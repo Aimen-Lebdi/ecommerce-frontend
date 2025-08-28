@@ -1,9 +1,9 @@
 // src/pages/ProductDetail.tsx
 // import { Star, Heart, ShoppingCart } from "lucide-react";
-import ProductDetailTop from "../components/ProductDetail/ProductDetailTop";
-import ProductTabs from "../components/ProductDetail/ProductTabs";
-import FeatureBox from "../components/ProductDetail/FeatureBox";
-import ProductCarouselSection from "../components/ProductDetail/ProductCarouselSection";
+import ProductDetailTop from "../../components/client/ProductDetail/ProductDetailTop";
+import ProductTabs from "../../components/client/ProductDetail/ProductTabs";
+import FeatureBox from "../../components/client/ProductDetail/FeatureBox";
+import ProductCarouselSection from "../../components/client/ProductDetail/ProductCarouselSection";
 // import  Link  from "react-router-dom";
 // import macbook from "../../public/macbook-main.png";
 // import thumb1 from "../assets/thumb1.jpg";

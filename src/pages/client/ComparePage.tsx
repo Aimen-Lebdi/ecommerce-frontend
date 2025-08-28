@@ -1,4 +1,4 @@
-import CompareGrid from "../components/Compare/CompareGrid";
+import CompareGrid from "../../components/client/Compare/CompareGrid";
 
 export default function ComparePage() {
   return (

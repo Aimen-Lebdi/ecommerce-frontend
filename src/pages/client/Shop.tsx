@@ -1,8 +1,8 @@
-import Sidebar from "../components/shop/Sidebar";
-import ProductGrid from "../components/shop/ProductGrid";
-import Pagination from "../components/shop/Pagination";
-import ShopHeaderBar from "../components/shop/ShopHeaderBar";
-import QuickViewModal from "../components/ui/QuickViewModal";
+import Sidebar from "../../components/client/shop/Sidebar";
+import ProductGrid from "../../components/client/shop/ProductGrid";
+import Pagination from "../../components/client/shop/Pagination";
+import ShopHeaderBar from "../../components/client/shop/ShopHeaderBar";
+import QuickViewModal from "../../components/ui/QuickViewModal";
 import { useState } from "react";
 
 const ShopPage = () => {

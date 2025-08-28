@@ -1,8 +1,8 @@
-import Footer from "./Footer";
-import Header from "./Header";
+import Footer from "../components/client/Footer";
+import Header from "../components/client/Header";
 import { Outlet } from "react-router-dom";
 
-const Layout = () => {
+const userLayout = () => {
   return (
     <div
       className="bg-gradient-to-br from-blue/90 to-primary/90 flex flex-col items-center
@@ -19,4 +19,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default userLayout;
