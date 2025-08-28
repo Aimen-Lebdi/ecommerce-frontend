@@ -8,6 +8,7 @@ import Shop from '../pages/Shop';
 import ProductDetail from '../pages/ProductDetail';
 import ComparePage from '../pages/ComparePage';
 import WishlistPage from '../pages/WishlistPage';
+import Payment from '../pages/payment';
 
 const AppRoutes = () => {
   return (
@@ -19,6 +20,7 @@ const AppRoutes = () => {
         <Route path="/shop/product/:id" element={<ProductDetail />} />
         <Route path="/compare" element={<ComparePage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/payment" element={<Payment />} />
 
         {/* Add more routes here */}
       </Route>
