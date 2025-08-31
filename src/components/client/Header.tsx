@@ -1,5 +1,4 @@
 import { ShoppingCart, Heart, User } from "lucide-react";
-import { ThemeToggle } from "../ui/ThemeToggle";
 import { Link } from "react-router-dom";
 
 const Header = () => {
@@ -29,7 +28,6 @@ const Header = () => {
             <option value="ar">🇩🇿 Ar</option>
           </select>
 
-          <ThemeToggle></ThemeToggle>
 
           <Link to="/#" aria-label="Shopping Cart" className="hover:text-green-400 transition">
             <ShoppingCart size={20} />
