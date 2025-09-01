@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   Users,
   Boxes,
+  TagIcon,
 } from "lucide-react";
 import {
   IconHelp,
@@ -50,6 +51,11 @@ const data = {
     title: "SubCategories",
     url: "/admin/sub-categories",
     icon: Boxes, 
+  },
+  {
+    title: "Brands",
+    url: "/admin/brands",
+    icon: TagIcon, 
   },
   {
     title: "Products",

@@ -29,7 +29,6 @@ import {
   IconGripVertical,
   IconLayoutColumns,
   IconLoader,
-  IconPlus,
   IconTrendingUp,
 } from "@tabler/icons-react";
 import {
@@ -100,11 +99,8 @@ import {
 import {
   Tabs,
   TabsContent,
-  // TabsList,
-  // TabsTrigger,
 } from "../../ui/tabs";
 import { ArrowUpDown } from "lucide-react";
-// import { ArrowUpDown } from "lucide-react"
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const schema = z.object({
@@ -339,10 +335,11 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 
 export function DataTable({
   data: initialData,
+  dialogComponent,
 }: {
   data: z.infer<typeof schema>[];
+  dialogComponent: React.ReactNode; 
 }) {
-  
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -488,10 +485,11 @@ export function DataTable({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm">
+          {/* <Button variant="outline" size="sm">
             <IconPlus />
             <span className="hidden lg:inline">Add Section</span>
-          </Button>
+          </Button> */}
+          {dialogComponent}
         </div>
       </div>
       <TabsContent
