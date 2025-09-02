@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Electronics",
+    "description": "Smartphones, laptops, cameras, and more."
+  },
+  {
+    "id": 2,
+    "name": "Fashion",
+    "description": "Clothing, shoes, accessories, and more."
+  },
+  {
+    "id": 3,
+    "name": "Home & Kitchen",
+    "description": "Furniture, appliances, and kitchen essentials."
+  },
+  {
+    "id": 4,
+    "name": "Fashion",
+    "description": "Clothing, shoes, accessories, and more."
+  },
+  {
+    "id": 5,
+    "name": "Home & Kitchen",
+    "description": "Furniture, appliances, and kitchen essentials."
+  },
+  {
+    "id": 6,
+    "name": "Beauty & Health",
+    "description": "Skincare, makeup, personal care, and wellness products."
+  }
+]
