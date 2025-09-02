@@ -72,6 +72,7 @@ const data = {
     url: "/admin/users",
     icon: Users,
   },
+
 ],
 navSecondary: [
     {
@@ -86,7 +87,6 @@ navSecondary: [
     },
   ],
 }
- 
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
