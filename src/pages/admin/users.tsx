@@ -193,6 +193,28 @@ const usersColumns: ColumnDef<User>[] = [
   },
 ];
 
+// Advanced filter configuration for categories
+const advancedFilterConfig = {
+  numeric: {
+    totalOrders: {
+      label: "Total Orders",
+      placeholder: "Enter number of total orders",
+    },
+    totalSpent: {
+      label: "Total Spent",
+      placeholder: "Enter total spent amount",
+    },
+  },
+  date: {
+    lastLogin: {
+      label: "Last Login",
+    },
+    createdAt: {
+      label: "Created Date",
+    },
+  },
+};
+
 export default function Users() {
   const [users, setUsers] = React.useState(usersData);
 
@@ -233,6 +255,8 @@ export default function Users() {
             enableRowSelection={true}
             enableGlobalFilter={true}
             enableColumnFilter={true}
+            enableAdvancedFilter={true}
+            advancedFilterConfig={advancedFilterConfig}
             filterColumn="role"
             filterPlaceholder="Filter by role..."
             onDataChange={handleDataChange}

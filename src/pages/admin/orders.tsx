@@ -241,6 +241,25 @@ const ordersColumns: ColumnDef<Order>[] = [
   },
 ];
 
+// Advanced filter configuration for categories
+const advancedFilterConfig = {
+  numeric: {
+    itemCount: {
+      label: "Item Count",
+      placeholder: "Enter number of items",
+    },
+    total: {
+      label: "Total",
+      placeholder: "Enter order total",
+    },
+  },
+  date: {
+    createdAt: {
+      label: "Created Date",
+    },
+  },
+};
+
 export default function Orders() {
   const [orders] = React.useState(ordersData);
 
@@ -255,6 +274,8 @@ export default function Orders() {
             enableRowSelection={true}
             enableGlobalFilter={true}
             enableColumnFilter={true}
+            enableAdvancedFilter={true}
+            advancedFilterConfig={advancedFilterConfig}
             filterColumn="status"
             filterPlaceholder="Filter by status..."
             pageSize={15}

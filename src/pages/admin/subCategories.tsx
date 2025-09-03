@@ -4,7 +4,6 @@ import { Badge } from "../../components/ui/badge";
 
 import { toast } from "sonner";
 import {
-  AddSubCategoryDialog,
   createEditSubCategoryDialog,
   SubCategoryDialog,
 } from "../../components/SubCategoryDialog";
@@ -202,6 +201,21 @@ const subcategoriesColumns: ColumnDef<Subcategory>[] = [
   },
 ];
 
+// Advanced filter configuration for categories
+const advancedFilterConfig = {
+  numeric: {
+    productCount: {
+      label: "Product Count",
+      placeholder: "Enter number of products",
+    },
+  },
+  date: {
+    createdAt: {
+      label: "Created Date",
+    },
+  },
+};
+
 export default function Subcategories() {
   const [subcategories, setSubcategories] = React.useState(subcategoriesData);
 
@@ -243,6 +257,8 @@ export default function Subcategories() {
             enableRowSelection={true}
             enableGlobalFilter={true}
             enableColumnFilter={true}
+            enableAdvancedFilter={true}
+            advancedFilterConfig={advancedFilterConfig}
             filterColumn="categoryName"
             filterPlaceholder="Filter by category..."
             onDataChange={handleDataChange}

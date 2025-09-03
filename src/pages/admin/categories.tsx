@@ -34,7 +34,6 @@ const categoriesData: Category[] = [
     productCount: 156,
     image:
       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
     createdAt: "2024-01-15",
   },
   {
@@ -45,7 +44,6 @@ const categoriesData: Category[] = [
     productCount: 89,
     image:
       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
     createdAt: "2024-01-20",
   },
   {
@@ -56,7 +54,6 @@ const categoriesData: Category[] = [
     productCount: 42,
     image:
       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
     createdAt: "2024-02-01",
   },
   {
@@ -67,7 +64,6 @@ const categoriesData: Category[] = [
     productCount: 234,
     image:
       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
     createdAt: "2024-02-10",
   },
   {
@@ -78,8 +74,37 @@ const categoriesData: Category[] = [
     productCount: 67,
     image:
       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
     createdAt: "2024-02-15",
+  },
+  {
+    id: 6,
+    name: "Beauty & Health",
+    description: "Cosmetics and health products",
+    status: "active",
+    productCount: 123,
+    image:
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
+    createdAt: "2024-01-30",
+  },
+  {
+    id: 7,
+    name: "Automotive",
+    description: "Car parts and accessories",
+    status: "inactive",
+    productCount: 78,
+    image:
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
+    createdAt: "2024-02-20",
+  },
+  {
+    id: 8,
+    name: "Toys & Games",
+    description: "Children's toys and games",
+    status: "active",
+    productCount: 34,
+    image:
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
+    createdAt: "2024-01-25",
   },
 ];
 
@@ -151,6 +176,21 @@ const categoriesColumns: ColumnDef<Category>[] = [
   },
 ];
 
+// Advanced filter configuration for categories
+const advancedFilterConfig = {
+  numeric: {
+    productCount: {
+      label: "Product Count",
+      placeholder: "Enter number of products",
+    },
+  },
+  date: {
+    createdAt: {
+      label: "Created Date",
+    },
+  },
+};
+
 export default function Categories() {
   const [categories, setCategories] = React.useState(categoriesData);
 
@@ -158,6 +198,7 @@ export default function Categories() {
   const handleAddCategory = (newCategory: Category) => {
     setCategories((prev) => [...prev, newCategory]);
     console.log("Added new category:", newCategory);
+    toast.success("Category added successfully");
   };
 
   // Handle updating existing category
@@ -166,6 +207,7 @@ export default function Categories() {
       prev.map((cat) => (cat.id === updatedCategory.id ? updatedCategory : cat))
     );
     console.log("Updated category:", updatedCategory);
+    toast.success("Category updated successfully");
   };
 
   const handleDataChange = (newData: Category[]) => {
@@ -178,6 +220,13 @@ export default function Categories() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          <div className="px-4 lg:px-6">
+            <h1 className="text-2xl font-semibold">Categories</h1>
+            <p className="text-muted-foreground">
+              Manage your product categories and their details.
+            </p>
+          </div>
+
           <DataTable
             data={categories}
             columns={categoriesColumns}
@@ -190,6 +239,8 @@ export default function Categories() {
             enableRowSelection={true}
             enableGlobalFilter={true}
             enableColumnFilter={true}
+            enableAdvancedFilter={true}
+            advancedFilterConfig={advancedFilterConfig}
             filterColumn="status"
             filterPlaceholder="Filter by status..."
             onDataChange={handleDataChange}

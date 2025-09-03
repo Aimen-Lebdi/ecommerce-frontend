@@ -49,9 +49,14 @@ interface Product {
   price: number;
   quantity: number;
   colors: string[];
+  status: "active" | "inactive" | "draft";
+  sku?: string;
+  weight?: number;
+  dimensions?: string;
   mainImageUrl?: string;
   otherImageUrls?: string[];
-  // Add any other product fields here
+  createdAt: string;
+  updatedAt?: string;
 }
 
 interface ProductDialogProps {
@@ -61,6 +66,29 @@ interface ProductDialogProps {
   onOpenChange?: (open: boolean) => void;
   onSave?: (data: Product) => void;
 }
+
+// Dummy data - in a real app, these would come from your API
+const dummyCategories = [
+  { id: "electronics", name: "Electronics" },
+  { id: "fashion", name: "Fashion" },
+  { id: "home", name: "Home & Garden" },
+  { id: "books", name: "Books" },
+  { id: "sports", name: "Sports & Outdoors" },
+];
+
+const dummySubcategories = [
+  { id: "phones", name: "Smartphones", categoryId: "electronics" },
+  { id: "laptops", name: "Laptops", categoryId: "electronics" },
+  { id: "men-clothing", name: "Men's Clothing", categoryId: "fashion" },
+  { id: "women-clothing", name: "Women's Clothing", categoryId: "fashion" },
+];
+
+const dummyBrands = [
+  { id: "apple", name: "Apple" },
+  { id: "samsung", name: "Samsung" },
+  { id: "nike", name: "Nike" },
+  { id: "adidas", name: "Adidas" },
+];
 
 export function ProductDialog({ 
   mode = "add", 
@@ -80,6 +108,10 @@ export function ProductDialog({
   const [price, setPrice] = React.useState("");
   const [quantity, setQuantity] = React.useState("");
   const [colors, setColors] = React.useState("");
+  const [status, setStatus] = React.useState<"active" | "inactive" | "draft">("active");
+  const [sku, setSku] = React.useState("");
+  const [weight, setWeight] = React.useState("");
+  const [dimensions, setDimensions] = React.useState("");
 
   // Images
   const [mainImage, setMainImage] = React.useState<File | null>(null);
@@ -107,6 +139,10 @@ export function ProductDialog({
       setPrice(existingData.price?.toString() || "");
       setQuantity(existingData.quantity?.toString() || "");
       setColors(existingData.colors?.join(", ") || "");
+      setStatus(existingData.status || "active");
+      setSku(existingData.sku || "");
+      setWeight(existingData.weight?.toString() || "");
+      setDimensions(existingData.dimensions || "");
       
       if (existingData.mainImageUrl) {
         setPreviewMain(existingData.mainImageUrl);
@@ -116,20 +152,30 @@ export function ProductDialog({
       }
     } else if (mode === "add" && open) {
       // Reset form for add mode
-      setCategory("");
-      setSubcategory("");
-      setBrand("");
-      setName("");
-      setDescription("");
-      setPrice("");
-      setQuantity("");
-      setColors("");
-      setMainImage(null);
-      setPreviewMain(null);
-      setOtherImages([]);
-      setPreviewOthers([]);
+      resetForm();
     }
   }, [mode, existingData, open]);
+
+  // Reset form function
+  const resetForm = () => {
+    setCategory("");
+    setSubcategory("");
+    setBrand("");
+    setName("");
+    setDescription("");
+    setPrice("");
+    setQuantity("");
+    setColors("");
+    setStatus("active");
+    setSku("");
+    setWeight("");
+    setDimensions("");
+    setMainImage(null);
+    setPreviewMain(null);
+    setOtherImages([]);
+    setPreviewOthers([]);
+    setErrors({});
+  };
 
   // --- Validation ---
   const validate = () => {
@@ -139,13 +185,24 @@ export function ProductDialog({
     if (!brand) e.brand = "Brand is required";
     if (!name.trim()) e.name = "Product name is required";
     if (!description.trim()) e.description = "Description is required";
-    if (!price || isNaN(Number(price))) e.price = "Valid price is required";
-    if (!quantity || isNaN(Number(quantity))) e.quantity = "Valid quantity is required";
+    if (!price || isNaN(Number(price)) || Number(price) <= 0) e.price = "Valid price is required";
+    if (!quantity || isNaN(Number(quantity)) || Number(quantity) < 0) e.quantity = "Valid quantity is required";
     if (!colors.trim()) e.colors = "At least one color is required";
     if (mode === "add" && !mainImage) e.mainImage = "Main image is required";
     if (mode === "edit" && !mainImage && !previewMain) e.mainImage = "Main image is required";
     setErrors(e);
     return Object.keys(e).length === 0;
+  };
+
+  // Generate SKU if not provided
+  const generateSku = () => {
+    if (!sku && name && brand) {
+      const brandCode = brand.substring(0, 3).toUpperCase();
+      const nameCode = name.substring(0, 3).toUpperCase();
+      const randomCode = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      return `${brandCode}-${nameCode}-${randomCode}`;
+    }
+    return sku;
   };
 
   // --- Save Handler ---
@@ -161,9 +218,15 @@ export function ProductDialog({
       description,
       price: Number(price),
       quantity: Number(quantity),
-      colors: colors.split(",").map((c) => c.trim()),
+      colors: colors.split(",").map((c) => c.trim()).filter(c => c.length > 0),
+      status,
+      sku: generateSku(),
+      weight: weight ? Number(weight) : undefined,
+      dimensions: dimensions || undefined,
       mainImageUrl: previewMain || existingData?.mainImageUrl || "",
       otherImageUrls: previewOthers.length > 0 ? previewOthers : existingData?.otherImageUrls || [],
+      createdAt: existingData?.createdAt || new Date().toISOString().split('T')[0],
+      updatedAt: mode === "edit" ? new Date().toISOString().split('T')[0] : undefined,
       ...existingData, // Preserve other existing fields
     };
 
@@ -171,21 +234,22 @@ export function ProductDialog({
 
     onSave?.(productData);
 
-    // Reset form and close dialog
-    setCategory("");
-    setSubcategory("");
-    setBrand("");
-    setName("");
-    setDescription("");
-    setPrice("");
-    setQuantity("");
-    setColors("");
-    setMainImage(null);
-    setPreviewMain(null);
-    setOtherImages([]);
-    setPreviewOthers([]);
-    setErrors({});
-    setOpen(false);
+    if (mode === "add") {
+      // For add mode: reset form but keep dialog open
+      resetForm();
+    } else {
+      // For edit mode: close dialog
+      setOpen(false);
+    }
+  };
+
+  // Dialog close handler
+  const handleDialogClose = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset form when closing
+      resetForm();
+    }
+    setOpen(newOpen);
   };
 
   // --- Image Handlers ---
@@ -220,7 +284,7 @@ export function ProductDialog({
   };
 
   const dialogContent = (
-    <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+    <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>
           {mode === "edit" ? "Edit Product" : "Add New Product"}
@@ -241,16 +305,17 @@ export function ProductDialog({
             value={category} 
             onValueChange={(value) => {
               setCategory(value);
+              setSubcategory(""); // Reset subcategory when category changes
               setErrors((prev) => ({ ...prev, category: undefined }));
             }}
           >
-            <SelectTrigger>
+            <SelectTrigger className={errors.category ? "border-red-500" : ""}>
               <SelectValue placeholder="Choose category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="electronics">Electronics</SelectItem>
-              <SelectItem value="fashion">Fashion</SelectItem>
-              <SelectItem value="home">Home</SelectItem>
+              {dummyCategories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.category && <p className="text-sm text-red-600">{errors.category}</p>}
@@ -265,13 +330,17 @@ export function ProductDialog({
               setSubcategory(value);
               setErrors((prev) => ({ ...prev, subcategory: undefined }));
             }}
+            disabled={!category}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Choose subcategory" />
+            <SelectTrigger className={errors.subcategory ? "border-red-500" : ""}>
+              <SelectValue placeholder={category ? "Choose subcategory" : "Select category first"} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="phones">Phones</SelectItem>
-              <SelectItem value="laptops">Laptops</SelectItem>
+              {dummySubcategories
+                .filter(sub => sub.categoryId === category)
+                .map((sub) => (
+                  <SelectItem key={sub.id} value={sub.id}>{sub.name}</SelectItem>
+                ))}
             </SelectContent>
           </Select>
           {errors.subcategory && <p className="text-sm text-red-600">{errors.subcategory}</p>}
@@ -287,12 +356,13 @@ export function ProductDialog({
               setErrors((prev) => ({ ...prev, brand: undefined }));
             }}
           >
-            <SelectTrigger>
+            <SelectTrigger className={errors.brand ? "border-red-500" : ""}>
               <SelectValue placeholder="Choose brand" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="apple">Apple</SelectItem>
-              <SelectItem value="samsung">Samsung</SelectItem>
+              {dummyBrands.map((br) => (
+                <SelectItem key={br.id} value={br.id}>{br.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.brand && <p className="text-sm text-red-600">{errors.brand}</p>}
@@ -302,7 +372,7 @@ export function ProductDialog({
         <div className="grid gap-2">
           <Label>Product Name</Label>
           <Input
-            placeholder="e.g., iPhone 17 Pro"
+            placeholder="e.g., iPhone 15 Pro Max"
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -319,7 +389,7 @@ export function ProductDialog({
         <div className="grid gap-2">
           <Label>Description</Label>
           <Textarea
-            placeholder="Enter product description..."
+            placeholder="Enter detailed product description..."
             value={description}
             onChange={(e) => {
               setDescription(e.target.value);
@@ -327,24 +397,29 @@ export function ProductDialog({
                 setErrors((prev) => ({ ...prev, description: undefined }));
               }
             }}
+            className={errors.description ? "border-red-500" : ""}
+            rows={3}
           />
           {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
         </div>
 
-        {/* Price & Quantity */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Price & Quantity & Status */}
+        <div className="grid grid-cols-3 gap-4">
           <div className="grid gap-2">
             <Label>Price ($)</Label>
             <Input
               type="number"
-              placeholder="999"
+              placeholder="99.99"
               value={price}
               onChange={(e) => {
                 setPrice(e.target.value);
-                if (e.target.value && !isNaN(Number(e.target.value))) {
+                if (e.target.value && !isNaN(Number(e.target.value)) && Number(e.target.value) > 0) {
                   setErrors((prev) => ({ ...prev, price: undefined }));
                 }
               }}
+              className={errors.price ? "border-red-500" : ""}
+              step="0.01"
+              min="0"
             />
             {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
           </div>
@@ -352,16 +427,31 @@ export function ProductDialog({
             <Label>Quantity</Label>
             <Input
               type="number"
-              placeholder="10"
+              placeholder="100"
               value={quantity}
               onChange={(e) => {
                 setQuantity(e.target.value);
-                if (e.target.value && !isNaN(Number(e.target.value))) {
+                if (e.target.value && !isNaN(Number(e.target.value)) && Number(e.target.value) >= 0) {
                   setErrors((prev) => ({ ...prev, quantity: undefined }));
                 }
               }}
+              className={errors.quantity ? "border-red-500" : ""}
+              min="0"
             />
             {errors.quantity && <p className="text-sm text-red-600">{errors.quantity}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label>Status</Label>
+            <Select value={status} onValueChange={(value: "active" | "inactive" | "draft") => setStatus(value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -369,7 +459,7 @@ export function ProductDialog({
         <div className="grid gap-2">
           <Label>Colors (comma separated)</Label>
           <Input
-            placeholder="e.g., Black, Silver, Gold"
+            placeholder="e.g., Black, Silver, Gold, Space Gray"
             value={colors}
             onChange={(e) => {
               setColors(e.target.value);
@@ -377,13 +467,45 @@ export function ProductDialog({
                 setErrors((prev) => ({ ...prev, colors: undefined }));
               }
             }}
+            className={errors.colors ? "border-red-500" : ""}
           />
           {errors.colors && <p className="text-sm text-red-600">{errors.colors}</p>}
         </div>
 
+        {/* Additional Fields */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="grid gap-2">
+            <Label>SKU <span className="text-muted-foreground text-sm">(Optional)</span></Label>
+            <Input
+              placeholder="Auto-generated if empty"
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Weight (kg) <span className="text-muted-foreground text-sm">(Optional)</span></Label>
+            <Input
+              type="number"
+              placeholder="0.5"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              step="0.01"
+              min="0"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Dimensions <span className="text-muted-foreground text-sm">(Optional)</span></Label>
+            <Input
+              placeholder="L x W x H (cm)"
+              value={dimensions}
+              onChange={(e) => setDimensions(e.target.value)}
+            />
+          </div>
+        </div>
+
         {/* Main Image Upload */}
         <div className="grid gap-2">
-          <Label>Main Image</Label>
+          <Label>Main Product Image</Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
               ${
@@ -419,7 +541,10 @@ export function ProductDialog({
                 />
                 <button
                   type="button"
-                  onClick={handleRemoveMain}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveMain();
+                  }}
                   className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
                 >
                   <IconX size={16} />
@@ -429,7 +554,7 @@ export function ProductDialog({
               <>
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
-                  Drag & drop your main image here or{" "}
+                  Drag & drop main product image here or{" "}
                   <span className="text-blue-600 hover:underline">
                     click to browse
                   </span>
@@ -452,7 +577,7 @@ export function ProductDialog({
 
         {/* Other Images Upload */}
         <div className="grid gap-2">
-          <Label>Other Images</Label>
+          <Label>Additional Images <span className="text-muted-foreground text-sm">(Optional)</span></Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
               ${
@@ -485,13 +610,13 @@ export function ProductDialog({
                   <div key={idx} className="relative">
                     <img
                       src={src}
-                      alt={`Preview ${idx}`}
+                      alt={`Preview ${idx + 1}`}
                       className="h-24 w-24 object-cover rounded-md"
                     />
                     <button
                       type="button"
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent parent click
+                        e.stopPropagation();
                         handleRemoveOther(idx);
                       }}
                       className="absolute top-1 right-1 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
@@ -526,7 +651,7 @@ export function ProductDialog({
           {errors.images && <p className="text-sm text-red-600 mt-1">{errors.images}</p>}
           {otherImages.length > 0 && !errors.images && (
             <p className="mt-2 text-xs text-green-600">
-              Selected: {otherImages.length} image(s)
+              Selected: {otherImages.length} additional image(s)
             </p>
           )}
         </div>
@@ -542,9 +667,9 @@ export function ProductDialog({
   );
 
   if (mode === "edit") {
-    // For edit mode, return just the dialog content (controlled externally)
+    // For edit mode, return dialog with proper close handling
     return (
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleDialogClose}>
         {dialogContent}
       </Dialog>
     );
@@ -552,7 +677,7 @@ export function ProductDialog({
 
   // For add mode, return the trigger button with dialog
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
@@ -572,5 +697,12 @@ export function AddProductDialog() {
 // Export a function to create edit dialogs for the data table
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditProductDialog(rowData: Product, onSave: (updatedData: Product) => void) {
-  return <ProductDialog mode="edit" existingData={rowData} onSave={onSave} open={true} />;
+  return (
+    <ProductDialog 
+      mode="edit" 
+      existingData={rowData} 
+      onSave={onSave}
+      // Don't set open=true here, let the component manage its own state
+    />
+  );
 }

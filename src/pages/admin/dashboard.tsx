@@ -231,6 +231,21 @@ const recentActivitiesColumns: ColumnDef<RecentActivity>[] = [
   },
 ];
 
+// Advanced filter configuration for categories
+const advancedFilterConfig = {
+  numeric: {
+    productCount: {
+      label: "Product Count",
+      placeholder: "Enter number of products",
+    },
+  },
+  date: {
+    createdAt: {
+      label: "Created Date",
+    },
+  },
+};
+
 export default function Dashboard() {
   const [recentActivities] = React.useState(recentActivitiesData);
 
@@ -264,6 +279,8 @@ export default function Dashboard() {
               enableRowSelection={false} // No need for selection on dashboard
               enableGlobalFilter={true}
               enableColumnFilter={true}
+              enableAdvancedFilter={true}
+            advancedFilterConfig={advancedFilterConfig}
               filterColumn="type"
               filterPlaceholder="Filter by activity type..."
               pageSize={8} // Smaller page size for dashboard

@@ -230,6 +230,25 @@ const productsColumns: ColumnDef<Product>[] = [
   },
 ];
 
+// Advanced filter configuration for categories
+const advancedFilterConfig = {
+  numeric: {
+    price: {
+      label: "Price",
+      placeholder: "Enter product price",
+    },
+    stock: {
+      label: "Stock",
+      placeholder: "Enter product stock",
+    },
+  },
+  date: {
+    createdAt: {
+      label: "Created Date",
+    },
+  },
+};
+
 export default function Products() {
   const [products, setProducts] = React.useState(productsData);
 
@@ -269,6 +288,8 @@ export default function Products() {
             enableRowSelection={true}
             enableGlobalFilter={true}
             enableColumnFilter={true}
+            enableAdvancedFilter={true}
+            advancedFilterConfig={advancedFilterConfig}
             filterColumn="category"
             filterPlaceholder="Filter by category..."
             onDataChange={handleDataChange}

@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 import * as React from "react";
 import {
   closestCenter,
@@ -74,6 +75,14 @@ import {
 } from "../../ui/table";
 import { Tabs, TabsContent } from "../../ui/tabs";
 
+// Import the new AdvancedFilter component
+import {
+  AdvancedFilter,
+  type AdvancedFilters,
+  // type NumericFilter,
+  // type DateFilter,
+} from "./AdvancedFilter";
+
 // Generic data type that all entities must extend
 export interface BaseEntity {
   id: number | string;
@@ -81,16 +90,36 @@ export interface BaseEntity {
   [key: string]: any;
 }
 
+// Filter configuration interface
+interface FilterConfig {
+  numeric: {
+    [key: string]: {
+      label: string;
+      placeholder: string;
+    };
+  };
+  date: {
+    [key: string]: {
+      label: string;
+    };
+  };
+}
+
 // Props for the generic DataTable
 export interface DataTableProps<TData extends BaseEntity> {
   data: TData[];
   columns: ColumnDef<TData>[];
   dialogComponent?: React.ReactNode;
-  editDialogComponent?: (rowData: TData, onSave: (updatedData: TData) => void) => React.ReactNode;
+  editDialogComponent?: (
+    rowData: TData,
+    onSave: (updatedData: TData) => void
+  ) => React.ReactNode;
   enableDragAndDrop?: boolean;
   enableRowSelection?: boolean;
   enableGlobalFilter?: boolean;
   enableColumnFilter?: boolean;
+  enableAdvancedFilter?: boolean;
+  advancedFilterConfig?: FilterConfig;
   filterColumn?: string;
   filterPlaceholder?: string;
   onDataChange?: (newData: TData[]) => void;
@@ -120,14 +149,18 @@ function DragHandle({ id }: { id: number | string }) {
 
 // Enhanced actions column component with Edit functionality
 export function ActionsColumn<TData extends BaseEntity>(
-  editDialogComponent?: (rowData: TData, onSave: (updatedData: TData) => void) => React.ReactNode,
+  editDialogComponent?: (
+    rowData: TData,
+    onSave: (updatedData: TData) => void
+  ) => React.ReactNode,
   onRowUpdate?: (updatedRow: TData) => void
 ) {
   return {
     id: "actions",
     cell: ({ row }: { row: Row<TData> }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const [editDialogOpen, setEditDialogOpen] = React.useState(false);
-      
+
       const handleEditSave = (updatedData: TData) => {
         onRowUpdate?.(updatedData);
         setEditDialogOpen(false);
@@ -160,17 +193,20 @@ export function ActionsColumn<TData extends BaseEntity>(
               <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
+
           {/* Render edit dialog when open */}
-          {editDialogComponent && editDialogOpen && (
+          {editDialogComponent &&
+            editDialogOpen &&
             React.cloneElement(
-              editDialogComponent(row.original, handleEditSave) as React.ReactElement,
+              editDialogComponent(
+                row.original,
+                handleEditSave
+              ) as React.ReactElement,
               {
                 open: editDialogOpen,
-                onOpenChange: setEditDialogOpen
+                onOpenChange: setEditDialogOpen,
               }
-            )
-          )}
+            )}
         </>
       );
     },
@@ -243,6 +279,81 @@ function DraggableRow<TData extends BaseEntity>({ row }: { row: Row<TData> }) {
   );
 }
 
+// Advanced filtering logic
+function applyAdvancedFilters<TData extends BaseEntity>(
+  data: TData[],
+  filters: AdvancedFilters
+): TData[] {
+  if (filters.numeric.length === 0 && filters.date.length === 0) {
+    return data;
+  }
+
+  return data.filter((row) => {
+    // Check numeric filters
+    const numericMatch = filters.numeric.every((filter) => {
+      if (filter.value === null) return true;
+
+      const rowValue = Number(row[filter.column]);
+      if (isNaN(rowValue)) return false;
+
+      switch (filter.operator) {
+        case "eq":
+          return rowValue === filter.value;
+        case "gt":
+          return rowValue > filter.value;
+        case "gte":
+          return rowValue >= filter.value;
+        case "lt":
+          return rowValue < filter.value;
+        case "lte":
+          return rowValue <= filter.value;
+        case "between":
+          return (
+            filter.value2 !== null &&
+            rowValue >= filter.value &&
+            rowValue <= filter.value2
+          );
+        default:
+          return true;
+      }
+    });
+
+    // Check date filters
+    const dateMatch = filters.date.every((filter) => {
+      if (filter.value === null) return true;
+
+      const rowDate = new Date(row[filter.column]);
+      const filterDate = new Date(filter.value);
+
+      if (isNaN(rowDate.getTime()) || isNaN(filterDate.getTime())) return false;
+
+      const rowDateOnly = new Date(rowDate.toDateString());
+      const filterDateOnly = new Date(filterDate.toDateString());
+
+      switch (filter.operator) {
+        case "eq":
+          return rowDateOnly.getTime() === filterDateOnly.getTime();
+        case "before":
+          return rowDateOnly.getTime() < filterDateOnly.getTime();
+        case "after":
+          return rowDateOnly.getTime() > filterDateOnly.getTime();
+        case "between":
+          if (filter.value2 === null) return false;
+          const filterDate2 = new Date(filter.value2);
+          const filterDate2Only = new Date(filterDate2.toDateString());
+          return (
+            rowDateOnly.getTime() >= filterDateOnly.getTime() &&
+            rowDateOnly.getTime() <= filterDate2Only.getTime()
+          );
+        default:
+          return true;
+      }
+    });
+
+    return numericMatch && dateMatch;
+  });
+}
+
 export function DataTable<TData extends BaseEntity>({
   data: initialData,
   columns,
@@ -252,6 +363,8 @@ export function DataTable<TData extends BaseEntity>({
   enableRowSelection = true,
   enableGlobalFilter = true,
   enableColumnFilter = true,
+  enableAdvancedFilter = false,
+  advancedFilterConfig,
   filterColumn = "status",
   filterPlaceholder = "Filter status...",
   onDataChange,
@@ -259,6 +372,7 @@ export function DataTable<TData extends BaseEntity>({
   pageSize = 10,
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
+  const [filteredData, setFilteredData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -270,6 +384,13 @@ export function DataTable<TData extends BaseEntity>({
     pageIndex: 0,
     pageSize,
   });
+  const [advancedFilters, setAdvancedFilters] = React.useState<AdvancedFilters>(
+    {
+      numeric: [],
+      date: [],
+    }
+  );
+
   const sortableId = React.useId();
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -277,22 +398,41 @@ export function DataTable<TData extends BaseEntity>({
     useSensor(KeyboardSensor, {})
   );
 
+  // Apply advanced filters whenever data or filters change
+  React.useEffect(() => {
+    const filtered = applyAdvancedFilters(data, advancedFilters);
+    setFilteredData(filtered);
+  }, [data, advancedFilters]);
+
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ id }) => id) || [],
     [data]
   );
 
   // Handle row updates
-  const handleRowUpdate = React.useCallback((updatedRow: TData) => {
-    setData(prevData => {
-      const newData = prevData.map(row => 
-        row.id === updatedRow.id ? updatedRow : row
-      );
-      onDataChange?.(newData);
-      return newData;
-    });
-    onRowUpdate?.(updatedRow);
-  }, [onDataChange, onRowUpdate]);
+  const handleRowUpdate = React.useCallback(
+    (updatedRow: TData) => {
+      setData((prevData) => {
+        const newData = prevData.map((row) =>
+          row.id === updatedRow.id ? updatedRow : row
+        );
+        onDataChange?.(newData);
+        return newData;
+      });
+      onRowUpdate?.(updatedRow);
+    },
+    [onDataChange, onRowUpdate]
+  );
+
+  // Handle advanced filter changes
+  const handleAdvancedFiltersChange = React.useCallback(
+    (filters: AdvancedFilters) => {
+      setAdvancedFilters(filters);
+      // Reset to first page when filters change
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    },
+    []
+  );
 
   // Build final columns array with optional system columns
   const finalColumns = React.useMemo(() => {
@@ -310,10 +450,16 @@ export function DataTable<TData extends BaseEntity>({
     cols.push(ActionsColumn<TData>(editDialogComponent, handleRowUpdate));
 
     return cols;
-  }, [columns, enableDragAndDrop, enableRowSelection, editDialogComponent, handleRowUpdate]);
+  }, [
+    columns,
+    enableDragAndDrop,
+    enableRowSelection,
+    editDialogComponent,
+    handleRowUpdate,
+  ]);
 
   const table = useReactTable({
-    data,
+    data: filteredData, // Use filtered data instead of original data
     columns: finalColumns,
     state: {
       sorting,
@@ -453,7 +599,7 @@ export function DataTable<TData extends BaseEntity>({
           </SelectTrigger>
         </Select>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {enableGlobalFilter && (
             <Input
               placeholder="Search..."
@@ -474,6 +620,14 @@ export function DataTable<TData extends BaseEntity>({
                 table.getColumn(filterColumn)?.setFilterValue(e.target.value)
               }
               className="max-w-sm"
+            />
+          )}
+
+          {enableAdvancedFilter && advancedFilterConfig && (
+            <AdvancedFilter
+              config={advancedFilterConfig}
+              onFiltersChange={handleAdvancedFiltersChange}
+              initialFilters={advancedFilters}
             />
           )}
 
