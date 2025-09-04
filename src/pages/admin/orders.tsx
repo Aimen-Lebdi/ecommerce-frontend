@@ -2,7 +2,7 @@ import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar";
-import { DataTable } from "../../components/admin/dashboard/data-table";
+import { DataTable } from "../../components/admin/global/data-table";
 
 // Define the Order entity type
 export interface Order {

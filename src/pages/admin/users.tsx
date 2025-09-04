@@ -3,8 +3,8 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { toast } from "sonner";
-import { createEditUserDialog, UserDialog } from "../../components/UserDialog";
-import { DataTable } from "../../components/admin/dashboard/data-table";
+import { createEditUserDialog, UserDialog } from "../../components/admin/global/UserDialog";
+import { DataTable } from "../../components/admin/global/data-table";
 // Define the User entity type
 export interface User {
   id: number;

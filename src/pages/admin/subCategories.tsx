@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import {
   createEditSubCategoryDialog,
   SubCategoryDialog,
-} from "../../components/SubCategoryDialog";
-import { DataTable } from "../../components/admin/dashboard/data-table";
+} from "../../components/admin/global/SubCategoryDialog";
+import { DataTable } from "../../components/admin/global/data-table";
 import {
   Avatar,
   AvatarFallback,

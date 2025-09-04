@@ -7,6 +7,8 @@ import ComparePage from "../pages/client/ComparePage";
 import WishlistPage from "../pages/client/WishlistPage";
 import Payment from "../pages/client/payment";
 import About from "../pages/client/About";
+import ShopPage from "../pages/client/Shop";
+import ProductDetails from "../pages/client/ProductDetail";
 
 const UserRoutes = {
   path: "/",
@@ -14,8 +16,8 @@ const UserRoutes = {
   children: [
     { index: true, element: <Home /> },
     { path: "about", element: <About /> },
-    { path: "shop", element: <Shop /> },
-    { path: "product/:id", element: <ProductDetail /> },
+    { path: "shop", element: <ShopPage /> },
+    { path: "product/:id", element: <ProductDetails /> },
     { path: "compare", element: <ComparePage /> },
     { path: "wishlist", element: <WishlistPage /> },
     { path: "payment", element: <Payment /> },

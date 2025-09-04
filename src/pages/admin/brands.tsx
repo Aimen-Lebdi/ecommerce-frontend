@@ -7,8 +7,8 @@ import {
   AvatarImage,
 } from "../../components/ui/avatar";
 import { toast } from "sonner";
-import { AddBrandDialog, BrandDialog, createEditBrandDialog } from "../../components/BrandDialog";
-import { DataTable } from "../../components/admin/dashboard/data-table";
+import { BrandDialog, createEditBrandDialog } from "../../components/admin/global/BrandDialog";
+import { DataTable } from "../../components/admin/global/data-table";
 
 // Define the Brand entity type
 export interface Brand {

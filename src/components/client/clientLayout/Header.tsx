@@ -1,0 +1,299 @@
+import { useState } from "react";
+import {
+  Search,
+  ShoppingCart,
+  Heart,
+  User,
+  Menu,
+  Globe,
+  ChevronDown,
+} from "lucide-react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Badge } from "../../ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "../../ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "../../ui/navigation-menu";
+import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
+import { ModeToggle } from "../../mode-toggle";
+import { Link } from "react-router-dom";
+
+const categories = [
+  {
+    name: "Electronics",
+    subcategories: ["Smartphones", "Laptops", "Headphones", "Cameras"],
+  },
+  {
+    name: "Fashion",
+    subcategories: [
+      "Men's Clothing",
+      "Women's Clothing",
+      "Shoes",
+      "Accessories",
+    ],
+  },
+  {
+    name: "Home & Garden",
+    subcategories: ["Furniture", "Decor", "Kitchen", "Garden"],
+  },
+];
+
+export function Header() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Top Bar - Promotional */}
+      <div className="border-b bg-muted/50">
+        <div className="container mx-auto px-4">
+          <div className="flex h-10 items-center justify-center text-sm">
+            <p className="text-muted-foreground">
+              🎉 Free shipping on orders over $50! Use code:{" "}
+              <span className="font-semibold text-primary">FREESHIP</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Header */}
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center">
+            <a href="/" className="flex items-center space-x-2">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-lg font-bold text-primary-foreground">
+                  C
+                </span>
+              </div>
+              <span className="font-bold text-xl">CLICON</span>
+            </a>
+          </div>
+
+          {/* Search Bar - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-lg mx-8">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search for products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4"
+              />
+            </div>
+          </div>
+
+          {/* Right Side Icons */}
+          <div className="flex items-center space-x-4">
+            <div className="hidden sm:flex">
+              {/* Language Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="">
+                    <Globe className="h-4 w-4 mr-1" />
+                    EN
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>🇺🇸 English</DropdownMenuItem>
+                  <DropdownMenuItem>🇫🇷 Français</DropdownMenuItem>
+                  <DropdownMenuItem>🇩🇿 العربية</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Dark Mode Toggle */}
+              <ModeToggle></ModeToggle>
+            </div>
+
+            {/* Wishlist */}
+            <Button variant="ghost" size="sm" className="relative">
+              <Heart className="h-5 w-5" />
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                3
+              </Badge>
+            </Button>
+
+            {/* Shopping Cart */}
+            <Button variant="ghost" size="sm" className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                2
+              </Badge>
+            </Button>
+
+            {/* User Account */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>My Account</DropdownMenuItem>
+                <DropdownMenuItem>Orders</DropdownMenuItem>
+                <DropdownMenuItem>Wishlist</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Sign In</DropdownMenuItem>
+                <DropdownMenuItem>Register</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile Menu */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 px-4">
+                <div className="flex flex-col space-y-4 mt-10">
+                  <Input placeholder="Search products..." />
+                  <div className="flex items-center justify-between">
+                    {/* Language Selector */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="">
+                          <Globe className="h-4 w-4 mr-1" />
+                          EN
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem>🇺🇸 English</DropdownMenuItem>
+                        <DropdownMenuItem>🇫🇷 Français</DropdownMenuItem>
+                        <DropdownMenuItem>🇩🇿 العربية</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <ModeToggle></ModeToggle>
+                  </div>
+
+                  <div className="space-y-2">
+                    <a href="/" className="block py-2 text-lg font-medium">
+                      Home
+                    </a>
+                    <a href="/shop" className="block py-2 text-lg font-medium">
+                      Shop
+                    </a>
+                    <a
+                      href="/categories"
+                      className="block py-2 text-lg font-medium"
+                    >
+                      Categories
+                    </a>
+                    <a href="/deals" className="block py-2 text-lg font-medium">
+                      Deals
+                    </a>
+                    <a href="/about" className="block py-2 text-lg font-medium">
+                      About
+                    </a>
+                    <a
+                      href="/contact"
+                      className="block py-2 text-lg font-medium"
+                    >
+                      Contact
+                    </a>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </div>
+
+      {/* Search Bar - Mobile */}
+      <div className="md:hidden border-t px-4 py-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search for products..."
+            className="pl-10 pr-4"
+          />
+        </div>
+      </div>
+
+      {/* Navigation Menu */}
+      <div className="hidden md:block border-t">
+        <div className="container mx-auto px-4">
+          <NavigationMenu className="max-w-full">
+            <NavigationMenuList className="flex-wrap">
+              <NavigationMenuItem>
+                <Link
+                  to="/"
+                  className="px-4 py-3 text-sm font-medium"
+                >
+                  Home
+                </Link>
+              </NavigationMenuItem>
+
+              {categories.map((category) => (
+                <NavigationMenuItem key={category.name}>
+                  <NavigationMenuTrigger className="px-4 py-3 text-sm font-medium">
+                    {category.name}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid w-80 gap-3 p-4">
+                      {category.subcategories.map((sub) => (
+                        <NavigationMenuLink
+                          key={sub}
+                          href={`/category/${sub
+                            .toLowerCase()
+                            .replace(" ", "-")}`}
+                          className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          {sub}
+                        </NavigationMenuLink>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              ))}
+
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  href="/deals"
+                  className="px-4 py-3 text-sm font-medium text-red-600"
+                >
+                  Hot Deals 🔥
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <Link 
+                  to="/shop"
+                  className="px-4 py-3 text-sm font-medium"
+                >
+                  Shop
+                </Link>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  href="/contact"
+                  className="px-4 py-3 text-sm font-medium"
+                >
+                  Contact
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+      </div>
+    </header>
+  );
+}

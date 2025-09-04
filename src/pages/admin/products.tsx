@@ -7,8 +7,8 @@ import {
   AvatarImage,
 } from "../../components/ui/avatar";
 import { toast } from "sonner";
-import { DataTable } from "../../components/admin/dashboard/data-table";
-import { createEditProductDialog, ProductDialog } from "../../components/ProductDialog";
+import { DataTable } from "../../components/admin/global/data-table";
+import { createEditProductDialog, ProductDialog } from "../../components/admin/global/ProductDialog";
 
 // Define the Product entity type
 export interface Product {

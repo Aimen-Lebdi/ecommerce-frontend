@@ -3,7 +3,7 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
 import { ChartAreaInteractive } from "../../components/admin/dashboard/chart-area-interactive";
 import { DashboardTables } from "../../components/admin/dashboard/dashboardTables";
-import { DataTable } from "../../components/admin/dashboard/data-table";
+import { DataTable } from "../../components/admin/global/data-table";
 import { SectionCards } from "../../components/admin/dashboard/section-cards";
 
 // Define the Recent Activity entity type for Dashboard
