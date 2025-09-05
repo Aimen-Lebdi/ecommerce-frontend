@@ -130,10 +130,12 @@ export function Header() {
 
             {/* Shopping Cart */}
             <Button variant="ghost" size="sm" className="relative">
+              <Link to='/cart'>
               <ShoppingCart className="h-5 w-5" />
               <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
                 2
               </Badge>
+              </Link>
             </Button>
 
             {/* User Account */}
