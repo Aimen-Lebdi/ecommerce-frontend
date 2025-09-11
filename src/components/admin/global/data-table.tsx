@@ -85,7 +85,8 @@ import {
 
 // Generic data type that all entities must extend
 export interface BaseEntity {
-  id: number | string;
+  id?: number | string;   // Make id optional
+  _id?: string;           // Add _id as optional
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
@@ -114,6 +115,8 @@ export interface DataTableProps<TData extends BaseEntity> {
     rowData: TData,
     onSave: (updatedData: TData) => void
   ) => React.ReactNode;
+  onRowDelete?: (id: string) => void; // ✅ ADD THIS
+  isDeleting?: boolean; // ✅ ADD THIS
   enableDragAndDrop?: boolean;
   enableRowSelection?: boolean;
   enableGlobalFilter?: boolean;
@@ -153,7 +156,9 @@ export function ActionsColumn<TData extends BaseEntity>(
     rowData: TData,
     onSave: (updatedData: TData) => void
   ) => React.ReactNode,
-  onRowUpdate?: (updatedRow: TData) => void
+  onRowUpdate?: (updatedRow: TData) => void,
+    onRowDelete?: (id: string) => void, // ✅ ADD THIS
+  isDeleting?: boolean // ✅ ADD THIS
 ) {
   return {
     id: "actions",
@@ -168,6 +173,13 @@ export function ActionsColumn<TData extends BaseEntity>(
 
       const handleEditClick = () => {
         setEditDialogOpen(true);
+      };
+      // ✅ ADD THIS: Handle delete click
+      const handleDeleteClick = () => {
+        if (onRowDelete && (row.original._id || row.original.id)) {
+          const id = row.original._id || row.original.id;
+          onRowDelete(id.toString());
+        }
       };
 
       return (
@@ -185,13 +197,17 @@ export function ActionsColumn<TData extends BaseEntity>(
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
               <DropdownMenuItem onClick={handleEditClick}>
-                Edit
+                View & Edit
               </DropdownMenuItem>
-              <DropdownMenuItem>Make a copy</DropdownMenuItem>
-              <DropdownMenuItem>Favorite</DropdownMenuItem>
+              
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-            </DropdownMenuContent>
+<DropdownMenuItem 
+                variant="destructive" 
+                onClick={handleDeleteClick}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </DropdownMenuItem>            </DropdownMenuContent>
           </DropdownMenu>
 
           {/* Render edit dialog when open */}
@@ -369,10 +385,11 @@ export function DataTable<TData extends BaseEntity>({
   filterPlaceholder = "Filter status...",
   onDataChange,
   onRowUpdate,
+  
   pageSize = 10,
 }: DataTableProps<TData>) {
-  const [data, setData] = React.useState(() => initialData);
-  const [filteredData, setFilteredData] = React.useState(() => initialData);
+  const [data, setData] = React.useState(() => initialData ||[]);
+  const [filteredData, setFilteredData] = React.useState(() => initialData ||[]);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -405,8 +422,8 @@ export function DataTable<TData extends BaseEntity>({
   }, [data, advancedFilters]);
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => data?.map(({ id }) => id) || [],
-    [data]
+    () => (Array.isArray(data) ? data.map((item) => item.id || item._id) : []),
+  [data]
   );
 
   // Handle row updates
@@ -468,7 +485,7 @@ export function DataTable<TData extends BaseEntity>({
       columnFilters,
       pagination,
     },
-    getRowId: (row) => row.id.toString(),
+  getRowId: (row) => (row.id || row._id).toString(),
     enableRowSelection: enableRowSelection,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,

@@ -1,6 +1,5 @@
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Badge } from "../../components/ui/badge";
 import { toast } from "sonner";
 import {
   CategoryDialog,
@@ -12,101 +11,25 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "../../components/ui/avatar";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  fetchCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory, // ✅ ADD THIS
+  clearError,
+  type CreateCategoryData,
+  type UpdateCategoryData,
+} from "../../features/categories/categoriesSlice";
 
-// Define the Category entity type
+// Define the Category entity type to match backend response
 export interface Category {
-  id: number;
+  _id: string;
   name: string;
-  description: string;
-  status: "active" | "inactive";
-  productCount: number;
   image?: string;
   createdAt: string;
+  productCount?: number;
 }
-
-// Sample data - in a real app, this would come from your API
-const categoriesData: Category[] = [
-  {
-    id: 1,
-    name: "Electronics",
-    description: "Electronic devices and accessories",
-    status: "active",
-    productCount: 156,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: 2,
-    name: "Clothing",
-    description: "Apparel and fashion accessories",
-    status: "active",
-    productCount: 89,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-20",
-  },
-  {
-    id: 3,
-    name: "Home & Garden",
-    description: "Home improvement and gardening supplies",
-    status: "inactive",
-    productCount: 42,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-02-01",
-  },
-  {
-    id: 4,
-    name: "Books",
-    description: "Books and educational materials",
-    status: "active",
-    productCount: 234,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-02-10",
-  },
-  {
-    id: 5,
-    name: "Sports & Outdoors",
-    description: "Sports equipment and outdoor gear",
-    status: "active",
-    productCount: 67,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-02-15",
-  },
-  {
-    id: 6,
-    name: "Beauty & Health",
-    description: "Cosmetics and health products",
-    status: "active",
-    productCount: 123,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-30",
-  },
-  {
-    id: 7,
-    name: "Automotive",
-    description: "Car parts and accessories",
-    status: "inactive",
-    productCount: 78,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-02-20",
-  },
-  {
-    id: 8,
-    name: "Toys & Games",
-    description: "Children's toys and games",
-    status: "active",
-    productCount: 34,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-25",
-  },
-];
 
 // Define columns specific to Categories
 const categoriesColumns: ColumnDef<Category>[] = [
@@ -132,33 +55,10 @@ const categoriesColumns: ColumnDef<Category>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => {
-      return (
-        <div className="max-w-[200px] truncate text-muted-foreground">
-          {row.getValue("description")}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      return (
-        <Badge variant={status === "active" ? "default" : "secondary"}>
-          {status}
-        </Badge>
-      );
-    },
-  },
-  {
     accessorKey: "productCount",
     header: "Products",
     cell: ({ row }) => {
-      const count = row.getValue("productCount") as number;
+      const count = row.original.productCount || 0;
       return (
         <div className="text-center font-medium">{count.toLocaleString()}</div>
       );
@@ -176,45 +76,70 @@ const categoriesColumns: ColumnDef<Category>[] = [
   },
 ];
 
-// Advanced filter configuration for categories
-const advancedFilterConfig = {
-  numeric: {
-    productCount: {
-      label: "Product Count",
-      placeholder: "Enter number of products",
-    },
-  },
-  date: {
-    createdAt: {
-      label: "Created Date",
-    },
-  },
-};
-
 export default function Categories() {
-  const [categories, setCategories] = React.useState(categoriesData);
+  const dispatch = useAppDispatch();
+  const { categories, loading, error, isCreating, isUpdating, isDeleting } =
+    useAppSelector((state) => state.categories);
 
+  React.useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+
+  
   // Handle adding new category
-  const handleAddCategory = (newCategory: Category) => {
-    setCategories((prev) => [...prev, newCategory]);
-    console.log("Added new category:", newCategory);
-    toast.success("Category added successfully");
+  const handleAddCategory = async (categoryData: {
+    name: string;
+    image?: File;
+  }) => {
+    try {
+      await dispatch(
+        createCategory(categoryData as CreateCategoryData)
+      ).unwrap();
+      toast.success("Category added successfully");
+    } catch (error) {
+      console.error("Failed to add category:", error);
+    }
   };
 
   // Handle updating existing category
-  const handleUpdateCategory = (updatedCategory: Category) => {
-    setCategories((prev) =>
-      prev.map((cat) => (cat.id === updatedCategory.id ? updatedCategory : cat))
-    );
-    console.log("Updated category:", updatedCategory);
-    toast.success("Category updated successfully");
+  const handleUpdateCategory = async (
+    id: string,
+    categoryData: { name?: string; image?: File }
+  ) => {
+    try {
+      await dispatch(
+        updateCategory({ id, categoryData: categoryData as UpdateCategoryData })
+      ).unwrap();
+      toast.success("Category updated successfully");
+    } catch (error) {
+      console.error("Failed to update category:", error);
+    }
   };
 
-  const handleDataChange = (newData: Category[]) => {
-    setCategories(newData);
-    // Here you would typically sync with your backend
-    toast.success("Categories reordered successfully");
+  const handleDeleteCategory = async (id: string) => {
+    try {
+      await dispatch(deleteCategory(id)).unwrap();
+      toast.success("Category deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete category:", error);
+    }
   };
+
+  if (loading) {
+    return <div>Loading categories...</div>;
+  }
+
+  if (error && categories.length === 0) {
+    return <div>Error loading categories: {error}</div>;
+  }
 
   return (
     <div className="flex flex-1 flex-col">
@@ -227,23 +152,41 @@ export default function Categories() {
             </p>
           </div>
 
-          <DataTable
-            data={categories}
+          <DataTable<Category>
+            data={categories || []}
             columns={categoriesColumns}
             dialogComponent={
-              <CategoryDialog mode="add" onSave={handleAddCategory} />
+              <CategoryDialog
+                mode="add"
+                onSave={handleAddCategory}
+                isLoading={isCreating}
+              />
             }
-            editDialogComponent={createEditCategoryDialog}
-            onRowUpdate={handleUpdateCategory}
+            editDialogComponent={(rowData: Category) =>
+              createEditCategoryDialog(
+                rowData,
+                (updatedData) => {
+                  handleUpdateCategory(rowData._id, {
+                    name: updatedData.name,
+                    image:
+                      updatedData.image instanceof File
+                        ? updatedData.image
+                        : undefined,
+                  });
+                },
+                isUpdating
+              )
+            }
+            onRowDelete={handleDeleteCategory}
+            // ✅ ADD THIS: Pass loading state
+            isDeleting={isDeleting}
             enableDragAndDrop={true}
             enableRowSelection={true}
             enableGlobalFilter={true}
             enableColumnFilter={true}
             enableAdvancedFilter={true}
-            advancedFilterConfig={advancedFilterConfig}
             filterColumn="status"
             filterPlaceholder="Filter by status..."
-            onDataChange={handleDataChange}
             pageSize={10}
           />
         </div>

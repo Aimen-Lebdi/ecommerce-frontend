@@ -3,7 +3,6 @@ import {
   IconCloudUpload,
   IconPlus,
   IconX,
-  IconPhoto,
 } from "@tabler/icons-react";
 import { Button } from "../../ui/button";
 import {
@@ -17,14 +16,7 @@ import {
 } from "../../ui/dialog";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
-import { Textarea } from "../../ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select";
+
 
 type Errors = {
   name?: string;
@@ -33,12 +25,11 @@ type Errors = {
 };
 
 interface Category {
-  id: number;
+  _id: string;
   name: string;
-  description: string;
-  status: "active" | "inactive";
-  productCount: number;
+  slug: string;
   image?: string;
+  productCount: number;
   createdAt: string;
 }
 
@@ -47,7 +38,9 @@ interface CategoryDialogProps {
   existingData?: Category;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSave?: (data: Category) => void;
+  onSave?: (data: { name?: string; image?: File }) => void; // ✅ Made name optional
+  isLoading?: boolean; // Add loading prop
+
 }
 
 export function CategoryDialog({
@@ -56,11 +49,13 @@ export function CategoryDialog({
   open: controlledOpen,
   onOpenChange,
   onSave,
+    isLoading = false, // Add loading prop with default
+
 }: CategoryDialogProps) {
   const [internalOpen, setInternalOpen] = React.useState(false);
   const [categoryName, setCategoryName] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [status, setStatus] = React.useState<"active" | "inactive">("active");
+  const [originalName, setOriginalName] = React.useState(""); // ✅ Track original name
+
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -74,16 +69,16 @@ export function CategoryDialog({
   React.useEffect(() => {
     if (mode === "edit" && existingData && open) {
       setCategoryName(existingData.name || "");
-      setDescription(existingData.description || "");
-      setStatus(existingData.status || "active");
+            setOriginalName(existingData.name || ""); // ✅ Store original name
+
       if (existingData.image) {
         setPreview(existingData.image);
       }
     } else if (mode === "add" && open) {
       // Reset form for add mode
       setCategoryName("");
-      setDescription("");
-      setStatus("active");
+            setOriginalName(""); // ✅ Reset original name
+
       setImage(null);
       setPreview(null);
     }
@@ -92,35 +87,46 @@ export function CategoryDialog({
   const validate = () => {
     const e: Errors = {};
     if (!categoryName.trim()) e.name = "Category name is required";
-    if (!description.trim()) e.description = "Description is required";
-    if (mode === "add" && !image) e.image = "Image is required";
-    if (mode === "edit" && !image && !preview) e.image = "Image is required";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const resetForm = () => {
     setCategoryName("");
-    setDescription("");
-    setStatus("active");
     setImage(null);
     setPreview(null);
     setErrors({});
   };
 
+  // ✅ NEW: Function to detect changes and prepare payload
+  const prepareUpdatePayload = () => {
+    const payload: { name?: string; image?: File } = {};
+    
+    // Only include name if it changed
+    if (mode === "add" || categoryName !== originalName) {
+      payload.name = categoryName;
+    }
+    
+    // Only include image if a new file was selected
+    if (image instanceof File) {
+      payload.image = image;
+    }
+    
+    return payload;
+  };
+
   const handleSave = () => {
     if (!validate()) return;
 
-    const categoryData: Category = {
-      id: existingData?.id || Date.now(),
-      name: categoryName,
-      description: description,
-      status: status,
-      productCount: existingData?.productCount || 0, // Default to 0 for new categories
-      image: preview || existingData?.image || "",
-      createdAt:
-        existingData?.createdAt || new Date().toISOString().split("T")[0],
-    };
+    // ✅ Get only changed fields
+    const categoryData = prepareUpdatePayload();
+    
+    // ✅ Don't proceed if nothing changed in edit mode
+    if (mode === "edit" && Object.keys(categoryData).length === 0) {
+      console.log("No changes detected");
+      setOpen(false);
+      return;
+    }
 
     console.log(
       `${mode === "edit" ? "Updating" : "Saving new"} category:`,
@@ -164,6 +170,13 @@ export function CategoryDialog({
     setOpen(newOpen);
   };
 
+  // Update the save button to show loading state
+  const saveButtonContent = isLoading ? (
+    mode === "edit" ? "Updating..." : "Saving..."
+  ) : (
+    mode === "edit" ? "Update" : "Save"
+  );
+
   const dialogContent = (
     <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
@@ -178,6 +191,7 @@ export function CategoryDialog({
       </DialogHeader>
 
       <div className="grid gap-4 py-4">
+
         {/* Category Name */}
         <div className="grid gap-2">
           <Label htmlFor="category-name">Category Name</Label>
@@ -196,43 +210,6 @@ export function CategoryDialog({
           {errors.name && (
             <p className="text-sm text-red-600 mt-1">{errors.name}</p>
           )}
-        </div>
-
-        {/* Description */}
-        <div className="grid gap-2">
-          <Label htmlFor="category-description">Description</Label>
-          <Textarea
-            id="category-description"
-            placeholder="e.g., Electronic devices and accessories"
-            value={description}
-            onChange={(e) => {
-              setDescription(e.target.value);
-              if (e.target.value.trim()) {
-                setErrors((prev) => ({ ...prev, description: undefined }));
-              }
-            }}
-            className={errors.description ? "border-red-500" : ""}
-          />
-          {errors.description && (
-            <p className="text-sm text-red-600 mt-1">{errors.description}</p>
-          )}
-        </div>
-
-        {/* Status */}
-        <div className="grid gap-2">
-          <Label htmlFor="category-status">Status</Label>
-          <Select
-            value={status}
-            onValueChange={(value: "active" | "inactive") => setStatus(value)}
-          >
-            <SelectTrigger id="category-status">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Image Upload */}
@@ -315,10 +292,9 @@ export function CategoryDialog({
       </div>
 
       <DialogFooter>
-        <Button onClick={handleSave}>
-          <IconPhoto className="mr-2 h-4 w-4" />
-          {mode === "edit" ? "Update" : "Save"}
-        </Button>
+        <Button onClick={handleSave} disabled={isLoading}>
+    {saveButtonContent}
+  </Button>
       </DialogFooter>
     </DialogContent>
   );
@@ -355,14 +331,15 @@ export function AddCategoryDialog() {
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditCategoryDialog(
   rowData: Category,
-  onSave: (updatedData: Category) => void
+  onSave: (updatedData: { name?: string; image?: File }) => void,
+  isLoading: boolean = false
 ) {
   return (
     <CategoryDialog
       mode="edit"
       existingData={rowData}
       onSave={onSave}
-      // open={true}
+      isLoading={isLoading}
       onOpenChange={() => {}} // Edit dialog closes when clicking outside or X
     />
   );
