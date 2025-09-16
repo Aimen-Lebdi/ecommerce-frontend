@@ -5,7 +5,10 @@ import {
   CategoryDialog,
   createEditCategoryDialog,
 } from "../../components/admin/global/CategoryDialog";
-import { DataTable } from "../../components/admin/global/data-table";
+import {
+  DataTable,
+  type ServerQueryParams,
+} from "../../components/admin/global/data-table";
 import {
   Avatar,
   AvatarFallback,
@@ -16,8 +19,10 @@ import {
   fetchCategories,
   createCategory,
   updateCategory,
-  deleteCategory, // ✅ ADD THIS
+  deleteCategory,
+  deleteManyCategories,
   clearError,
+  setQueryParams,
   type CreateCategoryData,
   type UpdateCategoryData,
 } from "../../features/categories/categoriesSlice";
@@ -60,7 +65,7 @@ const categoriesColumns: ColumnDef<Category>[] = [
     cell: ({ row }) => {
       const count = row.original.productCount || 0;
       return (
-        <div className="text-center font-medium">{count.toLocaleString()}</div>
+        <div className="text-start font-medium">{count.toLocaleString()}</div>
       );
     },
   },
@@ -76,15 +81,46 @@ const categoriesColumns: ColumnDef<Category>[] = [
   },
 ];
 
+// Advanced filter configuration for categories
+const advancedFilterConfig = {
+  numeric: {
+    productCount: {
+      label: "Product Count",
+      placeholder: "Enter number of products",
+    },
+  },
+  date: {
+    createdAt: {
+      label: "Created Date",
+    },
+  },
+};
+
 export default function Categories() {
   const dispatch = useAppDispatch();
-  const { categories, loading, error, isCreating, isUpdating, isDeleting } =
-    useAppSelector((state) => state.categories);
+  const {
+    categories,
+    pagination,
+    loading,
+    error,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    isDeletingMany,
+    currentQueryParams,
+  } = useAppSelector((state) => state.categories);
 
+  // Load initial data on component mount
   React.useEffect(() => {
-    dispatch(fetchCategories());
+    // Load categories with default parameters on mount
+    const initialParams: ServerQueryParams = {
+      page: 1,
+      limit: 10,
+    };
+    dispatch(fetchCategories(initialParams));
   }, [dispatch]);
 
+  // Handle errors
   React.useEffect(() => {
     if (error) {
       toast.error(error);
@@ -92,8 +128,17 @@ export default function Categories() {
     }
   }, [error, dispatch]);
 
+  // Handle query parameter changes from the DataTable
+  const handleQueryParamsChange = React.useCallback(
+    (params: ServerQueryParams) => {
+      // Store the parameters in Redux state for future reference
+      dispatch(setQueryParams(params));
+      // Fetch data with new parameters
+      dispatch(fetchCategories(params));
+    },
+    [dispatch]
+  );
 
-  
   // Handle adding new category
   const handleAddCategory = async (categoryData: {
     name: string;
@@ -104,8 +149,10 @@ export default function Categories() {
         createCategory(categoryData as CreateCategoryData)
       ).unwrap();
       toast.success("Category added successfully");
+      // Note: createCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to add category:", error);
+      // Error toast is handled by the error useEffect above
     }
   };
 
@@ -119,27 +166,41 @@ export default function Categories() {
         updateCategory({ id, categoryData: categoryData as UpdateCategoryData })
       ).unwrap();
       toast.success("Category updated successfully");
+      // Note: updateCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to update category:", error);
+      // Error toast is handled by the error useEffect above
     }
   };
 
+  // Handle single category delete
   const handleDeleteCategory = async (id: string) => {
     try {
       await dispatch(deleteCategory(id)).unwrap();
       toast.success("Category deleted successfully");
+      // Note: deleteCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete category:", error);
+      // Error toast is handled by the error useEffect above
     }
   };
 
-  if (loading) {
-    return <div>Loading categories...</div>;
-  }
-
-  if (error && categories.length === 0) {
-    return <div>Error loading categories: {error}</div>;
-  }
+  // Handle bulk category delete
+  const handleBulkDeleteCategories = async (ids: string[]) => {
+    try {
+      await dispatch(deleteManyCategories(ids)).unwrap();
+      toast.success(
+        `${ids.length} ${
+          ids.length === 1 ? "category" : "categories"
+        } deleted successfully`
+      );
+      // Note: deleteManyCategories thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete categories:", error);
+      // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
+      toast.error("Failed to delete selected categories");
+    }
+  };
 
   return (
     <div className="flex flex-1 flex-col">
@@ -153,7 +214,15 @@ export default function Categories() {
           </div>
 
           <DataTable<Category>
+            // Server-side specific props
+            serverSide={true}
             data={categories || []}
+            pagination={pagination}
+            loading={loading}
+            onQueryParamsChange={handleQueryParamsChange}
+            currentQueryParams={currentQueryParams}
+            error={error}
+            // Table configuration
             columns={categoriesColumns}
             dialogComponent={
               <CategoryDialog
@@ -166,27 +235,32 @@ export default function Categories() {
               createEditCategoryDialog(
                 rowData,
                 (updatedData) => {
-                  handleUpdateCategory(rowData._id, {
-                    name: updatedData.name,
-                    image:
-                      updatedData.image instanceof File
-                        ? updatedData.image
-                        : undefined,
-                  });
+                  // Handle the category update by extracting ID and calling update handler
+                  const id = updatedData._id;
+                  const {
+                    _id,
+                    createdAt,
+                    productCount,
+                    ...categoryUpdateData
+                  } = updatedData;
+                  handleUpdateCategory(id, categoryUpdateData);
                 },
-                isUpdating
+                isUpdating // Pass the loading state
               )
             }
+            // Row action handlers
             onRowDelete={handleDeleteCategory}
-            // ✅ ADD THIS: Pass loading state
             isDeleting={isDeleting}
-            enableDragAndDrop={true}
+            onBulkDelete={handleBulkDeleteCategories}
+            isBulkDeleting={isDeletingMany}
+            // Table features configuration
             enableRowSelection={true}
             enableGlobalFilter={true}
-            enableColumnFilter={true}
+            enableColumnFilter={false} // Disable simple column filter since we're using search
             enableAdvancedFilter={true}
-            filterColumn="status"
-            filterPlaceholder="Filter by status..."
+            advancedFilterConfig={advancedFilterConfig}
+            enableDragAndDrop={true} // Disable drag and drop for server-side tables
+            // Set page size for initial load
             pageSize={10}
           />
         </div>

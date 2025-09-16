@@ -1,9 +1,49 @@
-// src/features/categories/categoriesAPI.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "../../utils/axiosInstance";
 
-export const fetchCategoriesAPI = async () => {
-  const response = await axiosInstance.get("/api/categories");
-  return response.data.documents;
+// Interface for API query parameters
+export interface CategoriesQueryParams {
+  page?: number;
+  limit?: number;
+  sort?: string;
+  keyword?: string;
+  fields?: string;
+  [key: string]: any;
+}
+
+// Interface for API response structure
+export interface CategoriesResponse {
+  result: number;
+  pagination: {
+    currentPage: number;
+    limit: number;
+    numberOfPages: number;
+    nextPage?: number;
+    previousPage?: number;
+  };
+  documents: any[];
+}
+
+// Updated fetch categories function with query parameters support
+export const fetchCategoriesAPI = async (
+  queryParams: CategoriesQueryParams = {}
+): Promise<CategoriesResponse> => {
+  // Build query string from parameters
+  const params = new URLSearchParams();
+
+  Object.entries(queryParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.append(key, value.toString());
+    }
+  });
+
+  const queryString = params.toString();
+  const url = queryString
+    ? `/api/categories?${queryString}`
+    : "/api/categories";
+
+  const response = await axiosInstance.get(url);
+  return response.data;
 };
 
 // Add new category
@@ -27,7 +67,7 @@ export const updateCategoryAPI = async (id: string, categoryData: FormData) => {
       },
     }
   );
-  return response.data.data; // Based on your backend response structure
+  return response.data.data;
 };
 
 export const deleteCategoryAPI = async (id: string) => {
@@ -35,8 +75,10 @@ export const deleteCategoryAPI = async (id: string) => {
   return response.data;
 };
 
-// ✅ ADD THIS: Bulk delete API
+// Bulk delete API
 export const deleteManyCategoriesAPI = async (ids: string[]) => {
-  const response = await axiosInstance.post('/api/categories/bulk-delete', { ids });
+  const response = await axiosInstance.post("/api/categories/bulk-delete", {
+    ids,
+  });
   return response.data;
 };

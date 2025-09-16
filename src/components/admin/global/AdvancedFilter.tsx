@@ -132,23 +132,33 @@ export function AdvancedFilter({
     }));
   };
 
+  // FIXED: Remove numeric filter and immediately trigger change
   const removeNumericFilter = (index: number) => {
-    setFilters((prev) => ({
-      ...prev,
-      numeric: prev.numeric.filter((_, i) => i !== index),
-    }));
+    const newFilters = {
+      ...filters,
+      numeric: filters.numeric.filter((_, i) => i !== index),
+    };
+    setFilters(newFilters);
+    // Immediately trigger the change to update the server
+    onFiltersChange(newFilters);
   };
 
+  // FIXED: Remove date filter and immediately trigger change
   const removeDateFilter = (index: number) => {
-    setFilters((prev) => ({
-      ...prev,
-      date: prev.date.filter((_, i) => i !== index),
-    }));
+    const newFilters = {
+      ...filters,
+      date: filters.date.filter((_, i) => i !== index),
+    };
+    setFilters(newFilters);
+    // Immediately trigger the change to update the server
+    onFiltersChange(newFilters);
   };
 
+  // FIXED: Clear all filters and immediately trigger change
   const clearAllFilters = () => {
     const emptyFilters = { numeric: [], date: [] };
     setFilters(emptyFilters);
+    // Immediately trigger the change to update the server
     onFiltersChange(emptyFilters);
   };
 
