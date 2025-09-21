@@ -11,72 +11,34 @@ import {
   createEditUserDialog,
   UserDialog,
 } from "../../components/admin/global/UserDialog";
-import { DataTable } from "../../components/admin/global/data-table";
-// Define the User entity type
+import {
+  DataTable,
+  type ServerQueryParams,
+} from "../../components/admin/global/data-table";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  fetchUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  deleteManyUsers,
+  clearError,
+  setQueryParams,
+  type CreateUserData,
+  type UpdateUserData,
+} from "../../features/users/usersSlice";
+
+// Define the User entity type to match backend response
 export interface User {
-  id: number;
+  _id: string;
   name: string;
   email: string;
-  role: "admin" | "customer" | "moderator" | "support";
-  status: "active" | "inactive" | "suspended" | "pending";
-  avatar?: string;
-  lastLogin: string;
-  totalOrders: number;
-  totalSpent: number;
+  role: "admin" | "user";
+  active: boolean;
+  image?: string;
   createdAt: string;
+  updatedAt?: string;
 }
-
-// Sample data - in a real app, this would come from your API
-const usersData: User[] = [
-  {
-    id: 7,
-    name: "Robert Taylor",
-    email: "robert.taylor@email.com",
-    role: "support",
-    status: "active",
-    lastLogin: "2024-02-19",
-    totalOrders: 0,
-    totalSpent: 0,
-    createdAt: "2023-09-12",
-  },
-  {
-    id: 8,
-    name: "Jennifer White",
-    email: "jennifer.white@email.com",
-    role: "customer",
-    status: "pending",
-    avatar:
-      "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=40&h=40&fit=crop&crop=face",
-    lastLogin: "2024-02-20",
-    totalOrders: 1,
-    totalSpent: 149.99,
-    createdAt: "2024-02-19",
-  },
-  {
-    id: 9,
-    name: "Alex Johnson",
-    email: "alex.johnson@email.com",
-    role: "customer",
-    status: "inactive",
-    lastLogin: "2024-01-05",
-    totalOrders: 5,
-    totalSpent: 789.45,
-    createdAt: "2023-10-18",
-  },
-  {
-    id: 10,
-    name: "Maria Garcia",
-    email: "maria.garcia@email.com",
-    role: "customer",
-    status: "active",
-    avatar:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=40&h=40&fit=crop&crop=face",
-    lastLogin: "2024-02-18",
-    totalOrders: 12,
-    totalSpent: 2156.3,
-    createdAt: "2023-07-03",
-  },
-];
 
 // Define columns specific to Users
 const usersColumns: ColumnDef<User>[] = [
@@ -94,7 +56,7 @@ const usersColumns: ColumnDef<User>[] = [
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarImage src={user.image} alt={user.name} />
             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
           <div>
@@ -113,9 +75,7 @@ const usersColumns: ColumnDef<User>[] = [
       const role = row.getValue("role") as string;
       const variants = {
         admin: "destructive",
-        moderator: "default",
-        support: "default",
-        customer: "secondary",
+        user: "secondary",
       } as const;
       return (
         <Badge variant={variants[role as keyof typeof variants]}>{role}</Badge>
@@ -123,58 +83,14 @@ const usersColumns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "active",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      const variants = {
-        active: "default",
-        inactive: "secondary",
-        suspended: "destructive",
-        pending: "secondary",
-      } as const;
+      const active = row.getValue("active") as boolean;
       return (
-        <Badge variant={variants[status as keyof typeof variants]}>
-          {status}
+        <Badge variant={active ? "default" : "secondary"}>
+          {active ? "active" : "inactive"}
         </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "totalOrders",
-    header: "Orders",
-    cell: ({ row }) => {
-      const orders = row.getValue("totalOrders") as number;
-      return (
-        <div className="text-center font-medium">{orders.toLocaleString()}</div>
-      );
-    },
-  },
-  {
-    accessorKey: "totalSpent",
-    header: "Total Spent",
-    cell: ({ row }) => {
-      const spent = row.getValue("totalSpent") as number;
-      return <div className="text-center font-medium">${spent.toFixed(2)}</div>;
-    },
-  },
-  {
-    accessorKey: "lastLogin",
-    header: "Last Login",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("lastLogin"));
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - date.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      return (
-        <div className="text-muted-foreground">
-          {diffDays === 1
-            ? "Yesterday"
-            : diffDays < 7
-            ? `${diffDays} days ago`
-            : date.toLocaleDateString()}
-        </div>
       );
     },
   },
@@ -190,22 +106,14 @@ const usersColumns: ColumnDef<User>[] = [
   },
 ];
 
-// Advanced filter configuration for categories
+// Advanced filter configuration for users
 const advancedFilterConfig = {
   numeric: {
-    totalOrders: {
-      label: "Total Orders",
-      placeholder: "Enter number of total orders",
-    },
-    totalSpent: {
-      label: "Total Spent",
-      placeholder: "Enter total spent amount",
+    createdAt: {
+      label: "Created Date",
     },
   },
   date: {
-    lastLogin: {
-      label: "Last Login",
-    },
     createdAt: {
       label: "Created Date",
     },
@@ -213,47 +121,189 @@ const advancedFilterConfig = {
 };
 
 export default function Users() {
-  const [users, setUsers] = React.useState(usersData);
+  const dispatch = useAppDispatch();
+  const {
+    users,
+    pagination,
+    loading,
+    error,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    isDeletingMany,
+    currentQueryParams,
+  } = useAppSelector((state) => state.users);
 
-  // Handle adding new User
-  const handleAddUser = (newUser: User) => {
-    setUsers((prev) => [...prev, newUser]);
-    console.log("Added new User:", newUser);
+  // Load initial data on component mount
+  React.useEffect(() => {
+    // Load users with default parameters on mount
+    const initialParams: ServerQueryParams = {
+      page: 1,
+      limit: 15,
+    };
+    dispatch(fetchUsers(initialParams));
+  }, [dispatch]);
+
+  // Handle errors
+  React.useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+  // Handle query parameter changes from the DataTable
+  const handleQueryParamsChange = React.useCallback(
+    (params: ServerQueryParams) => {
+      // Store the parameters in Redux state for future reference
+      dispatch(setQueryParams(params));
+      // Fetch data with new parameters
+      dispatch(fetchUsers(params));
+    },
+    [dispatch]
+  );
+
+  // Handle adding new user
+  const handleAddUser = async (userData: {
+    name: string;
+    email: string;
+    password: string;
+    role?: "admin" | "user";
+    image?: File;
+  }) => {
+    try {
+      await dispatch(createUser(userData as CreateUserData)).unwrap();
+      toast.success("User added successfully");
+      // Note: createUser thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to add user:", error);
+      // Error toast is handled by the error useEffect above
+    }
   };
 
-  // Handle updating existing User
-  const handleUpdateUser = (updatedUser: User) => {
-    setUsers((prev) =>
-      prev.map((cat) => (cat.id === updatedUser.id ? updatedUser : cat))
-    );
-    console.log("Updated User:", updatedUser);
+  // Handle updating existing user
+  const handleUpdateUser = async (
+    id: string,
+    userData: {
+      name?: string;
+      email?: string;
+      role?: "admin" | "user";
+      image?: File;
+    }
+  ) => {
+    try {
+      await dispatch(
+        updateUser({ id, userData: userData as UpdateUserData })
+      ).unwrap();
+      toast.success("User updated successfully");
+      // Note: updateUser thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to update user:", error);
+      // Error toast is handled by the error useEffect above
+    }
   };
 
-  const handleDataChange = (newData: User[]) => {
-    setUsers(newData);
-    // Here you would typically sync with your backend
-    toast.success("Users reordered successfully");
+  // Handle single user delete
+  const handleDeleteUser = async (id: string) => {
+    try {
+      await dispatch(deleteUser(id)).unwrap();
+      toast.success("User deleted successfully");
+      // Note: deleteUser thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      // Error toast is handled by the error useEffect above
+    }
+  };
+
+  // Handle bulk user delete
+  const handleBulkDeleteUsers = async (ids: string[]) => {
+    try {
+      await dispatch(deleteManyUsers(ids)).unwrap();
+      toast.success(
+        `${ids.length} ${
+          ids.length === 1 ? "user" : "users"
+        } deleted successfully`
+      );
+      // Note: deleteManyUsers thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete users:", error);
+      // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
+      toast.error("Failed to delete selected users");
+    }
   };
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <DataTable
-            data={users}
+          <div className="px-4 lg:px-6">
+            <h1 className="text-2xl font-semibold">Users</h1>
+            <p className="text-muted-foreground">
+              Manage user accounts and their access levels.
+            </p>
+          </div>
+
+          <DataTable<User>
+            // Server-side specific props
+            serverSide={true}
+            data={users || []}
+            pagination={pagination}
+            loading={loading}
+            onQueryParamsChange={handleQueryParamsChange}
+            currentQueryParams={currentQueryParams}
+            error={error}
+            // Table configuration
             columns={usersColumns}
-            dialogComponent={<UserDialog mode="add" onSave={handleAddUser} />}
-            editDialogComponent={createEditUserDialog}
-            onRowUpdate={handleUpdateUser}
-            enableDragAndDrop={false} // Users shouldn't be reorderable
+            dialogComponent={
+              <UserDialog
+                mode="add"
+                onSave={handleAddUser}
+                isLoading={isCreating}
+              />
+            }
+            editDialogComponent={(rowData: User) =>
+              createEditUserDialog(
+                rowData,
+                (updatedData) => {
+                  // Handle the user update by extracting ID and calling update handler
+                  const id = updatedData._id || rowData._id; // Fallback to rowData._id if needed
+                  // Remove the _id from the update data since it's not needed in the payload
+                  const { _id, ...userUpdateData } = updatedData;
+                  console.log(
+                    "Users page received update data:",
+                    userUpdateData
+                  );
+                  console.log("User ID being used for update:", id);
+
+                  if (!id) {
+                    console.error("No user ID found!", {
+                      updatedData,
+                      rowData,
+                    });
+                    toast.error("Error: User ID is missing");
+                    return;
+                  }
+
+                  handleUpdateUser(id, userUpdateData);
+                },
+                isUpdating // Pass the loading state
+              )
+            }
+            // Row action handlers
+            onRowDelete={handleDeleteUser}
+            isDeleting={isDeleting}
+            onBulkDelete={handleBulkDeleteUsers}
+            isBulkDeleting={isDeletingMany}
+            // Table features configuration
             enableRowSelection={true}
             enableGlobalFilter={true}
-            enableColumnFilter={true}
+            enableColumnFilter={false} // Disable simple column filter since we're using search
             enableAdvancedFilter={true}
             advancedFilterConfig={advancedFilterConfig}
+            enableDragAndDrop={false} // Disable drag and drop for users
             filterColumn="role"
             filterPlaceholder="Filter by role..."
-            onDataChange={handleDataChange}
+            // Set page size for initial load
             pageSize={15}
           />
         </div>

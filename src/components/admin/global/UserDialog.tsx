@@ -26,7 +26,7 @@ import {
 } from "../../ui/select";
 
 type Errors = {
-  username?: string;
+  name?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
@@ -34,28 +34,30 @@ type Errors = {
   image?: string;
 };
 
-// Define the shape of the user object passed to the parent component
-// This should match the interface in users.tsx
-interface UserForParent {
-  id: number;
+interface User {
+  _id: string;
   name: string;
   email: string;
-  role: "admin" | "customer" | "moderator" | "support";
-  status: "active" | "inactive" | "suspended" | "pending";
-  avatar?: string;
-  lastLogin: string;
-  totalOrders: number;
-  totalSpent: number;
+  role: "admin" | "user";
+  active: boolean;
+  image?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 interface UserDialogProps {
   mode?: "add" | "edit";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  existingData?: any; // Use 'any' to accommodate the different User shapes initially
+  existingData?: User;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSave?: (data: UserForParent) => void;
+  onSave?: (data: {
+    name?: string;
+    email?: string;
+    password?: string;
+    role?: "admin" | "user";
+    image?: File;
+  }) => void;
+  isLoading?: boolean;
 }
 
 export function UserDialog({
@@ -64,22 +66,24 @@ export function UserDialog({
   open: controlledOpen,
   onOpenChange,
   onSave,
+  isLoading = false,
 }: UserDialogProps) {
   const [internalOpen, setInternalOpen] = React.useState(false);
 
   // Form state
-  const [username, setUsername] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [originalName, setOriginalName] = React.useState("");
   const [email, setEmail] = React.useState("");
+  const [originalEmail, setOriginalEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [role, setRole] = React.useState("");
-  const [status, setStatus] = React.useState<
-    "active" | "inactive" | "suspended" | "pending"
-  >("active");
+  const [role, setRole] = React.useState<"admin" | "user">("user");
+  const [originalRole, setOriginalRole] = React.useState<"admin" | "user">("user");
 
   // Image
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = React.useState(false); // Track if existing image was removed
   const [dragActive, setDragActive] = React.useState(false);
 
   const [errors, setErrors] = React.useState<Errors>({});
@@ -89,16 +93,18 @@ export function UserDialog({
 
   React.useEffect(() => {
     if (mode === "edit" && existingData && open) {
-      setUsername(existingData.name || ""); // <-- FIX: Use 'name' from existingData
+      setName(existingData.name || "");
+      setOriginalName(existingData.name || "");
       setEmail(existingData.email || "");
-      setRole(existingData.role || "");
-      setStatus(existingData.status || "active");
-      if (existingData.avatar) {
-        // <-- FIX: Use 'avatar'
-        setPreview(existingData.avatar);
+      setOriginalEmail(existingData.email || "");
+      setRole(existingData.role || "user");
+      setOriginalRole(existingData.role || "user");
+      if (existingData.image) {
+        setPreview(existingData.image);
       }
       setPassword("");
       setConfirmPassword("");
+      setImageRemoved(false); // Reset image removed state
     } else if (mode === "add" && open) {
       resetForm();
     }
@@ -106,7 +112,7 @@ export function UserDialog({
 
   const validate = () => {
     const e: Errors = {};
-    if (!username.trim()) e.username = "Username is required";
+    if (!name.trim()) e.name = "Name is required";
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       e.email = "Valid email is required";
 
@@ -124,56 +130,91 @@ export function UserDialog({
     }
 
     if (!role) e.role = "Role is required";
-    // Image validation is optional for edit mode if an image already exists
-    if (mode === "add" && !image) e.image = "User image is required";
-    if (mode === "edit" && !preview && !image)
-      e.image = "User image is required";
 
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const resetForm = () => {
-    setUsername("");
+    setName("");
+    setOriginalName("");
     setEmail("");
+    setOriginalEmail("");
     setPassword("");
     setConfirmPassword("");
-    setRole("");
-    setStatus("active");
+    setRole("user");
+    setOriginalRole("user");
     setImage(null);
     setPreview(null);
+    setImageRemoved(false); // Reset image removed state
     setErrors({});
+  };
+
+  // Function to detect changes and prepare payload
+  const prepareUpdatePayload = () => {
+    const payload: {
+      name?: string;
+      email?: string;
+      password?: string;
+      role?: "admin" | "user";
+      image?: File | null;
+    } = {};
+
+    // Only include fields that changed or are required for add mode
+    if (mode === "add") {
+      payload.name = name;
+      payload.email = email;
+      payload.password = password;
+      payload.role = role;
+      if (image) payload.image = image;
+    } else {
+      // Edit mode - only include changed fields
+      if (name.trim() !== originalName.trim()) {
+        payload.name = name;
+      }
+      if (email.trim() !== originalEmail.trim()) {
+        payload.email = email;
+      }
+      if (password.trim()) {
+        payload.password = password;
+      }
+      if (role !== originalRole) {
+        payload.role = role;
+      }
+      // Handle image changes: new file uploaded OR existing image removed
+      if (image instanceof File) {
+        payload.image = image;
+      } else if (imageRemoved && existingData?.image) {
+        // If user had an image and it was removed, send null to indicate removal
+        payload.image = null;
+      }
+    }
+
+    return payload;
   };
 
   const handleSave = () => {
     if (!validate()) return;
 
-    // --- START: MAJOR FIX ---
-    // Create an object that matches the User interface in `users.tsx`
-    const userData: UserForParent = {
-      id: existingData?.id || Date.now(),
-      name: username, // FIX: Map local 'username' state to 'name' property
-      email,
-      role: role as UserForParent["role"], // Assert the role type
-      status: status as UserForParent["status"],
-      avatar: preview || existingData?.avatar || "", // FIX: Map preview to 'avatar'
-      createdAt:
-        existingData?.createdAt || new Date().toISOString().split("T")[0],
+    // Get only changed fields
+    const userData = prepareUpdatePayload();
 
-      // FIX: Add missing properties with default values for new users
-      lastLogin:
-        existingData?.lastLogin || new Date().toISOString().split("T")[0],
-      totalOrders: existingData?.totalOrders || 0,
-      totalSpent: existingData?.totalSpent || 0,
-    };
-    // --- END: MAJOR FIX ---
+    // Don't proceed if nothing changed in edit mode
+    if (mode === "edit" && Object.keys(userData).length === 0) {
+      console.log("No changes detected");
+      setOpen(false);
+      return;
+    }
 
     console.log(
       `${mode === "edit" ? "Updating" : "Saving new"} user:`,
       userData
     );
-    if (mode === "edit" && password) {
-      console.log("Password will be updated");
+    
+    // Debug: Log what fields are being sent
+    console.log("Fields being sent:", Object.keys(userData));
+    if (userData.image) {
+      console.log("Image file:", userData.image.name, userData.image.size);
     }
 
     onSave?.(userData);
@@ -188,6 +229,7 @@ export function UserDialog({
   const handleFile = (file: File) => {
     setImage(file);
     setPreview(URL.createObjectURL(file));
+    setImageRemoved(false); // Reset removed state when new file is selected
     setErrors((prev) => ({ ...prev, image: undefined }));
   };
 
@@ -200,8 +242,12 @@ export function UserDialog({
   const handleRemoveImage = () => {
     setImage(null);
     setPreview(null);
+    
     if (mode === "add") {
       setErrors((prev) => ({ ...prev, image: "User image is required" }));
+    } else {
+      // In edit mode, mark that the existing image was removed
+      setImageRemoved(true);
     }
   };
 
@@ -211,6 +257,13 @@ export function UserDialog({
     }
     setOpen(newOpen);
   };
+
+  // Update the save button to show loading state
+  const saveButtonContent = isLoading ? (
+    mode === "edit" ? "Updating..." : "Saving..."
+  ) : (
+    mode === "edit" ? "Update" : "Save"
+  );
 
   const dialogContent = (
     <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -226,23 +279,23 @@ export function UserDialog({
       </DialogHeader>
 
       <div className="grid gap-4 py-4">
-        {/* Username */}
+        {/* Name */}
         <div className="grid gap-2">
-          <Label htmlFor="username">Username</Label>
+          <Label htmlFor="name">Name</Label>
           <Input
-            id="username"
-            placeholder="e.g., johndoe"
-            value={username}
+            id="name"
+            placeholder="e.g., John Doe"
+            value={name}
             onChange={(e) => {
-              setUsername(e.target.value);
+              setName(e.target.value);
               if (e.target.value.trim()) {
-                setErrors((prev) => ({ ...prev, username: undefined }));
+                setErrors((prev) => ({ ...prev, name: undefined }));
               }
             }}
-            className={errors.username ? "border-red-500" : ""}
+            className={errors.name ? "border-red-500" : ""}
           />
-          {errors.username && (
-            <p className="text-sm text-red-600 mt-1">{errors.username}</p>
+          {errors.name && (
+            <p className="text-sm text-red-600 mt-1">{errors.name}</p>
           )}
         </div>
 
@@ -332,7 +385,7 @@ export function UserDialog({
           <Label htmlFor="user-role">Role</Label>
           <Select
             value={role}
-            onValueChange={(value) => {
+            onValueChange={(value: "admin" | "user") => {
               setRole(value);
               setErrors((prev) => ({ ...prev, role: undefined }));
             }}
@@ -340,43 +393,14 @@ export function UserDialog({
             <SelectTrigger id="user-role">
               <SelectValue placeholder="Choose role" />
             </SelectTrigger>
-            {/* --- START: FIX --- */}
-            {/* Use roles that match the main users.tsx page */}
             <SelectContent>
               <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="moderator">Moderator</SelectItem>
-              <SelectItem value="support">Support</SelectItem>
-              <SelectItem value="customer">Customer</SelectItem>
+              <SelectItem value="user">User</SelectItem>
             </SelectContent>
-            {/* --- END: FIX --- */}
           </Select>
           {errors.role && (
             <p className="text-sm text-red-600 mt-1">{errors.role}</p>
           )}
-        </div>
-
-        {/* Status */}
-        <div className="grid gap-2">
-          <Label htmlFor="user-status">Status</Label>
-          <Select
-            value={status}
-            onValueChange={(
-              value: "active" | "inactive" | "suspended" | "pending"
-            ) => setStatus(value)}
-          >
-            <SelectTrigger id="user-status">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            {/* --- START: FIX --- */}
-            {/* Use all available statuses */}
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="suspended">Suspended</SelectItem>
-            </SelectContent>
-            {/* --- END: FIX --- */}
-          </Select>
         </div>
 
         {/* User Image Upload */}
@@ -459,9 +483,9 @@ export function UserDialog({
       </div>
 
       <DialogFooter>
-        <Button onClick={handleSave}>
+        <Button onClick={handleSave} disabled={isLoading}>
           <IconUser className="mr-2 h-4 w-4" />
-          {mode === "edit" ? "Update" : "Save"}
+          {saveButtonContent}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -488,11 +512,29 @@ export function UserDialog({
   );
 }
 
-// This factory function needs to accept the parent's User type
+// This factory function creates edit dialogs for the data table
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditUserDialog(
-  rowData: UserForParent,
-  onSave: (updatedData: UserForParent) => void
+  rowData: User,
+  onSave: (updatedData: { _id: string; [key: string]: any }) => void,
+  isLoading: boolean = false
 ) {
-  return <UserDialog mode="edit" existingData={rowData} onSave={onSave} />;
+  return (
+    <UserDialog
+      mode="edit"
+      existingData={rowData}
+      onSave={(userData) => {
+        // Ensure we always include the user ID
+        const updatePayload = {
+          _id: rowData._id, // Always use the rowData._id to ensure we have the correct ID
+          ...userData, // Only the changed fields from the dialog
+        };
+        console.log("Edit dialog sending payload:", updatePayload);
+        console.log("Original rowData:", rowData);
+        onSave(updatePayload);
+      }}
+      isLoading={isLoading}
+      onOpenChange={() => {}} // Edit dialog closes when clicking outside or X
+    />
+  );
 }

@@ -786,7 +786,7 @@ export function DataTable<TData extends BaseEntity>({
           .filter(Boolean);
 
         // Always include essential fields needed for the UI to work properly
-        const essentialFields = ["_id", "name", "slug", "mainImage"];
+        const essentialFields = ["_id", "name", "slug", "mainImage", "image"];
         const allRequiredFields = [
           ...new Set([...essentialFields, ...visibleColumns]),
         ];
