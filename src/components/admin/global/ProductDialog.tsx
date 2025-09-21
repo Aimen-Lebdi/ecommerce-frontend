@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import {
   IconCloudUpload,
@@ -25,6 +26,7 @@ import {
   SelectContent,
   SelectItem,
 } from "../../ui/select";
+import axiosInstance from "../../../utils/axiosInstance";
 
 type Errors = {
   category?: string;
@@ -39,22 +41,33 @@ type Errors = {
   images?: string;
 };
 
+// Backend Product interface matching your API
 interface Product {
-  id: number | string;
-  category: string;
-  subcategory: string;
-  brand: string;
+  _id: string;
   name: string;
+  slug: string;
   description: string;
   price: number;
+  priceAfterDiscount?: number;
+  mainImage: string;
+  images?: string[];
+  colors?: string[];
   quantity: number;
-  colors: string[];
-  status: "active" | "inactive" | "draft";
-  sku?: string;
-  weight?: number;
-  dimensions?: string;
-  mainImageUrl?: string;
-  otherImageUrls?: string[];
+  sold: number;
+  category: {
+    _id: string;
+    name: string;
+  };
+  subCategory?: {
+    _id: string;
+    name: string;
+  };
+  brand?: {
+    _id: string;
+    name: string;
+  };
+  rating?: number;
+  ratingsQuantity: number;
   createdAt: string;
   updatedAt?: string;
 }
@@ -64,38 +77,46 @@ interface ProductDialogProps {
   existingData?: Product;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSave?: (data: Product) => void;
+  onSubmit?: (data: {
+    name?: string;
+    description?: string;
+    price?: number;
+    priceAfterDiscount?: number;
+    mainImage?: File;
+    images?: File[];
+    colors?: string[];
+    quantity?: number;
+    category?: string;
+    subCategory?: string;
+    brand?: string;
+  }) => void;
+  isSubmitting?: boolean;
 }
 
-// Dummy data - in a real app, these would come from your API
-const dummyCategories = [
-  { id: "electronics", name: "Electronics" },
-  { id: "fashion", name: "Fashion" },
-  { id: "home", name: "Home & Garden" },
-  { id: "books", name: "Books" },
-  { id: "sports", name: "Sports & Outdoors" },
-];
+// API interfaces for dropdown data
+interface Category {
+  _id: string;
+  name: string;
+}
 
-const dummySubcategories = [
-  { id: "phones", name: "Smartphones", categoryId: "electronics" },
-  { id: "laptops", name: "Laptops", categoryId: "electronics" },
-  { id: "men-clothing", name: "Men's Clothing", categoryId: "fashion" },
-  { id: "women-clothing", name: "Women's Clothing", categoryId: "fashion" },
-];
+interface SubCategory {
+  _id: string;
+  name: string;
+  category: { _id: string };
+}
 
-const dummyBrands = [
-  { id: "apple", name: "Apple" },
-  { id: "samsung", name: "Samsung" },
-  { id: "nike", name: "Nike" },
-  { id: "adidas", name: "Adidas" },
-];
+interface Brand {
+  _id: string;
+  name: string;
+}
 
 export function ProductDialog({ 
   mode = "add", 
   existingData, 
   open: controlledOpen, 
   onOpenChange, 
-  onSave 
+  onSubmit,
+  isSubmitting = false
 }: ProductDialogProps) {
   const [internalOpen, setInternalOpen] = React.useState(false);
 
@@ -106,12 +127,9 @@ export function ProductDialog({
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [price, setPrice] = React.useState("");
+  const [priceAfterDiscount, setPriceAfterDiscount] = React.useState("");
   const [quantity, setQuantity] = React.useState("");
   const [colors, setColors] = React.useState("");
-  const [status, setStatus] = React.useState<"active" | "inactive" | "draft">("active");
-  const [sku, setSku] = React.useState("");
-  const [weight, setWeight] = React.useState("");
-  const [dimensions, setDimensions] = React.useState("");
 
   // Images
   const [mainImage, setMainImage] = React.useState<File | null>(null);
@@ -124,31 +142,106 @@ export function ProductDialog({
 
   const [errors, setErrors] = React.useState<Errors>({});
 
+  // Dropdown data state
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [subcategories, setSubcategories] = React.useState<SubCategory[]>([]);
+  const [brands, setBrands] = React.useState<Brand[]>([]);
+  const [loading, setLoading] = React.useState(false);
+
+  // Store original values for change detection in edit mode
+  const [originalValues, setOriginalValues] = React.useState<{
+    name: string;
+    description: string;
+    price: string;
+    priceAfterDiscount: string;
+    quantity: string;
+    colors: string;
+    category: string;
+    subcategory: string;
+    brand: string;
+  } | null>(null);
+
+  // NEW: Track if category has changed to force subcategory update
+  const [categoryChanged, setCategoryChanged] = React.useState(false);
+
   // Use controlled or internal open state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
 
+  // Load dropdown data when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      loadDropdownData();
+    }
+  }, [open]);
+
+  // Load categories, subcategories, and brands from API
+  const loadDropdownData = async () => {
+    setLoading(true);
+    try {
+      // Load categories
+      const categoriesResponse = await axiosInstance.get('/api/categories');
+      setCategories(categoriesResponse.data.documents || []);
+
+      // Load subcategories
+      const subcategoriesResponse = await axiosInstance.get('/api/subcategories');
+      setSubcategories(subcategoriesResponse.data.documents || []);
+
+      // Load brands
+      const brandsResponse = await axiosInstance.get('/api/brands');
+      setBrands(brandsResponse.data.documents || []);
+    } catch (error) {
+      console.error('Failed to load dropdown data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Initialize form with existing data in edit mode
   React.useEffect(() => {
     if (mode === "edit" && existingData && open) {
-      setCategory(existingData.category || "");
-      setSubcategory(existingData.subcategory || "");
-      setBrand(existingData.brand || "");
-      setName(existingData.name || "");
-      setDescription(existingData.description || "");
-      setPrice(existingData.price?.toString() || "");
-      setQuantity(existingData.quantity?.toString() || "");
-      setColors(existingData.colors?.join(", ") || "");
-      setStatus(existingData.status || "active");
-      setSku(existingData.sku || "");
-      setWeight(existingData.weight?.toString() || "");
-      setDimensions(existingData.dimensions || "");
+      const initialName = existingData.name || "";
+      const initialDescription = existingData.description || "";
+      const initialPrice = existingData.price?.toString() || "";
+      const initialPriceAfterDiscount = existingData.priceAfterDiscount?.toString() || "";
+      const initialQuantity = existingData.quantity?.toString() || "";
+      const initialColors = existingData.colors?.join(", ") || "";
+      const initialCategory = existingData.category?._id || "";
+      const initialSubcategory = existingData.subCategory?._id || "";
+      const initialBrand = existingData.brand?._id || "";
+
+      // Set form values
+      setName(initialName);
+      setDescription(initialDescription);
+      setPrice(initialPrice);
+      setPriceAfterDiscount(initialPriceAfterDiscount);
+      setQuantity(initialQuantity);
+      setColors(initialColors);
+      setCategory(initialCategory);
+      setSubcategory(initialSubcategory);
+      setBrand(initialBrand);
+
+      // Store original values for change detection
+      setOriginalValues({
+        name: initialName,
+        description: initialDescription,
+        price: initialPrice,
+        priceAfterDiscount: initialPriceAfterDiscount,
+        quantity: initialQuantity,
+        colors: initialColors,
+        category: initialCategory,
+        subcategory: initialSubcategory,
+        brand: initialBrand,
+      });
+
+      // Reset category changed flag
+      setCategoryChanged(false);
       
-      if (existingData.mainImageUrl) {
-        setPreviewMain(existingData.mainImageUrl);
+      if (existingData.mainImage) {
+        setPreviewMain(existingData.mainImage);
       }
-      if (existingData.otherImageUrls) {
-        setPreviewOthers(existingData.otherImageUrls);
+      if (existingData.images && existingData.images.length > 0) {
+        setPreviewOthers(existingData.images);
       }
     } else if (mode === "add" && open) {
       // Reset form for add mode
@@ -164,25 +257,22 @@ export function ProductDialog({
     setName("");
     setDescription("");
     setPrice("");
+    setPriceAfterDiscount("");
     setQuantity("");
     setColors("");
-    setStatus("active");
-    setSku("");
-    setWeight("");
-    setDimensions("");
     setMainImage(null);
     setPreviewMain(null);
     setOtherImages([]);
     setPreviewOthers([]);
     setErrors({});
+    setOriginalValues(null);
+    setCategoryChanged(false);
   };
 
-  // --- Validation ---
+  // Validation
   const validate = () => {
     const e: Errors = {};
     if (!category) e.category = "Category is required";
-    if (!subcategory) e.subcategory = "Subcategory is required";
-    if (!brand) e.brand = "Brand is required";
     if (!name.trim()) e.name = "Product name is required";
     if (!description.trim()) e.description = "Description is required";
     if (!price || isNaN(Number(price)) || Number(price) <= 0) e.price = "Valid price is required";
@@ -190,49 +280,100 @@ export function ProductDialog({
     if (!colors.trim()) e.colors = "At least one color is required";
     if (mode === "add" && !mainImage) e.mainImage = "Main image is required";
     if (mode === "edit" && !mainImage && !previewMain) e.mainImage = "Main image is required";
+    
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  // Generate SKU if not provided
-  const generateSku = () => {
-    if (!sku && name && brand) {
-      const brandCode = brand.substring(0, 3).toUpperCase();
-      const nameCode = name.substring(0, 3).toUpperCase();
-      const randomCode = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      return `${brandCode}-${nameCode}-${randomCode}`;
-    }
-    return sku;
+  // Check if a field has changed (for edit mode)
+  const hasFieldChanged = (fieldName: keyof typeof originalValues, currentValue: string) => {
+    if (mode === "add" || !originalValues) return true;
+    return originalValues[fieldName] !== currentValue;
   };
 
-  // --- Save Handler ---
+  // Save Handler
   const handleSave = () => {
     if (!validate()) return;
 
-    const productData: Product = {
-      id: existingData?.id || Date.now(),
-      category,
-      subcategory,
-      brand,
-      name,
-      description,
-      price: Number(price),
-      quantity: Number(quantity),
-      colors: colors.split(",").map((c) => c.trim()).filter(c => c.length > 0),
-      status,
-      sku: generateSku(),
-      weight: weight ? Number(weight) : undefined,
-      dimensions: dimensions || undefined,
-      mainImageUrl: previewMain || existingData?.mainImageUrl || "",
-      otherImageUrls: previewOthers.length > 0 ? previewOthers : existingData?.otherImageUrls || [],
-      createdAt: existingData?.createdAt || new Date().toISOString().split('T')[0],
-      updatedAt: mode === "edit" ? new Date().toISOString().split('T')[0] : undefined,
-      ...existingData, // Preserve other existing fields
-    };
+    const productData: any = {};
+
+    if (mode === "add") {
+      // For add mode, include all required fields
+      productData.name = name;
+      productData.description = description;
+      productData.price = Number(price);
+      if (priceAfterDiscount) productData.priceAfterDiscount = Number(priceAfterDiscount);
+      productData.quantity = Number(quantity);
+      productData.colors = colors.split(",").map((c) => c.trim()).filter(c => c.length > 0);
+      productData.category = category;
+      if (subcategory) productData.subCategory = subcategory;
+      if (brand) productData.brand = brand;
+      if (mainImage) productData.mainImage = mainImage;
+      if (otherImages.length > 0) productData.images = otherImages;
+    } else {
+      // For edit mode, only include changed fields
+      if (hasFieldChanged('name', name)) {
+        productData.name = name;
+      }
+      if (hasFieldChanged('description', description)) {
+        productData.description = description;
+      }
+      if (hasFieldChanged('price', price)) {
+        productData.price = Number(price);
+      }
+      if (hasFieldChanged('priceAfterDiscount', priceAfterDiscount)) {
+        if (priceAfterDiscount) {
+          productData.priceAfterDiscount = Number(priceAfterDiscount);
+        } else {
+          // Handle case where discount price is being removed
+          productData.priceAfterDiscount = undefined;
+        }
+      }
+      if (hasFieldChanged('quantity', quantity)) {
+        productData.quantity = Number(quantity);
+      }
+      if (hasFieldChanged('colors', colors)) {
+        productData.colors = colors.split(",").map((c) => c.trim()).filter(c => c.length > 0);
+      }
+      if (hasFieldChanged('category', category)) {
+        productData.category = category;
+      }
+
+    // FIXED: Handle subcategory changes properly
+// If category changed, always include subcategory in update (even if empty)
+// OR if subcategory value itself changed
+if (categoryChanged || hasFieldChanged('subcategory', subcategory)) {
+  if (subcategory && subcategory.trim() !== '') {
+    productData.subCategory = subcategory;
+  } else {
+    // Send empty string which will be converted to null by the API
+    productData.subCategory = '';
+  }
+}
+
+if (hasFieldChanged('brand', brand)) {
+  if (brand && brand.trim() !== '') {
+    productData.brand = brand;
+  } else {
+    // Send empty string which will be converted to null by the API
+    productData.brand = '';
+  }
+}
+
+      
+      // Always include new images if they were selected
+      if (mainImage) {
+        productData.mainImage = mainImage;
+      }
+      if (otherImages.length > 0) {
+        productData.images = otherImages;
+      }
+    }
 
     console.log(`${mode === "edit" ? "Updating" : "Saving new"} product:`, productData);
+    console.log('Changed fields only:', Object.keys(productData));
 
-    onSave?.(productData);
+    onSubmit?.(productData);
 
     if (mode === "add") {
       // For add mode: reset form but keep dialog open
@@ -246,13 +387,26 @@ export function ProductDialog({
   // Dialog close handler
   const handleDialogClose = (newOpen: boolean) => {
     if (!newOpen) {
-      // Reset form when closing
       resetForm();
     }
     setOpen(newOpen);
   };
 
-  // --- Image Handlers ---
+  // ENHANCED: Category change handler
+  const handleCategoryChange = (value: string) => {
+  setCategory(value);
+  
+  // Always reset subcategory when category changes
+  setSubcategory("");
+  
+  if (mode === "edit" && originalValues && value !== originalValues.category) {
+    setCategoryChanged(true);
+  }
+  
+  setErrors((prev) => ({ ...prev, category: undefined }));
+};
+
+  // Image Handlers
   const handleMainFile = (file: File) => {
     setMainImage(file);
     setPreviewMain(URL.createObjectURL(file));
@@ -283,6 +437,11 @@ export function ProductDialog({
     setPreviewOthers((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  // Filter subcategories based on selected category
+  const filteredSubcategories = subcategories.filter(
+    sub => sub.category._id === category
+  );
+
   const dialogContent = (
     <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
@@ -303,18 +462,15 @@ export function ProductDialog({
           <Label>Category</Label>
           <Select 
             value={category} 
-            onValueChange={(value) => {
-              setCategory(value);
-              setSubcategory(""); // Reset subcategory when category changes
-              setErrors((prev) => ({ ...prev, category: undefined }));
-            }}
+            onValueChange={handleCategoryChange}
+            disabled={loading}
           >
             <SelectTrigger className={errors.category ? "border-red-500" : ""}>
-              <SelectValue placeholder="Choose category" />
+              <SelectValue placeholder={loading ? "Loading categories..." : "Choose category"} />
             </SelectTrigger>
             <SelectContent>
-              {dummyCategories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -323,24 +479,22 @@ export function ProductDialog({
 
         {/* Subcategory */}
         <div className="grid gap-2">
-          <Label>Subcategory</Label>
+          <Label>Subcategory <span className="text-muted-foreground text-sm">(Optional)</span></Label>
           <Select 
             value={subcategory} 
             onValueChange={(value) => {
               setSubcategory(value);
               setErrors((prev) => ({ ...prev, subcategory: undefined }));
             }}
-            disabled={!category}
+            disabled={!category || loading}
           >
             <SelectTrigger className={errors.subcategory ? "border-red-500" : ""}>
-              <SelectValue placeholder={category ? "Choose subcategory" : "Select category first"} />
+              <SelectValue placeholder={!category ? "Select category first" : "Choose subcategory (optional)"} />
             </SelectTrigger>
             <SelectContent>
-              {dummySubcategories
-                .filter(sub => sub.categoryId === category)
-                .map((sub) => (
-                  <SelectItem key={sub.id} value={sub.id}>{sub.name}</SelectItem>
-                ))}
+              {filteredSubcategories.map((sub) => (
+                <SelectItem key={sub._id} value={sub._id}>{sub.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.subcategory && <p className="text-sm text-red-600">{errors.subcategory}</p>}
@@ -348,20 +502,21 @@ export function ProductDialog({
 
         {/* Brand */}
         <div className="grid gap-2">
-          <Label>Brand</Label>
+          <Label>Brand <span className="text-muted-foreground text-sm">(Optional)</span></Label>
           <Select 
             value={brand} 
             onValueChange={(value) => {
               setBrand(value);
               setErrors((prev) => ({ ...prev, brand: undefined }));
             }}
+            disabled={loading}
           >
             <SelectTrigger className={errors.brand ? "border-red-500" : ""}>
-              <SelectValue placeholder="Choose brand" />
+              <SelectValue placeholder={loading ? "Loading brands..." : "Choose brand (optional)"} />
             </SelectTrigger>
             <SelectContent>
-              {dummyBrands.map((br) => (
-                <SelectItem key={br.id} value={br.id}>{br.name}</SelectItem>
+              {brands.map((br) => (
+                <SelectItem key={br._id} value={br._id}>{br.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -403,7 +558,7 @@ export function ProductDialog({
           {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
         </div>
 
-        {/* Price & Quantity & Status */}
+        {/* Price, Discount Price & Quantity */}
         <div className="grid grid-cols-3 gap-4">
           <div className="grid gap-2">
             <Label>Price ($)</Label>
@@ -424,6 +579,17 @@ export function ProductDialog({
             {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
           </div>
           <div className="grid gap-2">
+            <Label>Discount Price ($) <span className="text-muted-foreground text-sm">(Optional)</span></Label>
+            <Input
+              type="number"
+              placeholder="79.99"
+              value={priceAfterDiscount}
+              onChange={(e) => setPriceAfterDiscount(e.target.value)}
+              step="0.01"
+              min="0"
+            />
+          </div>
+          <div className="grid gap-2">
             <Label>Quantity</Label>
             <Input
               type="number"
@@ -439,19 +605,6 @@ export function ProductDialog({
               min="0"
             />
             {errors.quantity && <p className="text-sm text-red-600">{errors.quantity}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label>Status</Label>
-            <Select value={status} onValueChange={(value: "active" | "inactive" | "draft") => setStatus(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
@@ -470,37 +623,6 @@ export function ProductDialog({
             className={errors.colors ? "border-red-500" : ""}
           />
           {errors.colors && <p className="text-sm text-red-600">{errors.colors}</p>}
-        </div>
-
-        {/* Additional Fields */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="grid gap-2">
-            <Label>SKU <span className="text-muted-foreground text-sm">(Optional)</span></Label>
-            <Input
-              placeholder="Auto-generated if empty"
-              value={sku}
-              onChange={(e) => setSku(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Weight (kg) <span className="text-muted-foreground text-sm">(Optional)</span></Label>
-            <Input
-              type="number"
-              placeholder="0.5"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              step="0.01"
-              min="0"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Dimensions <span className="text-muted-foreground text-sm">(Optional)</span></Label>
-            <Input
-              placeholder="L x W x H (cm)"
-              value={dimensions}
-              onChange={(e) => setDimensions(e.target.value)}
-            />
-          </div>
         </div>
 
         {/* Main Image Upload */}
@@ -658,9 +780,9 @@ export function ProductDialog({
       </div>
 
       <DialogFooter>
-        <Button onClick={handleSave}>
+        <Button onClick={handleSave} disabled={isSubmitting}>
           <IconPhoto className="mr-2 h-4 w-4" />
-          {mode === "edit" ? "Update Product" : "Save Product"}
+          {isSubmitting ? (mode === "edit" ? "Updating..." : "Saving...") : (mode === "edit" ? "Update Product" : "Save Product")}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -696,13 +818,30 @@ export function AddProductDialog() {
 
 // Export a function to create edit dialogs for the data table
 // eslint-disable-next-line react-refresh/only-export-components
-export function createEditProductDialog(rowData: Product, onSave: (updatedData: Product) => void) {
+export function createEditProductDialog(
+  rowData: Product, 
+  onSave: (updatedData: {
+    name?: string;
+    description?: string;
+    price?: number;
+    priceAfterDiscount?: number;
+    mainImage?: File;
+    images?: File[];
+    colors?: string[];
+    quantity?: number;
+    category?: string;
+    subCategory?: string;
+    brand?: string;
+  }) => void,
+  isSubmitting: boolean = false
+) {
   return (
     <ProductDialog 
       mode="edit" 
       existingData={rowData} 
-      onSave={onSave}
-      // Don't set open=true here, let the component manage its own state
+      onSubmit={onSave}
+      isSubmitting={isSubmitting}
+      onOpenChange={() => {}}
     />
   );
 }

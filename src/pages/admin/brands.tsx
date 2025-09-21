@@ -1,98 +1,41 @@
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Badge } from "../../components/ui/badge";
+import { toast } from "sonner";
+import {
+  BrandDialog,
+  createEditBrandDialog,
+} from "../../components/admin/global/BrandDialog";
+import {
+  DataTable,
+  type ServerQueryParams,
+} from "../../components/admin/global/data-table";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "../../components/ui/avatar";
-import { toast } from "sonner";
-import { BrandDialog, createEditBrandDialog } from "../../components/admin/global/BrandDialog";
-import { DataTable } from "../../components/admin/global/data-table";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  fetchBrands,
+  createBrand,
+  updateBrand,
+  deleteBrand,
+  deleteManyBrands,
+  clearError,
+  setQueryParams,
+  type CreateBrandData,
+  type UpdateBrandData,
+} from "../../features/brands/brandsSlice";
 
-// Define the Brand entity type
+// Define the Brand entity type to match backend response
 export interface Brand {
-  id: number;
+  _id: string;
   name: string;
-  description: string;
-  logo?: string;
-  website?: string;
-  status: "active" | "inactive";
-  productCount: number;
+  slug: string;
+  image?: string;
   createdAt: string;
+  productCount?: number;
 }
-
-// Sample data - in a real app, this would come from your API
-const brandsData: Brand[] = [
-  {
-    id: 1,
-    name: "Apple",
-    description: "Consumer electronics and technology company",
-    logo: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=40&h=40&fit=crop&crop=entropy",
-    website: "https://apple.com",
-    status: "active",
-    productCount: 89,
-    createdAt: "2024-01-10",
-  },
-  {
-    id: 2,
-    name: "Samsung",
-    description: "Electronics and home appliances manufacturer",
-    logo: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=40&h=40&fit=crop&crop=entropy",
-    website: "https://samsung.com",
-    status: "active",
-    productCount: 156,
-    createdAt: "2024-01-12",
-  },
-  {
-    id: 3,
-    name: "Nike",
-    description: "Athletic footwear and apparel",
-    logo: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=40&h=40&fit=crop&crop=entropy",
-    website: "https://nike.com",
-    status: "active",
-    productCount: 234,
-    createdAt: "2024-01-15",
-  },
-  {
-    id: 4,
-    name: "Adidas",
-    description: "Sports clothing and accessories",
-    logo: "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=40&h=40&fit=crop&crop=entropy",
-    website: "https://adidas.com",
-    status: "active",
-    productCount: 187,
-    createdAt: "2024-01-18",
-  },
-  {
-    id: 5,
-    name: "Sony",
-    description: "Consumer and professional electronics",
-    logo: "https://images.unsplash.com/photo-1493020258366-be3ead61c638?w=40&h=40&fit=crop&crop=entropy",
-    website: "https://sony.com",
-    status: "inactive",
-    productCount: 45,
-    createdAt: "2024-01-20",
-  },
-  {
-    id: 6,
-    name: "Microsoft",
-    description: "Software, hardware, and cloud services",
-    website: "https://microsoft.com",
-    status: "active",
-    productCount: 67,
-    createdAt: "2024-01-22",
-  },
-  {
-    id: 7,
-    name: "Dell",
-    description: "Computer hardware and technology solutions",
-    website: "https://dell.com",
-    status: "active",
-    productCount: 123,
-    createdAt: "2024-01-25",
-  },
-];
 
 // Define columns specific to Brands
 const brandsColumns: ColumnDef<Brand>[] = [
@@ -103,19 +46,14 @@ const brandsColumns: ColumnDef<Brand>[] = [
       const brand = row.original;
       return (
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={brand.logo} alt={brand.name} />
-            <AvatarFallback className="text-xs">
+          <Avatar className="h-10 w-10 rounded-md">
+            <AvatarImage src={brand.image} alt={brand.name} />
+            <AvatarFallback className="text-xs rounded-md">
               {brand.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
             <div className="font-medium">{brand.name}</div>
-            {brand.website && (
-              <div className="text-xs text-muted-foreground">
-                {brand.website.replace("https://", "")}
-              </div>
-            )}
           </div>
         </div>
       );
@@ -123,35 +61,12 @@ const brandsColumns: ColumnDef<Brand>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => {
-      return (
-        <div className="max-w-[250px] truncate text-muted-foreground">
-          {row.getValue("description")}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      return (
-        <Badge variant={status === "active" ? "default" : "secondary"}>
-          {status}
-        </Badge>
-      );
-    },
-  },
-  {
     accessorKey: "productCount",
     header: "Products",
     cell: ({ row }) => {
-      const count = row.getValue("productCount") as number;
+      const count = row.original.productCount || 0;
       return (
-        <div className="text-center font-medium">{count.toLocaleString()}</div>
+        <div className="text-start font-medium">{count.toLocaleString()}</div>
       );
     },
   },
@@ -167,48 +82,186 @@ const brandsColumns: ColumnDef<Brand>[] = [
   },
 ];
 
+// Advanced filter configuration for brands
+const advancedFilterConfig = {
+  numeric: {
+    productCount: {
+      label: "Product Count",
+      placeholder: "Enter number of products",
+    },
+  },
+  date: {
+    createdAt: {
+      label: "Created Date",
+    },
+  },
+};
+
 export default function Brands() {
-  const [brands, setBrands] = React.useState(brandsData);
+  const dispatch = useAppDispatch();
+  const {
+    brands,
+    pagination,
+    loading,
+    error,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    isDeletingMany,
+    currentQueryParams,
+  } = useAppSelector((state) => state.brands);
 
-  // Handle adding new Brand
-  const handleAddBrand = (newBrand: Brand) => {
-    setBrands((prev) => [...prev, newBrand]);
-    console.log("Added new Brand:", newBrand);
+  // Load initial data on component mount
+  React.useEffect(() => {
+    // Load brands with default parameters on mount
+    const initialParams: ServerQueryParams = {
+      page: 1,
+      limit: 10,
+    };
+    dispatch(fetchBrands(initialParams));
+  }, [dispatch]);
+
+  // Handle errors
+  React.useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+  // Handle query parameter changes from the DataTable
+  const handleQueryParamsChange = React.useCallback(
+    (params: ServerQueryParams) => {
+      // Store the parameters in Redux state for future reference
+      dispatch(setQueryParams(params));
+      // Fetch data with new parameters
+      dispatch(fetchBrands(params));
+    },
+    [dispatch]
+  );
+
+  // Handle adding new brand
+  const handleAddBrand = async (brandData: {
+    name: string;
+    image?: File;
+  }) => {
+    try {
+      await dispatch(
+        createBrand(brandData as CreateBrandData)
+      ).unwrap();
+      toast.success("Brand added successfully");
+      // Note: createBrand thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to add brand:", error);
+      // Error toast is handled by the error useEffect above
+    }
   };
 
-  // Handle updating existing Brand
-  const handleUpdateBrand = (updatedBrand: Brand) => {
-    setBrands((prev) =>
-      prev.map((cat) => (cat.id === updatedBrand.id ? updatedBrand : cat))
-    );
-    console.log("Updated Brand:", updatedBrand);
+  // Handle updating existing brand
+  const handleUpdateBrand = async (
+    id: string,
+    brandData: { name?: string; image?: File }
+  ) => {
+    try {
+      await dispatch(
+        updateBrand({ id, brandData: brandData as UpdateBrandData })
+      ).unwrap();
+      toast.success("Brand updated successfully");
+      // Note: updateBrand thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to update brand:", error);
+      // Error toast is handled by the error useEffect above
+    }
   };
 
-  const handleDataChange = (newData: Brand[]) => {
-    setBrands(newData);
-    // Here you would typically sync with your backend
-    toast.success("Brands reordered successfully");
+  // Handle single brand delete
+  const handleDeleteBrand = async (id: string) => {
+    try {
+      await dispatch(deleteBrand(id)).unwrap();
+      toast.success("Brand deleted successfully");
+      // Note: deleteBrand thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete brand:", error);
+      // Error toast is handled by the error useEffect above
+    }
+  };
+
+  // Handle bulk brand delete
+  const handleBulkDeleteBrands = async (ids: string[]) => {
+    try {
+      await dispatch(deleteManyBrands(ids)).unwrap();
+      toast.success(
+        `${ids.length} ${
+          ids.length === 1 ? "brand" : "brands"
+        } deleted successfully`
+      );
+      // Note: deleteManyBrands thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete brands:", error);
+      // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
+      toast.error("Failed to delete selected brands");
+    }
   };
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <DataTable
-            data={brands}
+          <div className="px-4 lg:px-6">
+            <h1 className="text-2xl font-semibold">Brands</h1>
+            <p className="text-muted-foreground">
+              Manage your product brands and their details.
+            </p>
+          </div>
+
+          <DataTable<Brand>
+            // Server-side specific props
+            serverSide={true}
+            data={brands || []}
+            pagination={pagination}
+            loading={loading}
+            onQueryParamsChange={handleQueryParamsChange}
+            currentQueryParams={currentQueryParams}
+            error={error}
+            // Table configuration
             columns={brandsColumns}
             dialogComponent={
-              <BrandDialog mode="add" onSave={handleAddBrand} />
+              <BrandDialog
+                mode="add"
+                onSave={handleAddBrand}
+                isLoading={isCreating}
+              />
             }
-            editDialogComponent={createEditBrandDialog}
-            onRowUpdate={handleUpdateBrand}
-            enableDragAndDrop={true}
+            editDialogComponent={(rowData: Brand) =>
+              createEditBrandDialog(
+                rowData,
+                (updatedData) => {
+                  // Handle the brand update by extracting ID and calling update handler
+                  const id = rowData._id;
+                  const {
+                    _id,
+                    createdAt,
+                    productCount,
+                    ...brandUpdateData
+                  } = updatedData;
+                  handleUpdateBrand(id, brandUpdateData);
+                },
+                isUpdating // Pass the loading state
+              )
+            }
+            // Row action handlers
+            onRowDelete={handleDeleteBrand}
+            isDeleting={isDeleting}
+            onBulkDelete={handleBulkDeleteBrands}
+            isBulkDeleting={isDeletingMany}
+            // Table features configuration
             enableRowSelection={true}
             enableGlobalFilter={true}
-            enableColumnFilter={true}
-            filterColumn="status"
-            filterPlaceholder="Filter by status..."
-            onDataChange={handleDataChange}
+            enableColumnFilter={false} // Disable simple column filter since we're using search
+            enableAdvancedFilter={true}
+            advancedFilterConfig={advancedFilterConfig}
+            enableDragAndDrop={true} // Enable drag and drop for server-side tables
+            // Set page size for initial load
             pageSize={10}
           />
         </div>

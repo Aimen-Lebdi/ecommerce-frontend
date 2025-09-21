@@ -7,128 +7,54 @@ import {
   AvatarImage,
 } from "../../components/ui/avatar";
 import { toast } from "sonner";
-import { DataTable } from "../../components/admin/global/data-table";
+import {
+  DataTable,
+  type ServerQueryParams,
+} from "../../components/admin/global/data-table";
 import { createEditProductDialog, ProductDialog } from "../../components/admin/global/ProductDialog";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  fetchProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  deleteManyProducts,
+  clearError,
+  setQueryParams,
+  type CreateProductData,
+  type UpdateProductData,
+} from "../../features/products/productsSlice";
 
-// Define the Product entity type
+// Define the Product entity type to match backend response
 export interface Product {
-  id: number;
+  _id: string;
   name: string;
-  sku: string;
-  category: string;
-  brand: string;
+  slug: string;
+  description: string;
   price: number;
-  stock: number;
-  status: "in-stock" | "low-stock" | "out-of-stock";
-  image?: string;
+  priceAfterDiscount?: number;
+  mainImage: string;
+  images?: string[];
+  colors?: string[];
+  quantity: number;
+  sold: number;
+  category: {
+    _id: string;
+    name: string;
+  };
+  subCategory?: {
+    _id: string;
+    name: string;
+  };
+  brand?: {
+    _id: string;
+    name: string;
+  };
+  rating?: number;
+  ratingsQuantity: number;
   createdAt: string;
+  updatedAt?: string;
 }
-
-// Sample data - in a real app, this would come from your API
-const productsData: Product[] = [
-  {
-    id: 1,
-    name: "iPhone 15 Pro Max",
-    sku: "APL-IP15PM-256",
-    category: "Smartphones",
-    brand: "Apple",
-    price: 1199.99,
-    stock: 45,
-    status: "in-stock",
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: 2,
-    name: "Samsung Galaxy S24 Ultra",
-    sku: "SAM-GS24U-512",
-    category: "Smartphones",
-    brand: "Samsung",
-    price: 1299.99,
-    stock: 23,
-    status: "in-stock",
-    image:
-      "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-18",
-  },
-  {
-    id: 3,
-    name: 'MacBook Pro 16"',
-    sku: "APL-MBP16-1TB",
-    category: "Laptops",
-    brand: "Apple",
-    price: 2499.99,
-    stock: 12,
-    status: "in-stock",
-    image:
-      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-20",
-  },
-  {
-    id: 4,
-    name: "Dell XPS 13",
-    sku: "DEL-XPS13-512",
-    category: "Laptops",
-    brand: "Dell",
-    price: 1299.99,
-    stock: 8,
-    status: "low-stock",
-    image:
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-22",
-  },
-  {
-    id: 5,
-    name: "Nike Air Max 270",
-    sku: "NK-AM270-BLK",
-    category: "Footwear",
-    brand: "Nike",
-    price: 149.99,
-    stock: 0,
-    status: "out-of-stock",
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-25",
-  },
-  {
-    id: 6,
-    name: "Sony WH-1000XM5",
-    sku: "SNY-WH1000XM5",
-    category: "Audio",
-    brand: "Sony",
-    price: 399.99,
-    stock: 34,
-    status: "in-stock",
-    image:
-      "https://images.unsplash.com/photo-1493020258366-be3ead61c638?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-01-28",
-  },
-  {
-    id: 7,
-    name: "Adidas Ultraboost 22",
-    sku: "ADI-UB22-WHT",
-    category: "Footwear",
-    brand: "Adidas",
-    price: 189.99,
-    stock: 5,
-    status: "low-stock",
-    image:
-      "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=40&h=40&fit=crop&crop=entropy",
-    createdAt: "2024-02-01",
-  },
-  {
-    id: 8,
-    name: "Microsoft Surface Pro 9",
-    sku: "MST-SP9-256",
-    category: "Tablets",
-    brand: "Microsoft",
-    price: 999.99,
-    stock: 18,
-    status: "in-stock",
-    createdAt: "2024-02-05",
-  },
-];
 
 // Define columns specific to Products
 const productsColumns: ColumnDef<Product>[] = [
@@ -138,18 +64,21 @@ const productsColumns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const product = row.original;
       return (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 rounded-md">
-            <AvatarImage src={product.image} alt={product.name} />
-            <AvatarFallback className="text-xs rounded-md">
+        <div className="flex items-center space-x-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage
+              src={product.mainImage}
+              alt={product.name}
+            />
+            <AvatarFallback>
               {product.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <div className="font-medium">{product.name}</div>
-            <div className="text-xs text-muted-foreground font-mono">
-              SKU: {product.sku}
-            </div>
+          <div className="space-y-1">
+            <p className="font-medium">{product.name}</p>
+            <p className="text-sm text-muted-foreground">
+              SKU: {product.slug}
+            </p>
           </div>
         </div>
       );
@@ -160,8 +89,17 @@ const productsColumns: ColumnDef<Product>[] = [
     accessorKey: "category",
     header: "Category",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground">
-        {row.getValue("category")}
+      <Badge variant="secondary">
+        {row.original.category?.name || "N/A"}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "subcategory",
+    header: "SubCategory",
+    cell: ({ row }) => (
+      <Badge variant="outline">
+        {row.original.subCategory?.name || "N/A"}
       </Badge>
     ),
   },
@@ -169,7 +107,10 @@ const productsColumns: ColumnDef<Product>[] = [
     accessorKey: "brand",
     header: "Brand",
     cell: ({ row }) => (
-      <div className="font-medium text-sm">{row.getValue("brand")}</div>
+      
+      <Badge variant="outline">
+        {row.original.brand?.name || "N/A"}
+      </Badge>
     ),
   },
   {
@@ -177,43 +118,34 @@ const productsColumns: ColumnDef<Product>[] = [
     header: "Price",
     cell: ({ row }) => {
       const price = row.getValue("price") as number;
-      return <div className="text-right font-medium">${price.toFixed(2)}</div>;
+      return `$${price.toFixed(2)}`;
     },
   },
   {
-    accessorKey: "stock",
-    header: "Stock",
+    accessorKey: "sold",
+    header: "sold",
     cell: ({ row }) => {
-      const stock = row.getValue("stock") as number;
-      const status = row.original.status;
+      const sold = row.original.sold;
       return (
-        <div
-          className={`text-center font-medium ${
-            status === "out-of-stock"
-              ? "text-red-600"
-              : status === "low-stock"
-              ? "text-orange-600"
-              : "text-green-600"
-          }`}
-        >
-          {stock}
+        <div className="text-center font-medium">
+          {sold}
         </div>
       );
     },
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "quantity",
+    header: "Stock",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      const variants = {
-        "in-stock": "default",
-        "low-stock": "destructive",
-        "out-of-stock": "secondary",
-      } as const;
+      const stock = row.original.quantity;
+      const getStatusColor = (stock: number) => {
+        if (stock === 0) return "destructive";
+        if (stock < 10) return "secondary";
+        return "default";
+      };
       return (
-        <Badge variant={variants[status as keyof typeof variants]}>
-          {status.replace("-", " ")}
+        <Badge variant={getStatusColor(stock)}>
+          {stock}
         </Badge>
       );
     },
@@ -224,20 +156,22 @@ const productsColumns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
-        <div className="text-muted-foreground">{date.toLocaleDateString()}</div>
+        <div className="text-sm">
+          {date.toLocaleDateString()}
+        </div>
       );
     },
   },
 ];
 
-// Advanced filter configuration for categories
+// Advanced filter configuration for products
 const advancedFilterConfig = {
   numeric: {
     price: {
       label: "Price",
       placeholder: "Enter product price",
     },
-    stock: {
+    quantity: {
       label: "Stock",
       placeholder: "Enter product stock",
     },
@@ -250,50 +184,186 @@ const advancedFilterConfig = {
 };
 
 export default function Products() {
-  const [products, setProducts] = React.useState(productsData);
+  const dispatch = useAppDispatch();
+  const {
+    products,
+    pagination,
+    loading,
+    error,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    isDeletingMany,
+    currentQueryParams,
+  } = useAppSelector((state) => state.products);
 
-  // Handle adding new Product
-  const handleAddProduct = (newProduct: Product) => {
-    setProducts((prev) => [...prev, newProduct]);
-    console.log("Added new Product:", newProduct);
+  // Load initial data on component mount
+  React.useEffect(() => {
+    // Load products with default parameters on mount
+    const initialParams: ServerQueryParams = {
+      page: 1,
+      limit: 10,
+    };
+    dispatch(fetchProducts(initialParams));
+  }, [dispatch]);
+
+  // Handle errors
+  React.useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+  // Handle query parameter changes from the DataTable
+  const handleQueryParamsChange = React.useCallback(
+    (params: ServerQueryParams) => {
+      // Store the parameters in Redux state for future reference
+      dispatch(setQueryParams(params));
+      // Fetch data with new parameters
+      dispatch(fetchProducts(params));
+    },
+    [dispatch]
+  );
+
+  // Handle adding new product
+  const handleAddProduct = async (productData: {
+    name: string;
+    description: string;
+    price: number;
+    priceAfterDiscount?: number;
+    mainImage?: File;
+    images?: File[];
+    colors?: string[];
+    quantity: number;
+    category: string;
+    subCategories?: string[];
+    brand?: string;
+  }) => {
+    try {
+      await dispatch(
+        createProduct(productData as CreateProductData)
+      ).unwrap();
+      toast.success("Product added successfully");
+      // Note: createProduct thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to add product:", error);
+      // Error toast is handled by the error useEffect above
+    }
   };
 
-  // Handle updating existing Product
-  const handleUpdateProduct = (updatedProduct: Product) => {
-    setProducts((prev) =>
-      prev.map((cat) => (cat.id === updatedProduct.id ? updatedProduct : cat))
-    );
-    console.log("Updated Product:", updatedProduct);
+  // Handle updating existing product
+  const handleUpdateProduct = async (
+    id: string,
+    productData: {
+      name?: string;
+      description?: string;
+      price?: number;
+      priceAfterDiscount?: number;
+      mainImage?: File;
+      images?: File[];
+      colors?: string[];
+      quantity?: number;
+      category?: string;
+      subCategory?: string;
+      brand?: string;
+    }
+  ) => {
+    try {
+      await dispatch(
+        updateProduct({ id, productData: productData as UpdateProductData })
+      ).unwrap();
+      toast.success("Product updated successfully");
+      // Note: updateProduct thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to update product:", error);
+      // Error toast is handled by the error useEffect above
+    }
   };
 
-  const handleDataChange = (newData: Product[]) => {
-    setProducts(newData);
-    // Here you would typically sync with your backend
-    toast.success("Products reordered successfully");
+  // Handle single product delete
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      await dispatch(deleteProduct(id)).unwrap();
+      toast.success("Product deleted successfully");
+      // Note: deleteProduct thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+      // Error toast is handled by the error useEffect above
+    }
+  };
+
+  // Handle bulk product delete
+  const handleBulkDeleteProducts = async (ids: string[]) => {
+    try {
+      await dispatch(deleteManyProducts(ids)).unwrap();
+      toast.success(
+        `${ids.length} ${
+          ids.length === 1 ? "product" : "products"
+        } deleted successfully`
+      );
+      // Note: deleteManyProducts thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete products:", error);
+      // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
+      toast.error("Failed to delete selected products");
+    }
   };
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <DataTable
-            data={products}
+          <div className="px-4 lg:px-6">
+            <h1 className="text-2xl font-semibold">Products</h1>
+            <p className="text-muted-foreground">
+              Manage your products and their details.
+            </p>
+          </div>
+
+          <DataTable<Product>
+            serverSide={true}
+            data={products || []}
+            pagination={pagination}
+            loading={loading}
+            onQueryParamsChange={handleQueryParamsChange}
+            currentQueryParams={currentQueryParams}
+            error={error}
             columns={productsColumns}
             dialogComponent={
-              <ProductDialog mode="add" onSave={handleAddProduct} />
+              <ProductDialog onSubmit={handleAddProduct} isSubmitting={isCreating} />
             }
-            editDialogComponent={createEditProductDialog}
-            onRowUpdate={handleUpdateProduct}
-            enableDragAndDrop={true}
+            editDialogComponent={(rowData: Product) =>
+              createEditProductDialog(
+                rowData,
+                (updatedData) => {
+                  const id = rowData._id;
+                  // const {
+                  //   _id,
+                  //   slug,
+                  //   createdAt,
+                  //   updatedAt,
+                  //   sold,
+                  //   rating,
+                  //   ratingsQuantity,
+                  //   ...productUpdateData
+                  // } = updatedData;
+                  handleUpdateProduct(id, updatedData);
+                },
+                isUpdating
+              )
+            }
+            onRowDelete={handleDeleteProduct}
+            isDeleting={isDeleting}
+            onBulkDelete={handleBulkDeleteProducts}
+            isBulkDeleting={isDeletingMany}
             enableRowSelection={true}
             enableGlobalFilter={true}
-            enableColumnFilter={true}
+            enableColumnFilter={false}
             enableAdvancedFilter={true}
             advancedFilterConfig={advancedFilterConfig}
-            filterColumn="category"
-            filterPlaceholder="Filter by category..."
-            onDataChange={handleDataChange}
-            pageSize={12}
+            enableDragAndDrop={false}
+            pageSize={10}
           />
         </div>
       </div>

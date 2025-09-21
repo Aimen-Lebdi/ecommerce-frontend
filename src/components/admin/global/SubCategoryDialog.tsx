@@ -11,7 +11,6 @@ import {
 } from "../../ui/dialog";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
-import { Textarea } from "../../ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,59 +20,57 @@ import {
 } from "../../ui/select";
 import {
   IconPlus,
-  IconPhoto,
   IconCloudUpload,
   IconX,
 } from "@tabler/icons-react";
-
-// Dummy data for categories - in a real app, this would come from your API
-const dummyCategories = [
-  { id: 1, name: "Electronics" },
-  { id: 2, name: "Clothing" },
-  { id: 3, name: "Home & Garden" },
-  { id: 4, name: "Books" },
-  { id: 5, name: "Sports & Outdoors" },
-];
+import { useAppSelector, useAppDispatch } from "../../../app/hooks";
+import { fetchCategories } from "../../../features/categories/categoriesSlice";
 
 type Errors = {
   category?: string;
   name?: string;
-  description?: string;
   image?: string;
 };
 
-interface Subcategory {
-  id: number;
+interface SubCategory {
+  _id: string;
   name: string;
-  description: string;
-  categoryName: string;
-  categoryId: number;
-  status: "active" | "inactive";
-  productCount: number;
+  slug: string;
   image?: string;
+  category: {
+    _id: string;
+    name: string;
+  } | string;
+  productCount: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 interface SubCategoryDialogProps {
   mode?: "add" | "edit";
-  existingData?: Subcategory;
+  existingData?: SubCategory;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSave?: (data: Subcategory) => void;
+  onSave?: (data: { name?: string; category?: string; image?: File }) => void;
+  isLoading?: boolean;
 }
 
-export function SubCategoryDialog({ 
-  mode = "add", 
-  existingData, 
-  open: controlledOpen, 
-  onOpenChange, 
-  onSave 
+export function SubCategoryDialog({
+  mode = "add",
+  existingData,
+  open: controlledOpen,
+  onOpenChange,
+  onSave,
+  isLoading = false,
 }: SubCategoryDialogProps) {
+  const dispatch = useAppDispatch();
+  const {categories} = useAppSelector((state) => state.categories);
+  
   const [internalOpen, setInternalOpen] = React.useState(false);
-  const [selectedCategory, setSelectedCategory] = React.useState<number | "">(""); 
+  const [selectedCategory, setSelectedCategory] = React.useState<string>("");
+  const [originalCategory, setOriginalCategory] = React.useState<string>("");
   const [subCategoryName, setSubCategoryName] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [status, setStatus] = React.useState<"active" | "inactive">("active");
+  const [originalName, setOriginalName] = React.useState("");
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -83,22 +80,35 @@ export function SubCategoryDialog({
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
 
+  // Load categories when dialog opens
+  React.useEffect(() => {
+    if (open && categories.length === 0) {
+      dispatch(fetchCategories({ limit: 100 })); // Load all categories for dropdown
+    }
+  }, [open, categories.length, dispatch]);
+
   // Initialize form with existing data in edit mode
   React.useEffect(() => {
     if (mode === "edit" && existingData && open) {
-      setSelectedCategory(existingData.categoryId || "");
       setSubCategoryName(existingData.name || "");
-      setDescription(existingData.description || "");
-      setStatus(existingData.status || "active");
+      setOriginalName(existingData.name || "");
+      
+      // Handle category (could be populated object or string ID)
+      const categoryId = typeof existingData.category === 'object' 
+        ? existingData.category._id 
+        : existingData.category;
+      setSelectedCategory(categoryId);
+      setOriginalCategory(categoryId);
+      
       if (existingData.image) {
         setPreview(existingData.image);
       }
     } else if (mode === "add" && open) {
       // Reset form for add mode
       setSelectedCategory("");
+      setOriginalCategory("");
       setSubCategoryName("");
-      setDescription("");
-      setStatus("active");
+      setOriginalName("");
       setImage(null);
       setPreview(null);
     }
@@ -108,43 +118,59 @@ export function SubCategoryDialog({
     const e: Errors = {};
     if (!selectedCategory) e.category = "Category is required";
     if (!subCategoryName.trim()) e.name = "Subcategory name is required";
-    if (!description.trim()) e.description = "Description is required";
-    if (mode === "add" && !image) e.image = "Image is required";
-    if (mode === "edit" && !image && !preview) e.image = "Image is required";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const resetForm = () => {
     setSelectedCategory("");
+    setOriginalCategory("");
     setSubCategoryName("");
-    setDescription("");
-    setStatus("active");
+    setOriginalName("");
     setImage(null);
     setPreview(null);
     setErrors({});
   };
 
+  // Function to detect changes and prepare payload
+  const prepareUpdatePayload = () => {
+    const payload: { name?: string; category?: string; image?: File } = {};
+    
+    // Only include name if it changed
+    if (mode === "add" || subCategoryName !== originalName) {
+      payload.name = subCategoryName;
+    }
+    
+    // Only include category if it changed
+    if (mode === "add" || selectedCategory !== originalCategory) {
+      payload.category = selectedCategory;
+    }
+    
+    // Only include image if a new file was selected
+    if (image instanceof File) {
+      payload.image = image;
+    }
+    
+    return payload;
+  };
+
   const handleSave = () => {
     if (!validate()) return;
 
-    // Find the selected category name
-    const selectedCategoryData = dummyCategories.find(cat => cat.id === selectedCategory);
-    const categoryName = selectedCategoryData?.name || "";
+    // Get only changed fields
+    const subCategoryData = prepareUpdatePayload();
+    
+    // Don't proceed if nothing changed in edit mode
+    if (mode === "edit" && Object.keys(subCategoryData).length === 0) {
+      console.log("No changes detected");
+      setOpen(false);
+      return;
+    }
 
-    const subCategoryData: Subcategory = {
-      id: existingData?.id || Date.now(),
-      name: subCategoryName,
-      description: description,
-      categoryName: categoryName,
-      categoryId: selectedCategory as number,
-      status: status,
-      productCount: existingData?.productCount || 0, // Default to 0 for new subcategories
-      image: preview || existingData?.image || "",
-      createdAt: existingData?.createdAt || new Date().toISOString().split('T')[0],
-    };
-
-    console.log(`${mode === "edit" ? "Updating" : "Saving new"} subcategory:`, subCategoryData);
+    console.log(
+      `${mode === "edit" ? "Updating" : "Saving new"} subcategory:`,
+      subCategoryData
+    );
 
     onSave?.(subCategoryData);
 
@@ -183,6 +209,13 @@ export function SubCategoryDialog({
     setOpen(newOpen);
   };
 
+  // Update the save button to show loading state
+  const saveButtonContent = isLoading ? (
+    mode === "edit" ? "Updating..." : "Saving..."
+  ) : (
+    mode === "edit" ? "Update" : "Save"
+  );
+
   const dialogContent = (
     <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
@@ -190,9 +223,9 @@ export function SubCategoryDialog({
           {mode === "edit" ? "Edit Subcategory" : "Add New Subcategory"}
         </DialogTitle>
         <DialogDescription>
-          {mode === "edit" 
-            ? "Update the subcategory details here." 
-            : "Choose a parent category and enter the subcategory details here."
+          {mode === "edit"
+            ? "Update the subcategory details below."
+            : "Choose a parent category and enter the subcategory details below."
           }
         </DialogDescription>
       </DialogHeader>
@@ -202,9 +235,9 @@ export function SubCategoryDialog({
         <div className="grid gap-2">
           <Label htmlFor="category">Category</Label>
           <Select
-            value={selectedCategory.toString()}
+            value={selectedCategory}
             onValueChange={(value) => {
-              setSelectedCategory(Number(value));
+              setSelectedCategory(value);
               setErrors((prev) => ({ ...prev, category: undefined }));
             }}
           >
@@ -216,8 +249,8 @@ export function SubCategoryDialog({
               <SelectValue placeholder="Select a parent category" />
             </SelectTrigger>
             <SelectContent>
-              {dummyCategories.map((category) => (
-                <SelectItem key={category.id} value={category.id.toString()}>
+              {categories.map((category) => (
+                <SelectItem key={category._id} value={category._id}>
                   {category.name}
                 </SelectItem>
               ))}
@@ -246,40 +279,6 @@ export function SubCategoryDialog({
           {errors.name && (
             <p className="text-sm text-red-600 mt-1">{errors.name}</p>
           )}
-        </div>
-
-        {/* Description */}
-        <div className="grid gap-2">
-          <Label htmlFor="subcategory-description">Description</Label>
-          <Textarea
-            id="subcategory-description"
-            placeholder="e.g., Portable computers and laptops"
-            value={description}
-            onChange={(e) => {
-              setDescription(e.target.value);
-              if (e.target.value.trim()) {
-                setErrors((prev) => ({ ...prev, description: undefined }));
-              }
-            }}
-            className={errors.description ? "border-red-500" : ""}
-          />
-          {errors.description && (
-            <p className="text-sm text-red-600 mt-1">{errors.description}</p>
-          )}
-        </div>
-
-        {/* Status */}
-        <div className="grid gap-2">
-          <Label htmlFor="subcategory-status">Status</Label>
-          <Select value={status} onValueChange={(value: "active" | "inactive") => setStatus(value)}>
-            <SelectTrigger id="subcategory-status">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Image Upload */}
@@ -362,9 +361,8 @@ export function SubCategoryDialog({
       </div>
 
       <DialogFooter>
-        <Button onClick={handleSave}>
-          <IconPhoto className="mr-2 h-4 w-4" />
-          {mode === "edit" ? "Update" : "Save"}
+        <Button onClick={handleSave} disabled={isLoading}>
+          {saveButtonContent}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -384,7 +382,7 @@ export function SubCategoryDialog({
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <IconPlus className="mr-2 h-4 w-4" />
+          <IconPlus />
           <span className="hidden lg:inline">Add Subcategory</span>
         </Button>
       </DialogTrigger>
@@ -400,13 +398,18 @@ export function AddSubCategoryDialog() {
 
 // Export a function to create edit dialogs for the data table
 // eslint-disable-next-line react-refresh/only-export-components
-export function createEditSubCategoryDialog(rowData: Subcategory, onSave: (updatedData: Subcategory) => void) {
+export function createEditSubCategoryDialog(
+  rowData: SubCategory,
+  onSave: (updatedData: { name?: string; category?: string; image?: File }) => void,
+  isLoading: boolean = false
+) {
   return (
-    <SubCategoryDialog 
-      mode="edit" 
-      existingData={rowData} 
+    <SubCategoryDialog
+      mode="edit"
+      existingData={rowData}
       onSave={onSave}
-      // Don't set open=true here, let the component manage its own state
+      isLoading={isLoading}
+      onOpenChange={() => {}} // Edit dialog closes when clicking outside or X
     />
   );
 }

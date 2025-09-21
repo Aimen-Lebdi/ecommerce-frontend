@@ -1,129 +1,48 @@
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
-
 import { toast } from "sonner";
 import {
   createEditSubCategoryDialog,
   SubCategoryDialog,
 } from "../../components/admin/global/SubCategoryDialog";
-import { DataTable } from "../../components/admin/global/data-table";
+import {
+  DataTable,
+  type ServerQueryParams,
+} from "../../components/admin/global/data-table";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "../../components/ui/avatar";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  fetchSubCategories,
+  createSubCategory,
+  updateSubCategory,
+  deleteSubCategory,
+  deleteManySubCategories,
+  clearError,
+  setQueryParams,
+  type CreateSubCategoryData,
+  type UpdateSubCategoryData,
+} from "../../features/subCategories/subCategoriesSlice";
 
-// Define the Subcategory entity type
-export interface Subcategory {
-  id: number;
+// Define the SubCategory entity type to match backend response
+export interface SubCategory {
+  _id: string;
   name: string;
-  description: string;
-  categoryName: string;
-  categoryId: number;
-  status: "active" | "inactive";
-  productCount: number;
   image?: string;
+  category: {
+    _id: string;
+    name: string;
+  } | string; // 
+  productCount: number;
   createdAt: string;
 }
 
-// Sample data - in a real app, this would come from your API
-const subcategoriesData: Subcategory[] = [
-  {
-    id: 1,
-    name: "Smartphones",
-    description: "Mobile phones and accessories",
-    categoryName: "Electronics",
-    categoryId: 1,
-    status: "active",
-    productCount: 45,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
-    createdAt: "2024-01-16",
-  },
-  {
-    id: 2,
-    name: "Laptops",
-    description: "Portable computers and laptops",
-    categoryName: "Electronics",
-    categoryId: 1,
-    status: "active",
-    productCount: 32,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
-    createdAt: "2024-01-18",
-  },
-  {
-    id: 3,
-    name: "Men's Clothing",
-    description: "Clothing items for men",
-    categoryName: "Clothing",
-    categoryId: 2,
-    status: "active",
-    productCount: 56,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
-    createdAt: "2024-01-22",
-  },
-  {
-    id: 4,
-    name: "Women's Clothing",
-    description: "Clothing items for women",
-    categoryName: "Clothing",
-    categoryId: 2,
-    status: "active",
-    productCount: 33,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
-    createdAt: "2024-01-25",
-  },
-  {
-    id: 5,
-    name: "Garden Tools",
-    description: "Tools for gardening and landscaping",
-    categoryName: "Home & Garden",
-    categoryId: 3,
-    status: "inactive",
-    productCount: 18,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
-    createdAt: "2024-02-02",
-  },
-  {
-    id: 6,
-    name: "Fiction Books",
-    description: "Novels and fictional literature",
-    categoryName: "Books",
-    categoryId: 4,
-    status: "active",
-    productCount: 127,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
-    createdAt: "2024-02-12",
-  },
-  {
-    id: 7,
-    name: "Fitness Equipment",
-    description: "Exercise and fitness gear",
-    categoryName: "Sports & Outdoors",
-    categoryId: 5,
-    status: "active",
-    productCount: 29,
-    image:
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=40&h=40&fit=crop&crop=entropy",
-
-    createdAt: "2024-02-16",
-  },
-];
-
-// Define columns specific to Subcategories
-const subcategoriesColumns: ColumnDef<Subcategory>[] = [
+// Define columns specific to SubCategories
+const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   {
     accessorKey: "name",
     header: "Subcategory",
@@ -146,35 +65,14 @@ const subcategoriesColumns: ColumnDef<Subcategory>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "categoryName",
+    accessorKey: "category",
     header: "Category",
     cell: ({ row }) => {
+      const category = row.original.category;
+      const categoryName = typeof category === 'object' ? category.name : 'Unknown';
       return (
         <Badge variant="outline" className="text-muted-foreground">
-          {row.getValue("categoryName")}
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => {
-      return (
-        <div className="max-w-[200px] truncate text-muted-foreground">
-          {row.getValue("description")}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      return (
-        <Badge variant={status === "active" ? "default" : "secondary"}>
-          {status}
+          {categoryName}
         </Badge>
       );
     },
@@ -183,7 +81,7 @@ const subcategoriesColumns: ColumnDef<Subcategory>[] = [
     accessorKey: "productCount",
     header: "Products",
     cell: ({ row }) => {
-      const count = row.getValue("productCount") as number;
+      const count = row.original.productCount || 0;
       return (
         <div className="text-center font-medium">{count.toLocaleString()}</div>
       );
@@ -201,7 +99,7 @@ const subcategoriesColumns: ColumnDef<Subcategory>[] = [
   },
 ];
 
-// Advanced filter configuration for categories
+// Advanced filter configuration for subcategories
 const advancedFilterConfig = {
   numeric: {
     productCount: {
@@ -216,52 +114,172 @@ const advancedFilterConfig = {
   },
 };
 
-export default function Subcategories() {
-  const [subcategories, setSubcategories] = React.useState(subcategoriesData);
+export default function SubCategories() {
+  const dispatch = useAppDispatch();
+  const {
+    subcategories,
+    pagination,
+    loading,
+    error,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    isDeletingMany,
+    currentQueryParams,
+  } = useAppSelector((state) => state.subCategories);
 
-  // Handle adding new category
-  const handleAddSubcategory = (newSubcategory: Subcategory) => {
-    setSubcategories((prev) => [...prev, newSubcategory]);
-    console.log("Added new Subcategory:", newSubcategory);
+  // Load initial data on component mount
+  React.useEffect(() => {
+    // Load subcategories with default parameters on mount
+    const initialParams: ServerQueryParams = {
+      page: 1,
+      limit: 10,
+    };
+    dispatch(fetchSubCategories(initialParams));
+  }, [dispatch]);
+
+  // Handle errors
+  React.useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+  // Handle query parameter changes from the DataTable
+  const handleQueryParamsChange = React.useCallback(
+    (params: ServerQueryParams) => {
+      // Store the parameters in Redux state for future reference
+      dispatch(setQueryParams(params));
+      // Fetch data with new parameters
+      dispatch(fetchSubCategories(params));
+    },
+    [dispatch]
+  );
+
+  // Handle adding new subcategory
+  const handleAddSubCategory = async (subCategoryData: {
+    name: string;
+    category: string;
+    image?: File;
+  }) => {
+    try {
+      await dispatch(
+        createSubCategory(subCategoryData as CreateSubCategoryData)
+      ).unwrap();
+      toast.success("Subcategory added successfully");
+      // Note: createSubCategory thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to add subcategory:", error);
+      // Error toast is handled by the error useEffect above
+    }
   };
 
-  // Handle updating existing Subcategory
-  const handleUpdateSubcategory = (updatedSubcategory: Subcategory) => {
-    setSubcategories((prev) =>
-      prev.map((cat) =>
-        cat.id === updatedSubcategory.id ? updatedSubcategory : cat
-      )
-    );
-    console.log("Updated Subcategory:", updatedSubcategory);
+  // Handle updating existing subcategory
+  const handleUpdateSubCategory = async (
+    id: string,
+    subCategoryData: { name?: string; category?: string; image?: File }
+  ) => {
+    try {
+      await dispatch(
+        updateSubCategory({ id, subCategoryData: subCategoryData as UpdateSubCategoryData })
+      ).unwrap();
+      toast.success("Subcategory updated successfully");
+      // Note: updateSubCategory thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to update subcategory:", error);
+      // Error toast is handled by the error useEffect above
+    }
   };
 
-  const handleDataChange = (newData: Subcategory[]) => {
-    setSubcategories(newData);
-    // Here you would typically sync with your backend
-    toast.success("Subcategories reordered successfully");
+  // Handle single subcategory delete
+  const handleDeleteSubCategory = async (id: string) => {
+    try {
+      await dispatch(deleteSubCategory(id)).unwrap();
+      toast.success("Subcategory deleted successfully");
+      // Note: deleteSubCategory thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete subcategory:", error);
+      // Error toast is handled by the error useEffect above
+    }
+  };
+
+  // Handle bulk subcategory delete
+  const handleBulkDeleteSubCategories = async (ids: string[]) => {
+    try {
+      await dispatch(deleteManySubCategories(ids)).unwrap();
+      toast.success(
+        `${ids.length} ${
+          ids.length === 1 ? "subcategory" : "subcategories"
+        } deleted successfully`
+      );
+      // Note: deleteManySubCategories thunk automatically refetches data
+    } catch (error) {
+      console.error("Failed to delete subcategories:", error);
+      // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
+      toast.error("Failed to delete selected subcategories");
+    }
   };
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <DataTable
-            data={subcategories}
-            columns={subcategoriesColumns}
+          <div className="px-4 lg:px-6">
+            <h1 className="text-2xl font-semibold">Subcategories</h1>
+            <p className="text-muted-foreground">
+              Manage your product subcategories and their details.
+            </p>
+          </div>
+
+          <DataTable<SubCategory>
+            // Server-side specific props
+            serverSide={true}
+            data={subcategories || []}
+            pagination={pagination}
+            loading={loading}
+            onQueryParamsChange={handleQueryParamsChange}
+            currentQueryParams={currentQueryParams}
+            error={error}
+            // Table configuration
+            columns={subCategoriesColumns}
             dialogComponent={
-              <SubCategoryDialog mode="add" onSave={handleAddSubcategory} />
+              <SubCategoryDialog
+                mode="add"
+                onSave={handleAddSubCategory}
+                isLoading={isCreating}
+              />
             }
-            editDialogComponent={createEditSubCategoryDialog}
-            onRowUpdate={handleUpdateSubcategory}
-            enableDragAndDrop={true}
+            editDialogComponent={(rowData: SubCategory) =>
+              createEditSubCategoryDialog(
+                rowData,
+                (updatedData) => {
+                  // Handle the subcategory update by extracting ID and calling update handler
+                  const id = rowData._id;
+                  const {
+                    _id,
+                    createdAt,
+                    productCount,
+                    ...subCategoryUpdateData
+                  } = updatedData;
+                  handleUpdateSubCategory(id, subCategoryUpdateData);
+                },
+                isUpdating // Pass the loading state
+              )
+            }
+            // Row action handlers
+            onRowDelete={handleDeleteSubCategory}
+            isDeleting={isDeleting}
+            onBulkDelete={handleBulkDeleteSubCategories}
+            isBulkDeleting={isDeletingMany}
+            // Table features configuration
             enableRowSelection={true}
             enableGlobalFilter={true}
-            enableColumnFilter={true}
+            enableColumnFilter={false} // Disable simple column filter since we're using search
             enableAdvancedFilter={true}
             advancedFilterConfig={advancedFilterConfig}
-            filterColumn="categoryName"
-            filterPlaceholder="Filter by category..."
-            onDataChange={handleDataChange}
+            enableDragAndDrop={true} // Disable drag and drop for server-side tables
+            // Set page size for initial load
             pageSize={10}
           />
         </div>

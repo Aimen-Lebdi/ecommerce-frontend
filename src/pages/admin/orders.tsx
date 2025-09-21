@@ -1,141 +1,41 @@
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
+import { toast } from "sonner";
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar";
-import { DataTable } from "../../components/admin/global/data-table";
-
-// Define the Order entity type
-export interface Order {
-  id: number;
-  orderNumber: string;
-  customerName: string;
-  customerEmail: string;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
-  total: number;
-  itemCount: number;
-  shippingAddress: string;
-  createdAt: string;
-}
-
-// Sample data - in a real app, this would come from your API
-const ordersData: Order[] = [
-  {
-    id: 1,
-    orderNumber: "ORD-2024-001",
-    customerName: "John Doe",
-    customerEmail: "john.doe@email.com",
-    status: "shipped",
-    paymentStatus: "paid",
-    total: 1299.99,
-    itemCount: 2,
-    shippingAddress: "123 Main St, New York, NY",
-    createdAt: "2024-02-15"
-  },
-  {
-    id: 2,
-    orderNumber: "ORD-2024-002",
-    customerName: "Sarah Wilson",
-    customerEmail: "sarah.wilson@email.com",
-    status: "delivered",
-    paymentStatus: "paid",
-    total: 299.99,
-    itemCount: 1,
-    shippingAddress: "456 Oak Ave, Los Angeles, CA",
-    createdAt: "2024-02-14"
-  },
-  {
-    id: 3,
-    orderNumber: "ORD-2024-003",
-    customerName: "Mike Johnson",
-    customerEmail: "mike.johnson@email.com",
-    status: "processing",
-    paymentStatus: "paid",
-    total: 2499.99,
-    itemCount: 1,
-    shippingAddress: "789 Pine St, Chicago, IL",
-    createdAt: "2024-02-16"
-  },
-  {
-    id: 4,
-    orderNumber: "ORD-2024-004",
-    customerName: "Emily Davis",
-    customerEmail: "emily.davis@email.com",
-    status: "pending",
-    paymentStatus: "pending",
-    total: 149.99,
-    itemCount: 1,
-    shippingAddress: "321 Elm Dr, Houston, TX",
-    createdAt: "2024-02-17"
-  },
-  {
-    id: 5,
-    orderNumber: "ORD-2024-005",
-    customerName: "David Brown",
-    customerEmail: "david.brown@email.com",
-    status: "cancelled",
-    paymentStatus: "refunded",
-    total: 399.99,
-    itemCount: 1,
-    shippingAddress: "654 Maple Ln, Phoenix, AZ",
-    createdAt: "2024-02-13"
-  },
-  {
-    id: 6,
-    orderNumber: "ORD-2024-006",
-    customerName: "Lisa Martinez",
-    customerEmail: "lisa.martinez@email.com",
-    status: "confirmed",
-    paymentStatus: "paid",
-    total: 189.99,
-    itemCount: 1,
-    shippingAddress: "987 Cedar St, Philadelphia, PA",
-    createdAt: "2024-02-18"
-  },
-  {
-    id: 7,
-    orderNumber: "ORD-2024-007",
-    customerName: "Robert Taylor",
-    customerEmail: "robert.taylor@email.com",
-    status: "shipped",
-    paymentStatus: "paid",
-    total: 999.99,
-    itemCount: 3,
-    shippingAddress: "159 Birch Ave, San Antonio, TX",
-    createdAt: "2024-02-12"
-  },
-  {
-    id: 8,
-    orderNumber: "ORD-2024-008",
-    customerName: "Jennifer White",
-    customerEmail: "jennifer.white@email.com",
-    status: "processing",
-    paymentStatus: "paid",
-    total: 599.98,
-    itemCount: 2,
-    shippingAddress: "753 Spruce St, San Diego, CA",
-    createdAt: "2024-02-19"
-  }
-];
+import { Button } from "../../components/ui/button";
+import { 
+  DataTable,
+  type ServerQueryParams,
+} from "../../components/admin/global/data-table";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  fetchOrders,
+  updateOrderToPaid,
+  updateOrderToDelivered,
+  clearError,
+  setQueryParams,
+  type Order,
+} from "../../features/orders/ordersSlice";
 
 // Define columns specific to Orders
 const ordersColumns: ColumnDef<Order>[] = [
   {
-    accessorKey: "orderNumber",
-    header: "Order #",
+    accessorKey: "_id",
+    header: "Order ID",
     cell: ({ row }) => (
       <div className="font-mono text-sm font-medium">
-        {row.getValue("orderNumber")}
+        #{row.getValue("_id").toString().slice(-8).toUpperCase()}
       </div>
     ),
     enableHiding: false,
   },
   {
-    accessorKey: "customerName",
+    accessorKey: "user.name",
     header: "Customer",
     cell: ({ row }) => {
       const order = row.original;
-      const initials = order.customerName
+      const initials = order.user.name
         .split(' ')
         .map(n => n[0])
         .join('')
@@ -149,9 +49,9 @@ const ordersColumns: ColumnDef<Order>[] = [
             </AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-medium">{order.customerName}</div>
+            <div className="font-medium">{order.user.name}</div>
             <div className="text-xs text-muted-foreground">
-              {order.customerEmail}
+              {order.user.email}
             </div>
           </div>
         </div>
@@ -159,58 +59,74 @@ const ordersColumns: ColumnDef<Order>[] = [
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "isDelivered",
     header: "Order Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      const variants = {
-        pending: 'secondary',
-        confirmed: 'default',
-        processing: 'default',
-        shipped: 'default',
-        delivered: 'default',
-        cancelled: 'destructive',
-        refunded: 'destructive'
-      } as const;
+      const order = row.original;
+      let status = "pending";
+      let variant: "default" | "secondary" | "destructive" = "secondary";
+      
+      if (order.isDelivered) {
+        status = "delivered";
+        variant = "default";
+      } else if (order.isPaid) {
+        status = "processing";
+        variant = "default";
+      }
+      
       return (
-        <Badge variant={variants[status as keyof typeof variants]}>
+        <Badge variant={variant}>
           {status}
         </Badge>
       );
     },
   },
   {
-    accessorKey: "paymentStatus",
+    accessorKey: "isPaid",
     header: "Payment",
     cell: ({ row }) => {
-      const paymentStatus = row.getValue("paymentStatus") as string;
-      const variants = {
-        pending: 'secondary',
-        paid: 'default',
-        failed: 'destructive',
-        refunded: 'destructive'
-      } as const;
+      const order = row.original;
+      const paymentStatus = order.isPaid ? "paid" : "pending";
+      const variant = order.isPaid ? "default" : "secondary";
+      
       return (
-        <Badge variant={variants[paymentStatus as keyof typeof variants]} className="text-xs">
+        <Badge variant={variant} className="text-xs">
           {paymentStatus}
         </Badge>
       );
     },
   },
   {
-    accessorKey: "itemCount",
-    header: "Items",
-    cell: ({ row }) => (
-      <div className="text-center font-medium">
-        {row.getValue("itemCount")}
-      </div>
-    ),
+    accessorKey: "paymentMethodType",
+    header: "Payment Method",
+    cell: ({ row }) => {
+      const paymentMethod = row.getValue("paymentMethodType") as string;
+      return (
+        <div className="text-sm font-medium capitalize">
+          {paymentMethod}
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "total",
+    accessorKey: "cartItems",
+    header: "Items",
+    cell: ({ row }) => {
+      const cartItems = row.getValue("cartItems") as Order['cartItems'];
+      const itemCount = cartItems.length;
+      
+      return (
+        <div className="text-center font-medium">
+          {itemCount}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "totalOrderPrice",
     header: "Total",
     cell: ({ row }) => {
-      const total = row.getValue("total") as number;
+      const total = row.getValue("totalOrderPrice") as number;
       return (
         <div className="text-right font-medium">
           ${total.toFixed(2)}
@@ -221,11 +137,20 @@ const ordersColumns: ColumnDef<Order>[] = [
   {
     accessorKey: "shippingAddress",
     header: "Shipping Address",
-    cell: ({ row }) => (
-      <div className="max-w-[200px] truncate text-muted-foreground text-xs">
-        {row.getValue("shippingAddress")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const shippingAddress = row.getValue("shippingAddress") as Order['shippingAddress'];
+      const addressString = [
+        shippingAddress.details,
+        shippingAddress.city,
+        shippingAddress.postalCode
+      ].filter(Boolean).join(", ");
+      
+      return (
+        <div className="max-w-[200px] truncate text-muted-foreground text-xs">
+          {addressString || "No address provided"}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "createdAt",
@@ -239,45 +164,162 @@ const ordersColumns: ColumnDef<Order>[] = [
       );
     },
   },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const order = row.original;
+      const dispatch = useAppDispatch();
+      const { isUpdatingPayment, isUpdatingDelivery } = useAppSelector((state) => state.orders);
+      
+      const handleMarkAsPaid = async () => {
+        try {
+          await dispatch(updateOrderToPaid(order._id)).unwrap();
+          toast.success("Order marked as paid");
+        } catch (error) {
+          toast.error("Failed to update payment status");
+        }
+      };
+      
+      const handleMarkAsDelivered = async () => {
+        try {
+          await dispatch(updateOrderToDelivered(order._id)).unwrap();
+          toast.success("Order marked as delivered");
+        } catch (error) {
+          toast.error("Failed to update delivery status");
+        }
+      };
+      
+      return (
+        <div className="flex items-center gap-2">
+          {!order.isPaid && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleMarkAsPaid}
+              disabled={isUpdatingPayment}
+              className="text-xs"
+            >
+              {isUpdatingPayment ? "..." : "Mark Paid"}
+            </Button>
+          )}
+          {order.isPaid && !order.isDelivered && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleMarkAsDelivered}
+              disabled={isUpdatingDelivery}
+              className="text-xs"
+            >
+              {isUpdatingDelivery ? "..." : "Mark Delivered"}
+            </Button>
+          )}
+        </div>
+      );
+    },
+  },
 ];
 
-// Advanced filter configuration for categories
+// Advanced filter configuration for orders
 const advancedFilterConfig = {
   numeric: {
-    itemCount: {
-      label: "Item Count",
-      placeholder: "Enter number of items",
-    },
-    total: {
-      label: "Total",
+    totalOrderPrice: {
+      label: "Total Order Price",
       placeholder: "Enter order total",
+    },
+    taxPrice: {
+      label: "Tax Price",
+      placeholder: "Enter tax amount",
+    },
+    shippingPrice: {
+      label: "Shipping Price",
+      placeholder: "Enter shipping cost",
     },
   },
   date: {
     createdAt: {
-      label: "Created Date",
+      label: "Order Date",
+    },
+    paidAt: {
+      label: "Payment Date",
+    },
+    deliveredAt: {
+      label: "Delivery Date",
     },
   },
 };
 
 export default function Orders() {
-  const [orders] = React.useState(ordersData);
+  const dispatch = useAppDispatch();
+  const {
+    orders,
+    pagination,
+    loading,
+    error,
+    isUpdatingPayment,
+    isUpdatingDelivery,
+    currentQueryParams,
+  } = useAppSelector((state) => state.orders);
+
+  // Load initial data on component mount
+  React.useEffect(() => {
+    // Load orders with default parameters on mount
+    const initialParams: ServerQueryParams = {
+      page: 1,
+      limit: 10,
+    };
+    dispatch(fetchOrders(initialParams));
+  }, [dispatch]);
+
+  // Handle errors
+  React.useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+  // Handle query parameter changes from the DataTable
+  const handleQueryParamsChange = React.useCallback(
+    (params: ServerQueryParams) => {
+      // Store the parameters in Redux state for future reference
+      dispatch(setQueryParams(params));
+      // Fetch data with new parameters
+      dispatch(fetchOrders(params));
+    },
+    [dispatch]
+  );
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <DataTable
-            data={orders}
+          <div className="px-4 lg:px-6">
+            <h1 className="text-2xl font-semibold">Orders</h1>
+            <p className="text-muted-foreground">
+              Manage customer orders and their statuses.
+            </p>
+          </div>
+
+          <DataTable<Order>
+            // Server-side specific props
+            serverSide={true}
+            data={orders || []}
+            pagination={pagination}
+            loading={loading}
+            onQueryParamsChange={handleQueryParamsChange}
+            currentQueryParams={currentQueryParams}
+            error={error}
+            // Table configuration
             columns={ordersColumns}
-            enableDragAndDrop={false} // Orders shouldn't be reorderable
-            enableRowSelection={true}
+            // Table features configuration
+            enableRowSelection={false} // Orders shouldn't be bulk selectable for deletion
             enableGlobalFilter={true}
-            enableColumnFilter={true}
+            enableColumnFilter={false} // Disable simple column filter since we're using search
             enableAdvancedFilter={true}
             advancedFilterConfig={advancedFilterConfig}
-            filterColumn="status"
-            filterPlaceholder="Filter by status..."
+            enableDragAndDrop={false} // Orders shouldn't be reorderable
+            // Set page size for initial load
             pageSize={15}
           />
         </div>
