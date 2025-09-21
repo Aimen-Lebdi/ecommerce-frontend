@@ -37,9 +37,7 @@ export const fetchProductsAPI = async (
   });
 
   const queryString = params.toString();
-  const url = queryString
-    ? `/api/products?${queryString}`
-    : "/api/products";
+  const url = queryString ? `/api/products?${queryString}` : "/api/products";
 
   const response = await axiosInstance.get(url);
   return response.data;
@@ -57,17 +55,22 @@ export const createProductAPI = async (productData: FormData) => {
 
 // Update existing product
 export const updateProductAPI = async (id: string, productData: FormData) => {
-  console.log('Sending update data for product:', id);
-  
-  // Convert empty strings to null for proper backend handling
+  // Log what we're sending for debugging
+  console.log("Sending update data for product:", id);
+
+  // Process FormData to handle empty values properly
   const processedData = new FormData();
-  
+
   for (const [key, value] of productData.entries()) {
-    console.log(`${key}:`, value instanceof File ? `File: ${value.name}` : value);
-    
-    // Handle empty string values by converting to null for subcategory and brand
-    if ((key === 'subCategory' || key === 'brand') && value === '') {
-      processedData.append(key, 'null'); // Send as string 'null' which backend can handle
+    console.log(
+      `${key}:`,
+      value instanceof File ? `File: ${value.name}` : value
+    );
+
+    // Handle empty string values by converting to 'null' string for subcategory and brand
+    if ((key === "subCategory" || key === "brand") && value === "") {
+      processedData.append(key, "__NULL__"); // Use a special marker to indicate null
+      console.log(`Converting empty ${key} to "__NULL__"`);
     } else {
       processedData.append(key, value);
     }

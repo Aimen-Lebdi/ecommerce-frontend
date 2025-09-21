@@ -110,13 +110,13 @@ interface Brand {
   name: string;
 }
 
-export function ProductDialog({ 
-  mode = "add", 
-  existingData, 
-  open: controlledOpen, 
-  onOpenChange, 
+export function ProductDialog({
+  mode = "add",
+  existingData,
+  open: controlledOpen,
+  onOpenChange,
   onSubmit,
-  isSubmitting = false
+  isSubmitting = false,
 }: ProductDialogProps) {
   const [internalOpen, setInternalOpen] = React.useState(false);
 
@@ -180,18 +180,20 @@ export function ProductDialog({
     setLoading(true);
     try {
       // Load categories
-      const categoriesResponse = await axiosInstance.get('/api/categories');
+      const categoriesResponse = await axiosInstance.get("/api/categories");
       setCategories(categoriesResponse.data.documents || []);
 
       // Load subcategories
-      const subcategoriesResponse = await axiosInstance.get('/api/subcategories');
+      const subcategoriesResponse = await axiosInstance.get(
+        "/api/subcategories"
+      );
       setSubcategories(subcategoriesResponse.data.documents || []);
 
       // Load brands
-      const brandsResponse = await axiosInstance.get('/api/brands');
+      const brandsResponse = await axiosInstance.get("/api/brands");
       setBrands(brandsResponse.data.documents || []);
     } catch (error) {
-      console.error('Failed to load dropdown data:', error);
+      console.error("Failed to load dropdown data:", error);
     } finally {
       setLoading(false);
     }
@@ -203,7 +205,8 @@ export function ProductDialog({
       const initialName = existingData.name || "";
       const initialDescription = existingData.description || "";
       const initialPrice = existingData.price?.toString() || "";
-      const initialPriceAfterDiscount = existingData.priceAfterDiscount?.toString() || "";
+      const initialPriceAfterDiscount =
+        existingData.priceAfterDiscount?.toString() || "";
       const initialQuantity = existingData.quantity?.toString() || "";
       const initialColors = existingData.colors?.join(", ") || "";
       const initialCategory = existingData.category?._id || "";
@@ -236,7 +239,7 @@ export function ProductDialog({
 
       // Reset category changed flag
       setCategoryChanged(false);
-      
+
       if (existingData.mainImage) {
         setPreviewMain(existingData.mainImage);
       }
@@ -275,18 +278,24 @@ export function ProductDialog({
     if (!category) e.category = "Category is required";
     if (!name.trim()) e.name = "Product name is required";
     if (!description.trim()) e.description = "Description is required";
-    if (!price || isNaN(Number(price)) || Number(price) <= 0) e.price = "Valid price is required";
-    if (!quantity || isNaN(Number(quantity)) || Number(quantity) < 0) e.quantity = "Valid quantity is required";
+    if (!price || isNaN(Number(price)) || Number(price) <= 0)
+      e.price = "Valid price is required";
+    if (!quantity || isNaN(Number(quantity)) || Number(quantity) < 0)
+      e.quantity = "Valid quantity is required";
     if (!colors.trim()) e.colors = "At least one color is required";
     if (mode === "add" && !mainImage) e.mainImage = "Main image is required";
-    if (mode === "edit" && !mainImage && !previewMain) e.mainImage = "Main image is required";
-    
+    if (mode === "edit" && !mainImage && !previewMain)
+      e.mainImage = "Main image is required";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   // Check if a field has changed (for edit mode)
-  const hasFieldChanged = (fieldName: keyof typeof originalValues, currentValue: string) => {
+  const hasFieldChanged = (
+    fieldName: keyof typeof originalValues,
+    currentValue: string
+  ) => {
     if (mode === "add" || !originalValues) return true;
     return originalValues[fieldName] !== currentValue;
   };
@@ -302,9 +311,13 @@ export function ProductDialog({
       productData.name = name;
       productData.description = description;
       productData.price = Number(price);
-      if (priceAfterDiscount) productData.priceAfterDiscount = Number(priceAfterDiscount);
+      if (priceAfterDiscount)
+        productData.priceAfterDiscount = Number(priceAfterDiscount);
       productData.quantity = Number(quantity);
-      productData.colors = colors.split(",").map((c) => c.trim()).filter(c => c.length > 0);
+      productData.colors = colors
+        .split(",")
+        .map((c) => c.trim())
+        .filter((c) => c.length > 0);
       productData.category = category;
       if (subcategory) productData.subCategory = subcategory;
       if (brand) productData.brand = brand;
@@ -312,16 +325,16 @@ export function ProductDialog({
       if (otherImages.length > 0) productData.images = otherImages;
     } else {
       // For edit mode, only include changed fields
-      if (hasFieldChanged('name', name)) {
+      if (hasFieldChanged("name", name)) {
         productData.name = name;
       }
-      if (hasFieldChanged('description', description)) {
+      if (hasFieldChanged("description", description)) {
         productData.description = description;
       }
-      if (hasFieldChanged('price', price)) {
+      if (hasFieldChanged("price", price)) {
         productData.price = Number(price);
       }
-      if (hasFieldChanged('priceAfterDiscount', priceAfterDiscount)) {
+      if (hasFieldChanged("priceAfterDiscount", priceAfterDiscount)) {
         if (priceAfterDiscount) {
           productData.priceAfterDiscount = Number(priceAfterDiscount);
         } else {
@@ -329,38 +342,38 @@ export function ProductDialog({
           productData.priceAfterDiscount = undefined;
         }
       }
-      if (hasFieldChanged('quantity', quantity)) {
+      if (hasFieldChanged("quantity", quantity)) {
         productData.quantity = Number(quantity);
       }
-      if (hasFieldChanged('colors', colors)) {
-        productData.colors = colors.split(",").map((c) => c.trim()).filter(c => c.length > 0);
+      if (hasFieldChanged("colors", colors)) {
+        productData.colors = colors
+          .split(",")
+          .map((c) => c.trim())
+          .filter((c) => c.length > 0);
       }
-      if (hasFieldChanged('category', category)) {
+      if (hasFieldChanged("category", category)) {
         productData.category = category;
       }
 
-    // FIXED: Handle subcategory changes properly
-// If category changed, always include subcategory in update (even if empty)
-// OR if subcategory value itself changed
-if (categoryChanged || hasFieldChanged('subcategory', subcategory)) {
-  if (subcategory && subcategory.trim() !== '') {
-    productData.subCategory = subcategory;
-  } else {
-    // Send empty string which will be converted to null by the API
-    productData.subCategory = '';
-  }
-}
+      if (categoryChanged || hasFieldChanged("subcategory", subcategory)) {
+        if (subcategory && subcategory.trim() !== "") {
+          productData.subCategory = subcategory;
+        } else {
+          // Send empty string which will be converted to null by the API
 
-if (hasFieldChanged('brand', brand)) {
-  if (brand && brand.trim() !== '') {
-    productData.brand = brand;
-  } else {
-    // Send empty string which will be converted to null by the API
-    productData.brand = '';
-  }
-}
+          productData.subCategory = null;
+        }
+      }
 
-      
+      if (hasFieldChanged("brand", brand)) {
+        if (brand && brand.trim() !== "") {
+          productData.brand = brand;
+        } else {
+          // Send empty string which will be converted to null by the API
+          productData.brand = null;
+        }
+      }
+
       // Always include new images if they were selected
       if (mainImage) {
         productData.mainImage = mainImage;
@@ -370,8 +383,11 @@ if (hasFieldChanged('brand', brand)) {
       }
     }
 
-    console.log(`${mode === "edit" ? "Updating" : "Saving new"} product:`, productData);
-    console.log('Changed fields only:', Object.keys(productData));
+    console.log(
+      `${mode === "edit" ? "Updating" : "Saving new"} product:`,
+      productData
+    );
+    console.log("Changed fields only:", Object.keys(productData));
 
     onSubmit?.(productData);
 
@@ -394,17 +410,21 @@ if (hasFieldChanged('brand', brand)) {
 
   // ENHANCED: Category change handler
   const handleCategoryChange = (value: string) => {
-  setCategory(value);
-  
-  // Always reset subcategory when category changes
-  setSubcategory("");
-  
-  if (mode === "edit" && originalValues && value !== originalValues.category) {
-    setCategoryChanged(true);
-  }
-  
-  setErrors((prev) => ({ ...prev, category: undefined }));
-};
+    setCategory(value);
+
+    // Always reset subcategory when category changes
+    setSubcategory("");
+
+    if (
+      mode === "edit" &&
+      originalValues &&
+      value !== originalValues.category
+    ) {
+      setCategoryChanged(true);
+    }
+
+    setErrors((prev) => ({ ...prev, category: undefined }));
+  };
 
   // Image Handlers
   const handleMainFile = (file: File) => {
@@ -428,7 +448,10 @@ if (hasFieldChanged('brand', brand)) {
   const handleOtherFiles = (files: FileList) => {
     const arr = Array.from(files);
     setOtherImages((prev) => [...prev, ...arr]);
-    setPreviewOthers((prev) => [...prev, ...arr.map((f) => URL.createObjectURL(f))]);
+    setPreviewOthers((prev) => [
+      ...prev,
+      ...arr.map((f) => URL.createObjectURL(f)),
+    ]);
     setErrors((prev) => ({ ...prev, images: undefined }));
   };
 
@@ -439,7 +462,7 @@ if (hasFieldChanged('brand', brand)) {
 
   // Filter subcategories based on selected category
   const filteredSubcategories = subcategories.filter(
-    sub => sub.category._id === category
+    (sub) => sub.category._id === category
   );
 
   const dialogContent = (
@@ -449,10 +472,9 @@ if (hasFieldChanged('brand', brand)) {
           {mode === "edit" ? "Edit Product" : "Add New Product"}
         </DialogTitle>
         <DialogDescription>
-          {mode === "edit" 
-            ? "Update the product details below." 
-            : "Enter the product details below."
-          }
+          {mode === "edit"
+            ? "Update the product details below."
+            : "Enter the product details below."}
         </DialogDescription>
       </DialogHeader>
 
@@ -460,67 +482,136 @@ if (hasFieldChanged('brand', brand)) {
         {/* Category */}
         <div className="grid gap-2">
           <Label>Category</Label>
-          <Select 
-            value={category} 
+          <Select
+            value={category}
             onValueChange={handleCategoryChange}
             disabled={loading}
           >
             <SelectTrigger className={errors.category ? "border-red-500" : ""}>
-              <SelectValue placeholder={loading ? "Loading categories..." : "Choose category"} />
+              <SelectValue
+                placeholder={
+                  loading ? "Loading categories..." : "Choose category"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               {categories.map((cat) => (
-                <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>
+                <SelectItem key={cat._id} value={cat._id}>
+                  {cat.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {errors.category && <p className="text-sm text-red-600">{errors.category}</p>}
+          {errors.category && (
+            <p className="text-sm text-red-600">{errors.category}</p>
+          )}
         </div>
 
         {/* Subcategory */}
         <div className="grid gap-2">
-          <Label>Subcategory <span className="text-muted-foreground text-sm">(Optional)</span></Label>
-          <Select 
-            value={subcategory} 
+          <Label>
+            Subcategory{" "}
+            <span className="text-muted-foreground text-sm">(Optional)</span>
+          </Label>
+          <Select
+            value={subcategory}
             onValueChange={(value) => {
-              setSubcategory(value);
+              // Handle the "none" option
+              if (value === "none") {
+                setSubcategory("");
+              } else {
+                setSubcategory(value);
+              }
               setErrors((prev) => ({ ...prev, subcategory: undefined }));
             }}
             disabled={!category || loading}
           >
-            <SelectTrigger className={errors.subcategory ? "border-red-500" : ""}>
-              <SelectValue placeholder={!category ? "Select category first" : "Choose subcategory (optional)"} />
+            <SelectTrigger
+              className={errors.subcategory ? "border-red-500" : ""}
+            >
+              <SelectValue
+                placeholder={
+                  !category
+                    ? "Select category first"
+                    : "Choose subcategory (optional)"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
-              {filteredSubcategories.map((sub) => (
-                <SelectItem key={sub._id} value={sub._id}>{sub.name}</SelectItem>
-              ))}
+              {/* Add "None" option */}
+              <SelectItem value="none">
+                <span className="text-muted-foreground italic">None</span>
+              </SelectItem>
+
+              {filteredSubcategories.length > 0
+                ? filteredSubcategories.map((sub) => (
+                    <SelectItem key={sub._id} value={sub._id}>
+                      {sub.name}
+                    </SelectItem>
+                  ))
+                : category && (
+                    <SelectItem value="no-subcategories" disabled>
+                      <span className="text-muted-foreground italic">
+                        No subcategories available
+                      </span>
+                    </SelectItem>
+                  )}
             </SelectContent>
           </Select>
-          {errors.subcategory && <p className="text-sm text-red-600">{errors.subcategory}</p>}
+          {errors.subcategory && (
+            <p className="text-sm text-red-600">{errors.subcategory}</p>
+          )}
+
+          {/* Show helper text based on category selection */}
+          {category && filteredSubcategories.length === 0 && (
+            <p className="text-xs text-muted-foreground">
+              This category has no subcategories available.
+            </p>
+          )}
         </div>
 
         {/* Brand */}
         <div className="grid gap-2">
-          <Label>Brand <span className="text-muted-foreground text-sm">(Optional)</span></Label>
-          <Select 
-            value={brand} 
+          <Label>
+            Brand{" "}
+            <span className="text-muted-foreground text-sm">(Optional)</span>
+          </Label>
+          <Select
+            value={brand}
             onValueChange={(value) => {
-              setBrand(value);
+              // Handle the "none" option
+              if (value === "none") {
+                setBrand("");
+              } else {
+                setBrand(value);
+              }
               setErrors((prev) => ({ ...prev, brand: undefined }));
             }}
             disabled={loading}
           >
             <SelectTrigger className={errors.brand ? "border-red-500" : ""}>
-              <SelectValue placeholder={loading ? "Loading brands..." : "Choose brand (optional)"} />
+              <SelectValue
+                placeholder={
+                  loading ? "Loading brands..." : "Choose brand (optional)"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
+              {/* Add "None" option */}
+              <SelectItem value="none">
+                <span className="text-muted-foreground italic">None</span>
+              </SelectItem>
+
               {brands.map((br) => (
-                <SelectItem key={br._id} value={br._id}>{br.name}</SelectItem>
+                <SelectItem key={br._id} value={br._id}>
+                  {br.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {errors.brand && <p className="text-sm text-red-600">{errors.brand}</p>}
+          {errors.brand && (
+            <p className="text-sm text-red-600">{errors.brand}</p>
+          )}
         </div>
 
         {/* Product Name */}
@@ -555,7 +646,9 @@ if (hasFieldChanged('brand', brand)) {
             className={errors.description ? "border-red-500" : ""}
             rows={3}
           />
-          {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
+          {errors.description && (
+            <p className="text-sm text-red-600">{errors.description}</p>
+          )}
         </div>
 
         {/* Price, Discount Price & Quantity */}
@@ -568,7 +661,11 @@ if (hasFieldChanged('brand', brand)) {
               value={price}
               onChange={(e) => {
                 setPrice(e.target.value);
-                if (e.target.value && !isNaN(Number(e.target.value)) && Number(e.target.value) > 0) {
+                if (
+                  e.target.value &&
+                  !isNaN(Number(e.target.value)) &&
+                  Number(e.target.value) > 0
+                ) {
                   setErrors((prev) => ({ ...prev, price: undefined }));
                 }
               }}
@@ -576,10 +673,15 @@ if (hasFieldChanged('brand', brand)) {
               step="0.01"
               min="0"
             />
-            {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
+            {errors.price && (
+              <p className="text-sm text-red-600">{errors.price}</p>
+            )}
           </div>
           <div className="grid gap-2">
-            <Label>Discount Price ($) <span className="text-muted-foreground text-sm">(Optional)</span></Label>
+            <Label>
+              Discount Price ($){" "}
+              <span className="text-muted-foreground text-sm">(Optional)</span>
+            </Label>
             <Input
               type="number"
               placeholder="79.99"
@@ -597,14 +699,20 @@ if (hasFieldChanged('brand', brand)) {
               value={quantity}
               onChange={(e) => {
                 setQuantity(e.target.value);
-                if (e.target.value && !isNaN(Number(e.target.value)) && Number(e.target.value) >= 0) {
+                if (
+                  e.target.value &&
+                  !isNaN(Number(e.target.value)) &&
+                  Number(e.target.value) >= 0
+                ) {
                   setErrors((prev) => ({ ...prev, quantity: undefined }));
                 }
               }}
               className={errors.quantity ? "border-red-500" : ""}
               min="0"
             />
-            {errors.quantity && <p className="text-sm text-red-600">{errors.quantity}</p>}
+            {errors.quantity && (
+              <p className="text-sm text-red-600">{errors.quantity}</p>
+            )}
           </div>
         </div>
 
@@ -622,7 +730,9 @@ if (hasFieldChanged('brand', brand)) {
             }}
             className={errors.colors ? "border-red-500" : ""}
           />
-          {errors.colors && <p className="text-sm text-red-600">{errors.colors}</p>}
+          {errors.colors && (
+            <p className="text-sm text-red-600">{errors.colors}</p>
+          )}
         </div>
 
         {/* Main Image Upload */}
@@ -637,7 +747,9 @@ if (hasFieldChanged('brand', brand)) {
                   ? "border-red-500 text-red-500"
                   : "border-gray-300 bg-gray-50 text-gray-500 hover:border-blue-500 hover:text-blue-500"
               }`}
-            onClick={() => !previewMain && document.getElementById("main-image")?.click()}
+            onClick={() =>
+              !previewMain && document.getElementById("main-image")?.click()
+            }
             onDragOver={(e) => {
               e.preventDefault();
               setDragActiveMain(true);
@@ -691,15 +803,22 @@ if (hasFieldChanged('brand', brand)) {
             accept="image/*"
             onChange={handleMainFileChange}
           />
-          {errors.mainImage && <p className="text-sm text-red-600 mt-1">{errors.mainImage}</p>}
+          {errors.mainImage && (
+            <p className="text-sm text-red-600 mt-1">{errors.mainImage}</p>
+          )}
           {mainImage && !errors.mainImage && (
-            <p className="mt-2 text-xs text-green-600">Selected: {mainImage.name}</p>
+            <p className="mt-2 text-xs text-green-600">
+              Selected: {mainImage.name}
+            </p>
           )}
         </div>
 
         {/* Other Images Upload */}
         <div className="grid gap-2">
-          <Label>Additional Images <span className="text-muted-foreground text-sm">(Optional)</span></Label>
+          <Label>
+            Additional Images{" "}
+            <span className="text-muted-foreground text-sm">(Optional)</span>
+          </Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
               ${
@@ -770,7 +889,9 @@ if (hasFieldChanged('brand', brand)) {
               if (e.target.files) handleOtherFiles(e.target.files);
             }}
           />
-          {errors.images && <p className="text-sm text-red-600 mt-1">{errors.images}</p>}
+          {errors.images && (
+            <p className="text-sm text-red-600 mt-1">{errors.images}</p>
+          )}
           {otherImages.length > 0 && !errors.images && (
             <p className="mt-2 text-xs text-green-600">
               Selected: {otherImages.length} additional image(s)
@@ -782,7 +903,13 @@ if (hasFieldChanged('brand', brand)) {
       <DialogFooter>
         <Button onClick={handleSave} disabled={isSubmitting}>
           <IconPhoto className="mr-2 h-4 w-4" />
-          {isSubmitting ? (mode === "edit" ? "Updating..." : "Saving...") : (mode === "edit" ? "Update Product" : "Save Product")}
+          {isSubmitting
+            ? mode === "edit"
+              ? "Updating..."
+              : "Saving..."
+            : mode === "edit"
+            ? "Update Product"
+            : "Save Product"}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -819,7 +946,7 @@ export function AddProductDialog() {
 // Export a function to create edit dialogs for the data table
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditProductDialog(
-  rowData: Product, 
+  rowData: Product,
   onSave: (updatedData: {
     name?: string;
     description?: string;
@@ -836,9 +963,9 @@ export function createEditProductDialog(
   isSubmitting: boolean = false
 ) {
   return (
-    <ProductDialog 
-      mode="edit" 
-      existingData={rowData} 
+    <ProductDialog
+      mode="edit"
+      existingData={rowData}
       onSubmit={onSave}
       isSubmitting={isSubmitting}
       onOpenChange={() => {}}

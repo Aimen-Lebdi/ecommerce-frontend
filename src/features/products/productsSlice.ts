@@ -160,30 +160,33 @@ export const createProduct = createAsyncThunk<
       formData.append("description", productData.description);
       formData.append("price", productData.price.toString());
       if (productData.priceAfterDiscount) {
-        formData.append("priceAfterDiscount", productData.priceAfterDiscount.toString());
+        formData.append(
+          "priceAfterDiscount",
+          productData.priceAfterDiscount.toString()
+        );
       }
       formData.append("quantity", productData.quantity.toString());
       formData.append("category", productData.category);
-      
+
       if (productData.subCategory) {
         formData.append("subCategory", productData.subCategory);
       }
       if (productData.brand) {
         formData.append("brand", productData.brand);
       }
-      
+
       if (productData.colors) {
-        productData.colors.forEach(color => {
+        productData.colors.forEach((color) => {
           formData.append("colors", color);
         });
       }
-      
+
       if (productData.mainImage) {
         formData.append("mainImage", productData.mainImage);
       }
-      
+
       if (productData.images) {
-        productData.images.forEach(image => {
+        productData.images.forEach((image) => {
           formData.append("images", image);
         });
       }
@@ -209,7 +212,7 @@ export const updateProduct = createAsyncThunk<
   async ({ id, productData }, { rejectWithValue, getState, dispatch }) => {
     try {
       const formData = new FormData();
-      
+
       if (productData.name) {
         formData.append("name", productData.name);
       }
@@ -220,7 +223,10 @@ export const updateProduct = createAsyncThunk<
         formData.append("price", productData.price.toString());
       }
       if (productData.priceAfterDiscount !== undefined) {
-        formData.append("priceAfterDiscount", productData.priceAfterDiscount.toString());
+        formData.append(
+          "priceAfterDiscount",
+          productData.priceAfterDiscount.toString()
+        );
       }
       if (productData.quantity !== undefined) {
         formData.append("quantity", productData.quantity.toString());
@@ -228,27 +234,36 @@ export const updateProduct = createAsyncThunk<
       if (productData.category) {
         formData.append("category", productData.category);
       }
-      
-      
-      if (productData.subCategory) {
-        formData.append("subCategory", productData.subCategory);
+
+      if ("subCategory" in productData) {
+        if (productData.subCategory === null) {
+          formData.append("subCategory", "null");
+        } else if (productData.subCategory) {
+          formData.append("subCategory", productData.subCategory);
+        }
       }
-      if (productData.brand) {
-        formData.append("brand", productData.brand);
+
+      // Handle brand - include it if it exists in productData (even if null)
+      if ("brand" in productData) {
+        if (productData.brand === null) {
+          formData.append("brand", "null");
+        } else if (productData.brand) {
+          formData.append("brand", productData.brand);
+        }
       }
-      
+
       if (productData.colors) {
-        productData.colors.forEach(color => {
+        productData.colors.forEach((color) => {
           formData.append("colors", color);
         });
       }
-      
+
       if (productData.mainImage) {
         formData.append("mainImage", productData.mainImage);
       }
-      
+
       if (productData.images) {
-        productData.images.forEach(image => {
+        productData.images.forEach((image) => {
           formData.append("images", image);
         });
       }

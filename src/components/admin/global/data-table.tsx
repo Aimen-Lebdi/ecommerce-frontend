@@ -401,7 +401,7 @@ function DraggableRow<TData extends BaseEntity>({ row }: { row: Row<TData> }) {
 // Helper function to get all possible filter keys from advanced filters
 function getAdvancedFilterKeys(filters: AdvancedFilters): string[] {
   const keys = new Set<string>();
-  
+
   // Add keys from numeric filters
   filters.numeric.forEach((filter) => {
     keys.add(filter.column);
@@ -410,7 +410,7 @@ function getAdvancedFilterKeys(filters: AdvancedFilters): string[] {
     keys.add(`${filter.column}[lt]`);
     keys.add(`${filter.column}[lte]`);
   });
-  
+
   // Add keys from date filters
   filters.date.forEach((filter) => {
     keys.add(filter.column);
@@ -419,32 +419,37 @@ function getAdvancedFilterKeys(filters: AdvancedFilters): string[] {
     keys.add(`${filter.column}[lt]`);
     keys.add(`${filter.column}[lte]`);
   });
-  
+
   return Array.from(keys);
 }
 
 // Clean query parameters by removing old filter keys
-function cleanQueryParams(currentParams: ServerQueryParams, advancedFilters: AdvancedFilters): ServerQueryParams {
+function cleanQueryParams(
+  currentParams: ServerQueryParams,
+  advancedFilters: AdvancedFilters
+): ServerQueryParams {
   const cleanedParams = { ...currentParams };
   const filterKeys = getAdvancedFilterKeys(advancedFilters);
-  
+
   // Remove all possible filter keys
   filterKeys.forEach((key) => {
     delete cleanedParams[key];
   });
-  
+
   return cleanedParams;
 }
 
 // Convert advanced filters to server query parameters
-function convertAdvancedFiltersToQueryParams(filters: AdvancedFilters): Record<string, any> {
+function convertAdvancedFiltersToQueryParams(
+  filters: AdvancedFilters
+): Record<string, any> {
   const params: Record<string, any> = {};
 
   // Process numeric filters
   filters.numeric.forEach((filter) => {
     if (filter.value !== null) {
       const { column, operator, value, value2 } = filter;
-      
+
       switch (operator) {
         case "eq":
           params[column] = value;
@@ -475,7 +480,7 @@ function convertAdvancedFiltersToQueryParams(filters: AdvancedFilters): Record<s
   filters.date.forEach((filter) => {
     if (filter.value !== null) {
       const { column, operator, value, value2 } = filter;
-      
+
       switch (operator) {
         case "eq":
           // For exact date matching, we should use date range for the entire day
@@ -538,7 +543,9 @@ export function DataTable<TData extends BaseEntity>({
 }: DataTableProps<TData>) {
   // Client-side state (used when serverSide is false)
   const [data, setData] = React.useState(() => initialData || []);
-  const [filteredData, setFilteredData] = React.useState(() => initialData || []);
+  const [filteredData, setFilteredData] = React.useState(
+    () => initialData || []
+  );
 
   // Server-side state (used when serverSide is true)
   const currentQueryParams = externalQueryParams || {
@@ -548,14 +555,19 @@ export function DataTable<TData extends BaseEntity>({
 
   // Common state for both modes
   const [rowSelection, setRowSelection] = React.useState({});
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
-  const [advancedFilters, setAdvancedFilters] = React.useState<AdvancedFilters>({
-    numeric: [],
-    date: [],
-  });
+  const [advancedFilters, setAdvancedFilters] = React.useState<AdvancedFilters>(
+    {
+      numeric: [],
+      date: [],
+    }
+  );
 
   // Client-side pagination state
   const [pagination, setPagination] = React.useState({
@@ -589,7 +601,10 @@ export function DataTable<TData extends BaseEntity>({
   // Handle client-side advanced filtering (only when serverSide is false)
   const applyClientSideAdvancedFilters = React.useCallback(
     (data: TData[], filters: AdvancedFilters): TData[] => {
-      if (serverSide || (filters.numeric.length === 0 && filters.date.length === 0)) {
+      if (
+        serverSide ||
+        (filters.numeric.length === 0 && filters.date.length === 0)
+      ) {
         return data;
       }
 
@@ -630,7 +645,8 @@ export function DataTable<TData extends BaseEntity>({
           const rowDate = new Date(row[filter.column]);
           const filterDate = new Date(filter.value);
 
-          if (isNaN(rowDate.getTime()) || isNaN(filterDate.getTime())) return false;
+          if (isNaN(rowDate.getTime()) || isNaN(filterDate.getTime()))
+            return false;
 
           const rowDateOnly = new Date(rowDate.toDateString());
           const filterDateOnly = new Date(filterDate.toDateString());
@@ -673,9 +689,10 @@ export function DataTable<TData extends BaseEntity>({
   const handleSortingChange = React.useCallback(
     (newSorting: SortingState | ((old: SortingState) => SortingState)) => {
       // Handle both direct state and function updates
-      const resolvedSorting = typeof newSorting === 'function' ? newSorting(sorting) : newSorting;
+      const resolvedSorting =
+        typeof newSorting === "function" ? newSorting(sorting) : newSorting;
       setSorting(resolvedSorting);
-      
+
       if (serverSide) {
         // Convert TanStack table sorting to server format
         let sortParam = "";
@@ -683,10 +700,10 @@ export function DataTable<TData extends BaseEntity>({
           const { id, desc } = resolvedSorting[0];
           sortParam = desc ? `-${id}` : id;
         }
-        
-        updateServerQueryParams({ 
-          sort: sortParam || undefined, 
-          page: 1 // Reset to first page when sorting
+
+        updateServerQueryParams({
+          sort: sortParam || undefined,
+          page: 1, // Reset to first page when sorting
         });
       }
     },
@@ -714,11 +731,11 @@ export function DataTable<TData extends BaseEntity>({
   const handleGlobalFilterChange = React.useCallback(
     (value: string) => {
       setGlobalFilter(value);
-      
+
       if (serverSide) {
-        updateServerQueryParams({ 
+        updateServerQueryParams({
           keyword: value || undefined,
-          page: 1 // Reset to first page when searching
+          page: 1, // Reset to first page when searching
         });
       }
     },
@@ -729,19 +746,21 @@ export function DataTable<TData extends BaseEntity>({
   const handleColumnFiltersChange = React.useCallback(
     (newColumnFilters: ColumnFiltersState) => {
       setColumnFilters(newColumnFilters);
-      
+
       if (serverSide) {
         // For server-side, we'll handle the specific filter column
-        const filterValue = newColumnFilters.find(f => f.id === filterColumn)?.value;
+        const filterValue = newColumnFilters.find(
+          (f) => f.id === filterColumn
+        )?.value;
         const filterParams: Record<string, any> = {};
-        
+
         if (filterValue) {
           filterParams[filterColumn] = filterValue;
         }
-        
-        updateServerQueryParams({ 
+
+        updateServerQueryParams({
           ...filterParams,
-          page: 1 // Reset to first page when filtering
+          page: 1, // Reset to first page when filtering
         });
       }
     },
@@ -752,23 +771,32 @@ export function DataTable<TData extends BaseEntity>({
   const handleColumnVisibilityChange = React.useCallback(
     (newVisibility: VisibilityState) => {
       setColumnVisibility(newVisibility);
-      
+
       if (serverSide) {
         // Build fields parameter from visible columns
         const visibleColumns = columns
-          .filter(col => {
-            if ('accessorKey' in col && col.accessorKey) {
+          .filter((col) => {
+            if ("accessorKey" in col && col.accessorKey) {
               const columnId = col.accessorKey as string;
               return newVisibility[columnId] !== false;
             }
             return true;
           })
-          .map(col => col.accessorKey as string)
+          .map((col) => col.accessorKey as string)
           .filter(Boolean);
-        
-        if (visibleColumns.length > 0) {
-          updateServerQueryParams({ 
-            fields: visibleColumns.join(',')
+
+        // Always include essential fields needed for the UI to work properly
+        const essentialFields = ["_id", "name", "slug", "mainImage"];
+        const allRequiredFields = [
+          ...new Set([...essentialFields, ...visibleColumns]),
+        ];
+
+        console.log("Visible columns:", visibleColumns);
+        console.log("All required fields:", allRequiredFields);
+
+        if (allRequiredFields.length > 0) {
+          updateServerQueryParams({
+            fields: allRequiredFields.join(","),
           });
         }
       }
@@ -780,33 +808,36 @@ export function DataTable<TData extends BaseEntity>({
   const handleAdvancedFiltersChange = React.useCallback(
     (filters: AdvancedFilters) => {
       setAdvancedFilters(filters);
-      
+
       if (serverSide) {
         // Clean old filter parameters first
-        const cleanedParams = cleanQueryParams(currentQueryParams, advancedFilters);
-        
+        const cleanedParams = cleanQueryParams(
+          currentQueryParams,
+          advancedFilters
+        );
+
         // Convert new advanced filters to query parameters
         const filterParams = convertAdvancedFiltersToQueryParams(filters);
-        
+
         // Merge cleaned params with new filter params
         const newParams = {
           ...cleanedParams,
           ...filterParams,
           page: 1, // Reset to first page when filtering
         };
-        
+
         // Remove undefined values
-        Object.keys(newParams).forEach(key => {
+        Object.keys(newParams).forEach((key) => {
           if (newParams[key] === undefined) {
             delete newParams[key];
           }
         });
-        
-        console.log('Advanced filters:', filters);
-        console.log('Cleaned params:', cleanedParams);
-        console.log('New filter params:', filterParams);
-        console.log('Final params:', newParams);
-        
+
+        console.log("Advanced filters:", filters);
+        console.log("Cleaned params:", cleanedParams);
+        console.log("New filter params:", filterParams);
+        console.log("Final params:", newParams);
+
         onQueryParamsChange?.(newParams);
       }
     },
@@ -878,7 +909,7 @@ export function DataTable<TData extends BaseEntity>({
 
   // Determine which data to use and pagination configuration
   const tableData = serverSide ? initialData : filteredData;
-  const tablePagination = serverSide 
+  const tablePagination = serverSide
     ? {
         pageIndex: (serverPagination?.currentPage || 1) - 1, // Convert 1-based to 0-based
         pageSize: serverPagination?.limit || pageSize,
@@ -922,7 +953,7 @@ export function DataTable<TData extends BaseEntity>({
   // Handle drag and drop (only in client-side mode)
   function handleDragEnd(event: DragEndEvent) {
     if (serverSide) return; // Disable drag and drop in server-side mode
-    
+
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
       setData((data) => {
@@ -946,13 +977,13 @@ export function DataTable<TData extends BaseEntity>({
     if (serverSide && currentQueryParams.sort) {
       const sortParam = currentQueryParams.sort;
       let newSorting: SortingState = [];
-      
+
       if (sortParam) {
-        const isDesc = sortParam.startsWith('-');
+        const isDesc = sortParam.startsWith("-");
         const columnId = isDesc ? sortParam.substring(1) : sortParam;
         newSorting = [{ id: columnId, desc: isDesc }];
       }
-      
+
       // Only update if different to avoid infinite loops
       if (JSON.stringify(newSorting) !== JSON.stringify(sorting)) {
         setSorting(newSorting);
@@ -964,19 +995,21 @@ export function DataTable<TData extends BaseEntity>({
   const selectedRows = table.getFilteredSelectedRowModel().rows;
 
   // Calculate pagination info for display
-  const paginationInfo = serverSide && serverPagination 
-    ? {
-        currentPage: serverPagination.currentPage,
-        totalPages: serverPagination.numberOfPages,
-        canPreviousPage: serverPagination.currentPage > 1,
-        canNextPage: serverPagination.currentPage < serverPagination.numberOfPages,
-      }
-    : {
-        currentPage: table.getState().pagination.pageIndex + 1,
-        totalPages: table.getPageCount(),
-        canPreviousPage: table.getCanPreviousPage(),
-        canNextPage: table.getCanNextPage(),
-      };
+  const paginationInfo =
+    serverSide && serverPagination
+      ? {
+          currentPage: serverPagination.currentPage,
+          totalPages: serverPagination.numberOfPages,
+          canPreviousPage: serverPagination.currentPage > 1,
+          canNextPage:
+            serverPagination.currentPage < serverPagination.numberOfPages,
+        }
+      : {
+          currentPage: table.getState().pagination.pageIndex + 1,
+          totalPages: table.getPageCount(),
+          canPreviousPage: table.getCanPreviousPage(),
+          canNextPage: table.getCanNextPage(),
+        };
 
   // FIXED: Enhanced table content with proper error and empty state handling
   const TableContent = () => (
@@ -1022,47 +1055,53 @@ export function DataTable<TData extends BaseEntity>({
       <TableBody className="**:data-[slot=table-cell]:first:w-8">
         {loading ? (
           <TableRow>
-            <TableCell colSpan={finalColumns.length} className="h-24 text-center">
+            <TableCell
+              colSpan={finalColumns.length}
+              className="h-24 text-center"
+            >
               Loading...
             </TableCell>
           </TableRow>
-        ) : error || (table.getRowModel().rows?.length === 0) ? (
+        ) : error || table.getRowModel().rows?.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={finalColumns.length} className="h-24 text-center">
+            <TableCell
+              colSpan={finalColumns.length}
+              className="h-24 text-center"
+            >
               {error ? (
                 <div className="text-muted-foreground">
                   <p className="font-medium">No Results Found</p>
-                  <p className="text-sm mt-1">Try adjusting your search or filter criteria</p>
+                  <p className="text-sm mt-1">
+                    Try adjusting your search or filter criteria
+                  </p>
                 </div>
               ) : (
                 "No results."
               )}
             </TableCell>
           </TableRow>
+        ) : enableDragAndDrop && !serverSide ? (
+          <SortableContext
+            items={dataIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {table.getRowModel().rows.map((row) => (
+              <DraggableRow key={row.id} row={row} />
+            ))}
+          </SortableContext>
         ) : (
-          enableDragAndDrop && !serverSide ? (
-            <SortableContext
-              items={dataIds}
-              strategy={verticalListSortingStrategy}
+          table.getRowModel().rows.map((row) => (
+            <TableRow
+              key={row.id}
+              data-state={row.getIsSelected() && "selected"}
             >
-              {table.getRowModel().rows.map((row) => (
-                <DraggableRow key={row.id} row={row} />
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
               ))}
-            </SortableContext>
-          ) : (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          )
+            </TableRow>
+          ))
         )}
       </TableBody>
     </Table>
@@ -1204,9 +1243,9 @@ export function DataTable<TData extends BaseEntity>({
                 onValueChange={(value) => {
                   const newPageSize = Number(value);
                   if (serverSide) {
-                    updateServerQueryParams({ 
+                    updateServerQueryParams({
                       limit: newPageSize,
-                      page: 1 // Reset to first page when changing page size
+                      page: 1, // Reset to first page when changing page size
                     });
                   } else {
                     table.setPageSize(newPageSize);
@@ -1250,7 +1289,12 @@ export function DataTable<TData extends BaseEntity>({
                 size="icon"
                 onClick={() => {
                   if (serverSide) {
-                    updateServerQueryParams({ page: Math.max(1, (serverPagination?.currentPage || 1) - 1) });
+                    updateServerQueryParams({
+                      page: Math.max(
+                        1,
+                        (serverPagination?.currentPage || 1) - 1
+                      ),
+                    });
                   } else {
                     table.previousPage();
                   }
@@ -1266,11 +1310,11 @@ export function DataTable<TData extends BaseEntity>({
                 size="icon"
                 onClick={() => {
                   if (serverSide) {
-                    updateServerQueryParams({ 
+                    updateServerQueryParams({
                       page: Math.min(
-                        serverPagination?.numberOfPages || 1, 
+                        serverPagination?.numberOfPages || 1,
                         (serverPagination?.currentPage || 1) + 1
-                      ) 
+                      ),
                     });
                   } else {
                     table.nextPage();
@@ -1287,7 +1331,9 @@ export function DataTable<TData extends BaseEntity>({
                 size="icon"
                 onClick={() => {
                   if (serverSide) {
-                    updateServerQueryParams({ page: serverPagination?.numberOfPages || 1 });
+                    updateServerQueryParams({
+                      page: serverPagination?.numberOfPages || 1,
+                    });
                   } else {
                     table.setPageIndex(table.getPageCount() - 1);
                   }

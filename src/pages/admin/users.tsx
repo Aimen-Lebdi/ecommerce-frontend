@@ -1,17 +1,24 @@
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../components/ui/avatar";
 import { toast } from "sonner";
-import { createEditUserDialog, UserDialog } from "../../components/admin/global/UserDialog";
+import {
+  createEditUserDialog,
+  UserDialog,
+} from "../../components/admin/global/UserDialog";
 import { DataTable } from "../../components/admin/global/data-table";
 // Define the User entity type
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'customer' | 'moderator' | 'support';
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
+  role: "admin" | "customer" | "moderator" | "support";
+  status: "active" | "inactive" | "suspended" | "pending";
   avatar?: string;
   lastLogin: string;
   totalOrders: number;
@@ -30,7 +37,7 @@ const usersData: User[] = [
     lastLogin: "2024-02-19",
     totalOrders: 0,
     totalSpent: 0,
-    createdAt: "2023-09-12"
+    createdAt: "2023-09-12",
   },
   {
     id: 8,
@@ -38,11 +45,12 @@ const usersData: User[] = [
     email: "jennifer.white@email.com",
     role: "customer",
     status: "pending",
-    avatar: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=40&h=40&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=40&h=40&fit=crop&crop=face",
     lastLogin: "2024-02-20",
     totalOrders: 1,
     totalSpent: 149.99,
-    createdAt: "2024-02-19"
+    createdAt: "2024-02-19",
   },
   {
     id: 9,
@@ -53,7 +61,7 @@ const usersData: User[] = [
     lastLogin: "2024-01-05",
     totalOrders: 5,
     totalSpent: 789.45,
-    createdAt: "2023-10-18"
+    createdAt: "2023-10-18",
   },
   {
     id: 10,
@@ -61,12 +69,13 @@ const usersData: User[] = [
     email: "maria.garcia@email.com",
     role: "customer",
     status: "active",
-    avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=40&h=40&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=40&h=40&fit=crop&crop=face",
     lastLogin: "2024-02-18",
     totalOrders: 12,
-    totalSpent: 2156.30,
-    createdAt: "2023-07-03"
-  }
+    totalSpent: 2156.3,
+    createdAt: "2023-07-03",
+  },
 ];
 
 // Define columns specific to Users
@@ -77,24 +86,20 @@ const usersColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original;
       const initials = user.name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
         .toUpperCase();
-      
+
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="text-xs">
-              {initials}
-            </AvatarFallback>
+            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
           <div>
             <div className="font-medium">{user.name}</div>
-            <div className="text-xs text-muted-foreground">
-              {user.email}
-            </div>
+            <div className="text-xs text-muted-foreground">{user.email}</div>
           </div>
         </div>
       );
@@ -107,15 +112,13 @@ const usersColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
       const variants = {
-        admin: 'destructive',
-        moderator: 'default',
-        support: 'default',
-        customer: 'secondary'
+        admin: "destructive",
+        moderator: "default",
+        support: "default",
+        customer: "secondary",
       } as const;
       return (
-        <Badge variant={variants[role as keyof typeof variants]}>
-          {role}
-        </Badge>
+        <Badge variant={variants[role as keyof typeof variants]}>{role}</Badge>
       );
     },
   },
@@ -125,10 +128,10 @@ const usersColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       const variants = {
-        active: 'default',
-        inactive: 'secondary',
-        suspended: 'destructive',
-        pending: 'secondary'
+        active: "default",
+        inactive: "secondary",
+        suspended: "destructive",
+        pending: "secondary",
       } as const;
       return (
         <Badge variant={variants[status as keyof typeof variants]}>
@@ -143,9 +146,7 @@ const usersColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const orders = row.getValue("totalOrders") as number;
       return (
-        <div className="text-center font-medium">
-          {orders.toLocaleString()}
-        </div>
+        <div className="text-center font-medium">{orders.toLocaleString()}</div>
       );
     },
   },
@@ -154,11 +155,7 @@ const usersColumns: ColumnDef<User>[] = [
     header: "Total Spent",
     cell: ({ row }) => {
       const spent = row.getValue("totalSpent") as number;
-      return (
-        <div className="text-center font-medium">
-          ${spent.toFixed(2)}
-        </div>
-      );
+      return <div className="text-center font-medium">${spent.toFixed(2)}</div>;
     },
   },
   {
@@ -169,12 +166,14 @@ const usersColumns: ColumnDef<User>[] = [
       const now = new Date();
       const diffTime = Math.abs(now.getTime() - date.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
+
       return (
         <div className="text-muted-foreground">
-          {diffDays === 1 ? 'Yesterday' : 
-           diffDays < 7 ? `${diffDays} days ago` :
-           date.toLocaleDateString()}
+          {diffDays === 1
+            ? "Yesterday"
+            : diffDays < 7
+            ? `${diffDays} days ago`
+            : date.toLocaleDateString()}
         </div>
       );
     },
@@ -185,9 +184,7 @@ const usersColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
-        <div className="text-muted-foreground">
-          {date.toLocaleDateString()}
-        </div>
+        <div className="text-muted-foreground">{date.toLocaleDateString()}</div>
       );
     },
   },
@@ -232,7 +229,6 @@ export default function Users() {
     console.log("Updated User:", updatedUser);
   };
 
-
   const handleDataChange = (newData: User[]) => {
     setUsers(newData);
     // Here you would typically sync with your backend
@@ -246,9 +242,7 @@ export default function Users() {
           <DataTable
             data={users}
             columns={usersColumns}
-            dialogComponent={
-              <UserDialog mode="add" onSave={handleAddUser} />
-            }
+            dialogComponent={<UserDialog mode="add" onSave={handleAddUser} />}
             editDialogComponent={createEditUserDialog}
             onRowUpdate={handleUpdateUser}
             enableDragAndDrop={false} // Users shouldn't be reorderable
@@ -266,4 +260,4 @@ export default function Users() {
       </div>
     </div>
   );
-} 
+}
