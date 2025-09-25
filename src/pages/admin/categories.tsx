@@ -236,7 +236,7 @@ export default function Categories() {
                 rowData,
                 (updatedData) => {
                   // Handle the category update by extracting ID and calling update handler
-                  const id = updatedData._id;
+                  const id = rowData._id;
                   const {
                     _id,
                     createdAt,
