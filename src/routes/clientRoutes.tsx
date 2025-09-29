@@ -10,6 +10,7 @@ import OrderConfirmationPage from "../pages/client/orderConfirmation";
 import MyAccountDashboard from "../pages/client/myAccount";
 import SignUpPage from "../pages/client/SignUp";
 import SignInPage from "../pages/client/SignIn";
+import ForgotPasswordPage from "../pages/client/ForgetPassword";
 import CodeVerificationPage from "../pages/client/CodeVerification";
 import ResetPasswordPage from "../pages/client/ResetPassword";
 
@@ -27,7 +28,8 @@ const UserRoutes = {
     { path: "my-account", element: <MyAccountDashboard /> },
     { path: "sign-up", element: <SignUpPage /> },
     { path: "sign-in", element: <SignInPage /> },
-    { path: "code-verification", element: <CodeVerificationPage /> },
+    { path: "forgot-password", element: <ForgotPasswordPage /> },
+    { path: "verify-reset-code", element: <CodeVerificationPage /> },
     { path: "reset-password", element: <ResetPasswordPage /> },
   ],
 };

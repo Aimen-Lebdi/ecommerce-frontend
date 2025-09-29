@@ -7,6 +7,9 @@ import {
   Menu,
   Globe,
   ChevronDown,
+  LogOut,
+  Settings,
+  Package,
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -28,7 +31,9 @@ import {
 } from "../../ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
 import { ModeToggle } from "../../mode-toggle";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { signOut } from "../../../features/auth/authSlice";
 
 const categories = [
   {
@@ -53,6 +58,15 @@ const categories = [
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+  const handleSignOut = () => {
+    dispatch(signOut());
+    navigate('/sign-in');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -61,7 +75,7 @@ export function Header() {
         <div className="container mx-auto px-4">
           <div className="flex h-10 items-center justify-center text-sm">
             <p className="text-muted-foreground">
-              🎉 Free shipping on orders over $50! Use code:{" "}
+              Free shipping on orders over $50! Use code:{" "}
               <span className="font-semibold text-primary">FREESHIP</span>
             </p>
           </div>
@@ -73,14 +87,14 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-lg font-bold text-primary-foreground">
                   C
                 </span>
               </div>
               <span className="font-bold text-xl">CLICON</span>
-            </a>
+            </Link>
           </div>
 
           {/* Search Bar - Desktop */}
@@ -103,21 +117,21 @@ export function Header() {
               {/* Language Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="">
+                  <Button variant="ghost" size="sm">
                     <Globe className="h-4 w-4 mr-1" />
                     EN
                     <ChevronDown className="h-3 w-3 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>🇺🇸 English</DropdownMenuItem>
-                  <DropdownMenuItem>🇫🇷 Français</DropdownMenuItem>
-                  <DropdownMenuItem>🇩🇿 العربية</DropdownMenuItem>
+                  <DropdownMenuItem>English</DropdownMenuItem>
+                  <DropdownMenuItem>Français</DropdownMenuItem>
+                  <DropdownMenuItem>العربية</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
               {/* Dark Mode Toggle */}
-              <ModeToggle></ModeToggle>
+              <ModeToggle />
             </div>
 
             {/* Wishlist */}
@@ -130,11 +144,11 @@ export function Header() {
 
             {/* Shopping Cart */}
             <Button variant="ghost" size="sm" className="relative">
-              <Link to='/cart'>
-              <ShoppingCart className="h-5 w-5" />
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
-                2
-              </Badge>
+              <Link to="/cart">
+                <ShoppingCart className="h-5 w-5" />
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                  2
+                </Badge>
               </Link>
             </Button>
 
@@ -145,13 +159,55 @@ export function Header() {
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>My Account</DropdownMenuItem>
-                <DropdownMenuItem>Orders</DropdownMenuItem>
-                <DropdownMenuItem>Wishlist</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Sign In</DropdownMenuItem>
-                <DropdownMenuItem>Register</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-56">
+                {isAuthenticated && user ? (
+                  <>
+                    <div className="px-2 py-1.5">
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-account" className="cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        My Account
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-account?tab=orders" className="cursor-pointer">
+                        <Package className="mr-2 h-4 w-4" />
+                        Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-account?tab=wishlist" className="cursor-pointer">
+                        <Heart className="mr-2 h-4 w-4" />
+                        Wishlist
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={handleSignOut}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/sign-in" className="cursor-pointer">
+                        Sign In
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/sign-up" className="cursor-pointer">
+                        Register
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -169,28 +225,86 @@ export function Header() {
                     {/* Language Selector */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="">
+                        <Button variant="ghost" size="sm">
                           <Globe className="h-4 w-4 mr-1" />
                           EN
                           <ChevronDown className="h-3 w-3 ml-1" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
-                        <DropdownMenuItem>🇺🇸 English</DropdownMenuItem>
-                        <DropdownMenuItem>🇫🇷 Français</DropdownMenuItem>
-                        <DropdownMenuItem>🇩🇿 العربية</DropdownMenuItem>
+                        <DropdownMenuItem>English</DropdownMenuItem>
+                        <DropdownMenuItem>Français</DropdownMenuItem>
+                        <DropdownMenuItem>العربية</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <ModeToggle></ModeToggle>
+                    <ModeToggle />
                   </div>
 
-                  <div className="space-y-2">
-                    <a href="/" className="block py-2 text-lg font-medium">
+                  {/* User Section in Mobile */}
+                  {isAuthenticated && user ? (
+                    <div className="border-t pt-4">
+                      <div className="px-2 py-2 mb-2">
+                        <p className="text-sm font-medium">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                      <Link 
+                        to="/my-account" 
+                        className="block py-2 text-sm font-medium hover:text-primary"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        My Account
+                      </Link>
+                      <Link 
+                        to="/my-account?tab=orders" 
+                        className="block py-2 text-sm font-medium hover:text-primary"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Orders
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleSignOut();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="block w-full text-left py-2 text-sm font-medium text-destructive hover:text-destructive/90"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="border-t pt-4 space-y-2">
+                      <Link 
+                        to="/sign-in"
+                        className="block py-2 text-sm font-medium hover:text-primary"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Sign In
+                      </Link>
+                      <Link 
+                        to="/sign-up"
+                        className="block py-2 text-sm font-medium hover:text-primary"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Register
+                      </Link>
+                    </div>
+                  )}
+
+                  <div className="space-y-2 border-t pt-4">
+                    <Link 
+                      to="/" 
+                      className="block py-2 text-lg font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       Home
-                    </a>
-                    <a href="/shop" className="block py-2 text-lg font-medium">
+                    </Link>
+                    <Link 
+                      to="/shop" 
+                      className="block py-2 text-lg font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       Shop
-                    </a>
+                    </Link>
                     <a
                       href="/categories"
                       className="block py-2 text-lg font-medium"
@@ -200,9 +314,13 @@ export function Header() {
                     <a href="/deals" className="block py-2 text-lg font-medium">
                       Deals
                     </a>
-                    <a href="/about" className="block py-2 text-lg font-medium">
+                    <Link 
+                      to="/about" 
+                      className="block py-2 text-lg font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       About
-                    </a>
+                    </Link>
                     <a
                       href="/contact"
                       className="block py-2 text-lg font-medium"
@@ -235,10 +353,7 @@ export function Header() {
           <NavigationMenu className="max-w-full">
             <NavigationMenuList className="flex-wrap">
               <NavigationMenuItem>
-                <Link
-                  to="/"
-                  className="px-4 py-3 text-sm font-medium"
-                >
+                <Link to="/" className="px-4 py-3 text-sm font-medium">
                   Home
                 </Link>
               </NavigationMenuItem>
@@ -271,15 +386,12 @@ export function Header() {
                   href="/deals"
                   className="px-4 py-3 text-sm font-medium text-red-600"
                 >
-                  Hot Deals 🔥
+                  Hot Deals
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link 
-                  to="/shop"
-                  className="px-4 py-3 text-sm font-medium"
-                >
+                <Link to="/shop" className="px-4 py-3 text-sm font-medium">
                   Shop
                 </Link>
               </NavigationMenuItem>

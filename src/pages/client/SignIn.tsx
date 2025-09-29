@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Shield, Lock, Mail, ArrowLeft } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -15,14 +16,14 @@ import { Separator } from "../../components/ui/separator";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { signIn, clearError } from "../../features/auth/authSlice";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 
 export default function SignInPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isSigningIn, error, isAuthenticated, user } = useAppSelector(
+  const { isSigningIn, error, tokenExpired,loading,  isAuthenticated, user } = useAppSelector(
     (state) => state.auth
   );
 
@@ -53,6 +54,12 @@ export default function SignInPage() {
     }
   }, [isAuthenticated, user, navigate, location]);
 
+  // Only redirect if truly authenticated (not expired)
+  if (isAuthenticated && !tokenExpired && !loading) {
+    // Get the intended destination from location state, or default to home
+    const from = (location.state as any)?.from?.pathname || '/';
+    return <Navigate to={from} replace />;
+  }
   // Email validation
   const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

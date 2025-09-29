@@ -1,5 +1,6 @@
-import  { useState } from 'react';
-import { Eye, EyeOff, Check, X, Shield, Lock, Mail, User, Phone, ArrowLeft } from 'lucide-react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from 'react';
+import { Eye, EyeOff, Check, X, Shield, Lock, Mail, User, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -8,8 +9,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Separator } from '../../components/ui/separator';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Progress } from '../../components/ui/progress';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { signUp, clearError } from '../../features/auth/authSlice';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 export default function SignUpPage() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { isSigningUp, error, isAuthenticated, user, loading, tokenExpired } = useAppSelector(
+    (state) => state.auth
+  );
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -24,8 +36,32 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+
+  // Clear errors when component mounts or when user starts typing
+  useEffect(() => {
+    if (error) {
+      dispatch(clearError());
+    }
+  }, [dispatch]);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Get the intended destination from location state or default based on role
+      const from =
+        location.state?.from?.pathname ||
+        (user.role === "admin" ? "/admin" : "/");
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate, location]);
+
+  // Only redirect if truly authenticated (not expired)
+  if (isAuthenticated && !tokenExpired && !loading) {
+    // Get the intended destination from location state, or default to home
+    const from = (location.state as any)?.from?.pathname || '/';
+    return <Navigate to={from} replace />;
+  }
 
   // Password strength calculation
   const calculatePasswordStrength = (password) => {
@@ -62,6 +98,11 @@ export default function SignUpPage() {
       }));
     }
 
+    // Clear auth error when user starts typing
+    if (error) {
+      dispatch(clearError());
+    }
+
     // Update password strength in real-time
     if (name === 'password') {
       setPasswordStrength(calculatePasswordStrength(value));
@@ -71,22 +112,21 @@ export default function SignUpPage() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Required fields
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    // Required fields - use firstName as name for backend
+    if (!formData.firstName.trim()) newErrors.firstName = 'Name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
     else if (!isValidEmail(formData.email)) newErrors.email = 'Please enter a valid email address';
     
     if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters long';
-    else if (passwordStrength < 3) newErrors.password = 'Password is too weak. Include uppercase, lowercase, numbers, and symbols.';
+    else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters long';
+    // else if (passwordStrength < 3) newErrors.password = 'Password is too weak. Include uppercase, lowercase, numbers, and symbols.';
     
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
     else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     
-    if (formData.phone && !isValidPhone(formData.phone)) newErrors.phone = 'Please enter a valid phone number';
+    // if (formData.phone && !isValidPhone(formData.phone)) newErrors.phone = 'Please enter a valid phone number';
     
-    if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree to the Terms of Service and Privacy Policy';
+    // if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree to the Terms of Service and Privacy Policy';
 
     return newErrors;
   };
@@ -99,18 +139,21 @@ export default function SignUpPage() {
       return;
     }
 
-    setIsSubmitting(true);
     setErrors({});
 
-    // Simulate API call
+    // Dispatch sign up action
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Account created successfully! Please check your email to verify your account.');
-      // In real app: redirect to email verification or login page
+      await dispatch(signUp({
+        name: formData.firstName, // Backend expects 'name' field
+        email: formData.email,
+        password: formData.password,
+        passwordConfirm: formData.confirmPassword,
+      })).unwrap();
+
+      // Navigation will be handled by the useEffect above
     } catch (error) {
-      setErrors({ submit: 'Failed to create account. Please try again.' });
-    } finally {
-      setIsSubmitting(false);
+      // Error will be handled by the auth slice and displayed in the UI
+      console.error("Sign up failed:", error);
     }
   };
 
@@ -138,7 +181,11 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Back to Login Link */}
-        <Button variant="ghost" className="p-0 h-auto font-normal">
+        <Button 
+          variant="ghost" 
+          className="p-0 h-auto font-normal"
+          onClick={() => navigate('/sign-in')}
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Login
         </Button>
@@ -188,41 +235,22 @@ export default function SignUpPage() {
               {/* Name Fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name *</Label>
+                  <Label htmlFor="firstName">Name *</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="firstName"
-                      placeholder="John"
+                      placeholder="John Doe"
                       value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       className={`pl-10 ${errors.firstName ? 'border-destructive' : ''}`}
+                      disabled={isSigningUp}
                     />
                   </div>
                   {errors.firstName && (
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <X className="h-3 w-3" />
                       {errors.firstName}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name *</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="lastName"
-                      placeholder="Doe"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className={`pl-10 ${errors.lastName ? 'border-destructive' : ''}`}
-                    />
-                  </div>
-                  {errors.lastName && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <X className="h-3 w-3" />
-                      {errors.lastName}
                     </p>
                   )}
                 </div>
@@ -240,6 +268,7 @@ export default function SignUpPage() {
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
+                    disabled={isSigningUp}
                   />
                 </div>
                 {errors.email && (
@@ -248,32 +277,6 @@ export default function SignUpPage() {
                     {errors.email}
                   </p>
                 )}
-              </div>
-
-              {/* Phone Number */}
-              <div className="space-y-2">
-                <Label htmlFor="phone">
-                  Phone Number <span className="text-muted-foreground font-normal">(Optional)</span>
-                </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+1 (555) 123-4567"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className={`pl-10 ${errors.phone ? 'border-destructive' : ''}`}
-                  />
-                </div>
-                {errors.phone ? (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    <X className="h-3 w-3" />
-                    {errors.phone}
-                  </p>
-                ) : formData.phone === '' ? (
-                  <p className="text-xs text-muted-foreground">For shipping updates and order notifications</p>
-                ) : null}
               </div>
 
               {/* Password */}
@@ -288,6 +291,7 @@ export default function SignUpPage() {
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
+                    disabled={isSigningUp}
                   />
                   <Button
                     type="button"
@@ -295,6 +299,7 @@ export default function SignUpPage() {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isSigningUp}
                   >
                     {showPassword ? 
                       <EyeOff className="h-4 w-4" /> : 
@@ -309,7 +314,7 @@ export default function SignUpPage() {
                     <div className="flex items-center gap-2">
                       <Progress 
                         value={getPasswordStrengthValue()} 
-                        className="flex-1 h-2"
+                        className={`flex-1 h-2 ${getPasswordStrengthColor()} `}
                       />
                       <span className="text-xs text-muted-foreground min-w-[60px]">
                         {getPasswordStrengthText()}
@@ -317,10 +322,10 @@ export default function SignUpPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className={`flex items-center gap-1 ${formData.password.length >= 8 ? 'text-green-600' : 'text-muted-foreground'}`}>
-                        {formData.password.length >= 8 ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                        8+ characters
+                        {formData.password.length >= 6 ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                        6+ characters
                       </div>
-                      <div className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      {/* <div className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-muted-foreground'}`}>
                         {/[A-Z]/.test(formData.password) ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         Uppercase
                       </div>
@@ -331,7 +336,7 @@ export default function SignUpPage() {
                       <div className={`flex items-center gap-1 ${/[0-9]/.test(formData.password) ? 'text-green-600' : 'text-muted-foreground'}`}>
                         {/[0-9]/.test(formData.password) ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         Number
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 )}
@@ -356,6 +361,7 @@ export default function SignUpPage() {
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                     className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                    disabled={isSigningUp}
                   />
                   <Button
                     type="button"
@@ -363,6 +369,7 @@ export default function SignUpPage() {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={isSigningUp}
                   >
                     {showConfirmPassword ? 
                       <EyeOff className="h-4 w-4" /> : 
@@ -385,13 +392,14 @@ export default function SignUpPage() {
               </div>
 
               {/* Checkboxes */}
-              <div className="space-y-4">
+              {/* <div className="space-y-4">
                 <div className="flex items-start space-x-2">
                   <Checkbox
                     id="agreeToTerms"
                     checked={formData.agreeToTerms}
                     onCheckedChange={(checked) => handleInputChange('agreeToTerms', checked)}
                     className="mt-0.5"
+                    disabled={isSigningUp}
                   />
                   <div className="grid gap-1.5 leading-none">
                     <Label
@@ -422,6 +430,7 @@ export default function SignUpPage() {
                     checked={formData.marketingEmails}
                     onCheckedChange={(checked) => handleInputChange('marketingEmails', checked)}
                     className="mt-0.5"
+                    disabled={isSigningUp}
                   />
                   <div className="grid gap-1.5 leading-none">
                     <Label
@@ -432,16 +441,16 @@ export default function SignUpPage() {
                     </Label>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={isSigningUp}
                 className="w-full"
                 size="lg"
               >
-                {isSubmitting ? (
+                {isSigningUp ? (
                   <>
                     <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2"></div>
                     Creating Account...
@@ -451,11 +460,12 @@ export default function SignUpPage() {
                 )}
               </Button>
 
-              {errors.submit && (
+              {/* Display auth error */}
+              {error && (
                 <Alert variant="destructive">
                   <X className="h-4 w-4" />
                   <AlertDescription>
-                    {errors.submit}
+                    {error}
                   </AlertDescription>
                 </Alert>
               )}
@@ -476,7 +486,11 @@ export default function SignUpPage() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{' '}
-                <Button variant="link" className="p-0 h-auto font-medium">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto font-medium"
+                  onClick={() => navigate('/sign-in')}
+                >
                   Sign in here
                 </Button>
               </p>

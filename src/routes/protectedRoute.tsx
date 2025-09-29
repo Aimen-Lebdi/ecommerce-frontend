@@ -1,11 +1,39 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAppSelector } from "../app/hooks";
+import { useAppSelector, useAppDispatch } from "../app/hooks";
+import { useEffect } from "react";
+import { verifyToken, handleTokenExpiration } from "../features/auth/authSlice"; // Import the new actions
 
 export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
   const location = useLocation();
-  const { user, isAuthenticated, loading } = useAppSelector(
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated, loading, tokenExpired } = useAppSelector(
     (state) => state.auth
   );
+
+  // Verify token when component mounts
+  useEffect(() => {
+    if (!isAuthenticated && !loading && !tokenExpired) {
+      // Only verify if we're not already authenticated and not currently loading
+      const token = localStorage.getItem("token");
+      if (token) {
+        dispatch(verifyToken());
+      }
+    }
+  }, [dispatch, isAuthenticated, loading, tokenExpired]);
+
+  // Handle API errors (token expiration) from other parts of the app
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      // This can be triggered from your API interceptors
+      dispatch(handleTokenExpiration());
+    };
+
+    window.addEventListener('tokenExpired', handleUnauthorized as EventListener);
+
+    return () => {
+      window.removeEventListener('tokenExpired', handleUnauthorized as EventListener);
+    };
+  }, [dispatch]);
 
   // Show loading spinner while checking auth state
   if (loading) {
@@ -16,8 +44,8 @@ export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
     );
   }
 
-  // If not authenticated, redirect to sign in with the current location
-  if (!isAuthenticated || !user) {
+  // If token expired or not authenticated, redirect to sign in with the current location
+  if (!isAuthenticated || !user || tokenExpired) {
     return <Navigate to="/sign-in" state={{ from: location }} replace />;
   }
 

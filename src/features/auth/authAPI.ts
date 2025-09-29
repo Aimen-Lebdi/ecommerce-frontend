@@ -6,8 +6,16 @@ export interface SignInData {
   password: string;
 }
 
-// Interface for signin response
-export interface SignInResponse {
+// Interface for signup request
+export interface SignUpData {
+  name: string;
+  email: string;
+  password: string;
+  passwordConfirm: string;
+}
+
+// Interface for auth response (both signin and signup)
+export interface AuthResponse {
   data: {
     _id: string;
     name: string;
@@ -19,43 +27,74 @@ export interface SignInResponse {
   token: string;
 }
 
+// Interface for forgot password request
+export interface ForgotPasswordData {
+  email: string;
+}
+
+// Interface for forgot password response
+export interface ForgotPasswordResponse {
+  status: string;
+  message: string;
+}
+
+// Interface for verify reset code request
+export interface VerifyResetCodeData {
+  resetCode: string;
+}
+
+// Interface for verify reset code response
+export interface VerifyResetCodeResponse {
+  status: string;
+}
+
+// Interface for reset password request
+export interface ResetPasswordData {
+  email: string;
+  newPassword: string;
+}
+
+// Interface for reset password response
+export interface ResetPasswordResponse {
+  token: string;
+}
+
 // Sign in API call
 export const signInAPI = async (
   signInData: SignInData
-): Promise<SignInResponse> => {
+): Promise<AuthResponse> => {
   const response = await axiosInstance.post("/api/auth/login", signInData);
   return response.data;
 };
 
-// Sign up API call (for future use)
+// Sign up API call
 export const signUpAPI = async (
-  signUpData: FormData
-): Promise<SignInResponse> => {
+  signUpData: SignUpData
+): Promise<AuthResponse> => {
   const response = await axiosInstance.post("/api/auth/signup", signUpData);
   return response.data;
 };
 
-// Forgot password API call (for future use)
-export const forgotPasswordAPI = async (email: string) => {
-  const response = await axiosInstance.post("/api/auth/forgotPassword", {
-    email,
-  });
+// Forgot password API call
+export const forgotPasswordAPI = async (
+  forgotPasswordData: ForgotPasswordData
+): Promise<ForgotPasswordResponse> => {
+  const response = await axiosInstance.post("/api/auth/forgotPassword", forgotPasswordData);
   return response.data;
 };
 
-// Verify reset code API call (for future use)
-export const verifyResetCodeAPI = async (resetCode: string) => {
-  const response = await axiosInstance.post("/api/auth/verifyResetCode", {
-    resetCode,
-  });
+// Verify reset code API call
+export const verifyResetCodeAPI = async (
+  verifyResetCodeData: VerifyResetCodeData
+): Promise<VerifyResetCodeResponse> => {
+  const response = await axiosInstance.post("/api/auth/verifyResetCode", verifyResetCodeData);
   return response.data;
 };
 
-// Reset password API call (for future use)
-export const resetPasswordAPI = async (email: string, newPassword: string) => {
-  const response = await axiosInstance.put("/api/auth/resetPassword", {
-    email,
-    newPassword,
-  });
+// Reset password API call
+export const resetPasswordAPI = async (
+  resetPasswordData: ResetPasswordData
+): Promise<ResetPasswordResponse> => {
+  const response = await axiosInstance.put("/api/auth/resetPassword", resetPasswordData);
   return response.data;
 };

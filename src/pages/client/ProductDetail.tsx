@@ -6,7 +6,7 @@ import { Card, CardContent } from "../../components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
-import { mockProducts } from "./Shop" // reuse mock data for now
+// import { mockProducts } from "./Shop" // reuse mock data for now
 
 const ProductDetails = () => {
   const { id } = useParams()

@@ -1,17 +1,50 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Mail, Smartphone, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { verifyResetCode, clearError, setResetEmail } from '../../features/auth/authSlice';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const CodeVerificationPage = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { isVerifyingResetCode, error, verifyResetCodeSuccess, resetEmail } = useAppSelector(
+    (state) => state.auth
+  );
+
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [resendTimer, setResendTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const [expiryTimer, setExpiryTimer] = useState(300); // 5 minutes
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [contactMethod] = useState({ type: 'email', value: 'john.doe@example.com' });
+  const [localError, setLocalError] = useState('');
+  const [contactMethod] = useState({ 
+    type: 'email', 
+    value: resetEmail || (location.state as any)?.email || 'your email'
+  });
   
-  const inputRefs = useRef([]);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Clear errors when component mounts
+  useEffect(() => {
+    if (error) {
+      dispatch(clearError());
+    }
+  }, [dispatch]);
+
+  // Redirect if no email in state
+  useEffect(() => {
+    if (!resetEmail && !(location.state as any)?.email) {
+      navigate('/forgot-password', { replace: true });
+    }
+  }, [resetEmail, location.state, navigate]);
+
+  // Redirect to reset password on successful verification
+  useEffect(() => {
+    if (verifyResetCodeSuccess) {
+      navigate('/reset-password', { replace: true });
+    }
+  }, [verifyResetCodeSuccess, navigate]);
 
   // Timer effects
   useEffect(() => {
@@ -32,7 +65,7 @@ const CodeVerificationPage = () => {
     const expiryInterval = setInterval(() => {
       setExpiryTimer(prev => {
         if (prev <= 1) {
-          setError('Verification code has expired. Please request a new one.');
+          setLocalError('Verification code has expired. Please request a new one.');
           return 0;
         }
         return prev - 1;
@@ -42,13 +75,13 @@ const CodeVerificationPage = () => {
     return () => clearInterval(expiryInterval);
   }, []);
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleInputChange = (index, value) => {
+  const handleInputChange = (index: number, value: string) => {
     // Only allow single digit
     if (value.length > 1) return;
     
@@ -58,7 +91,12 @@ const CodeVerificationPage = () => {
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
-    setError('');
+    setLocalError('');
+    
+    // Clear auth error when user starts typing
+    if (error) {
+      dispatch(clearError());
+    }
 
     // Auto-focus next input
     if (value && index < 5) {
@@ -71,7 +109,7 @@ const CodeVerificationPage = () => {
     }
   };
 
-  const handleKeyDown = (index, e) => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace') {
       if (!code[index] && index > 0) {
         // Move to previous input if current is empty
@@ -89,14 +127,19 @@ const CodeVerificationPage = () => {
     }
   };
 
-  const handlePaste = (e) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
     
     if (pastedData.length === 6) {
       const newCode = pastedData.split('').slice(0, 6);
       setCode(newCode);
-      setError('');
+      setLocalError('');
+      
+      // Clear auth error
+      if (error) {
+        dispatch(clearError());
+      }
       
       // Focus last input
       inputRefs.current[5]?.focus();
@@ -106,38 +149,31 @@ const CodeVerificationPage = () => {
     }
   };
 
-  const handleVerification = async (codeToVerify = code) => {
+  const handleVerification = async (codeToVerify: string[] = code) => {
     if (codeToVerify.some(digit => digit === '')) {
-      setError('Please enter the complete verification code');
+      setLocalError('Please enter the complete verification code');
       return;
     }
 
-    setIsVerifying(true);
-    setError('');
+    if (expiryTimer === 0) {
+      setLocalError('Verification code has expired. Please request a new one.');
+      return;
+    }
+
+    setLocalError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
       const enteredCode = codeToVerify.join('');
       
-      // Simulate verification logic
-      if (enteredCode === '123456') {
-        setSuccess(true);
-        // Redirect after success animation
-        setTimeout(() => {
-          console.log('Redirecting to dashboard...');
-        }, 2000);
-      } else {
-        setError('Invalid verification code. Please try again.');
-        // Clear the code
-        setCode(['', '', '', '', '', '']);
-        inputRefs.current[0]?.focus();
-      }
+      await dispatch(verifyResetCode({ resetCode: enteredCode })).unwrap();
+      
+      // Navigation will be handled by the useEffect above
     } catch (err) {
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsVerifying(false);
+      // Error will be handled by the auth slice and displayed in the UI
+      console.error("Verification failed:", err);
+      // Clear the code on error
+      setCode(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     }
   };
 
@@ -147,40 +183,21 @@ const CodeVerificationPage = () => {
     setCanResend(false);
     setResendTimer(30);
     setExpiryTimer(300);
-    setError('');
+    setLocalError('');
     setCode(['', '', '', '', '', '']);
     
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Code resent successfully');
-    } catch (err) {
-      setError('Failed to resend code. Please try again.');
-      setCanResend(true);
-      setResendTimer(0);
+    // Clear auth error
+    if (error) {
+      dispatch(clearError());
     }
+    
+    // Navigate back to forgot password to resend
+    navigate('/forgot-password', { 
+      state: { email: resetEmail || (location.state as any)?.email } 
+    });
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="bg-card rounded-lg shadow-lg border p-8 text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
-            </div>
-            <h2 className="text-2xl font-semibold text-card-foreground mb-2">
-              Verification Successful!
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Your account has been verified successfully. You will be redirected to your dashboard shortly.
-            </p>
-            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const displayError = error || localError;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -188,15 +205,16 @@ const CodeVerificationPage = () => {
         {/* Header */}
         <div className="mb-8">
           <button 
-            onClick={() => console.log('Back to sign in')}
+            onClick={() => navigate('/forgot-password')}
             className="flex items-center text-muted-foreground hover:text-foreground transition-colors mb-6"
+            disabled={isVerifyingResetCode}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Sign In
+            Back to Forgot Password
           </button>
           
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Verify Your Account
+            Verify Reset Code
           </h1>
           <p className="text-muted-foreground">
             We sent a verification code to your {contactMethod.type}
@@ -211,12 +229,6 @@ const CodeVerificationPage = () => {
             <span className="text-sm font-medium text-muted-foreground">
               {contactMethod.value}
             </span>
-            <button 
-              onClick={() => console.log('Change contact method')}
-              className="ml-auto text-sm text-primary hover:underline"
-            >
-              Change
-            </button>
           </div>
         </div>
 
@@ -240,20 +252,20 @@ const CodeVerificationPage = () => {
                   onKeyDown={e => handleKeyDown(index, e)}
                   onPaste={handlePaste}
                   className={`w-12 h-12 text-center text-xl font-semibold border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-colors ${
-                    error ? 'border-destructive' : 'border-input hover:border-ring/50'
+                    displayError ? 'border-destructive' : 'border-input hover:border-ring/50'
                   }`}
                   aria-label={`Digit ${index + 1} of verification code`}
-                  disabled={isVerifying || success}
+                  disabled={isVerifyingResetCode || verifyResetCodeSuccess}
                 />
               ))}
             </div>
           </div>
 
           {/* Error Message */}
-          {error && (
+          {displayError && (
             <div className="flex items-center gap-2 mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
               <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
-              <span className="text-sm text-destructive">{error}</span>
+              <span className="text-sm text-destructive">{displayError}</span>
             </div>
           )}
 
@@ -267,16 +279,16 @@ const CodeVerificationPage = () => {
           {/* Verify Button */}
           <button
             onClick={() => handleVerification()}
-            disabled={code.some(digit => digit === '') || isVerifying || expiryTimer === 0}
+            disabled={code.some(digit => digit === '') || isVerifyingResetCode || expiryTimer === 0}
             className="w-full bg-primary text-primary-foreground py-3 px-4 rounded-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
           >
-            {isVerifying ? (
+            {isVerifyingResetCode ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
                 Verifying...
               </div>
             ) : (
-              'Verify Account'
+              'Verify Code'
             )}
           </button>
 
@@ -287,7 +299,7 @@ const CodeVerificationPage = () => {
             </p>
             <button
               onClick={handleResendCode}
-              disabled={!canResend || isVerifying}
+              disabled={!canResend || isVerifyingResetCode}
               className="text-sm text-primary hover:underline disabled:text-muted-foreground disabled:no-underline disabled:cursor-not-allowed transition-colors"
             >
               {canResend ? 'Resend Code' : `Resend in ${resendTimer}s`}

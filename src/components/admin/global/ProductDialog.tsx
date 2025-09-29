@@ -466,7 +466,7 @@ export function ProductDialog({
   );
 
   const dialogContent = (
-    <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+    <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto custom-scroll">
       <DialogHeader>
         <DialogTitle>
           {mode === "edit" ? "Edit Product" : "Add New Product"}
