@@ -58,14 +58,14 @@ const categories = [
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   const handleSignOut = () => {
     dispatch(signOut());
-    navigate('/sign-in');
+    navigate("/sign-in");
   };
 
   return (
@@ -136,10 +136,12 @@ export function Header() {
 
             {/* Wishlist */}
             <Button variant="ghost" size="sm" className="relative">
-              <Heart className="h-5 w-5" />
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
-                3
-              </Badge>
+              <Link to="/wishlist">
+                <Heart className="h-5 w-5" />
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                  3
+                </Badge>
+              </Link>
             </Button>
 
             {/* Shopping Cart */}
@@ -164,7 +166,9 @@ export function Header() {
                   <>
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {user.email}
+                      </p>
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
@@ -174,19 +178,25 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/my-account?tab=orders" className="cursor-pointer">
+                      <Link
+                        to="/my-account?tab=orders"
+                        className="cursor-pointer"
+                      >
                         <Package className="mr-2 h-4 w-4" />
                         Orders
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/my-account?tab=wishlist" className="cursor-pointer">
+                      <Link
+                        to="/my-account?tab=wishlist"
+                        className="cursor-pointer"
+                      >
                         <Heart className="mr-2 h-4 w-4" />
                         Wishlist
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={handleSignOut}
                       className="cursor-pointer text-destructive focus:text-destructive"
                     >
@@ -245,17 +255,19 @@ export function Header() {
                     <div className="border-t pt-4">
                       <div className="px-2 py-2 mb-2">
                         <p className="text-sm font-medium">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {user.email}
+                        </p>
                       </div>
-                      <Link 
-                        to="/my-account" 
+                      <Link
+                        to="/my-account"
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         My Account
                       </Link>
-                      <Link 
-                        to="/my-account?tab=orders" 
+                      <Link
+                        to="/my-account?tab=orders"
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -273,14 +285,14 @@ export function Header() {
                     </div>
                   ) : (
                     <div className="border-t pt-4 space-y-2">
-                      <Link 
+                      <Link
                         to="/sign-in"
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Sign In
                       </Link>
-                      <Link 
+                      <Link
                         to="/sign-up"
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
@@ -291,15 +303,15 @@ export function Header() {
                   )}
 
                   <div className="space-y-2 border-t pt-4">
-                    <Link 
-                      to="/" 
+                    <Link
+                      to="/"
                       className="block py-2 text-lg font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Home
                     </Link>
-                    <Link 
-                      to="/shop" 
+                    <Link
+                      to="/shop"
                       className="block py-2 text-lg font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -314,8 +326,8 @@ export function Header() {
                     <a href="/deals" className="block py-2 text-lg font-medium">
                       Deals
                     </a>
-                    <Link 
-                      to="/about" 
+                    <Link
+                      to="/about"
                       className="block py-2 text-lg font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >

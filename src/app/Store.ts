@@ -8,6 +8,8 @@ import ordersReducer from "../features/orders/ordersSlice";
 import usersReducer from "../features/users/usersSlice";
 import activitiesReducer from "../features/activities/activitiesSlice";
 import authReducer from "../features/auth/authSlice";
+import cartReducer from "../features/cart/cartSlice"
+import wishlistReducer from "../features/wishlist/wishlistSlice";
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +21,8 @@ export const store = configureStore({
     orders: ordersReducer,
     users: usersReducer,
     activities: activitiesReducer,
+    cart: cartReducer,
+    wishlist: wishlistReducer,
   },
 });
 

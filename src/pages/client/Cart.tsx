@@ -1,122 +1,155 @@
-import React, { useState } from "react"
-import { Link } from "react-router-dom"
-import { 
-  Minus, 
-  Plus, 
-  Trash2, 
-  Heart, 
-  ShoppingBag, 
-  Lock, 
-  Truck, 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  Heart,
+  ShoppingBag,
+  Lock,
+  Truck,
   ArrowLeft,
   Tag,
   Shield,
-  CreditCard
-} from "lucide-react"
-import { Button } from "../../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
-import { Input } from "../../components/ui/input"
-import { Badge } from "../../components/ui/badge"
-import { Separator } from "../../components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-
-// Mock cart data - replace with your actual cart state
-const mockCartItems = [
-  {
-    id: 1,
-    name: "Premium Wireless Headphones",
-    brand: "AudioTech",
-    price: 299.99,
-    originalPrice: 349.99,
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop",
-    quantity: 2,
-    variant: { color: "Midnight Black", size: "One Size" },
-    inStock: true
-  },
-  {
-    id: 2,
-    name: "Smart Fitness Watch",
-    brand: "TechFit",
-    price: 199.99,
-    originalPrice: null,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop",
-    quantity: 1,
-    variant: { color: "Space Gray", size: "42mm" },
-    inStock: true
-  },
-  {
-    id: 3,
-    name: "Portable Bluetooth Speaker",
-    brand: "SoundWave",
-    price: 89.99,
-    originalPrice: 119.99,
-    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=200&h=200&fit=crop",
-    quantity: 1,
-    variant: { color: "Ocean Blue", size: "Compact" },
-    inStock: false
-  }
-]
-
-// Mock recommended products
-const recommendedProducts = [
-  {
-    id: 4,
-    name: "Wireless Mouse",
-    price: 49.99,
-    image: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=200&h=200&fit=crop"
-  },
-  {
-    id: 5,
-    name: "Phone Case",
-    price: 24.99,
-    image: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=200&h=200&fit=crop"
-  }
-]
+  CreditCard,
+  Loader2,
+} from "lucide-react";
+import { Button } from "../../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import { Separator } from "../../components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  fetchCart,
+  removeCartItem,
+  updateCartItemQuantity,
+  applyCoupon,
+  clearError,
+} from "../../features/cart/cartSlice";
+import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
+import { toast } from "sonner"; // ✅ Import directly from sonner
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState(mockCartItems)
-  const [promoCode, setPromoCode] = useState("")
-  const [appliedPromo, setAppliedPromo] = useState(null)
-  const [shippingMethod, setShippingMethod] = useState("standard")
+  const dispatch = useAppDispatch();
+  // const { toast } = Toaster()
+
+  const {
+    cartItems,
+    numOfCartItems,
+    totalCartPrice,
+    totalPriceAfterDiscount,
+    loading,
+    error,
+    isRemoving,
+    isUpdating,
+    appliedCoupon,
+  } = useAppSelector((state) => state.cart);
+
+  const [promoCode, setPromoCode] = useState("");
+  const [shippingMethod, setShippingMethod] = useState("standard");
+
+  // Fetch cart on component mount
+  useEffect(() => {
+    dispatch(fetchCart());
+  }, [dispatch]);
+
+  // Show error toast
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   // Calculate totals
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const promoDiscount = appliedPromo ? subtotal * 0.1 : 0 // 10% discount example
-  const shippingCost = shippingMethod === "express" ? 15.99 : subtotal > 75 ? 0 : 9.99
-  const taxRate = 0.08 // 8% tax
-  const taxAmount = (subtotal - promoDiscount) * taxRate
-  const total = subtotal - promoDiscount + shippingCost + taxAmount
+  const subtotal = totalCartPrice;
+  const promoDiscount = appliedCoupon ? appliedCoupon.discount : 0;
+  const shippingCost =
+    shippingMethod === "express" ? 15.99 : subtotal > 75 ? 0 : 9.99;
+  const taxRate = 0.08; // 8% tax
+  const taxAmount = (subtotal - promoDiscount) * taxRate;
+  const total = subtotal - promoDiscount + shippingCost + taxAmount;
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity === 0) {
-      removeItem(id)
-      return
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+
+    try {
+      await dispatch(
+        updateCartItemQuantity({ itemId, quantity: newQuantity })
+      ).unwrap();
+      toast.success("Cart updated successfully");
+    } catch (err) {
+      // Error handled by slice
     }
-    setCartItems(items => 
-      items.map(item => 
-        item.id === id ? { ...item, quantity: Math.max(1, newQuantity) } : item
-      )
-    )
-  }
+  };
 
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id))
-  }
-
-  const moveToWishlist = (id: number) => {
-    // In real app, add to wishlist then remove from cart
-    removeItem(id)
-  }
-
-  const applyPromoCode = () => {
-    if (promoCode.toLowerCase() === "save10") {
-      setAppliedPromo({ code: "SAVE10", discount: 0.1, description: "10% off your order" })
-    } else {
-      setAppliedPromo(null)
+  const removeItem = async (itemId: string) => {
+    try {
+      await dispatch(removeCartItem(itemId)).unwrap();
+      toast.success("Item removed from cart");
+    } catch (err) {
+      // Error handled by slice
     }
+  };
+
+  const moveToWishlist = async (
+    itemId: string,
+    productId: string,
+    productName: string
+  ) => {
+    try {
+      await dispatch(addProductToWishlist(productId)).unwrap();
+      await dispatch(removeCartItem(itemId)).unwrap();
+      toast.success(`${productName} moved to wishlist`);
+    } catch (err: any) {
+      toast.error(err || "Failed to move to wishlist");
+    }
+  };
+
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) {
+      toast.error("Please enter a promo code");
+      return;
+    }
+
+    try {
+      await dispatch(applyCoupon(promoCode)).unwrap();
+      toast.success("Coupon applied successfully");
+      setPromoCode("");
+    } catch (err) {
+      // Error handled by slice
+    }
+  };
+
+  // Loading state
+  if (loading && cartItems.length === 0) {
+    return (
+      <div className="container py-10 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading cart...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (cartItems.length === 0) {
+  // Empty cart state
+  if (cartItems.length === 0 && !loading) {
     return (
       <div className="container py-8 md:py-12">
         <div className="max-w-2xl mx-auto text-center space-y-6">
@@ -134,20 +167,23 @@ const Cart = () => {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="container py-6 md:py-10 px-4 md:px-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6 md:mb-8">
-        <Link to="/shop" className="text-muted-foreground hover:text-foreground">
+        <Link
+          to="/shop"
+          className="text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Shopping Cart</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
+            {numOfCartItems} {numOfCartItems === 1 ? "item" : "items"}
           </p>
         </div>
       </div>
@@ -156,15 +192,21 @@ const Cart = () => {
         {/* Cart Items - Left Column */}
         <div className="lg:col-span-2 space-y-4">
           {cartItems.map((item) => (
-            <Card key={item.id} className={!item.inStock ? "opacity-60" : ""}>
+            <Card key={item._id}>
               <CardContent className="p-4 md:p-6">
                 <div className="flex gap-4">
                   {/* Product Image */}
-                  <Link to={`/product/${item.id}`} className="flex-shrink-0">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
+                  <Link
+                    to={`/product/${item.product._id}`}
+                    className="flex-shrink-0"
+                  >
+                    <img
+                      src={item.product.mainImage}
+                      alt={item.product.name}
                       className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-lg"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder.png";
+                      }}
                     />
                   </Link>
 
@@ -172,30 +214,25 @@ const Cart = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 md:gap-4">
                       <div className="flex-1 min-w-0">
-                        <Link 
-                          to={`/product/${item.id}`} 
+                        <Link
+                          to={`/product/${item.product._id}`}
                           className="font-medium text-sm md:text-base hover:underline line-clamp-2"
                         >
-                          {item.name}
+                          {item.product.name}
                         </Link>
-                        <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                          {item.brand}
-                        </p>
-                        
-                        {/* Variants */}
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <Badge variant="outline" className="text-xs">
-                            {item.variant.color}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {item.variant.size}
-                          </Badge>
-                        </div>
+                        {item.product.brand && (
+                          <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                            {item.product.brand.name}
+                          </p>
+                        )}
 
-                        {!item.inStock && (
-                          <Badge variant="destructive" className="mt-2 text-xs">
-                            Out of Stock
-                          </Badge>
+                        {/* Color */}
+                        {item.color && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <Badge variant="outline" className="text-xs">
+                              {item.color}
+                            </Badge>
+                          </div>
                         )}
                       </div>
 
@@ -204,11 +241,6 @@ const Cart = () => {
                         <div className="font-semibold text-sm md:text-base">
                           ${item.price.toFixed(2)}
                         </div>
-                        {item.originalPrice && (
-                          <div className="text-xs text-muted-foreground line-through">
-                            ${item.originalPrice.toFixed(2)}
-                          </div>
-                        )}
                       </div>
                     </div>
 
@@ -220,8 +252,10 @@ const Cart = () => {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          disabled={!item.inStock}
+                          onClick={() =>
+                            updateQuantity(item._id, item.quantity - 1)
+                          }
+                          disabled={isUpdating || item.quantity <= 1}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
@@ -232,8 +266,10 @@ const Cart = () => {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          disabled={!item.inStock}
+                          onClick={() =>
+                            updateQuantity(item._id, item.quantity + 1)
+                          }
+                          disabled={isUpdating}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
@@ -244,8 +280,15 @@ const Cart = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => moveToWishlist(item.id)}
-                          className="text-xs"
+                          onClick={() =>
+                            moveToWishlist(
+                              item._id,
+                              item.product._id,
+                              item.product.name
+                            )
+                          }
+                          className="text-xs hidden md:flex"
+                          disabled={isRemoving}
                         >
                           <Heart className="h-3 w-3 mr-1" />
                           Save
@@ -253,8 +296,9 @@ const Cart = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item._id)}
                           className="text-xs text-destructive hover:text-destructive"
+                          disabled={isRemoving}
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
                           Remove
@@ -284,21 +328,30 @@ const Cart = () => {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     className="w-full"
+                    disabled={loading}
                   />
                 </div>
-                <Button onClick={applyPromoCode} variant="outline">
-                  <Tag className="h-4 w-4 mr-2" />
+                <Button
+                  onClick={applyPromoCode}
+                  variant="outline"
+                  disabled={loading || !promoCode.trim()}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Tag className="h-4 w-4 mr-2" />
+                  )}
                   Apply
                 </Button>
               </div>
-              {appliedPromo && (
+              {totalPriceAfterDiscount && appliedCoupon && (
                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-green-800">
-                      {appliedPromo.description}
+                      Coupon applied: {appliedCoupon.code}
                     </span>
                     <span className="text-sm font-semibold text-green-800">
-                      -${promoDiscount.toFixed(2)}
+                      -${appliedCoupon.discount.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -319,18 +372,21 @@ const Cart = () => {
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
-              
-              {appliedPromo && (
+
+              {totalPriceAfterDiscount && appliedCoupon && (
                 <div className="flex justify-between text-sm text-green-600">
-                  <span>Discount ({appliedPromo.code})</span>
-                  <span>-${promoDiscount.toFixed(2)}</span>
+                  <span>Discount</span>
+                  <span>-${appliedCoupon.discount.toFixed(2)}</span>
                 </div>
               )}
 
               {/* Shipping Options */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Shipping</label>
-                <Select value={shippingMethod} onValueChange={setShippingMethod}>
+                <Select
+                  value={shippingMethod}
+                  onValueChange={setShippingMethod}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -366,7 +422,8 @@ const Cart = () => {
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
                 <Truck className="h-4 w-4" />
                 <span>
-                  Estimated delivery: {shippingMethod === "express" ? "Dec 8-10" : "Dec 12-15"}
+                  Estimated delivery:{" "}
+                  {shippingMethod === "express" ? "Dec 8-10" : "Dec 12-15"}
                 </span>
               </div>
 
@@ -417,33 +474,8 @@ const Cart = () => {
           </Card>
         </div>
       </div>
-
-      {/* Recommended Products */}
-      <div className="mt-10 md:mt-12">
-        <h2 className="text-xl font-semibold mb-4">You might also like</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {recommendedProducts.map((product) => (
-            <Card key={product.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-3">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-24 md:h-32 object-cover rounded-lg mb-2"
-                />
-                <p className="text-xs md:text-sm font-medium line-clamp-2 mb-1">
-                  {product.name}
-                </p>
-                <p className="text-sm font-semibold">${product.price}</p>
-                <Button size="sm" className="w-full mt-2 text-xs">
-                  Add to Cart
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cart
+export default Cart;

@@ -1,67 +1,92 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Grid3X3, 
-  List, 
-  Star, 
-  Heart, 
-  ShoppingCart, 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Grid3X3,
+  List,
+  Star,
+  Heart,
+  ShoppingCart,
   Eye,
   X,
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
-  Loader2
-} from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Card, CardContent, CardHeader } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Input } from '../../components/ui/input';
-import { Checkbox } from '../../components/ui/checkbox';
-import { Label } from '../../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../../components/ui/sheet';
-import { Link } from 'react-router-dom';
+  Loader2,
+} from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardHeader } from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
+import { Input } from "../../components/ui/input";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Label } from "../../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../../components/ui/sheet";
+import { Link } from "react-router-dom";
 
 // Import Redux actions
-import { fetchProducts } from '../../features/products/productsSlice';
-import { fetchCategories } from '../../features/categories/categoriesSlice';
-import { fetchSubCategories } from '../../features/subCategories/subCategoriesSlice';
-import { fetchBrands } from '../../features/brands/brandsSlice';
+import { fetchProducts } from "../../features/products/productsSlice";
+import { fetchCategories } from "../../features/categories/categoriesSlice";
+import { fetchSubCategories } from "../../features/subCategories/subCategoriesSlice";
+import { fetchBrands } from "../../features/brands/brandsSlice";
+import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
+import { toast } from "sonner";
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Newest First' },
-  { value: '-createdAt', label: 'Oldest First' },
-  { value: 'price', label: 'Price: Low to High' },
-  { value: '-price', label: 'Price: High to Low' },
-  { value: '-rating', label: 'Highest Rated' },
-  { value: '-sold', label: 'Most Popular' },
-  { value: 'name', label: 'Name: A to Z' },
-  { value: '-name', label: 'Name: Z to A' }
+  { value: "createdAt", label: "Newest First" },
+  { value: "-createdAt", label: "Oldest First" },
+  { value: "price", label: "Price: Low to High" },
+  { value: "-price", label: "Price: High to Low" },
+  { value: "-rating", label: "Highest Rated" },
+  { value: "-sold", label: "Most Popular" },
+  { value: "name", label: "Name: A to Z" },
+  { value: "-name", label: "Name: Z to A" },
 ];
 
 const ShopPage = () => {
   const dispatch = useDispatch();
-  
+
   // Redux state
-  const { products, pagination, loading: productsLoading } = useSelector(state => state.products);
-  const { categories, loading: categoriesLoading } = useSelector(state => state.categories);
-  const { subcategories, loading: subcategoriesLoading } = useSelector(state => state.subCategories);
-  const { brands, loading: brandsLoading } = useSelector(state => state.brands);
+  const {
+    products,
+    pagination,
+    loading: productsLoading,
+  } = useSelector((state) => state.products);
+  const { categories, loading: categoriesLoading } = useSelector(
+    (state) => state.categories
+  );
+  const { subcategories, loading: subcategoriesLoading } = useSelector(
+    (state) => state.subCategories
+  );
+  const { brands, loading: brandsLoading } = useSelector(
+    (state) => state.brands
+  );
 
   // Local state
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState("grid");
   const [filters, setFilters] = useState({
     page: 1,
     limit: 12,
-    sort: '-sold', // Default to most popular
-    category: '',
-    subCategory: '',
-    brand: '',
-    minPrice: '',
-    maxPrice: '',
+    sort: "-sold", // Default to most popular
+    category: "",
+    subCategory: "",
+    brand: "",
+    minPrice: "",
+    maxPrice: "",
     inStock: false,
-    onSale: false
+    onSale: false,
   });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
@@ -77,7 +102,7 @@ const ShopPage = () => {
   // Fetch subcategories when categories change
   useEffect(() => {
     if (selectedCategories.length > 0) {
-      const categoryIds = selectedCategories.join(',');
+      const categoryIds = selectedCategories.join(",");
       dispatch(fetchSubCategories({ category: categoryIds, limit: 100 }));
     } else {
       setSelectedSubCategories([]);
@@ -89,44 +114,50 @@ const ShopPage = () => {
     const queryParams = {
       page: filters.page,
       limit: filters.limit,
-      sort: filters.sort
+      sort: filters.sort,
     };
 
     // Add category filter
     if (selectedCategories.length > 0) {
-      queryParams.category = selectedCategories.join(',');
+      queryParams.category = selectedCategories.join(",");
     }
 
     // Add subcategory filter
     if (selectedSubCategories.length > 0) {
-      queryParams.subCategory = selectedSubCategories.join(',');
+      queryParams.subCategory = selectedSubCategories.join(",");
     }
 
     // Add brand filter
     if (selectedBrands.length > 0) {
-      queryParams.brand = selectedBrands.join(',');
+      queryParams.brand = selectedBrands.join(",");
     }
 
     // Add price filters
     if (filters.minPrice) {
-      queryParams['price[gte]'] = filters.minPrice;
+      queryParams["price[gte]"] = filters.minPrice;
     }
     if (filters.maxPrice) {
-      queryParams['price[lte]'] = filters.maxPrice;
+      queryParams["price[lte]"] = filters.maxPrice;
     }
 
     // Add stock filter
     if (filters.inStock) {
-      queryParams['quantity[gt]'] = 0;
+      queryParams["quantity[gt]"] = 0;
     }
 
     // Add sale filter (products with priceAfterDiscount)
     if (filters.onSale) {
-      queryParams.priceAfterDiscount = 'exists';
+      queryParams.priceAfterDiscount = "exists";
     }
 
     dispatch(fetchProducts(queryParams));
-  }, [filters, selectedCategories, selectedSubCategories, selectedBrands, dispatch]);
+  }, [
+    filters,
+    selectedCategories,
+    selectedSubCategories,
+    selectedBrands,
+    dispatch,
+  ]);
 
   // Count active filters
   useEffect(() => {
@@ -141,92 +172,98 @@ const ShopPage = () => {
   }, [selectedCategories, selectedSubCategories, selectedBrands, filters]);
 
   const handleCategoryChange = (categoryId) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryId) 
-        ? prev.filter(c => c !== categoryId)
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((c) => c !== categoryId)
         : [...prev, categoryId]
     );
     // Reset subcategories when categories change
     setSelectedSubCategories([]);
-    setFilters(prev => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleSubCategoryChange = (subCategoryId) => {
-    setSelectedSubCategories(prev => 
-      prev.includes(subCategoryId) 
-        ? prev.filter(s => s !== subCategoryId)
+    setSelectedSubCategories((prev) =>
+      prev.includes(subCategoryId)
+        ? prev.filter((s) => s !== subCategoryId)
         : [...prev, subCategoryId]
     );
-    setFilters(prev => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleBrandChange = (brandId) => {
-    setSelectedBrands(prev => 
-      prev.includes(brandId) 
-        ? prev.filter(b => b !== brandId)
+    setSelectedBrands((prev) =>
+      prev.includes(brandId)
+        ? prev.filter((b) => b !== brandId)
         : [...prev, brandId]
     );
-    setFilters(prev => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev, page: 1 }));
   };
 
   const handlePriceChange = (field, value) => {
-    setFilters(prev => ({ 
-      ...prev, 
+    setFilters((prev) => ({
+      ...prev,
       [field]: value,
-      page: 1 
+      page: 1,
     }));
   };
 
   const handleSortChange = (sortValue) => {
-    setFilters(prev => ({ ...prev, sort: sortValue, page: 1 }));
+    setFilters((prev) => ({ ...prev, sort: sortValue, page: 1 }));
   };
 
   const handlePageChange = (page) => {
-    setFilters(prev => ({ ...prev, page }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setFilters((prev) => ({ ...prev, page }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const clearFilters = () => {
     setSelectedCategories([]);
     setSelectedSubCategories([]);
     setSelectedBrands([]);
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      minPrice: '',
-      maxPrice: '',
+      minPrice: "",
+      maxPrice: "",
       inStock: false,
       onSale: false,
-      page: 1
+      page: 1,
     }));
   };
 
   const clearSpecificFilter = (type, value) => {
     switch (type) {
-      case 'category':
+      case "category":
         handleCategoryChange(value);
         break;
-      case 'subcategory':
+      case "subcategory":
         handleSubCategoryChange(value);
         break;
-      case 'brand':
+      case "brand":
         handleBrandChange(value);
         break;
-      case 'price':
-        setFilters(prev => ({ ...prev, minPrice: '', maxPrice: '', page: 1 }));
+      case "price":
+        setFilters((prev) => ({
+          ...prev,
+          minPrice: "",
+          maxPrice: "",
+          page: 1,
+        }));
         break;
-      case 'inStock':
-        setFilters(prev => ({ ...prev, inStock: false, page: 1 }));
+      case "inStock":
+        setFilters((prev) => ({ ...prev, inStock: false, page: 1 }));
         break;
-      case 'onSale':
-        setFilters(prev => ({ ...prev, onSale: false, page: 1 }));
+      case "onSale":
+        setFilters((prev) => ({ ...prev, onSale: false, page: 1 }));
         break;
     }
   };
 
   // Get filtered subcategories based on selected categories
-  const availableSubCategories = subcategories.filter(sub => {
+  const availableSubCategories = subcategories.filter((sub) => {
     if (selectedCategories.length === 0) return false;
-    const subCategoryId = typeof sub.category === 'object' ? sub.category._id : sub.category;
+    const subCategoryId =
+      typeof sub.category === "object" ? sub.category._id : sub.category;
     return selectedCategories.includes(subCategoryId);
   });
 
@@ -242,16 +279,21 @@ const ShopPage = () => {
           </div>
         ) : (
           <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
-            {categories?.map(category => (
+            {categories?.map((category) => (
               <div key={category._id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`category-${category._id}`}
                   checked={selectedCategories.includes(category._id)}
                   onCheckedChange={() => handleCategoryChange(category._id)}
                 />
-                <Label htmlFor={`category-${category._id}`} className="text-sm font-normal flex-1 line-clamp-1">
+                <Label
+                  htmlFor={`category-${category._id}`}
+                  className="text-sm font-normal flex-1 line-clamp-1"
+                >
                   {category.name}
-                  <span className="text-muted-foreground ml-1">({category.productCount || 0})</span>
+                  <span className="text-muted-foreground ml-1">
+                    ({category.productCount || 0})
+                  </span>
                 </Label>
               </div>
             ))}
@@ -270,22 +312,34 @@ const ShopPage = () => {
             </div>
           ) : availableSubCategories.length > 0 ? (
             <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
-              {availableSubCategories.map(subcategory => (
-                <div key={subcategory._id} className="flex items-center space-x-2">
+              {availableSubCategories.map((subcategory) => (
+                <div
+                  key={subcategory._id}
+                  className="flex items-center space-x-2"
+                >
                   <Checkbox
                     id={`subcategory-${subcategory._id}`}
                     checked={selectedSubCategories.includes(subcategory._id)}
-                    onCheckedChange={() => handleSubCategoryChange(subcategory._id)}
+                    onCheckedChange={() =>
+                      handleSubCategoryChange(subcategory._id)
+                    }
                   />
-                  <Label htmlFor={`subcategory-${subcategory._id}`} className="text-sm font-normal flex-1 line-clamp-1">
+                  <Label
+                    htmlFor={`subcategory-${subcategory._id}`}
+                    className="text-sm font-normal flex-1 line-clamp-1"
+                  >
                     {subcategory.name}
-                    <span className="text-muted-foreground ml-1">({subcategory.productCount || 0})</span>
+                    <span className="text-muted-foreground ml-1">
+                      ({subcategory.productCount || 0})
+                    </span>
                   </Label>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No subcategories available</p>
+            <p className="text-sm text-muted-foreground">
+              No subcategories available
+            </p>
           )}
         </div>
       )}
@@ -300,16 +354,21 @@ const ShopPage = () => {
           </div>
         ) : (
           <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
-            {brands?.map(brand => (
+            {brands?.map((brand) => (
               <div key={brand._id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`brand-${brand._id}`}
                   checked={selectedBrands.includes(brand._id)}
                   onCheckedChange={() => handleBrandChange(brand._id)}
                 />
-                <Label htmlFor={`brand-${brand._id}`} className="text-sm font-normal flex-1 line-clamp-1">
+                <Label
+                  htmlFor={`brand-${brand._id}`}
+                  className="text-sm font-normal flex-1 line-clamp-1"
+                >
                   {brand.name}
-                  <span className="text-muted-foreground ml-1">({brand.productCount || 0})</span>
+                  <span className="text-muted-foreground ml-1">
+                    ({brand.productCount || 0})
+                  </span>
                 </Label>
               </div>
             ))}
@@ -322,24 +381,34 @@ const ShopPage = () => {
         <Label className="text-sm font-medium">Price Range</Label>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label htmlFor="min-price" className="text-xs text-muted-foreground">Min Price</Label>
+            <Label
+              htmlFor="min-price"
+              className="text-xs text-muted-foreground"
+            >
+              Min Price
+            </Label>
             <Input
               id="min-price"
               type="number"
               placeholder="0"
               value={filters.minPrice}
-              onChange={(e) => handlePriceChange('minPrice', e.target.value)}
+              onChange={(e) => handlePriceChange("minPrice", e.target.value)}
               className="text-sm"
             />
           </div>
           <div>
-            <Label htmlFor="max-price" className="text-xs text-muted-foreground">Max Price</Label>
+            <Label
+              htmlFor="max-price"
+              className="text-xs text-muted-foreground"
+            >
+              Max Price
+            </Label>
             <Input
               id="max-price"
               type="number"
               placeholder="∞"
               value={filters.maxPrice}
-              onChange={(e) => handlePriceChange('maxPrice', e.target.value)}
+              onChange={(e) => handlePriceChange("maxPrice", e.target.value)}
               className="text-sm"
             />
           </div>
@@ -354,7 +423,9 @@ const ShopPage = () => {
             <Checkbox
               id="on-sale"
               checked={filters.onSale}
-              onCheckedChange={(checked) => setFilters(prev => ({ ...prev, onSale: checked, page: 1 }))}
+              onCheckedChange={(checked) =>
+                setFilters((prev) => ({ ...prev, onSale: checked, page: 1 }))
+              }
             />
             <Label htmlFor="on-sale" className="text-sm font-normal">
               On Sale
@@ -364,7 +435,9 @@ const ShopPage = () => {
             <Checkbox
               id="in-stock"
               checked={filters.inStock}
-              onCheckedChange={(checked) => setFilters(prev => ({ ...prev, inStock: checked, page: 1 }))}
+              onCheckedChange={(checked) =>
+                setFilters((prev) => ({ ...prev, inStock: checked, page: 1 }))
+              }
             />
             <Label htmlFor="in-stock" className="text-sm font-normal">
               In Stock Only
@@ -375,11 +448,7 @@ const ShopPage = () => {
 
       {/* Clear Filters */}
       {activeFilters > 0 && (
-        <Button 
-          variant="outline" 
-          onClick={clearFilters}
-          className="w-full"
-        >
+        <Button variant="outline" onClick={clearFilters} className="w-full">
           Clear All Filters ({activeFilters})
         </Button>
       )}
@@ -388,17 +457,23 @@ const ShopPage = () => {
 
   const ProductCard = ({ product }) => {
     const discountPrice = product.priceAfterDiscount || product.price;
-    const hasDiscount = product.priceAfterDiscount && product.priceAfterDiscount < product.price;
-    const discountPercentage = hasDiscount 
-      ? Math.round(((product.price - product.priceAfterDiscount) / product.price) * 100)
+    const hasDiscount =
+      product.priceAfterDiscount && product.priceAfterDiscount < product.price;
+    const discountPercentage = hasDiscount
+      ? Math.round(
+          ((product.price - product.priceAfterDiscount) / product.price) * 100
+        )
       : 0;
-    
+
     return (
       <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col">
         <CardHeader className="p-0 flex-shrink-0">
           <div className="relative overflow-hidden rounded-t-lg">
             <img
-              src={product.mainImage || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop'}
+              src={
+                product.mainImage ||
+                "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop"
+              }
               alt={product.name}
               className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -415,10 +490,27 @@ const ShopPage = () => {
               )}
             </div>
             <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100 sm:group-hover:scale-110">
-              <Button size="icon" variant="outline" className="h-7 w-7 bg-white/90 hover:bg-white">
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-7 w-7 bg-white/90 hover:bg-white"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  try {
+                    await dispatch(addProductToWishlist(product._id)).unwrap();
+                    toast.success(`${product.name} added to wishlist`);
+                  } catch (err: any) {
+                    toast.error(err || "Failed to add to wishlist");
+                  }
+                }}
+              >
                 <Heart className="h-3 w-3" />
               </Button>
-              <Button size="icon" variant="outline" className="h-7 w-7 bg-white/90 hover:bg-white">
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-7 w-7 bg-white/90 hover:bg-white"
+              >
                 <Link to={`/product/${product._id}`}>
                   <Eye className="h-4 w-4" />
                 </Link>
@@ -445,13 +537,13 @@ const ShopPage = () => {
           <div className="flex items-center mb-2">
             <div className="flex items-center mr-2">
               {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
+                <Star
+                  key={i}
                   className={`h-3 w-3 ${
-                    i < Math.floor(product.rating || 0) 
-                      ? 'fill-yellow-400 text-yellow-400' 
-                      : 'text-gray-300'
-                  }`} 
+                    i < Math.floor(product.rating || 0)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
                 />
               ))}
             </div>
@@ -459,11 +551,17 @@ const ShopPage = () => {
               ({product.ratingsQuantity || 0})
             </span>
             <span className="text-xs text-muted-foreground sm:hidden">
-              ({product.ratingsQuantity > 1000 ? `${Math.floor(product.ratingsQuantity/1000)}k` : (product.ratingsQuantity || 0)})
+              (
+              {product.ratingsQuantity > 1000
+                ? `${Math.floor(product.ratingsQuantity / 1000)}k`
+                : product.ratingsQuantity || 0}
+              )
             </span>
           </div>
           <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
-            <span className="text-base sm:text-lg font-bold">${discountPrice}</span>
+            <span className="text-base sm:text-lg font-bold">
+              ${discountPrice}
+            </span>
             {hasDiscount && (
               <span className="text-xs sm:text-sm text-muted-foreground line-through">
                 ${product.price}
@@ -471,16 +569,24 @@ const ShopPage = () => {
             )}
           </div>
           <div className="flex items-center justify-between mt-auto">
-            <span className={`text-xs ${
-              product.quantity > 0 ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {product.quantity > 0 ? `In Stock (${product.quantity})` : 'Out of Stock'}
+            <span
+              className={`text-xs ${
+                product.quantity > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {product.quantity > 0
+                ? `In Stock (${product.quantity})`
+                : "Out of Stock"}
             </span>
-            <Button size="sm" disabled={product.quantity === 0} className="text-xs px-2 py-1 h-7 sm:h-8">
+            {/* <Button
+              size="sm"
+              disabled={product.quantity === 0}
+              className="text-xs px-2 py-1 h-7 sm:h-8"
+            >
               <ShoppingCart className="h-3 w-3 mr-1" />
               <span className="hidden sm:inline">Add to Cart</span>
               <span className="sm:hidden">Add</span>
-            </Button>
+            </Button> */}
           </div>
         </CardContent>
       </Card>
@@ -489,9 +595,12 @@ const ShopPage = () => {
 
   const ProductCardList = ({ product }) => {
     const discountPrice = product.priceAfterDiscount || product.price;
-    const hasDiscount = product.priceAfterDiscount && product.priceAfterDiscount < product.price;
-    const discountPercentage = hasDiscount 
-      ? Math.round(((product.price - product.priceAfterDiscount) / product.price) * 100)
+    const hasDiscount =
+      product.priceAfterDiscount && product.priceAfterDiscount < product.price;
+    const discountPercentage = hasDiscount
+      ? Math.round(
+          ((product.price - product.priceAfterDiscount) / product.price) * 100
+        )
       : 0;
 
     return (
@@ -500,7 +609,10 @@ const ShopPage = () => {
           <div className="flex gap-4">
             <div className="relative overflow-hidden rounded-lg flex-shrink-0">
               <img
-                src={product.mainImage || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop'}
+                src={
+                  product.mainImage ||
+                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop"
+                }
                 alt={product.name}
                 className="w-24 h-24 sm:w-32 sm:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -532,10 +644,18 @@ const ShopPage = () => {
                   </h3>
                 </div>
                 <div className="flex gap-1 sm:gap-2 ml-2">
-                  <Button size="icon" variant="outline" className="h-7 w-7 sm:h-8 sm:w-8">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="h-7 w-7 sm:h-8 sm:w-8"
+                  >
                     <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <Button size="icon" variant="outline" className="h-7 w-7 sm:h-8 sm:w-8">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="h-7 w-7 sm:h-8 sm:w-8"
+                  >
                     <Link to={`/product/${product._id}`}>
                       <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Link>
@@ -545,13 +665,13 @@ const ShopPage = () => {
               <div className="flex items-center mb-2">
                 <div className="flex items-center mr-2">
                   {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
+                    <Star
+                      key={i}
                       className={`h-3 w-3 sm:h-4 sm:w-4 ${
-                        i < Math.floor(product.rating || 0) 
-                          ? 'fill-yellow-400 text-yellow-400' 
-                          : 'text-gray-300'
-                      }`} 
+                        i < Math.floor(product.rating || 0)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                 </div>
@@ -562,24 +682,34 @@ const ShopPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg sm:text-xl font-bold">${discountPrice}</span>
+                    <span className="text-lg sm:text-xl font-bold">
+                      ${discountPrice}
+                    </span>
                     {hasDiscount && (
                       <span className="text-sm text-muted-foreground line-through">
                         ${product.price}
                       </span>
                     )}
                   </div>
-                  <span className={`text-sm ${
-                    product.quantity > 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {product.quantity > 0 ? `In Stock (${product.quantity})` : 'Out of Stock'}
+                  <span
+                    className={`text-sm ${
+                      product.quantity > 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {product.quantity > 0
+                      ? `In Stock (${product.quantity})`
+                      : "Out of Stock"}
                   </span>
                 </div>
-                <Button disabled={product.quantity === 0} size="sm" className="ml-2">
+                {/* <Button
+                  disabled={product.quantity === 0}
+                  size="sm"
+                  className="ml-2"
+                >
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Add to Cart</span>
                   <span className="sm:hidden">Add</span>
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
@@ -590,11 +720,11 @@ const ShopPage = () => {
 
   const generatePaginationPages = () => {
     if (!pagination) return [];
-    
+
     const { currentPage, numberOfPages } = pagination;
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     if (numberOfPages <= maxVisiblePages) {
       // Show all pages if total pages is less than or equal to maxVisiblePages
       for (let i = 1; i <= numberOfPages; i++) {
@@ -603,31 +733,31 @@ const ShopPage = () => {
     } else {
       // Show first page
       pages.push(1);
-      
+
       if (currentPage > 3) {
-        pages.push('...');
+        pages.push("...");
       }
-      
+
       // Show pages around current page
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(numberOfPages - 1, currentPage + 1);
-      
+
       for (let i = start; i <= end; i++) {
         if (!pages.includes(i)) {
           pages.push(i);
         }
       }
-      
+
       if (currentPage < numberOfPages - 2) {
-        pages.push('...');
+        pages.push("...");
       }
-      
+
       // Show last page
       if (!pages.includes(numberOfPages)) {
         pages.push(numberOfPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -635,7 +765,9 @@ const ShopPage = () => {
     <div className="container mx-auto px-4 py-4 sm:py-8">
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Shop All Products</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+          Shop All Products
+        </h1>
         <p className="text-muted-foreground text-sm sm:text-base">
           Discover our complete collection of premium products
         </p>
@@ -691,10 +823,11 @@ const ShopPage = () => {
               <p className="text-sm text-muted-foreground">
                 {pagination ? (
                   <>
-                    Showing {products?.length || 0} of {pagination.totalResults || 0} results
+                    Showing {products?.length || 0} of{" "}
+                    {pagination.totalResults || 0} results
                   </>
                 ) : (
-                  'Loading...'
+                  "Loading..."
                 )}
               </p>
             </div>
@@ -706,7 +839,7 @@ const ShopPage = () => {
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
-                  {sortOptions.map(option => (
+                  {sortOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -717,16 +850,16 @@ const ShopPage = () => {
               {/* View Toggle */}
               <div className="flex border rounded-md p-1">
                 <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setViewMode('grid')}
+                  onClick={() => setViewMode("grid")}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  variant={viewMode === "list" ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setViewMode('list')}
+                  onClick={() => setViewMode("list")}
                 >
                   <List className="h-4 w-4" />
                 </Button>
@@ -737,58 +870,85 @@ const ShopPage = () => {
           {/* Active Filters */}
           {activeFilters > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
-              {selectedCategories.map(categoryId => {
-                const category = categories.find(c => c._id === categoryId);
+              {selectedCategories.map((categoryId) => {
+                const category = categories.find((c) => c._id === categoryId);
                 return category ? (
-                  <Badge key={categoryId} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={categoryId}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     {category.name}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
-                      onClick={() => clearSpecificFilter('category', categoryId)} 
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() =>
+                        clearSpecificFilter("category", categoryId)
+                      }
                     />
                   </Badge>
                 ) : null;
               })}
-              {selectedSubCategories.map(subCategoryId => {
-                const subcategory = availableSubCategories.find(s => s._id === subCategoryId);
+              {selectedSubCategories.map((subCategoryId) => {
+                const subcategory = availableSubCategories.find(
+                  (s) => s._id === subCategoryId
+                );
                 return subcategory ? (
-                  <Badge key={subCategoryId} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={subCategoryId}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     {subcategory.name}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
-                      onClick={() => clearSpecificFilter('subcategory', subCategoryId)} 
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() =>
+                        clearSpecificFilter("subcategory", subCategoryId)
+                      }
                     />
                   </Badge>
                 ) : null;
               })}
-              {selectedBrands.map(brandId => {
-                const brand = brands.find(b => b._id === brandId);
+              {selectedBrands.map((brandId) => {
+                const brand = brands.find((b) => b._id === brandId);
                 return brand ? (
-                  <Badge key={brandId} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={brandId}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     {brand.name}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
-                      onClick={() => clearSpecificFilter('brand', brandId)} 
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => clearSpecificFilter("brand", brandId)}
                     />
                   </Badge>
                 ) : null;
               })}
               {(filters.minPrice || filters.maxPrice) && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  Price: {filters.minPrice || '0'} - {filters.maxPrice || '∞'}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => clearSpecificFilter('price')} />
+                  Price: {filters.minPrice || "0"} - {filters.maxPrice || "∞"}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => clearSpecificFilter("price")}
+                  />
                 </Badge>
               )}
               {filters.onSale && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   On Sale
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => clearSpecificFilter('onSale')} />
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => clearSpecificFilter("onSale")}
+                  />
                 </Badge>
               )}
               {filters.inStock && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   In Stock Only
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => clearSpecificFilter('inStock')} />
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => clearSpecificFilter("inStock")}
+                  />
                 </Badge>
               )}
             </div>
@@ -807,15 +967,15 @@ const ShopPage = () => {
           {/* Products Grid/List */}
           {!productsLoading && products && products.length > 0 ? (
             <>
-              {viewMode === 'grid' ? (
+              {viewMode === "grid" ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                  {products.map(product => (
+                  {products.map((product) => (
                     <ProductCard key={product._id} product={product} />
                   ))}
                 </div>
               ) : (
                 <div className="space-y-4 mb-8">
-                  {products.map(product => (
+                  {products.map((product) => (
                     <ProductCardList key={product._id} product={product} />
                   ))}
                 </div>
@@ -825,40 +985,52 @@ const ShopPage = () => {
               {pagination && pagination.numberOfPages > 1 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t">
                   <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                    Showing page {pagination.currentPage} of {pagination.numberOfPages}
+                    Showing page {pagination.currentPage} of{" "}
+                    {pagination.numberOfPages}
                   </div>
-                  
+
                   <div className="flex items-center gap-2 order-1 sm:order-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      onClick={() =>
+                        handlePageChange(pagination.currentPage - 1)
+                      }
                       disabled={!pagination.previousPage}
                       className="hidden sm:flex"
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" />
                       Previous
                     </Button>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      onClick={() =>
+                        handlePageChange(pagination.currentPage - 1)
+                      }
                       disabled={!pagination.previousPage}
                       className="sm:hidden"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    
-                    {generatePaginationPages().map((page, index) => (
-                      page === '...' ? (
-                        <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
+
+                    {generatePaginationPages().map((page, index) =>
+                      page === "..." ? (
+                        <span
+                          key={`ellipsis-${index}`}
+                          className="px-2 text-muted-foreground"
+                        >
                           ...
                         </span>
                       ) : (
                         <Button
                           key={page}
-                          variant={pagination.currentPage === page ? "default" : "outline"}
+                          variant={
+                            pagination.currentPage === page
+                              ? "default"
+                              : "outline"
+                          }
                           size="sm"
                           onClick={() => handlePageChange(page)}
                           className="min-w-[40px]"
@@ -866,23 +1038,27 @@ const ShopPage = () => {
                           {page}
                         </Button>
                       )
-                    ))}
-                    
+                    )}
+
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      onClick={() =>
+                        handlePageChange(pagination.currentPage + 1)
+                      }
                       disabled={!pagination.nextPage}
                       className="hidden sm:flex"
                     >
                       Next
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      onClick={() =>
+                        handlePageChange(pagination.currentPage + 1)
+                      }
                       disabled={!pagination.nextPage}
                       className="sm:hidden"
                     >

@@ -13,6 +13,7 @@ import SignInPage from "../pages/client/SignIn";
 import ForgotPasswordPage from "../pages/client/ForgetPassword";
 import CodeVerificationPage from "../pages/client/CodeVerification";
 import ResetPasswordPage from "../pages/client/ResetPassword";
+import WishlistPage from "../pages/client/WishlistPage";
 
 const UserRoutes = {
   path: "/",
@@ -22,6 +23,7 @@ const UserRoutes = {
     { path: "about", element: <About /> },
     { path: "shop", element: <ShopPage /> },
     { path: "product/:id", element: <ProductDetails /> },
+    { path: "wishlist", element: <WishlistPage /> },
     { path: "cart", element: <Cart /> },
     { path: "checkout", element: <Checkout /> },
     { path: "order-confirmation", element: <OrderConfirmationPage /> },

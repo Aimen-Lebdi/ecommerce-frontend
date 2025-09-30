@@ -43,6 +43,12 @@ export const fetchProductsAPI = async (
   return response.data;
 };
 
+// Fetch single product by ID
+export const fetchProductByIdAPI = async (id: string) => {
+  const response = await axiosInstance.get(`/api/products/${id}`);
+  return response.data;
+};
+
 // Add new product
 export const createProductAPI = async (productData: FormData) => {
   const response = await axiosInstance.post("/api/products", productData, {

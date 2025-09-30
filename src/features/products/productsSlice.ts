@@ -7,6 +7,7 @@ import {
 } from "@reduxjs/toolkit";
 import {
   fetchProductsAPI,
+  fetchProductByIdAPI,
   createProductAPI,
   updateProductAPI,
   deleteProductAPI,
@@ -35,13 +36,14 @@ export interface Product {
   subCategory?: {
     _id: string;
     name: string;
-  };
+  } | null;
   brand?: {
     _id: string;
     name: string;
-  };
+  } | null;
   rating?: number;
   ratingsQuantity: number;
+  reviews?: any[];
   createdAt: string;
   updatedAt?: string;
 }
@@ -89,9 +91,12 @@ export interface PaginationMeta {
 // State interface for products slice
 interface ProductsState {
   products: Product[];
+  currentProduct: Product | null;
   pagination: PaginationMeta | null;
   loading: boolean;
+  loadingProduct: boolean;
   error: string | null;
+  productError: string | null;
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
@@ -102,9 +107,12 @@ interface ProductsState {
 // Initial state
 const initialState: ProductsState = {
   products: [],
+  currentProduct: null,
   pagination: null,
   loading: false,
+  loadingProduct: false,
   error: null,
+  productError: null,
   isCreating: false,
   isUpdating: false,
   isDeleting: false,
@@ -143,6 +151,22 @@ export const fetchProducts = createAsyncThunk<
       };
     }
     return rejectWithValue({ message, status });
+  }
+});
+
+// Async thunk to fetch single product by ID
+export const fetchProductById = createAsyncThunk<
+  Product,
+  string,
+  { rejectValue: string }
+>("products/fetchProductById", async (id, { rejectWithValue }) => {
+  try {
+    const data = await fetchProductByIdAPI(id);
+    return data;
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data?.message || err.message || "Failed to fetch product"
+    );
   }
 });
 
@@ -326,6 +350,11 @@ const productsSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
+      state.productError = null;
+    },
+    clearCurrentProduct: (state) => {
+      state.currentProduct = null;
+      state.productError = null;
     },
     // Action to update current query parameters
     setQueryParams: (state, action: PayloadAction<ProductsQueryParams>) => {
@@ -362,6 +391,23 @@ const productsSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
+      })
+      // Fetch single product
+      .addCase(fetchProductById.pending, (state) => {
+        state.loadingProduct = true;
+        state.productError = null;
+        state.currentProduct = null;
+      })
+      .addCase(
+        fetchProductById.fulfilled,
+        (state, action: PayloadAction<Product>) => {
+          state.loadingProduct = false;
+          state.currentProduct = action.payload;
+        }
+      )
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loadingProduct = false;
+        state.productError = action.payload || "Failed to fetch product";
       })
       // Create product
       .addCase(createProduct.pending, (state) => {
@@ -418,7 +464,7 @@ const productsSlice = createSlice({
   },
 });
 
-export const { clearError, setQueryParams, resetQueryParams } =
+export const { clearError, clearCurrentProduct, setQueryParams, resetQueryParams } =
   productsSlice.actions;
 
 export default productsSlice.reducer;

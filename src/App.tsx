@@ -5,6 +5,7 @@ import SocketProvider from "./socket/useSocket";
 import { useEffect } from "react";
 import { useAppDispatch } from "./app/hooks";
 import { setAuthData } from "./features/auth/authSlice";
+import { Toaster } from "sonner";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -30,6 +31,7 @@ const App = () => {
     <SocketProvider>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AppRoutes />
+        <Toaster position="top-right" richColors={true} closeButton={true} />
       </ThemeProvider>
     </SocketProvider>
   );
