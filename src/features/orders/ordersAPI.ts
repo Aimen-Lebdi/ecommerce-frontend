@@ -8,6 +8,9 @@ export interface OrdersQueryParams {
   sort?: string;
   keyword?: string;
   fields?: string;
+  deliveryStatus?: string;
+  paymentStatus?: string;
+  paymentMethodType?: string;
   [key: string]: any;
 }
 
@@ -24,11 +27,40 @@ export interface OrdersResponse {
   documents: any[];
 }
 
+// Interface for creating cash order
+export interface CreateCashOrderData {
+  shippingAddress: {
+    details: string;
+    phone: string;
+    dayra: string;
+    wilaya: string;
+  };
+}
+
+// Interface for tracking info
+export interface TrackingInfo {
+  order: {
+    _id: string;
+    orderNumber: string;
+    deliveryStatus: string;
+    trackingNumber?: string;
+    isPaid: boolean;
+    isDelivered: boolean;
+    totalOrderPrice: number;
+    statusHistory: Array<{
+      status: string;
+      timestamp: Date;
+      note: string;
+      updatedBy: string;
+    }>;
+  };
+  tracking?: any;
+}
+
 // Fetch orders function with query parameters support
 export const fetchOrdersAPI = async (
   queryParams: OrdersQueryParams = {}
 ): Promise<OrdersResponse> => {
-  // Build query string from parameters
   const params = new URLSearchParams();
 
   Object.entries(queryParams).forEach(([key, value]) => {
@@ -38,28 +70,79 @@ export const fetchOrdersAPI = async (
   });
 
   const queryString = params.toString();
-  const url = queryString
-    ? `/api/orders?${queryString}`
-    : "/api/orders";
+  const url = queryString ? `/api/orders?${queryString}` : "/api/orders";
 
   const response = await axiosInstance.get(url);
-  return response.data;
-};
-
-// Update order payment status to paid
-export const updateOrderToPaidAPI = async (id: string) => {
-  const response = await axiosInstance.put(`/api/orders/${id}/pay`);
-  return response.data;
-};
-
-// Update order delivery status
-export const updateOrderToDeliveredAPI = async (id: string) => {
-  const response = await axiosInstance.put(`/api/orders/${id}/deliver`);
   return response.data;
 };
 
 // Get specific order
 export const getOrderAPI = async (id: string) => {
   const response = await axiosInstance.get(`/api/orders/${id}`);
+  return response.data;
+};
+
+// Create cash order
+export const createCashOrderAPI = async (
+  cartId: string,
+  orderData: CreateCashOrderData
+) => {
+  const response = await axiosInstance.post(`/api/orders/${cartId}`, orderData);
+  return response.data;
+};
+
+// Create checkout session (Stripe)
+export const createCheckoutSessionAPI = async (cartId: string) => {
+  const response = await axiosInstance.get(
+    `/api/orders/checkout-session/${cartId}`
+  );
+  return response.data;
+};
+
+// Confirm order (Admin/Seller)
+export const confirmOrderAPI = async (id: string) => {
+  const response = await axiosInstance.put(`/api/orders/${id}/confirm`);
+  return response.data;
+};
+
+// Confirm card payment order (Admin/Seller)
+export const confirmCardOrderAPI = async (id: string) => {
+  const response = await axiosInstance.put(
+    `/api/orders/${id}/confirm-card`
+  );
+  return response.data;
+};
+
+// Ship order (Admin/Seller)
+export const shipOrderAPI = async (id: string) => {
+  const response = await axiosInstance.post(`/api/orders/${id}/ship`);
+  return response.data;
+};
+
+// Cancel order
+export const cancelOrderAPI = async (id: string, reason?: string) => {
+  const response = await axiosInstance.put(`/api/orders/${id}/cancel`, {
+    reason,
+  });
+  return response.data;
+};
+
+// Get order tracking
+export const getOrderTrackingAPI = async (
+  id: string
+): Promise<{ status: string; data: TrackingInfo }> => {
+  const response = await axiosInstance.get(`/api/orders/${id}/tracking`);
+  return response.data;
+};
+
+// Simulate delivery (Testing only)
+export const simulateDeliveryAPI = async (
+  id: string,
+  options: { speed?: string; scenario?: string } = {}
+) => {
+  const response = await axiosInstance.post(
+    `/api/orders/${id}/simulate-delivery`,
+    options
+  );
   return response.data;
 };

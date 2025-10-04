@@ -14,6 +14,7 @@ import ForgotPasswordPage from "../pages/client/ForgetPassword";
 import CodeVerificationPage from "../pages/client/CodeVerification";
 import ResetPasswordPage from "../pages/client/ResetPassword";
 import WishlistPage from "../pages/client/WishlistPage";
+import OrderTracking from "../pages/client/orderTracking";
 
 const UserRoutes = {
   path: "/",
@@ -25,8 +26,9 @@ const UserRoutes = {
     { path: "product/:id", element: <ProductDetails /> },
     { path: "wishlist", element: <WishlistPage /> },
     { path: "cart", element: <Cart /> },
-    { path: "checkout", element: <Checkout /> },
-    { path: "order-confirmation", element: <OrderConfirmationPage /> },
+    { path: "/checkout", element: <Checkout /> },
+    { path: "/order-confirmation/:id", element: <OrderConfirmationPage /> },
+    { path: "/orders/:id/tracking", element: <OrderTracking /> },
     { path: "my-account", element: <MyAccountDashboard /> },
     { path: "sign-up", element: <SignUpPage /> },
     { path: "sign-in", element: <SignInPage /> },

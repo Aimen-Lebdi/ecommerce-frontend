@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import {
   addProductToCartAPI,
   getLoggedUserCartAPI,
@@ -13,6 +17,8 @@ import {
 
 // Interface for cart state
 interface CartState {
+  cartId: string | null; // ADD THIS LINE
+
   cartItems: CartItem[];
   numOfCartItems: number;
   totalCartPrice: number;
@@ -27,9 +33,13 @@ interface CartState {
     discount: number;
   } | null;
 }
-
+export interface CartIdInfo {
+  cartId: string;
+}
 // Initial state
 const initialState: CartState = {
+  cartId: null, // ADD THIS LINE
+
   cartItems: [],
   numOfCartItems: 0,
   totalCartPrice: 0,
@@ -57,7 +67,9 @@ export const addProductToCart = createAsyncThunk<
       return data;
     } catch (err: any) {
       return rejectWithValue(
-        err.response?.data?.message || err.message || "Failed to add product to cart"
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to add product to cart"
       );
     }
   }
@@ -141,7 +153,9 @@ export const updateCartItemQuantity = createAsyncThunk<
       return data;
     } catch (err: any) {
       return rejectWithValue(
-        err.response?.data?.message || err.message || "Failed to update quantity"
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to update quantity"
       );
     }
   }
@@ -205,6 +219,7 @@ const cartSlice = createSlice({
           state.totalCartPrice = action.payload.data.totalCartPrice || 0;
           state.totalPriceAfterDiscount =
             action.payload.data.totalPriceAfterDiscount;
+          state.cartId = action.payload.data._id; // Store cart ID
         }
       )
       .addCase(fetchCart.rejected, (state, action) => {
@@ -264,7 +279,8 @@ const cartSlice = createSlice({
           state.appliedCoupon = {
             code: action.meta.arg,
             discount:
-              state.totalCartPrice - action.payload.data.totalPriceAfterDiscount,
+              state.totalCartPrice -
+              action.payload.data.totalPriceAfterDiscount,
           };
         }
       })
@@ -278,3 +294,11 @@ const cartSlice = createSlice({
 export const { clearError, clearAppliedCoupon } = cartSlice.actions;
 
 export default cartSlice.reducer;
+
+// Selector to get cart ID
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const selectCartId = (_state: { cart: CartState }): string | null => {
+  // You'll need to store cart ID in state when fetching cart
+  // For now, return null - we'll get it from the cart response
+  return null;
+};

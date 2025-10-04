@@ -430,7 +430,7 @@ const Cart = () => {
               {/* Checkout Button */}
               <Button size="lg" className="w-full mt-4">
                 <Lock className="h-4 w-4 mr-2" />
-                Secure Checkout
+                <Link to="/checkout">Secure Checkout</Link>
               </Button>
 
               <Button variant="outline" size="lg" className="w-full" asChild>

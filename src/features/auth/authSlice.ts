@@ -5,13 +5,13 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import { 
-  signInAPI, 
+import {
+  signInAPI,
   signUpAPI,
   forgotPasswordAPI,
   verifyResetCodeAPI,
   resetPasswordAPI,
-  type SignInData, 
+  type SignInData,
   type SignUpData,
   type ForgotPasswordData,
   type VerifyResetCodeData,
@@ -19,7 +19,7 @@ import {
   type AuthResponse,
   type ForgotPasswordResponse,
   type VerifyResetCodeResponse,
-  type ResetPasswordResponse
+  type ResetPasswordResponse,
 } from "./authAPI";
 
 // Define the User type
@@ -54,12 +54,12 @@ interface AuthState {
 // Function to check if token is expired
 const isTokenExpired = (token: string): boolean => {
   if (!token) return true;
-  
+
   try {
     // Decode JWT payload (assuming it's a JWT token)
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split(".")[1]));
     const currentTime = Date.now() / 1000;
-    
+
     // Check if token is expired
     return payload.exp < currentTime;
   } catch (error) {
@@ -219,9 +219,9 @@ export const signUp = createAsyncThunk<
     return response;
   } catch (err: any) {
     const message =
-      err.response?.data?.message || 
-      err.response?.data?.errors?.[0]?.msg || 
-      err.message || 
+      err.response?.data?.message ||
+      err.response?.data?.errors?.[0]?.msg ||
+      err.message ||
       "Sign up failed";
     return rejectWithValue(message);
   }
@@ -276,7 +276,7 @@ export const resetPassword = createAsyncThunk<
 
     // Store the new token in localStorage (user is automatically signed in after password reset)
     localStorage.setItem("token", response.token);
-    
+
     return response;
   } catch (err: any) {
     const message =
@@ -420,7 +420,7 @@ const authSlice = createSlice({
       })
       .addCase(
         forgotPassword.fulfilled,
-        (state, action: PayloadAction<ForgotPasswordResponse>) => {
+        (state, _action: PayloadAction<ForgotPasswordResponse>) => {
           state.isForgotPassword = false;
           state.forgotPasswordSuccess = true;
           state.error = null;
@@ -439,7 +439,7 @@ const authSlice = createSlice({
       })
       .addCase(
         verifyResetCode.fulfilled,
-        (state, action: PayloadAction<VerifyResetCodeResponse>) => {
+        (state, _action: PayloadAction<VerifyResetCodeResponse>) => {
           state.isVerifyingResetCode = false;
           state.verifyResetCodeSuccess = true;
           state.error = null;
@@ -494,13 +494,13 @@ const authSlice = createSlice({
   },
 });
 
-export const { 
-  clearError, 
-  signOut, 
-  setAuthData, 
+export const {
+  clearError,
+  signOut,
+  setAuthData,
   handleTokenExpiration,
   clearPasswordResetState,
-  setResetEmail
+  setResetEmail,
 } = authSlice.actions;
 
 export default authSlice.reducer;

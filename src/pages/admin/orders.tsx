@@ -12,8 +12,8 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchOrders,
-  updateOrderToPaid,
-  updateOrderToDelivered,
+  // updateOrderToPaid,
+  // updateOrderToDelivered,
   clearError,
   setQueryParams,
   type Order,
