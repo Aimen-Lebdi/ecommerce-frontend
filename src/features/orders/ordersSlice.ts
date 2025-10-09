@@ -19,6 +19,7 @@ import {
   type OrdersResponse,
   type CreateCashOrderData,
   type TrackingInfo,
+  getOrderBySessionAPI,
 } from "./ordersAPI";
 
 // Define the Order type to match backend response
@@ -187,10 +188,8 @@ export const getOrder = createAsyncThunk<
 >("orders/getOrder", async (id, { rejectWithValue }) => {
   try {
     const data = await getOrderAPI(id);
-    console.log(data)
+    console.log(data);
     return data;
-      
-
   } catch (err: any) {
     return rejectWithValue(err.response?.data?.message || err.message);
   }
@@ -213,19 +212,36 @@ export const createCashOrder = createAsyncThunk<
   }
 );
 
-// Async thunk to create checkout session
-export const createCheckoutSession = createAsyncThunk<
-  any,
+// ADD this new thunk after getOrder:
+export const getOrderBySession = createAsyncThunk<
+  Order,
   string,
   { rejectValue: string }
->("orders/createCheckoutSession", async (cartId, { rejectWithValue }) => {
+>("orders/getOrderBySession", async (sessionId, { rejectWithValue }) => {
   try {
-    const response = await createCheckoutSessionAPI(cartId);
-    return response.session;
+    const data = await getOrderBySessionAPI(sessionId);
+    return data.data;
   } catch (err: any) {
     return rejectWithValue(err.response?.data?.message || err.message);
   }
 });
+
+// UPDATE createCheckoutSession thunk:
+export const createCheckoutSession = createAsyncThunk<
+  any,
+  { cartId: string; shippingAddress: any },
+  { rejectValue: string }
+>(
+  "orders/createCheckoutSession",
+  async ({ cartId, shippingAddress }, { rejectWithValue }) => {
+    try {
+      const response = await createCheckoutSessionAPI(cartId, shippingAddress);
+      return response.session;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
 
 // Async thunk to confirm order
 export const confirmOrder = createAsyncThunk<
@@ -276,22 +292,19 @@ export const shipOrder = createAsyncThunk<
   any,
   string,
   { rejectValue: string; state: { orders: OrdersState } }
->(
-  "orders/shipOrder",
-  async (id, { rejectWithValue, getState, dispatch }) => {
-    try {
-      const response = await shipOrderAPI(id);
+>("orders/shipOrder", async (id, { rejectWithValue, getState, dispatch }) => {
+  try {
+    const response = await shipOrderAPI(id);
 
-      // Refetch orders to maintain consistency
-      const state = getState();
-      dispatch(fetchOrders(state.orders.currentQueryParams));
+    // Refetch orders to maintain consistency
+    const state = getState();
+    dispatch(fetchOrders(state.orders.currentQueryParams));
 
-      return response;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
+    return response;
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.message || err.message);
   }
-);
+});
 
 // Async thunk to cancel order
 export const cancelOrder = createAsyncThunk<
@@ -398,7 +411,6 @@ const ordersSlice = createSlice({
         state.loadingOrder = false;
         console.log(action);
         state.currentOrder = action.payload;
-
       })
       .addCase(getOrder.rejected, (state, action) => {
         state.loadingOrder = false;

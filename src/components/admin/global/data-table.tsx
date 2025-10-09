@@ -1113,19 +1113,6 @@ export function DataTable<TData extends BaseEntity>({
       className="w-full flex-col justify-start gap-6"
     >
       <div className="flex items-center justify-between px-4 lg:px-6">
-        <Label htmlFor="view-selector" className="sr-only">
-          View
-        </Label>
-        <Select defaultValue="outline">
-          <SelectTrigger
-            className="flex w-fit @4xl/main:hidden"
-            size="sm"
-            id="view-selector"
-          >
-            <SelectValue placeholder="Select a view" />
-          </SelectTrigger>
-        </Select>
-
         <div className="flex items-center gap-2 flex-wrap">
           {enableGlobalFilter && (
             <Input

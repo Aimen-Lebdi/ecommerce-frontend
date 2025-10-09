@@ -26,6 +26,14 @@ export interface UsersResponse {
   documents: any[];
 }
 
+export interface UpdateUserData {
+  name?: string;
+  email?: string;
+  role?: "admin" | "user";
+  active?: boolean; // NEW: Allow updating active status
+  image?: File | null;
+}
+
 // Updated fetch users function with query parameters support
 export const fetchUsersAPI = async (
   queryParams: UsersQueryParams = {}
@@ -95,7 +103,19 @@ export const deleteManyUsersAPI = async (ids: string[]) => {
   });
   return response.data;
 };
+// NEW: Activate single user
+export const activateUserAPI = async (id: string) => {
+  const response = await axiosInstance.put(`/api/users/${id}/activate`);
+  return response.data;
+};
 
+// NEW: Activate multiple users
+export const activateManyUsersAPI = async (ids: string[]) => {
+  const response = await axiosInstance.post("/api/users/bulk-activate", {
+    ids,
+  });
+  return response.data;
+};
 // Update user password
 export const updateUserPasswordAPI = async (
   id: string,
@@ -110,4 +130,27 @@ export const updateUserPasswordAPI = async (
     passwordData
   );
   return response.data.data;
+};
+
+// Update logged user data
+export const updateLoggedUserDataAPI = async (userData: FormData) => {
+  const response = await axiosInstance.put("/api/users/updateMe", userData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data.data;
+};
+
+// Update logged user password
+export const updateLoggedUserPasswordAPI = async (passwordData: {
+  currentPassword: string;
+  password: string;
+  passwordConfirm: string;
+}) => {
+  const response = await axiosInstance.put(
+    "/api/users/changeMyPassword",
+    passwordData
+  );
+  return response.data;
 };

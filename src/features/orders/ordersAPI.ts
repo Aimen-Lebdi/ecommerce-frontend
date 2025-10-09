@@ -70,7 +70,7 @@ export const fetchOrdersAPI = async (
   });
 
   const queryString = params.toString();
-  const url = queryString ? `/api/orders?${queryString}` : "/api/orders";
+  const url = queryString ? `/api/v1/orders?${queryString}` : "/api/v1/orders";
 
   const response = await axiosInstance.get(url);
   return response.data;
@@ -78,7 +78,7 @@ export const fetchOrdersAPI = async (
 
 // Get specific order
 export const getOrderAPI = async (id: string) => {
-  const response = await axiosInstance.get(`/api/orders/${id}`);
+  const response = await axiosInstance.get(`/api/v1/orders/${id}`);
   return response.data;
 };
 
@@ -87,41 +87,49 @@ export const createCashOrderAPI = async (
   cartId: string,
   orderData: CreateCashOrderData
 ) => {
-  const response = await axiosInstance.post(`/api/orders/${cartId}`, orderData);
+  const response = await axiosInstance.post(`/api/v1/orders/${cartId}`, orderData);
   return response.data;
 };
 
 // Create checkout session (Stripe)
-export const createCheckoutSessionAPI = async (cartId: string) => {
-  const response = await axiosInstance.get(
-    `/api/orders/checkout-session/${cartId}`
+export const createCheckoutSessionAPI = async (
+  cartId: string,
+  shippingAddress: CreateCashOrderData["shippingAddress"]
+) => {
+  const response = await axiosInstance.post(
+    `/api/v1/orders/checkout-session/${cartId}`,
+    { shippingAddress }
   );
+  return response.data;
+};
+
+// Add this new function
+export const getOrderBySessionAPI = async (sessionId: string) => {
+  const response = await axiosInstance.get(`/api/v1/orders/session/${sessionId}`);
   return response.data;
 };
 
 // Confirm order (Admin/Seller)
 export const confirmOrderAPI = async (id: string) => {
-  const response = await axiosInstance.put(`/api/orders/${id}/confirm`);
+  const response = await axiosInstance.put(`/api/v1/orders/${id}/confirm`);
   return response.data;
 };
 
 // Confirm card payment order (Admin/Seller)
 export const confirmCardOrderAPI = async (id: string) => {
-  const response = await axiosInstance.put(
-    `/api/orders/${id}/confirm-card`
-  );
+  const response = await axiosInstance.put(`/api/v1/orders/${id}/confirm-card`);
   return response.data;
 };
 
 // Ship order (Admin/Seller)
 export const shipOrderAPI = async (id: string) => {
-  const response = await axiosInstance.post(`/api/orders/${id}/ship`);
+  const response = await axiosInstance.post(`/api/v1/orders/${id}/ship`);
   return response.data;
 };
 
 // Cancel order
 export const cancelOrderAPI = async (id: string, reason?: string) => {
-  const response = await axiosInstance.put(`/api/orders/${id}/cancel`, {
+  const response = await axiosInstance.put(`/api/v1/orders/${id}/cancel`, {
     reason,
   });
   return response.data;
@@ -131,7 +139,7 @@ export const cancelOrderAPI = async (id: string, reason?: string) => {
 export const getOrderTrackingAPI = async (
   id: string
 ): Promise<{ status: string; data: TrackingInfo }> => {
-  const response = await axiosInstance.get(`/api/orders/${id}/tracking`);
+  const response = await axiosInstance.get(`/api/v1/orders/${id}/tracking`);
   return response.data;
 };
 
@@ -141,7 +149,7 @@ export const simulateDeliveryAPI = async (
   options: { speed?: string; scenario?: string } = {}
 ) => {
   const response = await axiosInstance.post(
-    `/api/orders/${id}/simulate-delivery`,
+    `/api/v1/orders/${id}/simulate-delivery`,
     options
   );
   return response.data;

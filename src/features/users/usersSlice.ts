@@ -14,6 +14,10 @@ import {
   updateUserPasswordAPI,
   type UsersQueryParams,
   type UsersResponse,
+  updateLoggedUserPasswordAPI,
+  updateLoggedUserDataAPI,
+  activateManyUsersAPI,
+  activateUserAPI,
 } from "./usersAPI";
 
 // Define the User type to match backend response
@@ -42,6 +46,7 @@ export interface UpdateUserData {
   name?: string;
   email?: string;
   role?: "admin" | "user";
+  active?: boolean; // NEW: Allow updating active status
   image?: File | null;
 }
 
@@ -74,6 +79,20 @@ interface UsersState {
   isDeletingMany: boolean;
   isUpdatingPassword: boolean;
   currentQueryParams: UsersQueryParams;
+  isUpdatingLoggedUser: boolean;
+  isUpdatingLoggedPassword: boolean;
+}
+
+// Add these interfaces at the top
+export interface UpdateLoggedUserData {
+  name?: string;
+  image?: File | null;
+}
+
+export interface UpdateLoggedUserPasswordData {
+  currentPassword: string;
+  password: string;
+  passwordConfirm: string;
 }
 
 // Initial state
@@ -88,6 +107,9 @@ const initialState: UsersState = {
   isDeletingMany: false,
   isUpdatingPassword: false,
   currentQueryParams: {},
+  isUpdatingLoggedUser: false,
+isUpdatingLoggedPassword: false,
+
 };
 
 // Async thunk to fetch users from backend with query parameters
@@ -181,6 +203,9 @@ export const updateUser = createAsyncThunk<
       if (userData.role !== undefined) {
         formData.append("role", userData.role);
       }
+      if (userData.active !== undefined) {
+        formData.append("active", userData.active.toString());
+      }
       if (userData.image !== undefined) {
         if (userData.image === null) {
           // Send empty string or a flag to indicate image removal
@@ -258,6 +283,92 @@ export const deleteManyUsers = createAsyncThunk<
       dispatch(fetchUsers(state.users.currentQueryParams));
 
       return ids;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+// NEW: Async thunk to activate single user
+export const activateUser = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string; state: { users: UsersState } }
+>(
+  "users/activateUser",
+  async (id, { rejectWithValue, getState, dispatch }) => {
+    try {
+      await activateUserAPI(id);
+
+      const state = getState();
+      dispatch(fetchUsers(state.users.currentQueryParams));
+
+      return id;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
+// NEW: Async thunk for bulk activate
+export const activateManyUsers = createAsyncThunk<
+  string[],
+  string[],
+  { rejectValue: string; state: { users: UsersState } }
+>(
+  "users/activateManyUsers",
+  async (ids, { rejectWithValue, getState, dispatch }) => {
+    try {
+      await activateManyUsersAPI(ids);
+
+      const state = getState();
+      dispatch(fetchUsers(state.users.currentQueryParams));
+
+      return ids;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+// Add these thunks
+export const updateLoggedUserData = createAsyncThunk<
+  User,
+  UpdateLoggedUserData,
+  { rejectValue: string }
+>(
+  "users/updateLoggedUserData",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      
+      if (userData.name !== undefined) {
+        formData.append("name", userData.name);
+      }
+      if (userData.image !== undefined) {
+        if (userData.image === null) {
+          formData.append("image", "null");
+        } else {
+          formData.append("image", userData.image);
+        }
+      }
+
+      const data = await updateLoggedUserDataAPI(formData);
+      return data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
+export const updateLoggedUserPassword = createAsyncThunk<
+  { user: User; token: string },
+  UpdateLoggedUserPasswordData,
+  { rejectValue: string }
+>(
+  "users/updateLoggedUserPassword",
+  async (passwordData, { rejectWithValue }) => {
+    try {
+      const data = await updateLoggedUserPasswordAPI(passwordData);
+      return data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
@@ -371,7 +482,30 @@ const usersSlice = createSlice({
       .addCase(deleteManyUsers.rejected, (state, action) => {
         state.isDeletingMany = false;
         state.error = action.payload || "Failed to delete users";
-      });
+      })
+      // Add these to extraReducers
+.addCase(updateLoggedUserData.pending, (state) => {
+  state.isUpdatingLoggedUser = true;
+  state.error = null;
+})
+.addCase(updateLoggedUserData.fulfilled, (state) => {
+  state.isUpdatingLoggedUser = false;
+})
+.addCase(updateLoggedUserData.rejected, (state, action) => {
+  state.isUpdatingLoggedUser = false;
+  state.error = action.payload || "Failed to update profile";
+})
+.addCase(updateLoggedUserPassword.pending, (state) => {
+  state.isUpdatingLoggedPassword = true;
+  state.error = null;
+})
+.addCase(updateLoggedUserPassword.fulfilled, (state) => {
+  state.isUpdatingLoggedPassword = false;
+})
+.addCase(updateLoggedUserPassword.rejected, (state, action) => {
+  state.isUpdatingLoggedPassword = false;
+  state.error = action.payload || "Failed to update password";
+});
   },
 });
 

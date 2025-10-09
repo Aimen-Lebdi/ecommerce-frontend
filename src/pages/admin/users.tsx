@@ -139,7 +139,7 @@ export default function Users() {
     // Load users with default parameters on mount
     const initialParams: ServerQueryParams = {
       page: 1,
-      limit: 15,
+      limit: 10,
     };
     dispatch(fetchUsers(initialParams));
   }, [dispatch]);
@@ -304,7 +304,7 @@ export default function Users() {
             filterColumn="role"
             filterPlaceholder="Filter by role..."
             // Set page size for initial load
-            pageSize={15}
+            pageSize={10}
           />
         </div>
       </div>

@@ -45,11 +45,12 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { fetchCart } from "../../features/cart/cartSlice";
 import {
   createCashOrder,
-  createCheckoutSession,
+  // createCheckoutSession,
   clearError,
   clearCheckoutSession,
 } from "../../features/orders/ordersSlice";
 import { toast } from "sonner";
+import axiosInstance from "../../utils/axiosInstance";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -146,6 +147,8 @@ const Checkout = () => {
   const shippingCost = 500;
   const total = subtotal + shippingCost;
 
+  // Update the handlePlaceOrder function in Checkout.tsx:
+
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
       toast.error("Please fill in all required fields");
@@ -166,17 +169,32 @@ const Checkout = () => {
             phone: shippingAddress.phone,
             wilaya: shippingAddress.wilaya,
             dayra: shippingAddress.dayra,
-            // postalCode: shippingAddress.zipCode,
           },
         };
 
         await dispatch(createCashOrder({ cartId, orderData })).unwrap();
       } else {
-        // Create Stripe checkout session
-        await dispatch(createCheckoutSession(cartId)).unwrap();
+        // For card payment, we need to pass shipping address to the backend
+        // The backend will create the Stripe session and redirect
+        const response = await axiosInstance.post(
+          `/api/orders/checkout-session/${cartId}`,
+          {
+            shippingAddress: {
+              details: shippingAddress.details,
+              phone: shippingAddress.phone,
+              wilaya: shippingAddress.wilaya,
+              dayra: shippingAddress.dayra,
+            },
+          }
+        );
+
+        // Redirect to Stripe checkout
+        if (response.data.session && response.data.session.url) {
+          window.location.href = response.data.session.url;
+        }
       }
     } catch (error: any) {
-      // Error handled by useEffect
+      toast.error(error.response?.data?.message || "Failed to create order");
       console.error("Order creation failed:", error);
     }
   };

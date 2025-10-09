@@ -23,11 +23,11 @@ import {
 } from "../../ui/dropdown-menu";
 import {
   NavigationMenu,
-  NavigationMenuContent,
+  // NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
+  // NavigationMenuTrigger,
 } from "../../ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
 import { ModeToggle } from "../../mode-toggle";
@@ -35,25 +35,25 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { signOut } from "../../../features/auth/authSlice";
 
-const categories = [
-  {
-    name: "Electronics",
-    subcategories: ["Smartphones", "Laptops", "Headphones", "Cameras"],
-  },
-  {
-    name: "Fashion",
-    subcategories: [
-      "Men's Clothing",
-      "Women's Clothing",
-      "Shoes",
-      "Accessories",
-    ],
-  },
-  {
-    name: "Home & Garden",
-    subcategories: ["Furniture", "Decor", "Kitchen", "Garden"],
-  },
-];
+// const categories = [
+//   {
+//     name: "Electronics",
+//     subcategories: ["Smartphones", "Laptops", "Headphones", "Cameras"],
+//   },
+//   {
+//     name: "Fashion",
+//     subcategories: [
+//       "Men's Clothing",
+//       "Women's Clothing",
+//       "Shoes",
+//       "Accessories",
+//     ],
+//   },
+//   {
+//     name: "Home & Garden",
+//     subcategories: ["Furniture", "Decor", "Kitchen", "Garden"],
+//   },
+// ];
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -135,14 +135,14 @@ export function Header() {
             </div>
 
             {/* Wishlist */}
-            <Button variant="ghost" size="sm" className="relative">
+            {/* <Button variant="ghost" size="sm" className="relative">
               <Link to="/wishlist">
                 <Heart className="h-5 w-5" />
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
                   3
                 </Badge>
               </Link>
-            </Button>
+            </Button> */}
 
             {/* Shopping Cart */}
             <Button variant="ghost" size="sm" className="relative">
@@ -273,6 +273,13 @@ export function Header() {
                       >
                         Orders
                       </Link>
+                      <Link
+                        to="/my-account?tab=wishlist"
+                        className="block py-2 text-sm font-medium hover:text-primary"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Wishlist
+                      </Link>
                       <button
                         onClick={() => {
                           handleSignOut();
@@ -370,7 +377,7 @@ export function Header() {
                 </Link>
               </NavigationMenuItem>
 
-              {categories.map((category) => (
+              {/* {categories.map((category) => (
                 <NavigationMenuItem key={category.name}>
                   <NavigationMenuTrigger className="px-4 py-3 text-sm font-medium">
                     {category.name}
@@ -400,7 +407,7 @@ export function Header() {
                 >
                   Hot Deals
                 </NavigationMenuLink>
-              </NavigationMenuItem>
+              </NavigationMenuItem> */}
 
               <NavigationMenuItem>
                 <Link to="/shop" className="px-4 py-3 text-sm font-medium">

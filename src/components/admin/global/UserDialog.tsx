@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import {
   IconCloudUpload,
@@ -24,6 +25,7 @@ import {
   SelectContent,
   SelectItem,
 } from "../../ui/select";
+import { Switch } from "../../ui/switch";
 
 type Errors = {
   name?: string;
@@ -55,7 +57,8 @@ interface UserDialogProps {
     email?: string;
     password?: string;
     role?: "admin" | "user";
-    image?: File;
+    active?: boolean;
+    image?: File | null;
   }) => void;
   isLoading?: boolean;
 }
@@ -78,12 +81,16 @@ export function UserDialog({
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [role, setRole] = React.useState<"admin" | "user">("user");
-  const [originalRole, setOriginalRole] = React.useState<"admin" | "user">("user");
+  const [originalRole, setOriginalRole] = React.useState<"admin" | "user">(
+    "user"
+  );
+  const [active, setActive] = React.useState(true);
+  const [originalActive, setOriginalActive] = React.useState(true);
 
   // Image
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
-  const [imageRemoved, setImageRemoved] = React.useState(false); // Track if existing image was removed
+  const [imageRemoved, setImageRemoved] = React.useState(false);
   const [dragActive, setDragActive] = React.useState(false);
 
   const [errors, setErrors] = React.useState<Errors>({});
@@ -99,12 +106,14 @@ export function UserDialog({
       setOriginalEmail(existingData.email || "");
       setRole(existingData.role || "user");
       setOriginalRole(existingData.role || "user");
+      setActive(existingData.active ?? true);
+      setOriginalActive(existingData.active ?? true);
       if (existingData.image) {
         setPreview(existingData.image);
       }
       setPassword("");
       setConfirmPassword("");
-      setImageRemoved(false); // Reset image removed state
+      setImageRemoved(false);
     } else if (mode === "add" && open) {
       resetForm();
     }
@@ -144,9 +153,11 @@ export function UserDialog({
     setConfirmPassword("");
     setRole("user");
     setOriginalRole("user");
+    setActive(true);
+    setOriginalActive(true);
     setImage(null);
     setPreview(null);
-    setImageRemoved(false); // Reset image removed state
+    setImageRemoved(false);
     setErrors({});
   };
 
@@ -157,15 +168,16 @@ export function UserDialog({
       email?: string;
       password?: string;
       role?: "admin" | "user";
+      active?: boolean;
       image?: File | null;
     } = {};
 
-    // Only include fields that changed or are required for add mode
     if (mode === "add") {
       payload.name = name;
       payload.email = email;
       payload.password = password;
       payload.role = role;
+      payload.active = active;
       if (image) payload.image = image;
     } else {
       // Edit mode - only include changed fields
@@ -181,11 +193,12 @@ export function UserDialog({
       if (role !== originalRole) {
         payload.role = role;
       }
-      // Handle image changes: new file uploaded OR existing image removed
+      if (active !== originalActive) {
+        payload.active = active;
+      }
       if (image instanceof File) {
         payload.image = image;
       } else if (imageRemoved && existingData?.image) {
-        // If user had an image and it was removed, send null to indicate removal
         payload.image = null;
       }
     }
@@ -196,10 +209,8 @@ export function UserDialog({
   const handleSave = () => {
     if (!validate()) return;
 
-    // Get only changed fields
     const userData = prepareUpdatePayload();
 
-    // Don't proceed if nothing changed in edit mode
     if (mode === "edit" && Object.keys(userData).length === 0) {
       console.log("No changes detected");
       setOpen(false);
@@ -210,12 +221,6 @@ export function UserDialog({
       `${mode === "edit" ? "Updating" : "Saving new"} user:`,
       userData
     );
-    
-    // Debug: Log what fields are being sent
-    console.log("Fields being sent:", Object.keys(userData));
-    if (userData.image) {
-      console.log("Image file:", userData.image.name, userData.image.size);
-    }
 
     onSave?.(userData);
 
@@ -229,7 +234,7 @@ export function UserDialog({
   const handleFile = (file: File) => {
     setImage(file);
     setPreview(URL.createObjectURL(file));
-    setImageRemoved(false); // Reset removed state when new file is selected
+    setImageRemoved(false);
     setErrors((prev) => ({ ...prev, image: undefined }));
   };
 
@@ -242,11 +247,10 @@ export function UserDialog({
   const handleRemoveImage = () => {
     setImage(null);
     setPreview(null);
-    
+
     if (mode === "add") {
       setErrors((prev) => ({ ...prev, image: "User image is required" }));
     } else {
-      // In edit mode, mark that the existing image was removed
       setImageRemoved(true);
     }
   };
@@ -258,12 +262,13 @@ export function UserDialog({
     setOpen(newOpen);
   };
 
-  // Update the save button to show loading state
-  const saveButtonContent = isLoading ? (
-    mode === "edit" ? "Updating..." : "Saving..."
-  ) : (
-    mode === "edit" ? "Update" : "Save"
-  );
+  const saveButtonContent = isLoading
+    ? mode === "edit"
+      ? "Updating..."
+      : "Saving..."
+    : mode === "edit"
+    ? "Update"
+    : "Save";
 
   const dialogContent = (
     <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -320,66 +325,6 @@ export function UserDialog({
           )}
         </div>
 
-        {/* Password */}
-        <div className="grid gap-2">
-          <Label htmlFor="password">
-            Password
-            {mode === "edit" && (
-              <span className="text-sm text-muted-foreground ml-2">
-                (Leave blank to keep current password)
-              </span>
-            )}
-          </Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder={
-              mode === "edit"
-                ? "Enter new password (optional)"
-                : "Enter password"
-            }
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (e.target.value) {
-                setErrors((prev) => ({ ...prev, password: undefined }));
-              }
-            }}
-            className={errors.password ? "border-red-500" : ""}
-          />
-          {errors.password && (
-            <p className="text-sm text-red-600 mt-1">{errors.password}</p>
-          )}
-        </div>
-
-        {/* Confirm Password */}
-        {(mode === "add" || password) && (
-          <div className="grid gap-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                if (e.target.value === password) {
-                  setErrors((prev) => ({
-                    ...prev,
-                    confirmPassword: undefined,
-                  }));
-                }
-              }}
-              className={errors.confirmPassword ? "border-red-500" : ""}
-            />
-            {errors.confirmPassword && (
-              <p className="text-sm text-red-600 mt-1">
-                {errors.confirmPassword}
-              </p>
-            )}
-          </div>
-        )}
-
         {/* Role */}
         <div className="grid gap-2">
           <Label htmlFor="user-role">Role</Label>
@@ -402,6 +347,25 @@ export function UserDialog({
             <p className="text-sm text-red-600 mt-1">{errors.role}</p>
           )}
         </div>
+
+        {/* Active Status - Only show in edit mode */}
+        {mode === "edit" && (
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="active-status">Account Status</Label>
+              <p className="text-sm text-muted-foreground">
+                {active
+                  ? "User account is currently active"
+                  : "User account is currently inactive"}
+              </p>
+            </div>
+            <Switch
+              id="active-status"
+              checked={active}
+              onCheckedChange={setActive}
+            />
+          </div>
+        )}
 
         {/* User Image Upload */}
         <div className="grid gap-2">
@@ -512,7 +476,6 @@ export function UserDialog({
   );
 }
 
-// This factory function creates edit dialogs for the data table
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditUserDialog(
   rowData: User,
@@ -524,17 +487,15 @@ export function createEditUserDialog(
       mode="edit"
       existingData={rowData}
       onSave={(userData) => {
-        // Ensure we always include the user ID
         const updatePayload = {
-          _id: rowData._id, // Always use the rowData._id to ensure we have the correct ID
-          ...userData, // Only the changed fields from the dialog
+          _id: rowData._id,
+          ...userData,
         };
         console.log("Edit dialog sending payload:", updatePayload);
-        console.log("Original rowData:", rowData);
         onSave(updatePayload);
       }}
       isLoading={isLoading}
-      onOpenChange={() => {}} // Edit dialog closes when clicking outside or X
+      onOpenChange={() => {}}
     />
   );
 }

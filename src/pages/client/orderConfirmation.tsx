@@ -16,7 +16,11 @@ import {
   Clock,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { getOrder, clearError,  } from "../../features/orders/ordersSlice";
+import {
+  getOrder,
+  clearError,
+  // getOrderBySession,
+} from "../../features/orders/ordersSlice";
 import { Button } from "../../components/ui/button";
 // import { Card, CardContent } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
@@ -24,7 +28,7 @@ import { Separator } from "../../components/ui/separator";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
-  const OrderConfirmationPage = () => {
+const OrderConfirmationPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -37,12 +41,15 @@ import { format } from "date-fns";
   // Fetch order on mount
   useEffect(() => {
     if (id) {
+      // Check if it's a Stripe session ID (starts with cs_test_ or cs_live_)
+      // if (id.startsWith('cs_')) {
+      // It's a Stripe session ID
       dispatch(getOrder(id));
+      // } else {
+      //   // It's a regular order ID (from COD)
+      //   dispatch(getOrder(id));
+      // }
     }
-
-    // return () => {
-    //   dispatch(clearCurrentOrder());
-    // };
   }, [id, dispatch]);
 
   // Handle errors
@@ -50,7 +57,7 @@ import { format } from "date-fns";
     if (orderError) {
       toast.error(orderError);
       dispatch(clearError());
-      navigate("/cart");
+      navigate("/checkout");
     }
   }, [orderError, dispatch, navigate]);
 
@@ -152,12 +159,16 @@ import { format } from "date-fns";
             {/* Status Badges */}
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               <Badge
-                className={`${getStatusColor(order.deliveryStatus)} border px-3 py-1`}
+                className={`${getStatusColor(
+                  order.deliveryStatus
+                )} border px-3 py-1`}
               >
                 {order.deliveryStatus.replace("_", " ").toUpperCase()}
               </Badge>
               <Badge
-                className={`${getPaymentStatusColor(order.paymentStatus)} border px-3 py-1`}
+                className={`${getPaymentStatusColor(
+                  order.paymentStatus
+                )} border px-3 py-1`}
               >
                 Payment: {order.paymentStatus.toUpperCase()}
               </Badge>
@@ -292,7 +303,9 @@ import { format } from "date-fns";
                   </h3>
                   <div className="space-y-2">
                     <Badge
-                      className={`${getStatusColor(order.deliveryStatus)} border`}
+                      className={`${getStatusColor(
+                        order.deliveryStatus
+                      )} border`}
                     >
                       {order.deliveryStatus.replace("_", " ").toUpperCase()}
                     </Badge>
@@ -385,7 +398,9 @@ import { format } from "date-fns";
                     </div>
                   </div>
                   <Badge
-                    className={`${getPaymentStatusColor(order.paymentStatus)} border`}
+                    className={`${getPaymentStatusColor(
+                      order.paymentStatus
+                    )} border`}
                   >
                     {order.paymentStatus.toUpperCase()}
                   </Badge>
@@ -522,10 +537,7 @@ import { format } from "date-fns";
         <div className="mt-6 sm:mt-8 bg-white rounded-lg shadow-sm p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {order.trackingNumber && (
-              <Button
-                className="flex-1 text-sm sm:text-base"
-                asChild
-              >
+              <Button className="flex-1 text-sm sm:text-base" asChild>
                 <Link to={`/orders/${order._id}/tracking`}>
                   <Truck className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Track Your Order
@@ -564,7 +576,8 @@ import { format } from "date-fns";
           </h3>
           <ul className="text-xs sm:text-sm text-blue-800 space-y-1">
             <li>
-              • {order.paymentMethodType === "cash" 
+              •{" "}
+              {order.paymentMethodType === "cash"
                 ? "Your order will be confirmed by the seller within 1-2 business days"
                 : "We'll process your payment and confirm your order"}
             </li>
