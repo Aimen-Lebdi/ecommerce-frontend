@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   LayoutDashboard,
   List,
@@ -9,16 +9,13 @@ import {
   Users,
   Boxes,
   TagIcon,
+  ShoppingCartIcon,
 } from "lucide-react";
-import {
-  IconHelp,
-  IconInnerShadowTop,
-  IconSettings,
-} from "@tabler/icons-react"
+import { IconHelp, IconInnerShadowTop } from "@tabler/icons-react";
 
-import { NavMain } from "../../ui/nav-main"
-import { NavSecondary } from "../../ui/nav-secondary"
-import { NavUser } from "../../ui/nav-user"
+import { NavMain } from "../../ui/nav-main";
+import { NavSecondary } from "../../ui/nav-secondary";
+import { NavUser } from "../../ui/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -27,8 +24,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "../../admin/adminLayout/sidebar"
-import { Link } from "react-router-dom"
+} from "../../admin/adminLayout/sidebar";
+import { Link } from "react-router-dom";
 
 const data = {
   user: {
@@ -36,49 +33,48 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navMain :[
-  {
-    title: "Dashboard",
-    url: "/admin",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Categories",
-    url: "/admin/categories",
-    icon: List, 
-  },
-  {
-    title: "SubCategories",
-    url: "/admin/sub-categories",
-    icon: Boxes, 
-  },
-  {
-    title: "Brands",
-    url: "/admin/brands",
-    icon: TagIcon, 
-  },
-  {
-    title: "Products",
-    url: "/admin/products",
-    icon: Package,
-  },
-  {
-    title: "Orders",
-    url: "/admin/orders",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Users",
-    url: "/admin/users",
-    icon: Users,
-  },
-
-],
-navSecondary: [
+  navMain: [
     {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
+      title: "Dashboard",
+      url: "/admin",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Categories",
+      url: "/admin/categories",
+      icon: List,
+    },
+    {
+      title: "SubCategories",
+      url: "/admin/sub-categories",
+      icon: Boxes,
+    },
+    {
+      title: "Brands",
+      url: "/admin/brands",
+      icon: TagIcon,
+    },
+    {
+      title: "Products",
+      url: "/admin/products",
+      icon: Package,
+    },
+    {
+      title: "Orders",
+      url: "/admin/orders",
+      icon: ShoppingCart,
+    },
+    {
+      title: "Users",
+      url: "/admin/users",
+      icon: Users,
+    },
+  ],
+  navSecondary: [
+    {
+      title: "Back to Store",
+      url: "/",
+      icon: ShoppingCartIcon,
     },
     {
       title: "Get Help",
@@ -86,8 +82,7 @@ navSecondary: [
       icon: IconHelp,
     },
   ],
-}
-
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -115,5 +110,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

@@ -58,9 +58,25 @@ export const createBrandAPI = async (brandData: FormData) => {
 
 // Update existing brand
 export const updateBrandAPI = async (id: string, brandData: FormData) => {
+  const processedData = new FormData();
+
+  for (const [key, value] of brandData.entries()) {
+    console.log(
+      `${key}:`,
+      value instanceof File ? `File: ${value.name}` : value
+    );
+
+    // Handle empty string values by converting to 'null' string for image
+    if (key === "image" && value === "null") {
+      processedData.append(key, "__NULL__"); // Use a special marker to indicate null
+      console.log(`Converting empty ${key} to "__NULL__"`);
+    } else {
+      processedData.append(key, value);
+    }
+  }
   const response = await axiosInstance.put(
     `/api/brands/${id}`,
-    brandData,
+    processedData,
     {
       headers: {
         "Content-Type": "multipart/form-data",

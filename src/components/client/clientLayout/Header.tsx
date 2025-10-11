@@ -10,6 +10,7 @@ import {
   LogOut,
   Settings,
   Package,
+  Shield,
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -23,37 +24,15 @@ import {
 } from "../../ui/dropdown-menu";
 import {
   NavigationMenu,
-  // NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  // NavigationMenuTrigger,
 } from "../../ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
 import { ModeToggle } from "../../mode-toggle";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { signOut } from "../../../features/auth/authSlice";
-
-// const categories = [
-//   {
-//     name: "Electronics",
-//     subcategories: ["Smartphones", "Laptops", "Headphones", "Cameras"],
-//   },
-//   {
-//     name: "Fashion",
-//     subcategories: [
-//       "Men's Clothing",
-//       "Women's Clothing",
-//       "Shoes",
-//       "Accessories",
-//     ],
-//   },
-//   {
-//     name: "Home & Garden",
-//     subcategories: ["Furniture", "Decor", "Kitchen", "Garden"],
-//   },
-// ];
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,6 +41,9 @@ export function Header() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+  // Check if user is admin
+  const isAdmin = user?.role === "admin";
 
   const handleSignOut = () => {
     dispatch(signOut());
@@ -134,16 +116,6 @@ export function Header() {
               <ModeToggle />
             </div>
 
-            {/* Wishlist */}
-            {/* <Button variant="ghost" size="sm" className="relative">
-              <Link to="/wishlist">
-                <Heart className="h-5 w-5" />
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
-                  3
-                </Badge>
-              </Link>
-            </Button> */}
-
             {/* Shopping Cart */}
             <Button variant="ghost" size="sm" className="relative">
               <Link to="/cart">
@@ -169,8 +141,27 @@ export function Header() {
                       <p className="text-xs text-muted-foreground">
                         {user.email}
                       </p>
+                      {isAdmin && (
+                        <Badge variant="secondary" className="mt-1 text-xs">
+                          Admin
+                        </Badge>
+                      )}
                     </div>
                     <DropdownMenuSeparator />
+                    
+                    {/* Show Admin Panel for admin users */}
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="cursor-pointer">
+                            <Shield className="mr-2 h-4 w-4" />
+                            Admin Panel
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    
                     <DropdownMenuItem asChild>
                       <Link to="/my-account" className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
@@ -258,7 +249,28 @@ export function Header() {
                         <p className="text-xs text-muted-foreground">
                           {user.email}
                         </p>
+                        {isAdmin && (
+                          <Badge variant="secondary" className="mt-1 text-xs">
+                            Admin
+                          </Badge>
+                        )}
                       </div>
+                      
+                      {/* Show Admin Panel for admin users in mobile */}
+                      {isAdmin && (
+                        <>
+                          <Link
+                            to="/admin"
+                            className="flex items-center py-2 text-sm font-medium hover:text-primary"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <Shield className="mr-2 h-4 w-4" />
+                            Admin Panel
+                          </Link>
+                          <div className="border-b my-2" />
+                        </>
+                      )}
+                      
                       <Link
                         to="/my-account"
                         className="block py-2 text-sm font-medium hover:text-primary"
@@ -376,38 +388,6 @@ export function Header() {
                   Home
                 </Link>
               </NavigationMenuItem>
-
-              {/* {categories.map((category) => (
-                <NavigationMenuItem key={category.name}>
-                  <NavigationMenuTrigger className="px-4 py-3 text-sm font-medium">
-                    {category.name}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid w-80 gap-3 p-4">
-                      {category.subcategories.map((sub) => (
-                        <NavigationMenuLink
-                          key={sub}
-                          href={`/category/${sub
-                            .toLowerCase()
-                            .replace(" ", "-")}`}
-                          className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          {sub}
-                        </NavigationMenuLink>
-                      ))}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              ))}
-
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  href="/deals"
-                  className="px-4 py-3 text-sm font-medium text-red-600"
-                >
-                  Hot Deals
-                </NavigationMenuLink>
-              </NavigationMenuItem> */}
 
               <NavigationMenuItem>
                 <Link to="/shop" className="px-4 py-3 text-sm font-medium">

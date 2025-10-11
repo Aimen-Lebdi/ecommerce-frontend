@@ -162,8 +162,12 @@ export const updateSubCategory = createAsyncThunk<
       if (subCategoryData.category) {
         formData.append("category", subCategoryData.category);
       }
-      if (subCategoryData.image) {
-        formData.append("image", subCategoryData.image);
+      if (subCategoryData.image !== undefined) {
+        if (subCategoryData.image === null) {
+          formData.append("image", "null");
+        } else {
+          formData.append("image", subCategoryData.image);
+        }
       }
 
       const data = await updateSubCategoryAPI(id, formData);

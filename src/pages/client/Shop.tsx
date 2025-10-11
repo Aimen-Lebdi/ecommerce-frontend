@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Grid3X3,
@@ -55,6 +55,255 @@ const sortOptions = [
   { value: "-name", label: "Name: Z to A" },
 ];
 
+// FiltersPanel component - MOVED OUTSIDE ShopPage
+const FiltersPanel = memo(
+  ({
+    isMobile = false,
+    categories,
+    categoriesLoading,
+    selectedCategories,
+    onCategoryChange,
+    selectedSubCategories,
+    availableSubCategories,
+    subcategoriesLoading,
+    onSubCategoryChange,
+    brands,
+    brandsLoading,
+    selectedBrands,
+    onBrandChange,
+    tempPriceRange,
+    onTempPriceChange,
+    onApplyPriceFilter,
+    filters,
+    onFiltersChange,
+    activeFilters,
+    onClearFilters,
+  }) => {
+    return (
+      <div className="space-y-6">
+        {/* Categories */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Categories</Label>
+          {categoriesLoading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm text-muted-foreground">Loading...</span>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
+              {categories?.map((category) => (
+                <div key={category._id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`category-${category._id}`}
+                    checked={selectedCategories.includes(category._id)}
+                    onCheckedChange={() => onCategoryChange(category._id)}
+                  />
+                  <Label
+                    htmlFor={`category-${category._id}`}
+                    className="text-sm font-normal flex-1 line-clamp-1"
+                  >
+                    {category.name}
+                    <span className="text-muted-foreground ml-1">
+                      ({category.productCount || 0})
+                    </span>
+                  </Label>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Subcategories */}
+        {selectedCategories.length > 0 && (
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Subcategories</Label>
+            {subcategoriesLoading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm text-muted-foreground">
+                  Loading...
+                </span>
+              </div>
+            ) : availableSubCategories.length > 0 ? (
+              <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
+                {availableSubCategories.map((subcategory) => (
+                  <div
+                    key={subcategory._id}
+                    className="flex items-center space-x-2"
+                  >
+                    <Checkbox
+                      id={`subcategory-${subcategory._id}`}
+                      checked={selectedSubCategories.includes(subcategory._id)}
+                      onCheckedChange={() =>
+                        onSubCategoryChange(subcategory._id)
+                      }
+                    />
+                    <Label
+                      htmlFor={`subcategory-${subcategory._id}`}
+                      className="text-sm font-normal flex-1 line-clamp-1"
+                    >
+                      {subcategory.name}
+                      <span className="text-muted-foreground ml-1">
+                        ({subcategory.productCount || 0})
+                      </span>
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No subcategories available
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Brands */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Brands</Label>
+          {brandsLoading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm text-muted-foreground">Loading...</span>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
+              {brands?.map((brand) => (
+                <div key={brand._id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`brand-${brand._id}`}
+                    checked={selectedBrands.includes(brand._id)}
+                    onCheckedChange={() => onBrandChange(brand._id)}
+                  />
+                  <Label
+                    htmlFor={`brand-${brand._id}`}
+                    className="text-sm font-normal flex-1 line-clamp-1"
+                  >
+                    {brand.name}
+                    <span className="text-muted-foreground ml-1">
+                      ({brand.productCount || 0})
+                    </span>
+                  </Label>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Price Range */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Price Range</Label>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label
+                htmlFor="min-price"
+                className="text-xs text-muted-foreground"
+              >
+                Min Price
+              </Label>
+              <Input
+                id="min-price"
+                type="number"
+                placeholder="0"
+                value={tempPriceRange.minPrice}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onTempPriceChange("minPrice", e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    onApplyPriceFilter();
+                  }
+                }}
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <Label
+                htmlFor="max-price"
+                className="text-xs text-muted-foreground"
+              >
+                Max Price
+              </Label>
+              <Input
+                id="max-price"
+                type="number"
+                placeholder="∞"
+                value={tempPriceRange.maxPrice}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onTempPriceChange("maxPrice", e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    onApplyPriceFilter();
+                  }
+                }}
+                className="text-sm"
+              />
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onApplyPriceFilter}
+            className="w-full"
+          >
+            Apply Price Filter
+          </Button>
+          {(filters.minPrice || filters.maxPrice) && (
+            <div className="text-xs text-muted-foreground text-center">
+              Active: ${filters.minPrice || "0"} - ${filters.maxPrice || "∞"}
+            </div>
+          )}
+        </div>
+
+        {/* Special Filters */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Special Offers</Label>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="on-sale"
+                checked={filters.onSale}
+                onCheckedChange={(checked) =>
+                  onFiltersChange({ ...filters, onSale: checked, page: 1 })
+                }
+              />
+              <Label htmlFor="on-sale" className="text-sm font-normal">
+                On Sale
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="in-stock"
+                checked={filters.inStock}
+                onCheckedChange={(checked) =>
+                  onFiltersChange({ ...filters, inStock: checked, page: 1 })
+                }
+              />
+              <Label htmlFor="in-stock" className="text-sm font-normal">
+                In Stock Only
+              </Label>
+            </div>
+          </div>
+        </div>
+
+        {/* Clear Filters */}
+        {activeFilters > 0 && (
+          <Button variant="outline" onClick={onClearFilters} className="w-full">
+            Clear All Filters ({activeFilters})
+          </Button>
+        )}
+      </div>
+    );
+  }
+);
+
+FiltersPanel.displayName = "FiltersPanel";
+
 const ShopPage = () => {
   const dispatch = useDispatch();
 
@@ -79,7 +328,7 @@ const ShopPage = () => {
   const [filters, setFilters] = useState({
     page: 1,
     limit: 12,
-    sort: "-sold", // Default to most popular
+    sort: "-sold",
     category: "",
     subCategory: "",
     brand: "",
@@ -92,11 +341,15 @@ const ShopPage = () => {
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [activeFilters, setActiveFilters] = useState(0);
+  const [tempPriceRange, setTempPriceRange] = useState({
+    minPrice: "",
+    maxPrice: "",
+  });
 
   // Fetch initial data
   useEffect(() => {
-    dispatch(fetchCategories({ limit: 100 })); // Get all categories
-    dispatch(fetchBrands({ limit: 100 })); // Get all brands
+    dispatch(fetchCategories());
+    dispatch(fetchBrands());
   }, [dispatch]);
 
   // Fetch subcategories when categories change
@@ -117,22 +370,18 @@ const ShopPage = () => {
       sort: filters.sort,
     };
 
-    // Add category filter
     if (selectedCategories.length > 0) {
       queryParams.category = selectedCategories.join(",");
     }
 
-    // Add subcategory filter
     if (selectedSubCategories.length > 0) {
       queryParams.subCategory = selectedSubCategories.join(",");
     }
 
-    // Add brand filter
     if (selectedBrands.length > 0) {
       queryParams.brand = selectedBrands.join(",");
     }
 
-    // Add price filters
     if (filters.minPrice) {
       queryParams["price[gte]"] = filters.minPrice;
     }
@@ -140,12 +389,10 @@ const ShopPage = () => {
       queryParams["price[lte]"] = filters.maxPrice;
     }
 
-    // Add stock filter
     if (filters.inStock) {
       queryParams["quantity[gt]"] = 0;
     }
 
-    // Add sale filter (products with priceAfterDiscount)
     if (filters.onSale) {
       queryParams.priceAfterDiscount = "exists";
     }
@@ -171,42 +418,51 @@ const ShopPage = () => {
     setActiveFilters(count);
   }, [selectedCategories, selectedSubCategories, selectedBrands, filters]);
 
-  const handleCategoryChange = (categoryId) => {
+  // Callbacks wrapped with useCallback
+  const handleCategoryChange = useCallback((categoryId) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId)
         ? prev.filter((c) => c !== categoryId)
         : [...prev, categoryId]
     );
-    // Reset subcategories when categories change
     setSelectedSubCategories([]);
     setFilters((prev) => ({ ...prev, page: 1 }));
-  };
+  }, []);
 
-  const handleSubCategoryChange = (subCategoryId) => {
+  const handleSubCategoryChange = useCallback((subCategoryId) => {
     setSelectedSubCategories((prev) =>
       prev.includes(subCategoryId)
         ? prev.filter((s) => s !== subCategoryId)
         : [...prev, subCategoryId]
     );
     setFilters((prev) => ({ ...prev, page: 1 }));
-  };
+  }, []);
 
-  const handleBrandChange = (brandId) => {
+  const handleBrandChange = useCallback((brandId) => {
     setSelectedBrands((prev) =>
       prev.includes(brandId)
         ? prev.filter((b) => b !== brandId)
         : [...prev, brandId]
     );
     setFilters((prev) => ({ ...prev, page: 1 }));
-  };
+  }, []);
 
-  const handlePriceChange = (field, value) => {
+  const handleTempPriceChange = useCallback((field, value) => {
+    setTempPriceRange((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleApplyPriceFilter = useCallback(() => {
     setFilters((prev) => ({
       ...prev,
-      [field]: value,
+      minPrice: tempPriceRange.minPrice,
+      maxPrice: tempPriceRange.maxPrice,
       page: 1,
     }));
-  };
+  }, [tempPriceRange]);
+
+  const handleFiltersChange = useCallback((newFilters) => {
+    setFilters(newFilters);
+  }, []);
 
   const handleSortChange = (sortValue) => {
     setFilters((prev) => ({ ...prev, sort: sortValue, page: 1 }));
@@ -217,10 +473,11 @@ const ShopPage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSelectedCategories([]);
     setSelectedSubCategories([]);
     setSelectedBrands([]);
+    setTempPriceRange({ minPrice: "", maxPrice: "" });
     setFilters((prev) => ({
       ...prev,
       minPrice: "",
@@ -229,7 +486,7 @@ const ShopPage = () => {
       onSale: false,
       page: 1,
     }));
-  };
+  }, []);
 
   const clearSpecificFilter = (type, value) => {
     switch (type) {
@@ -243,6 +500,7 @@ const ShopPage = () => {
         handleBrandChange(value);
         break;
       case "price":
+        setTempPriceRange({ minPrice: "", maxPrice: "" });
         setFilters((prev) => ({
           ...prev,
           minPrice: "",
@@ -267,194 +525,6 @@ const ShopPage = () => {
     return selectedCategories.includes(subCategoryId);
   });
 
-  const FiltersPanel = ({ isMobile = false }) => (
-    <div className="space-y-6">
-      {/* Categories */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Categories</Label>
-        {categoriesLoading ? (
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-muted-foreground">Loading...</span>
-          </div>
-        ) : (
-          <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
-            {categories?.map((category) => (
-              <div key={category._id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`category-${category._id}`}
-                  checked={selectedCategories.includes(category._id)}
-                  onCheckedChange={() => handleCategoryChange(category._id)}
-                />
-                <Label
-                  htmlFor={`category-${category._id}`}
-                  className="text-sm font-normal flex-1 line-clamp-1"
-                >
-                  {category.name}
-                  <span className="text-muted-foreground ml-1">
-                    ({category.productCount || 0})
-                  </span>
-                </Label>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Subcategories - Only show if categories are selected */}
-      {selectedCategories.length > 0 && (
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Subcategories</Label>
-          {subcategoriesLoading ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm text-muted-foreground">Loading...</span>
-            </div>
-          ) : availableSubCategories.length > 0 ? (
-            <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
-              {availableSubCategories.map((subcategory) => (
-                <div
-                  key={subcategory._id}
-                  className="flex items-center space-x-2"
-                >
-                  <Checkbox
-                    id={`subcategory-${subcategory._id}`}
-                    checked={selectedSubCategories.includes(subcategory._id)}
-                    onCheckedChange={() =>
-                      handleSubCategoryChange(subcategory._id)
-                    }
-                  />
-                  <Label
-                    htmlFor={`subcategory-${subcategory._id}`}
-                    className="text-sm font-normal flex-1 line-clamp-1"
-                  >
-                    {subcategory.name}
-                    <span className="text-muted-foreground ml-1">
-                      ({subcategory.productCount || 0})
-                    </span>
-                  </Label>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No subcategories available
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Brands */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Brands</Label>
-        {brandsLoading ? (
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-muted-foreground">Loading...</span>
-          </div>
-        ) : (
-          <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
-            {brands?.map((brand) => (
-              <div key={brand._id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`brand-${brand._id}`}
-                  checked={selectedBrands.includes(brand._id)}
-                  onCheckedChange={() => handleBrandChange(brand._id)}
-                />
-                <Label
-                  htmlFor={`brand-${brand._id}`}
-                  className="text-sm font-normal flex-1 line-clamp-1"
-                >
-                  {brand.name}
-                  <span className="text-muted-foreground ml-1">
-                    ({brand.productCount || 0})
-                  </span>
-                </Label>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Price Range */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Price Range</Label>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label
-              htmlFor="min-price"
-              className="text-xs text-muted-foreground"
-            >
-              Min Price
-            </Label>
-            <Input
-              id="min-price"
-              type="number"
-              placeholder="0"
-              value={filters.minPrice}
-              onChange={(e) => handlePriceChange("minPrice", e.target.value)}
-              className="text-sm"
-            />
-          </div>
-          <div>
-            <Label
-              htmlFor="max-price"
-              className="text-xs text-muted-foreground"
-            >
-              Max Price
-            </Label>
-            <Input
-              id="max-price"
-              type="number"
-              placeholder="∞"
-              value={filters.maxPrice}
-              onChange={(e) => handlePriceChange("maxPrice", e.target.value)}
-              className="text-sm"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Special Filters */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Special Offers</Label>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="on-sale"
-              checked={filters.onSale}
-              onCheckedChange={(checked) =>
-                setFilters((prev) => ({ ...prev, onSale: checked, page: 1 }))
-              }
-            />
-            <Label htmlFor="on-sale" className="text-sm font-normal">
-              On Sale
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="in-stock"
-              checked={filters.inStock}
-              onCheckedChange={(checked) =>
-                setFilters((prev) => ({ ...prev, inStock: checked, page: 1 }))
-              }
-            />
-            <Label htmlFor="in-stock" className="text-sm font-normal">
-              In Stock Only
-            </Label>
-          </div>
-        </div>
-      </div>
-
-      {/* Clear Filters */}
-      {activeFilters > 0 && (
-        <Button variant="outline" onClick={clearFilters} className="w-full">
-          Clear All Filters ({activeFilters})
-        </Button>
-      )}
-    </div>
-  );
-
   const ProductCard = ({ product }) => {
     const discountPrice = product.priceAfterDiscount || product.price;
     const hasDiscount =
@@ -466,130 +536,127 @@ const ShopPage = () => {
       : 0;
 
     return (
-      <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-        <CardHeader className="p-0 flex-shrink-0">
-          <div className="relative overflow-hidden rounded-t-lg">
-            <img
-              src={
-                product.mainImage ||
-                "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop"
-              }
-              alt={product.name}
-              className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-            <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-              {hasDiscount && (
-                <Badge className="bg-red-600 hover:bg-red-700 text-xs px-1.5 py-0.5">
-                  -{discountPercentage}%
-                </Badge>
-              )}
-              {product.quantity === 0 && (
-                <Badge className="bg-gray-600 hover:bg-gray-700 text-xs px-1.5 py-0.5">
-                  Out of Stock
-                </Badge>
-              )}
-            </div>
-            <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100 sm:group-hover:scale-110">
-              <Button
-                size="icon"
-                variant="outline"
-                className="h-7 w-7 bg-white/90 hover:bg-white"
-                onClick={async (e) => {
-                  e.preventDefault();
-                  try {
-                    await dispatch(addProductToWishlist(product._id)).unwrap();
-                    toast.success(`${product.name} added to wishlist`);
-                  } catch (err: any) {
-                    toast.error(err || "Failed to add to wishlist");
-                  }
-                }}
-              >
-                <Heart className="h-3 w-3" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                className="h-7 w-7 bg-white/90 hover:bg-white"
-              >
-                <Link to={`/product/${product._id}`}>
+      <Link to={`/product/${product._id}`} className="block h-full">
+        <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col cursor-pointer">
+          <CardHeader className="p-0 flex-shrink-0">
+            <div className="relative overflow-hidden rounded-t-lg">
+              <img
+                src={
+                  product.mainImage ||
+                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop"
+                }
+                alt={product.name}
+                className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                {hasDiscount && (
+                  <Badge className="bg-red-600 hover:bg-red-700 text-xs px-1.5 py-0.5">
+                    -{discountPercentage}%
+                  </Badge>
+                )}
+                {product.quantity === 0 && (
+                  <Badge className="bg-gray-600 hover:bg-gray-700 text-xs px-1.5 py-0.5">
+                    Out of Stock
+                  </Badge>
+                )}
+              </div>
+              <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100 sm:group-hover:scale-110">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-7 w-7 bg-white/90 hover:bg-white"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation(); // Add this to prevent Link navigation
+                    try {
+                      await dispatch(
+                        addProductToWishlist(product._id)
+                      ).unwrap();
+                      toast.success(`${product.name} added to wishlist`);
+                    } catch (err: any) {
+                      toast.error(err || "Failed to add to wishlist");
+                    }
+                  }}
+                >
+                  <Heart className="h-3 w-3" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-7 w-7 bg-white/90 hover:bg-white"
+                  onClick={(e) => {
+                    e.stopPropagation(); // This is now just for safety
+                  }}
+                >
                   <Eye className="h-4 w-4" />
-                </Link>
-              </Button>
+                </Button>
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
-          <div className="mb-1.5 flex flex-wrap gap-1">
-            {product.brand?.name && (
-              <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                {product.brand.name}
-              </Badge>
-            )}
-            {product.category?.name && (
-              <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                {product.category.name}
-              </Badge>
-            )}
-          </div>
-          <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-2 leading-tight flex-1">
-            {product.name}
-          </h3>
-          <div className="flex items-center mb-2">
-            <div className="flex items-center mr-2">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3 w-3 ${
-                    i < Math.floor(product.rating || 0)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
+          </CardHeader>
+          <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
+            <div className="mb-1.5 flex flex-wrap gap-1">
+              {product.brand?.name && (
+                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                  {product.brand.name}
+                </Badge>
+              )}
+              {product.category?.name && (
+                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                  {product.category.name}
+                </Badge>
+              )}
             </div>
-            <span className="text-xs text-muted-foreground hidden sm:inline">
-              ({product.ratingsQuantity || 0})
-            </span>
-            <span className="text-xs text-muted-foreground sm:hidden">
-              (
-              {product.ratingsQuantity > 1000
-                ? `${Math.floor(product.ratingsQuantity / 1000)}k`
-                : product.ratingsQuantity || 0}
-              )
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
-            <span className="text-base sm:text-lg font-bold">
-              ${discountPrice}
-            </span>
-            {hasDiscount && (
-              <span className="text-xs sm:text-sm text-muted-foreground line-through">
-                ${product.price}
+            <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-2 leading-tight flex-1">
+              {product.name}
+            </h3>
+            <div className="flex items-center mb-2">
+              <div className="flex items-center mr-2">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-3 w-3 ${
+                      i < Math.floor(product.rating || 0)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                ({product.ratingsQuantity || 0})
               </span>
-            )}
-          </div>
-          <div className="flex items-center justify-between mt-auto">
-            <span
-              className={`text-xs ${
-                product.quantity > 0 ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {product.quantity > 0
-                ? `In Stock (${product.quantity})`
-                : "Out of Stock"}
-            </span>
-            {/* <Button
-              size="sm"
-              disabled={product.quantity === 0}
-              className="text-xs px-2 py-1 h-7 sm:h-8"
-            >
-              <ShoppingCart className="h-3 w-3 mr-1" />
-              <span className="hidden sm:inline">Add to Cart</span>
-              <span className="sm:hidden">Add</span>
-            </Button> */}
-          </div>
-        </CardContent>
-      </Card>
+              <span className="text-xs text-muted-foreground sm:hidden">
+                (
+                {product.ratingsQuantity > 1000
+                  ? `${Math.floor(product.ratingsQuantity / 1000)}k`
+                  : product.ratingsQuantity || 0}
+                )
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
+              <span className="text-base sm:text-lg font-bold">
+                ${discountPrice}
+              </span>
+              {hasDiscount && (
+                <span className="text-xs sm:text-sm text-muted-foreground line-through">
+                  ${product.price}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center justify-between mt-auto">
+              <span
+                className={`text-xs ${
+                  product.quantity > 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {product.quantity > 0
+                  ? `In Stock (${product.quantity})`
+                  : "Out of Stock"}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
     );
   };
 
@@ -701,15 +768,6 @@ const ShopPage = () => {
                       : "Out of Stock"}
                   </span>
                 </div>
-                {/* <Button
-                  disabled={product.quantity === 0}
-                  size="sm"
-                  className="ml-2"
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Add to Cart</span>
-                  <span className="sm:hidden">Add</span>
-                </Button> */}
               </div>
             </div>
           </div>
@@ -726,19 +784,16 @@ const ShopPage = () => {
     const maxVisiblePages = 5;
 
     if (numberOfPages <= maxVisiblePages) {
-      // Show all pages if total pages is less than or equal to maxVisiblePages
       for (let i = 1; i <= numberOfPages; i++) {
         pages.push(i);
       }
     } else {
-      // Show first page
       pages.push(1);
 
       if (currentPage > 3) {
         pages.push("...");
       }
 
-      // Show pages around current page
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(numberOfPages - 1, currentPage + 1);
 
@@ -752,7 +807,6 @@ const ShopPage = () => {
         pages.push("...");
       }
 
-      // Show last page
       if (!pages.includes(numberOfPages)) {
         pages.push(numberOfPages);
       }
@@ -786,7 +840,27 @@ const ShopPage = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <FiltersPanel />
+              <FiltersPanel
+                categories={categories}
+                categoriesLoading={categoriesLoading}
+                selectedCategories={selectedCategories}
+                onCategoryChange={handleCategoryChange}
+                selectedSubCategories={selectedSubCategories}
+                availableSubCategories={availableSubCategories}
+                subcategoriesLoading={subcategoriesLoading}
+                onSubCategoryChange={handleSubCategoryChange}
+                brands={brands}
+                brandsLoading={brandsLoading}
+                selectedBrands={selectedBrands}
+                onBrandChange={handleBrandChange}
+                tempPriceRange={tempPriceRange}
+                onTempPriceChange={handleTempPriceChange}
+                onApplyPriceFilter={handleApplyPriceFilter}
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                activeFilters={activeFilters}
+                onClearFilters={clearFilters}
+              />
             </CardContent>
           </Card>
         </div>
@@ -813,8 +887,29 @@ const ShopPage = () => {
                   <SheetHeader>
                     <SheetTitle>Filters</SheetTitle>
                   </SheetHeader>
-                  <div className="mt-6 overflow-y-auto h-full pb-16">
-                    <FiltersPanel isMobile={true} />
+                  <div className="mt-6 p-6 overflow-y-auto h-full pb-16">
+                    <FiltersPanel
+                      isMobile={true}
+                      categories={categories}
+                      categoriesLoading={categoriesLoading}
+                      selectedCategories={selectedCategories}
+                      onCategoryChange={handleCategoryChange}
+                      selectedSubCategories={selectedSubCategories}
+                      availableSubCategories={availableSubCategories}
+                      subcategoriesLoading={subcategoriesLoading}
+                      onSubCategoryChange={handleSubCategoryChange}
+                      brands={brands}
+                      brandsLoading={brandsLoading}
+                      selectedBrands={selectedBrands}
+                      onBrandChange={handleBrandChange}
+                      tempPriceRange={tempPriceRange}
+                      onTempPriceChange={handleTempPriceChange}
+                      onApplyPriceFilter={handleApplyPriceFilter}
+                      filters={filters}
+                      onFiltersChange={handleFiltersChange}
+                      activeFilters={activeFilters}
+                      onClearFilters={clearFilters}
+                    />
                   </div>
                 </SheetContent>
               </Sheet>

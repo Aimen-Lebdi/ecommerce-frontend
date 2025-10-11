@@ -77,7 +77,7 @@ export function UserDialog({
   const [name, setName] = React.useState("");
   const [originalName, setOriginalName] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [originalEmail, setOriginalEmail] = React.useState("");
+  // const [originalEmail, setOriginalEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [role, setRole] = React.useState<"admin" | "user">("user");
@@ -103,7 +103,7 @@ export function UserDialog({
       setName(existingData.name || "");
       setOriginalName(existingData.name || "");
       setEmail(existingData.email || "");
-      setOriginalEmail(existingData.email || "");
+      // setOriginalEmail(existingData.email || "");
       setRole(existingData.role || "user");
       setOriginalRole(existingData.role || "user");
       setActive(existingData.active ?? true);
@@ -122,7 +122,7 @@ export function UserDialog({
   const validate = () => {
     const e: Errors = {};
     if (!name.trim()) e.name = "Name is required";
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    // if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       e.email = "Valid email is required";
 
     if (mode === "add") {
@@ -147,8 +147,8 @@ export function UserDialog({
   const resetForm = () => {
     setName("");
     setOriginalName("");
-    setEmail("");
-    setOriginalEmail("");
+    // setEmail("");
+    // setOriginalEmail("");
     setPassword("");
     setConfirmPassword("");
     setRole("user");
@@ -184,9 +184,9 @@ export function UserDialog({
       if (name.trim() !== originalName.trim()) {
         payload.name = name;
       }
-      if (email.trim() !== originalEmail.trim()) {
-        payload.email = email;
-      }
+      // if (email.trim() !== originalEmail.trim()) {
+      //   payload.email = email;
+      // }
       if (password.trim()) {
         payload.password = password;
       }
@@ -312,12 +312,12 @@ export function UserDialog({
             type="email"
             placeholder="e.g., john@example.com"
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (e.target.value.trim()) {
-                setErrors((prev) => ({ ...prev, email: undefined }));
-              }
-            }}
+            // onChange={(e) => {
+            //   setEmail(e.target.value);
+            //   if (e.target.value.trim()) {
+            //     setErrors((prev) => ({ ...prev, email: undefined }));
+            //   }
+            // }}
             className={errors.email ? "border-red-500" : ""}
           />
           {errors.email && (

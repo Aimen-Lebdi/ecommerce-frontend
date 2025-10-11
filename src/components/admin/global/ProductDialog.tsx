@@ -27,6 +27,7 @@ import {
   SelectItem,
 } from "../../ui/select";
 import axiosInstance from "../../../utils/axiosInstance";
+// import { set } from "date-fns";
 
 type Errors = {
   category?: string;
@@ -138,6 +139,7 @@ export function ProductDialog({
 
   const [otherImages, setOtherImages] = React.useState<File[]>([]);
   const [previewOthers, setPreviewOthers] = React.useState<string[]>([]);
+  const [imagesRemoved, setImagesRemoved] = React.useState(false);
   const [dragActiveOthers, setDragActiveOthers] = React.useState(false);
 
   const [errors, setErrors] = React.useState<Errors>({});
@@ -246,6 +248,7 @@ export function ProductDialog({
       if (existingData.images && existingData.images.length > 0) {
         setPreviewOthers(existingData.images);
       }
+      setImagesRemoved(false)
     } else if (mode === "add" && open) {
       // Reset form for add mode
       resetForm();
@@ -267,6 +270,7 @@ export function ProductDialog({
     setPreviewMain(null);
     setOtherImages([]);
     setPreviewOthers([]);
+    setImagesRemoved(false)
     setErrors({});
     setOriginalValues(null);
     setCategoryChanged(false);
@@ -378,9 +382,12 @@ export function ProductDialog({
       if (mainImage) {
         productData.mainImage = mainImage;
       }
-      if (otherImages.length > 0) {
-        productData.images = otherImages;
-      }
+      // Always include new images if they were selected OR if images were removed
+if (otherImages.length > 0) {
+  productData.images = otherImages;
+} else if (imagesRemoved && existingData?.images && existingData.images.length > 0) {
+  productData.images = null;
+}
     }
 
     console.log(
@@ -456,9 +463,17 @@ export function ProductDialog({
   };
 
   const handleRemoveOther = (idx: number) => {
-    setOtherImages((prev) => prev.filter((_, i) => i !== idx));
-    setPreviewOthers((prev) => prev.filter((_, i) => i !== idx));
-  };
+  const newOtherImages = otherImages.filter((_, i) => i !== idx);
+  const newPreviewOthers = previewOthers.filter((_, i) => i !== idx);
+  
+  setOtherImages(newOtherImages);
+  setPreviewOthers(newPreviewOthers);
+  
+  // If all images are removed in edit mode and there were existing images
+  if (mode === "edit" && newOtherImages.length === 0 && existingData?.images && existingData.images.length > 0) {
+    setImagesRemoved(true);
+  }
+};
 
   // Filter subcategories based on selected category
   const filteredSubcategories = subcategories.filter(

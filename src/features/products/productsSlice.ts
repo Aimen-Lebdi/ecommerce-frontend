@@ -286,11 +286,18 @@ export const updateProduct = createAsyncThunk<
         formData.append("mainImage", productData.mainImage);
       }
 
-      if (productData.images) {
-        productData.images.forEach((image) => {
-          formData.append("images", image);
-        });
-      }
+      if (productData.images !== undefined) {
+  if (productData.images === null) {
+    formData.append("images", "null");
+  } else if (Array.isArray(productData.images)) {
+    productData.images.forEach((image) => {
+      formData.append("images", image);
+    });
+  } else {
+    // if it's a single string instead of array
+    formData.append("images", productData.images);
+  }
+}
 
       const data = await updateProductAPI(id, formData);
       // Refetch to maintain consistency with server-side data

@@ -338,17 +338,17 @@ export default function Products() {
                 rowData,
                 (updatedData) => {
                   const id = rowData._id;
-                  // const {
-                  //   _id,
-                  //   slug,
-                  //   createdAt,
-                  //   updatedAt,
-                  //   sold,
-                  //   rating,
-                  //   ratingsQuantity,
-                  //   ...productUpdateData
-                  // } = updatedData;
-                  handleUpdateProduct(id, updatedData);
+                  const {
+                    _id,
+                    slug,
+                    createdAt,
+                    updatedAt,
+                    sold,
+                    rating,
+                    ratingsQuantity,
+                    ...productUpdateData
+                  } = updatedData;
+                  handleUpdateProduct(id, productUpdateData);
                 },
                 isUpdating
               )

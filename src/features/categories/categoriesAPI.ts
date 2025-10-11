@@ -58,9 +58,27 @@ export const createCategoryAPI = async (categoryData: FormData) => {
 
 // Update existing category
 export const updateCategoryAPI = async (id: string, categoryData: FormData) => {
+
+const processedData = new FormData();
+
+  for (const [key, value] of categoryData.entries()) {
+    console.log(
+      `${key}:`,
+      value instanceof File ? `File: ${value.name}` : value
+    );
+
+    // Handle empty string values by converting to 'null' string for image
+    if (key === "image" && value === "null") {
+      processedData.append(key, "__NULL__"); // Use a special marker to indicate null
+      console.log(`Converting empty ${key} to "__NULL__"`);
+    } else {
+      processedData.append(key, value);
+    }
+  }
+  console.log("Processed FormData entries:", processedData);
   const response = await axiosInstance.put(
     `/api/categories/${id}`,
-    categoryData,
+    processedData,
     {
       headers: {
         "Content-Type": "multipart/form-data",

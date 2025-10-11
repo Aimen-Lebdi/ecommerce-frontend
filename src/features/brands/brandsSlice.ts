@@ -152,8 +152,12 @@ export const updateBrand = createAsyncThunk<
       if (brandData.name) {
         formData.append("name", brandData.name);
       }
-      if (brandData.image) {
-        formData.append("image", brandData.image);
+      if (brandData.image !== undefined) {
+        if (brandData.image === null) {
+          formData.append("image", "null");
+        } else {
+          formData.append("image", brandData.image);
+        }
       }
 
       const data = await updateBrandAPI(id, formData);

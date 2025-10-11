@@ -37,7 +37,7 @@ interface BrandDialogProps {
   existingData?: Brand;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSave?: (data: { name?: string; image?: File }) => void; // Made name optional for updates
+  onSave?: (data: { name?: string; image?: File | null }) => void; // Made name optional for updates
   isLoading?: boolean; // Add loading prop
 }
 
@@ -54,6 +54,7 @@ export function BrandDialog({
   const [originalName, setOriginalName] = React.useState(""); // Track original name
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = React.useState(false);
   const [dragActive, setDragActive] = React.useState(false);
   const [errors, setErrors] = React.useState<Errors>({});
 
@@ -69,6 +70,7 @@ export function BrandDialog({
       if (existingData.image) {
         setPreview(existingData.image);
       }
+      setImageRemoved(false);
     } else if (mode === "add" && open) {
       // Reset form for add mode
       setBrandName("");
@@ -90,12 +92,13 @@ export function BrandDialog({
     setOriginalName("");
     setImage(null);
     setPreview(null);
+    setImageRemoved(false);
     setErrors({});
   };
 
   // Function to detect changes and prepare payload
   const prepareUpdatePayload = () => {
-    const payload: { name?: string; image?: File } = {};
+    const payload: { name?: string; image?: File | null } = {};
     
     // Only include name if it changed
     if (mode === "add" || brandName !== originalName) {
@@ -103,9 +106,12 @@ export function BrandDialog({
     }
     
     // Only include image if a new file was selected
-    if (image instanceof File) {
-      payload.image = image;
-    }
+    // Only include image if a new file was selected OR if image was removed
+if (image instanceof File) {
+  payload.image = image;
+} else if (mode === "edit" && imageRemoved && existingData?.image) {
+  payload.image = null;
+}
     
     return payload;
   };
@@ -152,10 +158,13 @@ export function BrandDialog({
   };
 
   const handleRemoveImage = () => {
-    setImage(null);
-    setPreview(null);
-    setErrors((prev) => ({ ...prev, image: "Image is required" }));
-  };
+  setImage(null);
+  setPreview(null);
+  
+  if (mode === "edit") {
+    setImageRemoved(true);
+  }
+};
 
   const handleDialogClose = (newOpen: boolean) => {
     if (!newOpen) {
@@ -328,7 +337,7 @@ export function AddBrandDialog() {
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditBrandDialog(
   rowData: Brand,
-  onSave: (updatedData: { name?: string; image?: File }) => void,
+  onSave: (updatedData: { name?: string; image?: File | null }) => void,
   isLoading: boolean = false
 ) {
   return (

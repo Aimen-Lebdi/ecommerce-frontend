@@ -74,7 +74,7 @@ export const updateProductAPI = async (id: string, productData: FormData) => {
     );
 
     // Handle empty string values by converting to 'null' string for subcategory and brand
-    if ((key === "subCategory" || key === "brand") && value === "") {
+    if ((key === "subCategory" || key === "brand" || key === "images") && value === "" || value === "null") {
       processedData.append(key, "__NULL__"); // Use a special marker to indicate null
       console.log(`Converting empty ${key} to "__NULL__"`);
     } else {

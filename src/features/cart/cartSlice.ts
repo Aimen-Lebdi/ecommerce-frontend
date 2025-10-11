@@ -18,7 +18,6 @@ import {
 // Interface for cart state
 interface CartState {
   cartId: string | null; // ADD THIS LINE
-
   cartItems: CartItem[];
   numOfCartItems: number;
   totalCartPrice: number;

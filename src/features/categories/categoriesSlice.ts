@@ -35,7 +35,7 @@ export interface CreateCategoryData {
 // Define interface for updating category
 export interface UpdateCategoryData {
   name?: string;
-  image?: File;
+  image?: File | null; // null indicates removal of image
 }
 
 // Pagination metadata interface
@@ -147,15 +147,21 @@ export const updateCategory = createAsyncThunk<
 >(
   "categories/updateCategory",
   async ({ id, categoryData }, { rejectWithValue, getState, dispatch }) => {
+    console.log("Appending image to formData:", categoryData.image);
     try {
       const formData = new FormData();
       if (categoryData.name) {
         formData.append("name", categoryData.name);
       }
-      if (categoryData.image) {
-        formData.append("image", categoryData.image);
+      if (categoryData.image !== undefined) {
+        console.log("Appending image to formData:", categoryData.image);
+        if (categoryData.image === null) {
+          formData.append("image", "null");
+        } else {
+          formData.append("image", categoryData.image);
+        }
       }
-
+ console.log("FormData before updateCategoryAPI call:", formData);
       const data = await updateCategoryAPI(id, formData);
 
       // Refetch to maintain consistency with server-side data
