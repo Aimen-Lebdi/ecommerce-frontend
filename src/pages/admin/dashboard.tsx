@@ -250,34 +250,34 @@ export default function Dashboard() {
       console.log("Dashboard socket disconnected");
       toast.error("Disconnected from live updates");
     },
-    onError: (error) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
       console.error("Dashboard socket error:", error);
       toast.error("Connection error occurred");
     },
   });
 
   // Combine dashboard activities with realtime activities
-  // Realtime activities appear at the top, followed by dashboard activities
   const combinedActivities = React.useMemo(() => {
-  const activityMap = new Map<string, Activity>();
-  
-  // Add realtime activities first (priority)
-  realtimeActivities.forEach(activity => {
-    activityMap.set(activity._id, activity);
-  });
-  
-  // Add dashboard activities only if not already present
-  dashboardActivities.forEach(activity => {
-    if (!activityMap.has(activity._id)) {
+    const activityMap = new Map<string, Activity>();
+    
+    // Add realtime activities first (priority)
+    realtimeActivities.forEach(activity => {
       activityMap.set(activity._id, activity);
-    }
-  });
-  
-  // Convert to array and sort by date
-  return Array.from(activityMap.values()).sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-}, [realtimeActivities, dashboardActivities]);
+    });
+    
+    // Add dashboard activities only if not already present
+    dashboardActivities.forEach(activity => {
+      if (!activityMap.has(activity._id)) {
+        activityMap.set(activity._id, activity);
+      }
+    });
+    
+    // Convert to array and sort by date
+    return Array.from(activityMap.values()).sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [realtimeActivities, dashboardActivities]);
 
   // Load initial dashboard activities on component mount
   React.useEffect(() => {
@@ -295,10 +295,8 @@ export default function Dashboard() {
   // Handle query parameter changes from the DataTable
   const handleQueryParamsChange = React.useCallback(
     (params: ServerQueryParams) => {
-      // Store the parameters in Redux state for future reference
       dispatch(setQueryParams(params));
 
-      // For dashboard, we mainly use socket filters for real-time filtering
       if (params.type || params.timeframe) {
         const filters: { type?: string; timeframe?: string } = {};
 
@@ -310,13 +308,11 @@ export default function Dashboard() {
           filters.timeframe = params.timeframe as string;
         }
 
-        // Use socket filtering for real-time updates
         if (isConnected && Object.keys(filters).length > 0) {
           filterActivities(filters);
         }
       }
 
-      // Also fetch fresh dashboard activities with new params
       dispatch(fetchDashboardActivities());
     },
     [dispatch, isConnected, filterActivities]
@@ -324,10 +320,8 @@ export default function Dashboard() {
 
   // Handle refresh button
   const handleRefresh = React.useCallback(() => {
-    // Refresh dashboard activities
     dispatch(fetchDashboardActivities());
 
-    // Request fresh stats if connected
     if (isConnected) {
       requestActivityStats();
     }
@@ -352,8 +346,10 @@ export default function Dashboard() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          {/* Dashboard Cards - Revenue, Customers, Orders, Top Product */}
           <SectionCards />
 
+          {/* Growth Rate Chart */}
           <div className="px-4 lg:px-6">
             <ChartAreaInteractive />
           </div>
@@ -394,30 +390,27 @@ export default function Dashboard() {
             </div>
 
             <DataTable
-              // Client-side table since we're managing data through socket and Redux
               serverSide={false}
               data={combinedActivities || []}
               loading={dashboardLoading}
               onQueryParamsChange={handleQueryParamsChange}
               currentQueryParams={currentQueryParams}
               error={dashboardError}
-              // Table configuration
               columns={recentActivitiesColumns}
-              // Table features configuration
-              enableRowSelection={false} // No selection needed for dashboard
+              enableRowSelection={false}
               enableGlobalFilter={true}
               enableColumnFilter={false}
               enableAdvancedFilter={true}
               advancedFilterConfig={advancedFilterConfig}
-              enableDragAndDrop={false} // Activities shouldn't be reorderable
+              enableDragAndDrop={false}
               filterColumn="type"
               filterPlaceholder="Filter by activity type..."
-              pageSize={10} // Smaller page size for dashboard
-              // Disable row actions
+              pageSize={10}
               showRowActions={false}
             />
           </div>
 
+          {/* Dashboard Tables - Best Orders, Top Customers, Best Products */}
           <DashboardTables />
         </div>
       </div>

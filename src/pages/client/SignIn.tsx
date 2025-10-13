@@ -13,19 +13,18 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Separator } from "../../components/ui/separator";
-import { Alert, AlertDescription } from "../../components/ui/alert";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { signIn, clearError } from "../../features/auth/authSlice";
-import { useNavigate, useLocation, Navigate } from "react-router-dom";
+import { useNavigate, useLocation, Navigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function SignInPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isSigningIn, error, tokenExpired,loading,  isAuthenticated, user } = useAppSelector(
-    (state) => state.auth
-  );
+  const { isSigningIn, error, tokenExpired, loading, isAuthenticated, user } =
+    useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -34,38 +33,61 @@ export default function SignInPage() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Clear errors when component mounts or when user starts typing
+  // Check for error in location state (from protected route - banned user)
+  useEffect(() => {
+    if (location.state?.error) {
+      toast.error(location.state.error, {
+        duration: 5000,
+      });
+      // Clear the error from location state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  // Show error toast when auth error occurs
   useEffect(() => {
     if (error) {
-      dispatch(clearError());
+      toast.error(error, {
+        duration: 4000,
+      });
     }
-  }, [dispatch]);
+  }, [error]);
+
+  // Clear errors when component mounts
+  useEffect(() => {
+    return () => {
+      if (error) {
+        dispatch(clearError());
+      }
+    };
+  }, [dispatch, error]);
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && !tokenExpired) {
       // Get the intended destination from location state or default based on role
       const from =
         location.state?.from?.pathname ||
         (user.role === "admin" ? "/admin" : "/");
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, user, navigate, location]);
+  }, [isAuthenticated, user, navigate, location, tokenExpired]);
 
   // Only redirect if truly authenticated (not expired)
   if (isAuthenticated && !tokenExpired && !loading) {
     // Get the intended destination from location state, or default to home
-    const from = (location.state as any)?.from?.pathname || '/';
+    const from = (location.state as any)?.from?.pathname || "/";
     return <Navigate to={from} replace />;
   }
+
   // Email validation
-  const isValidEmail = (email) => {
+  const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleInputChange = (name, value) => {
+  const handleInputChange = (name: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -86,7 +108,7 @@ export default function SignInPage() {
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
 
     // Required fields
     if (!formData.email.trim()) newErrors.email = "Email is required";
@@ -105,6 +127,9 @@ export default function SignInPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      // Show first error in toast
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError);
       return;
     }
 
@@ -119,9 +144,14 @@ export default function SignInPage() {
         })
       ).unwrap();
 
+      // Show success toast
+      toast.success("Welcome back!", {
+        duration: 3000,
+      });
+
       // Navigation will be handled by the useEffect above
-    } catch (error) {
-      // Error will be handled by the auth slice and displayed in the UI
+    } catch (error: any) {
+      // Error will be handled by the auth slice and displayed via toast
       console.error("Sign in failed:", error);
     }
   };
@@ -130,10 +160,12 @@ export default function SignInPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Back to Home Link */}
-        <Button variant="ghost" className="p-0 h-auto font-normal">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
-        </Button>
+        <Link to="/">
+          <Button variant="ghost" className="p-0 h-auto font-normal">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+        </Link>
 
         <Card>
           <CardHeader className="text-center">
@@ -146,7 +178,16 @@ export default function SignInPage() {
           <CardContent className="space-y-6">
             {/* Social Sign In */}
             <div className="space-y-3">
-              <Button variant="outline" className="w-full" type="button">
+              <Button
+                variant="outline"
+                className="w-full"
+                type="button"
+                onClick={() =>
+                  toast.info("Google sign-in coming soon!", {
+                    duration: 3000,
+                  })
+                }
+              >
                 <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                   <path
                     fill="#4285f4"
@@ -168,7 +209,16 @@ export default function SignInPage() {
                 Continue with Google
               </Button>
 
-              <Button variant="outline" className="w-full" type="button">
+              <Button
+                variant="outline"
+                className="w-full"
+                type="button"
+                onClick={() =>
+                  toast.info("Facebook sign-in coming soon!", {
+                    duration: 3000,
+                  })
+                }
+              >
                 <svg
                   className="h-4 w-4 mr-2"
                   viewBox="0 0 24 24"
@@ -219,9 +269,11 @@ export default function SignInPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <Button variant="link" className="p-0 h-auto text-sm">
-                    Forgot password?
-                  </Button>
+                  <Link to="/forgot-password">
+                    <Button variant="link" className="p-0 h-auto text-sm">
+                      Forgot password?
+                    </Button>
+                  </Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -275,7 +327,7 @@ export default function SignInPage() {
                 />
                 <Label
                   htmlFor="rememberMe"
-                  className="text-sm font-normal text-muted-foreground"
+                  className="text-sm font-normal text-muted-foreground cursor-pointer"
                 >
                   Keep me signed in
                 </Label>
@@ -297,13 +349,6 @@ export default function SignInPage() {
                   "Sign In"
                 )}
               </Button>
-
-              {/* Display auth error */}
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
             </div>
 
             {/* Trust Elements */}
@@ -318,9 +363,11 @@ export default function SignInPage() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
-                <Button variant="link" className="p-0 h-auto font-medium">
-                  Sign up here
-                </Button>
+                <Link to="/sign-up">
+                  <Button variant="link" className="p-0 h-auto font-medium">
+                    Sign up here
+                  </Button>
+                </Link>
               </p>
             </div>
           </CardContent>

@@ -154,3 +154,11 @@ export const simulateDeliveryAPI = async (
   );
   return response.data;
 };
+
+// Download invoice
+export const downloadInvoiceAPI = async (id: string) => {
+  const response = await axiosInstance.get(`/api/v1/orders/${id}/invoice`, {
+    responseType: "blob", // Important for file download
+  });
+  return response.data;
+};

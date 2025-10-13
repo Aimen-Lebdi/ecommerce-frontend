@@ -27,6 +27,7 @@ import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { downloadInvoiceAPI } from "../../features/orders/ordersAPI";
 
 const OrderConfirmationPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -131,6 +132,27 @@ const OrderConfirmationPage = () => {
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
+
+  const handleDownloadInvoice = async () => {
+  try {
+    const blob = await downloadInvoiceAPI(order._id);
+    
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `invoice-${order._id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    toast.success("Invoice downloaded successfully!");
+  } catch (error) {
+    toast.error("Failed to download invoice");
+    console.error(error);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
@@ -477,13 +499,13 @@ const OrderConfirmationPage = () => {
                 )}
 
                 <Button
-                  variant="outline"
-                  className="w-full justify-between text-xs sm:text-sm"
-                  onClick={() => window.print()}
-                >
-                  <span>Download Invoice</span>
-                  <Download className="w-4 h-4" />
-                </Button>
+  variant="outline"
+  className="w-full justify-between text-xs sm:text-sm"
+  onClick={handleDownloadInvoice}
+>
+  <span>Download Invoice</span>
+  <Download className="w-4 h-4" />
+</Button>
 
                 <Button
                   variant="outline"

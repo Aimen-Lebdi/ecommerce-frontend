@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -12,108 +13,225 @@ import {
   TableBody,
   TableCell,
 } from "../../../components/ui/table";
+import { Badge } from "../../../components/ui/badge";
+import { Skeleton } from "../../../components/ui/skeleton";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { fetchDashboardTables } from "../../../features/analytics/analyticsSlice";
+import { IconTrophy, IconShoppingCart, IconPackage } from "@tabler/icons-react";
 
-const orders = [
-  { id: "ORD-1001", customer: "Alice", total: "$500", date: "2025-08-01" },
-  { id: "ORD-1002", customer: "Bob", total: "$420", date: "2025-08-02" },
-  { id: "ORD-1003", customer: "Charlie", total: "$390", date: "2025-08-03" },
-];
+function TableSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex gap-4">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-20" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
-const sellers = [
-  { name: "Seller A", products: 120, revenue: "$12,000" },
-  { name: "Seller B", products: 95, revenue: "$9,500" },
-  { name: "Seller C", products: 80, revenue: "$8,000" },
-];
-
-const products = [
-  { name: "iPhone 17", sold: 300, revenue: "$300,000" },
-  { name: "Samsung S25", sold: 250, revenue: "$200,000" },
-  { name: "MacBook Pro 2025", sold: 150, revenue: "$225,000" },
-];
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+      <p className="text-sm">{message}</p>
+    </div>
+  );
+}
 
 export function DashboardTables() {
+  const dispatch = useAppDispatch();
+  const { 
+    bestOrders, 
+    topCustomers, 
+    bestProducts, 
+    tablesLoading, 
+    tablesError 
+  } = useAppSelector((state) => state.analytics);
+
+  useEffect(() => {
+    dispatch(fetchDashboardTables());
+  }, [dispatch]);
+
+  if (tablesError) {
+    return (
+      <div className="px-4 lg:px-6 mt-4">
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <p className="text-destructive text-center">{tablesError}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 gap-4 px-4 mt-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
       {/* Best Orders */}
       <Card>
-        <CardHeader>
-          <CardTitle>Best Orders</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <IconShoppingCart className="w-5 h-5 text-primary" />
+            </div>
+            <CardTitle className="text-lg font-semibold">Best Orders</CardTitle>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            Top 5
+          </Badge>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell>{order.id}</TableCell>
-                  <TableCell>{order.customer}</TableCell>
-                  <TableCell>{order.total}</TableCell>
-                  <TableCell>{order.date}</TableCell>
+          {tablesLoading ? (
+            <TableSkeleton />
+          ) : bestOrders.length === 0 ? (
+            <EmptyState message="No orders yet" />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Order ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead className="text-right">Date</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {bestOrders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {order.id}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {order.customer}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-green-600">
+                      {order.total}
+                    </TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">
+                      {new Date(order.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
-      {/* New Customers */}
+      {/* Top Customers */}
       <Card>
-        <CardHeader>
-          <CardTitle>New Customers</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-blue-500/10">
+              <IconTrophy className="w-5 h-5 text-blue-500" />
+            </div>
+            <CardTitle className="text-lg font-semibold">Top Customers</CardTitle>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            Top 5
+          </Badge>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Seller</TableHead>
-                <TableHead>Products Sold</TableHead>
-                <TableHead>Revenue</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sellers.map((seller, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{seller.name}</TableCell>
-                  <TableCell>{seller.products}</TableCell>
-                  <TableCell>{seller.revenue}</TableCell>
+          {tablesLoading ? (
+            <TableSkeleton />
+          ) : topCustomers.length === 0 ? (
+            <EmptyState message="No customers yet" />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Customer</TableHead>
+                  <TableHead className="text-center">Orders</TableHead>
+                  <TableHead className="text-right">Revenue</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {topCustomers.map((customer, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 text-xs font-semibold">
+                          {index + 1}
+                        </div>
+                        <span>{customer.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="secondary" className="text-xs">
+                        {customer.products}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-green-600">
+                      {customer.revenue}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
       {/* Best Products */}
       <Card>
-        <CardHeader>
-          <CardTitle>Best Products</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-orange-500/10">
+              <IconPackage className="w-5 h-5 text-orange-500" />
+            </div>
+            <CardTitle className="text-lg font-semibold">Best Products</CardTitle>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            Top 5
+          </Badge>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Units Sold</TableHead>
-                <TableHead>Revenue</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.sold}</TableCell>
-                  <TableCell>{product.revenue}</TableCell>
+          {tablesLoading ? (
+            <TableSkeleton />
+          ) : bestProducts.length === 0 ? (
+            <EmptyState message="No products sold yet" />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product</TableHead>
+                  <TableHead className="text-center">Units Sold</TableHead>
+                  <TableHead className="text-right">Revenue</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {bestProducts.map((product, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-500/10 text-xs font-semibold">
+                          {index + 1}
+                        </div>
+                        <span className="truncate max-w-[150px]" title={product.name}>
+                          {product.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="secondary" className="text-xs">
+                        {product.sold}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-green-600">
+                      {product.revenue}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
