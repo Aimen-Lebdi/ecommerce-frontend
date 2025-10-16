@@ -18,6 +18,7 @@ import { Skeleton } from "../../../components/ui/skeleton";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchDashboardTables } from "../../../features/analytics/analyticsSlice";
 import { IconTrophy, IconShoppingCart, IconPackage } from "@tabler/icons-react";
+import { useTranslation } from 'react-i18next';
 
 function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
@@ -42,6 +43,7 @@ function EmptyState({ message }: { message: string }) {
 }
 
 export function DashboardTables() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { 
     bestOrders, 
@@ -76,25 +78,25 @@ export function DashboardTables() {
             <div className="p-2 rounded-lg bg-primary/10">
               <IconShoppingCart className="w-5 h-5 text-primary" />
             </div>
-            <CardTitle className="text-lg font-semibold">Best Orders</CardTitle>
+            <CardTitle className="text-lg font-semibold">{t('tables.bestOrders.title')}</CardTitle>
           </div>
           <Badge variant="secondary" className="text-xs">
-            Top 5
+            {t('tables.topBadge')}
           </Badge>
         </CardHeader>
         <CardContent>
           {tablesLoading ? (
             <TableSkeleton />
           ) : bestOrders.length === 0 ? (
-            <EmptyState message="No orders yet" />
+            <EmptyState message={t('tables.bestOrders.empty')} />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Order ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-right">Date</TableHead>
+                  <TableHead className="w-[100px]">{t('tables.bestOrders.headers.orderId')}</TableHead>
+                  <TableHead>{t('tables.bestOrders.headers.customer')}</TableHead>
+                  <TableHead className="text-right">{t('tables.bestOrders.headers.total')}</TableHead>
+                  <TableHead className="text-right">{t('tables.bestOrders.headers.date')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -132,24 +134,24 @@ export function DashboardTables() {
             <div className="p-2 rounded-lg bg-blue-500/10">
               <IconTrophy className="w-5 h-5 text-blue-500" />
             </div>
-            <CardTitle className="text-lg font-semibold">Top Customers</CardTitle>
+            <CardTitle className="text-lg font-semibold">{t('tables.topCustomers.title')}</CardTitle>
           </div>
           <Badge variant="secondary" className="text-xs">
-            Top 5
+            {t('tables.topBadge')}
           </Badge>
         </CardHeader>
         <CardContent>
           {tablesLoading ? (
             <TableSkeleton />
           ) : topCustomers.length === 0 ? (
-            <EmptyState message="No customers yet" />
+            <EmptyState message={t('tables.topCustomers.empty')} />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead className="text-center">Orders</TableHead>
-                  <TableHead className="text-right">Revenue</TableHead>
+                  <TableHead>{t('tables.topCustomers.headers.customer')}</TableHead>
+                  <TableHead className="text-center">{t('tables.topCustomers.headers.orders')}</TableHead>
+                  <TableHead className="text-right">{t('tables.topCustomers.headers.revenue')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -186,24 +188,24 @@ export function DashboardTables() {
             <div className="p-2 rounded-lg bg-orange-500/10">
               <IconPackage className="w-5 h-5 text-orange-500" />
             </div>
-            <CardTitle className="text-lg font-semibold">Best Products</CardTitle>
+            <CardTitle className="text-lg font-semibold">{t('tables.bestProducts.title')}</CardTitle>
           </div>
           <Badge variant="secondary" className="text-xs">
-            Top 5
+            {t('tables.topBadge')}
           </Badge>
         </CardHeader>
         <CardContent>
           {tablesLoading ? (
             <TableSkeleton />
           ) : bestProducts.length === 0 ? (
-            <EmptyState message="No products sold yet" />
+            <EmptyState message={t('tables.bestProducts.empty')} />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-center">Units Sold</TableHead>
-                  <TableHead className="text-right">Revenue</TableHead>
+                  <TableHead>{t('tables.bestProducts.headers.product')}</TableHead>
+                  <TableHead className="text-center">{t('tables.bestProducts.headers.unitsSold')}</TableHead>
+                  <TableHead className="text-right">{t('tables.bestProducts.headers.revenue')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

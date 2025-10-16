@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import { type ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import {
@@ -41,7 +42,10 @@ export interface Brand {
 const brandsColumns: ColumnDef<Brand>[] = [
   {
     accessorKey: "name",
-    header: "Brand",
+    header: () => {
+      const { t } = useTranslation();
+      return t('brands.table.headers.brand');
+    },
     cell: ({ row }) => {
       const brand = row.original;
       return (
@@ -62,7 +66,10 @@ const brandsColumns: ColumnDef<Brand>[] = [
   },
   {
     accessorKey: "productCount",
-    header: "Products",
+    header: () => {
+      const { t } = useTranslation();
+      return t('brands.table.headers.products');
+    },
     cell: ({ row }) => {
       const count = row.original.productCount || 0;
       return (
@@ -72,7 +79,10 @@ const brandsColumns: ColumnDef<Brand>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Created",
+    header: () => {
+      const { t } = useTranslation();
+      return t('brands.table.headers.created');
+    },
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
@@ -98,6 +108,7 @@ const advancedFilterConfig = {
 };
 
 export default function Brands() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const {
     brands,
@@ -149,7 +160,7 @@ export default function Brands() {
       await dispatch(
         createBrand(brandData as CreateBrandData)
       ).unwrap();
-      toast.success("Brand added successfully");
+      toast.success(t('brands.messages.addSuccess'));
       // Note: createBrand thunk automatically refetches data
     } catch (error) {
       console.error("Failed to add brand:", error);
@@ -166,7 +177,7 @@ export default function Brands() {
       await dispatch(
         updateBrand({ id, brandData: brandData as UpdateBrandData })
       ).unwrap();
-      toast.success("Brand updated successfully");
+      toast.success(t('brands.messages.updateSuccess'));
       // Note: updateBrand thunk automatically refetches data
     } catch (error) {
       console.error("Failed to update brand:", error);
@@ -178,7 +189,7 @@ export default function Brands() {
   const handleDeleteBrand = async (id: string) => {
     try {
       await dispatch(deleteBrand(id)).unwrap();
-      toast.success("Brand deleted successfully");
+      toast.success(t('brands.messages.deleteSuccess'));
       // Note: deleteBrand thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete brand:", error);
@@ -191,15 +202,13 @@ export default function Brands() {
     try {
       await dispatch(deleteManyBrands(ids)).unwrap();
       toast.success(
-        `${ids.length} ${
-          ids.length === 1 ? "brand" : "brands"
-        } deleted successfully`
+        t('brands.messages.bulkDeleteSuccess', { count: ids.length })
       );
       // Note: deleteManyBrands thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete brands:", error);
       // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
-      toast.error("Failed to delete selected brands");
+      toast.error(t('brands.messages.bulkDeleteError'));
     }
   };
 
@@ -208,9 +217,9 @@ export default function Brands() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
-            <h1 className="text-2xl font-semibold">Brands</h1>
+            <h1 className="text-2xl font-semibold">{t('brands.title')}</h1>
             <p className="text-muted-foreground">
-              Manage your product brands and their details.
+              {t('brands.description')}
             </p>
           </div>
 

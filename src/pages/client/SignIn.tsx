@@ -17,8 +17,10 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { signIn, clearError } from "../../features/auth/authSlice";
 import { useNavigate, useLocation, Navigate, Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useTranslation } from 'react-i18next';
 
 export default function SignInPage() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -111,13 +113,13 @@ export default function SignInPage() {
     const newErrors: Record<string, string> = {};
 
     // Required fields
-    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!formData.email.trim()) newErrors.email = t('signIn.errors.emailRequired');
     else if (!isValidEmail(formData.email))
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = t('signIn.errors.emailInvalid');
 
-    if (!formData.password) newErrors.password = "Password is required";
+    if (!formData.password) newErrors.password = t('signIn.errors.passwordRequired');
     else if (formData.password.length < 6)
-      newErrors.password = "Password must be at least 6 characters long";
+      newErrors.password = t('signIn.errors.passwordLength');
 
     return newErrors;
   };
@@ -145,7 +147,7 @@ export default function SignInPage() {
       ).unwrap();
 
       // Show success toast
-      toast.success("Welcome back!", {
+      toast.success(t('signIn.welcomeBack'), {
         duration: 3000,
       });
 
@@ -163,15 +165,15 @@ export default function SignInPage() {
         <Link to="/">
           <Button variant="ghost" className="p-0 h-auto font-normal">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
+            {t('signIn.backToHome')}
           </Button>
         </Link>
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl">{t('signIn.title')}</CardTitle>
             <CardDescription>
-              Sign in to your account to continue
+              {t('signIn.description')}
             </CardDescription>
           </CardHeader>
 
@@ -183,7 +185,7 @@ export default function SignInPage() {
                 className="w-full"
                 type="button"
                 onClick={() =>
-                  toast.info("Google sign-in coming soon!", {
+                  toast.info(t('signIn.googleComingSoon'), {
                     duration: 3000,
                   })
                 }
@@ -206,7 +208,7 @@ export default function SignInPage() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Continue with Google
+                {t('signIn.continueWithGoogle')}
               </Button>
 
               <Button
@@ -214,7 +216,7 @@ export default function SignInPage() {
                 className="w-full"
                 type="button"
                 onClick={() =>
-                  toast.info("Facebook sign-in coming soon!", {
+                  toast.info(t('signIn.facebookComingSoon'), {
                     duration: 3000,
                   })
                 }
@@ -226,7 +228,7 @@ export default function SignInPage() {
                 >
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
-                Continue with Facebook
+                {t('signIn.continueWithFacebook')}
               </Button>
             </div>
 
@@ -236,7 +238,7 @@ export default function SignInPage() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with email
+                  {t('signIn.orContinueWithEmail')}
                 </span>
               </div>
             </div>
@@ -245,13 +247,13 @@ export default function SignInPage() {
             <div className="space-y-4">
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t('signIn.emailLabel')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="john.doe@example.com"
+                    placeholder={t('signIn.emailPlaceholder')}
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className={`pl-10 ${
@@ -268,10 +270,10 @@ export default function SignInPage() {
               {/* Password */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('signIn.passwordLabel')}</Label>
                   <Link to="/forgot-password">
                     <Button variant="link" className="p-0 h-auto text-sm">
-                      Forgot password?
+                      {t('signIn.forgotPassword')}
                     </Button>
                   </Link>
                 </div>
@@ -280,7 +282,7 @@ export default function SignInPage() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
+                    placeholder={t('signIn.passwordPlaceholder')}
                     value={formData.password}
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
@@ -329,7 +331,7 @@ export default function SignInPage() {
                   htmlFor="rememberMe"
                   className="text-sm font-normal text-muted-foreground cursor-pointer"
                 >
-                  Keep me signed in
+                  {t('signIn.rememberMe')}
                 </Label>
               </div>
 
@@ -343,10 +345,10 @@ export default function SignInPage() {
                 {isSigningIn ? (
                   <>
                     <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Signing In...
+                    {t('signIn.signingIn')}
                   </>
                 ) : (
-                  "Sign In"
+                  t('signIn.signInButton')
                 )}
               </Button>
             </div>
@@ -355,17 +357,17 @@ export default function SignInPage() {
             <div className="border-t pt-6 space-y-4">
               <div className="flex items-center justify-center gap-2 text-muted-foreground text-sm">
                 <Shield className="h-4 w-4" />
-                <span>Your information is secure and encrypted</span>
+                <span>{t('signIn.secureInfo')}</span>
               </div>
             </div>
 
             {/* Sign Up Link */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
+                {t('signIn.noAccount')}{" "}
                 <Link to="/sign-up">
                   <Button variant="link" className="p-0 h-auto font-medium">
-                    Sign up here
+                    {t('signIn.signUpHere')}
                   </Button>
                 </Link>
               </p>

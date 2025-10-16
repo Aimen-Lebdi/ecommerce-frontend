@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import {
   User,
   Package,
@@ -64,6 +65,7 @@ import {
 import { updateLoggedUserData, updateLoggedUserPassword } from "../../features/users/usersSlice";
 
 const MyAccountDashboard = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -139,7 +141,7 @@ useEffect(() => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your account...</p>
+          <p className="text-muted-foreground">{t('myAccount.loading')}</p>
         </div>
       </div>
     );
@@ -147,9 +149,9 @@ useEffect(() => {
 
   // Prepare user data
   const userData = {
-    name: user?.name || "Guest",
+    name: user?.name || t('myAccount.guest'),
     email: user?.email || "",
-    phone: "N/A",
+    phone: t('myAccount.notAvailable'),
     profilePicture:
       user?.image ||
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
@@ -158,7 +160,7 @@ useEffect(() => {
           month: "long",
           year: "numeric",
         })
-      : "N/A",
+      : t('myAccount.notAvailable'),
     totalOrders: ordersPagination?.totalResults || 0,
     totalSpent: orders.reduce((sum, order) => sum + order.totalOrderPrice, 0),
     loyaltyPoints: Math.floor(
@@ -188,51 +190,27 @@ useEffect(() => {
     image: item.mainImage,
   }));
 
-  // // Mock addresses
-  // const addresses = [
-  //   {
-  //     id: 1,
-  //     type: "Home",
-  //     name: userData.name,
-  //     address: "Add your address in settings",
-  //     isDefault: true
-  //   }
-  // ];
-
-  // // Mock payment methods
-  // const paymentMethods = [
-  //   {
-  //     id: 1,
-  //     type: "Cash on Delivery",
-  //     last4: "COD",
-  //     expiry: "N/A",
-  //     isDefault: true
-  //   }
-  // ];
-
   const sidebarItems = [
-    { id: "overview", label: "Overview", icon: User },
-    { id: "orders", label: "Orders", icon: Package },
-    // { id: 'addresses', label: 'Addresses', icon: MapPin },
-    // { id: 'payments', label: 'Payment Methods', icon: CreditCard },
-    { id: "wishlist", label: "Wishlist", icon: Heart },
-    { id: "settings", label: "Account Settings", icon: Settings },
-    { id: "support", label: "Help & Support", icon: HelpCircle },
+    { id: "overview", label: t('myAccount.sidebar.overview'), icon: User },
+    { id: "orders", label: t('myAccount.sidebar.orders'), icon: Package },
+    { id: "wishlist", label: t('myAccount.sidebar.wishlist'), icon: Heart },
+    { id: "settings", label: t('myAccount.sidebar.settings'), icon: Settings },
+    { id: "support", label: t('myAccount.sidebar.support'), icon: HelpCircle },
   ];
 
   // Handlers
   const handleLogout = () => {
     dispatch(signOut());
-    toast.success("Logged out successfully");
+    toast.success(t('myAccount.logoutSuccess'));
     navigate("/signin");
   };
 
   const handleRemoveFromWishlist = async (productId: string) => {
     try {
       await dispatch(removeProductFromWishlist(productId)).unwrap();
-      toast.success("Product removed from wishlist");
+      toast.success(t('myAccount.removedFromWishlist'));
     } catch (error) {
-      toast.error("Failed to remove product");
+      toast.error(t('myAccount.removeFailed'));
     }
   };
 
@@ -242,9 +220,9 @@ useEffect(() => {
       await dispatch(
         addProductToCart({ productId, color: "default" })
       ).unwrap();
-      toast.success(`${productName} added to cart`);
+      toast.success(t('myAccount.addedToCart', { productName }));
     } catch (error: any) {
-      toast.error(error || "Failed to add to cart");
+      toast.error(error || t('myAccount.addToCartFailed'));
     } finally {
       setAddingToCartId(null);
     }
@@ -256,7 +234,7 @@ useEffect(() => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size should be less than 5MB");
+        toast.error(t('myAccount.imageSizeError'));
         return;
       }
       setSelectedImage(file);
@@ -282,15 +260,12 @@ useEffect(() => {
         })
       ).unwrap();
       
-      toast.success("Profile updated successfully");
+      toast.success(t('myAccount.profileUpdated'));
       setIsEditingInfo(false);
       setSelectedImage(null);
       setImagePreview(null);
-      
-      // Refresh auth user data if you have this action
-      // dispatch(fetchUserProfile());
     } catch (error: any) {
-      toast.error(error || "Failed to update profile");
+      toast.error(error || t('myAccount.updateFailed'));
     }
   };
 
@@ -305,19 +280,19 @@ useEffect(() => {
     const errors: Record<string, string> = {};
 
     if (!passwordData.currentPassword) {
-      errors.currentPassword = "Current password is required";
+      errors.currentPassword = t('myAccount.passwordErrors.currentRequired');
     }
 
     if (!passwordData.password) {
-      errors.password = "New password is required";
+      errors.password = t('myAccount.passwordErrors.newRequired');
     } else if (passwordData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
+      errors.password = t('myAccount.passwordErrors.minLength');
     }
 
     if (!passwordData.passwordConfirm) {
-      errors.passwordConfirm = "Password confirmation is required";
+      errors.passwordConfirm = t('myAccount.passwordErrors.confirmRequired');
     } else if (passwordData.password !== passwordData.passwordConfirm) {
-      errors.passwordConfirm = "Passwords do not match";
+      errors.passwordConfirm = t('myAccount.passwordErrors.mismatch');
     }
 
     setPasswordErrors(errors);
@@ -334,7 +309,7 @@ useEffect(() => {
         updateLoggedUserPassword(passwordData)
       ).unwrap();
       
-      toast.success("Password updated successfully");
+      toast.success(t('myAccount.passwordUpdated'));
       setPasswordData({
         currentPassword: "",
         password: "",
@@ -347,7 +322,7 @@ useEffect(() => {
         localStorage.setItem("token", result.token);
       }
     } catch (error: any) {
-      toast.error(error || "Failed to update password");
+      toast.error(error || t('myAccount.passwordUpdateFailed'));
     }
   };
 
@@ -396,10 +371,10 @@ useEffect(() => {
             </Avatar>
             <div>
               <h2 className="text-xl sm:text-2xl font-semibold">
-                Welcome back, {userData.name}!
+                {t('myAccount.overview.welcome', { name: userData.name })}
               </h2>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Member since {userData.memberSince}
+                {t('myAccount.overview.memberSince', { date: userData.memberSince })}
               </p>
             </div>
           </div>
@@ -419,7 +394,7 @@ useEffect(() => {
                   {userData.totalOrders}
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Total Orders
+                  {t('myAccount.overview.totalOrders')}
                 </p>
               </div>
             </div>
@@ -437,26 +412,12 @@ useEffect(() => {
                   ${userData.totalSpent.toFixed(2)}
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Total Spent
+                  {t('myAccount.overview.totalSpent')}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-
-        {/* <Card>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-chart-4/10 rounded-lg flex items-center justify-center">
-                <Star className="w-5 h-5 sm:w-6 sm:h-6 text-chart-4" />
-              </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-semibold">{userData.loyaltyPoints}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">Loyalty Points</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
 
       {/* Recent Orders */}
@@ -464,7 +425,7 @@ useEffect(() => {
         <CardHeader className="p-4 sm:p-6 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base sm:text-lg">
-              Recent Orders
+              {t('myAccount.overview.recentOrders')}
             </CardTitle>
             <Button
               variant="ghost"
@@ -472,7 +433,7 @@ useEffect(() => {
               onClick={() => setActiveSection("orders")}
               className="text-primary hover:text-primary/80 text-xs sm:text-sm font-medium"
             >
-              View All
+              {t('myAccount.overview.viewAll')}
               <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
             </Button>
           </div>
@@ -499,7 +460,7 @@ useEffect(() => {
                       </Badge>
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                      {order.date} • {order.items} items
+                      {t('myAccount.overview.orderInfo', { date: order.date, items: order.items })}
                     </p>
                   </div>
                   <p className="font-semibold text-base">
@@ -510,7 +471,7 @@ useEffect(() => {
             </div>
           ) : (
             <p className="text-center text-muted-foreground py-8">
-              No orders yet
+              {t('myAccount.overview.noOrders')}
             </p>
           )}
         </CardContent>
@@ -521,16 +482,16 @@ useEffect(() => {
   const renderOrders = () => (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h2 className="text-xl sm:text-2xl font-semibold">Order History</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold">{t('myAccount.orders.title')}</h2>
         <Select defaultValue="all">
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter orders" />
+            <SelectValue placeholder={t('myAccount.orders.filter')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Orders</SelectItem>
-            <SelectItem value="delivered">Delivered</SelectItem>
-            <SelectItem value="shipped">Shipped</SelectItem>
-            <SelectItem value="processing">Processing</SelectItem>
+            <SelectItem value="all">{t('myAccount.orders.allOrders')}</SelectItem>
+            <SelectItem value="delivered">{t('myAccount.orders.delivered')}</SelectItem>
+            <SelectItem value="shipped">{t('myAccount.orders.shipped')}</SelectItem>
+            <SelectItem value="processing">{t('myAccount.orders.processing')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -547,10 +508,10 @@ useEffect(() => {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
                   <div>
                     <h3 className="font-semibold text-sm sm:text-base">
-                      Order #{order._id.slice(-8)}
+                      {t('myAccount.orders.orderNumber', { number: order._id.slice(-8) })}
                     </h3>
                     <p className="text-xs sm:text-sm text-muted-foreground">
-                      Placed on {new Date(order.createdAt).toLocaleDateString()}
+                      {t('myAccount.orders.placedOn', { date: new Date(order.createdAt).toLocaleDateString() })}
                     </p>
                   </div>
                   <Badge
@@ -564,23 +525,23 @@ useEffect(() => {
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="text-xs sm:text-sm text-muted-foreground">
-                    {order.cartItems.length} items • Total:{" "}
-                    <span className="font-semibold text-foreground">
-                      ${order.totalOrderPrice.toFixed(2)}
-                    </span>
+                    {t('myAccount.orders.orderSummary', { 
+                      items: order.cartItems.length, 
+                      total: order.totalOrderPrice.toFixed(2) 
+                    })}
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Link to={`/order-confirmation/${order._id}`}>
                       <Button variant="outline" size="sm">
                         <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                        View
+                        {t('myAccount.orders.view')}
                       </Button>
                     </Link>
                     <Link to={`/orders/${order._id}/tracking`}>
                       <Button variant="outline" size="sm">
                         <Truck className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                        Track
+                        {t('myAccount.orders.track')}
                       </Button>
                     </Link>
                   </div>
@@ -593,9 +554,9 @@ useEffect(() => {
         <Card>
           <CardContent className="text-center py-12">
             <Package className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground mb-4">No orders yet</p>
+            <p className="text-muted-foreground mb-4">{t('myAccount.orders.noOrders')}</p>
             <Link to="/shop">
-              <Button>Start Shopping</Button>
+              <Button>{t('myAccount.orders.startShopping')}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -603,90 +564,12 @@ useEffect(() => {
     </div>
   );
 
-  // const renderAddresses = () => (
-  //   <div className="space-y-4 sm:space-y-6">
-  //     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-  //       <h2 className="text-xl sm:text-2xl font-semibold">Address Book</h2>
-  //       <Button>
-  //         <Plus className="w-4 h-4 mr-2" />
-  //         Add Address
-  //       </Button>
-  //     </div>
-
-  //     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  //       {addresses.map((address) => (
-  //         <Card key={address.id}>
-  //           <CardContent className="p-4 sm:p-6">
-  //             <div className="flex items-start justify-between mb-3">
-  //               <div className="flex items-center space-x-2">
-  //                 <h3 className="font-semibold text-sm sm:text-base">{address.type}</h3>
-  //                 {address.isDefault && (
-  //                   <Badge variant="secondary">Default</Badge>
-  //                 )}
-  //               </div>
-  //               <Button variant="ghost" size="icon">
-  //                 <Edit className="w-4 h-4" />
-  //               </Button>
-  //             </div>
-  //             <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
-  //               <p className="font-medium text-foreground">{address.name}</p>
-  //               <p>{address.address}</p>
-  //             </div>
-  //             <div className="flex flex-wrap gap-2 mt-4 text-xs sm:text-sm">
-  //               <Button variant="link" size="sm" className="h-auto p-0">Edit</Button>
-  //               <Button variant="link" size="sm" className="h-auto p-0 text-destructive">Delete</Button>
-  //               {!address.isDefault && (
-  //                 <Button variant="link" size="sm" className="h-auto p-0">Set as Default</Button>
-  //               )}
-  //             </div>
-  //           </CardContent>
-  //         </Card>
-  //       ))}
-  //     </div>
-  //   </div>
-  // );
-
-  // const renderPaymentMethods = () => (
-  //   <div className="space-y-4 sm:space-y-6">
-  //     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-  //       <h2 className="text-xl sm:text-2xl font-semibold">Payment Methods</h2>
-  //       <Button>
-  //         <Plus className="w-4 h-4 mr-2" />
-  //         Add Card
-  //       </Button>
-  //     </div>
-
-  //     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  //       {paymentMethods.map((method) => (
-  //         <Card key={method.id}>
-  //           <CardContent className="p-4 sm:p-6">
-  //             <div className="flex items-start justify-between mb-3">
-  //               <div className="flex items-center space-x-3">
-  //                 <div className="w-10 h-7 sm:w-12 sm:h-8 bg-primary rounded flex items-center justify-center">
-  //                   <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
-  //                 </div>
-  //                 <div>
-  //                   <p className="font-semibold text-sm sm:text-base">{method.type}</p>
-  //                   <p className="text-xs sm:text-sm text-muted-foreground">{method.expiry !== 'N/A' ? `Expires ${method.expiry}` : method.expiry}</p>
-  //                 </div>
-  //               </div>
-  //               {method.isDefault && (
-  //                 <Badge variant="secondary">Default</Badge>
-  //               )}
-  //             </div>
-  //           </CardContent>
-  //         </Card>
-  //       ))}
-  //     </div>
-  //   </div>
-  // );
-
   const renderWishlist = () => (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl sm:text-2xl font-semibold">Wishlist</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold">{t('myAccount.wishlist.title')}</h2>
         <p className="text-sm sm:text-base text-muted-foreground">
-          {numOfWishlistItems} items
+          {t('myAccount.wishlist.itemCount', { count: numOfWishlistItems })}
         </p>
       </div>
 
@@ -731,7 +614,7 @@ useEffect(() => {
                     ) : (
                       <>
                         <ShoppingCart className="w-3 h-3 mr-1" />
-                        <span className="hidden sm:inline">Add</span>
+                        <span className="hidden sm:inline">{t('myAccount.wishlist.add')}</span>
                       </>
                     )}
                   </Button>
@@ -753,9 +636,9 @@ useEffect(() => {
         <Card>
           <CardContent className="text-center py-12">
             <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground mb-4">Your wishlist is empty</p>
+            <p className="text-muted-foreground mb-4">{t('myAccount.wishlist.empty')}</p>
             <Link to="/shop">
-              <Button>Browse Products</Button>
+              <Button>{t('myAccount.wishlist.browseProducts')}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -764,7 +647,7 @@ useEffect(() => {
       {wishlistItems.length > 4 && (
         <div className="text-center">
           <Link to="/wishlist">
-            <Button variant="outline">View All Wishlist Items</Button>
+            <Button variant="outline">{t('myAccount.wishlist.viewAll')}</Button>
           </Link>
         </div>
       )}
@@ -773,13 +656,13 @@ useEffect(() => {
 
   const renderSettings = () => (
     <div className="space-y-4 sm:space-y-6">
-      <h2 className="text-xl sm:text-2xl font-semibold">Account Settings</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold">{t('myAccount.settings.title')}</h2>
 
       {/* Personal Information */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base sm:text-lg">
-            Personal Information
+            {t('myAccount.settings.personalInfo')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -801,14 +684,13 @@ useEffect(() => {
               </div>
               <Button onClick={() => setIsEditingInfo(true)}>
                 <Edit className="w-4 h-4 mr-2" />
-                Edit Information
+                {t('myAccount.settings.editInfo')}
               </Button>
             </>
           ) : (
             <>
-              {/* Rest of the editing UI - keep as provided earlier */}
               <div className="space-y-2">
-                <Label>Profile Picture</Label>
+                <Label>{t('myAccount.settings.profilePicture')}</Label>
                 <div className="flex items-center gap-4">
                   <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
                     <AvatarImage
@@ -824,7 +706,7 @@ useEffect(() => {
                       <Button type="button" variant="outline" size="sm" asChild>
                         <span className="cursor-pointer">
                           <Upload className="w-4 h-4 mr-2" />
-                          Upload
+                          {t('myAccount.settings.upload')}
                         </span>
                       </Button>
                     </label>
@@ -843,18 +725,18 @@ useEffect(() => {
                         onClick={handleRemoveImage}
                       >
                         <X className="w-4 h-4 mr-2" />
-                        Remove
+                        {t('myAccount.settings.remove')}
                       </Button>
                     )}
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  JPG, PNG or GIF. Max size 5MB.
+                  {t('myAccount.settings.imageRequirements')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t('myAccount.settings.fullName')}</Label>
                 <Input
                   id="name"
                   type="text"
@@ -869,7 +751,7 @@ useEffect(() => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('myAccount.settings.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -878,7 +760,7 @@ useEffect(() => {
                   disabled
                 />
                 <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
+                  {t('myAccount.settings.emailCannotChange')}
                 </p>
               </div>
 
@@ -890,10 +772,10 @@ useEffect(() => {
                   {isUpdatingLoggedUser ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Updating...
+                      {t('myAccount.settings.updating')}
                     </>
                   ) : (
-                    "Save Changes"
+                    t('myAccount.settings.saveChanges')
                   )}
                 </Button>
                 <Button
@@ -901,7 +783,7 @@ useEffect(() => {
                   onClick={handleCancelInfoEdit}
                   disabled={isUpdatingLoggedUser}
                 >
-                  Cancel
+                  {t('myAccount.settings.cancel')}
                 </Button>
               </div>
             </>
@@ -909,21 +791,20 @@ useEffect(() => {
         </CardContent>
       </Card>
 
-      {/* Security - keep the password section as provided earlier */}
+      {/* Security */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base sm:text-lg">Security</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t('myAccount.settings.security')}</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Password editing UI here - same as before */}
           {!isEditingPassword ? (
             <div className="flex items-center justify-between p-3 sm:p-4 bg-muted rounded-lg">
               <div className="flex items-center space-x-3">
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium text-sm sm:text-base">Password</p>
+                  <p className="font-medium text-sm sm:text-base">{t('myAccount.settings.password')}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    Keep your account secure
+                    {t('myAccount.settings.keepAccountSecure')}
                   </p>
                 </div>
               </div>
@@ -932,13 +813,13 @@ useEffect(() => {
                 size="sm"
                 onClick={() => setIsEditingPassword(true)}
               >
-                Change
+                {t('myAccount.settings.change')}
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
+                <Label htmlFor="currentPassword">{t('myAccount.settings.currentPassword')}</Label>
                 <Input
                   id="currentPassword"
                   type="password"
@@ -961,7 +842,7 @@ useEffect(() => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">{t('myAccount.settings.newPassword')}</Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -980,12 +861,12 @@ useEffect(() => {
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Password must be at least 6 characters
+                  {t('myAccount.settings.passwordMinLength')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword">{t('myAccount.settings.confirmPassword')}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -1015,10 +896,10 @@ useEffect(() => {
                   {isUpdatingLoggedPassword ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Updating...
+                      {t('myAccount.settings.updating')}
                     </>
                   ) : (
-                    "Update Password"
+                    t('myAccount.settings.updatePassword')
                   )}
                 </Button>
                 <Button
@@ -1026,7 +907,7 @@ useEffect(() => {
                   onClick={handleCancelPasswordEdit}
                   disabled={isUpdatingLoggedPassword}
                 >
-                  Cancel
+                  {t('myAccount.settings.cancel')}
                 </Button>
               </div>
             </div>
@@ -1036,10 +917,9 @@ useEffect(() => {
     </div>
   );
 
-
   const renderSupport = () => (
     <div className="space-y-4 sm:space-y-6">
-      <h2 className="text-xl sm:text-2xl font-semibold">Help & Support</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold">{t('myAccount.support.title')}</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card>
@@ -1050,18 +930,18 @@ useEffect(() => {
               </div>
               <div>
                 <h3 className="font-semibold text-sm sm:text-base">
-                  Phone Support
+                  {t('myAccount.support.phoneSupport')}
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Mon-Fri, 9AM-6PM
+                  {t('myAccount.support.phoneHours')}
                 </p>
               </div>
             </div>
             <p className="text-base sm:text-lg font-semibold mb-2">
-              1-800-SUPPORT
+              {t('myAccount.support.phoneNumber')}
             </p>
             <Button variant="outline" className="w-full">
-              Call Now
+              {t('myAccount.support.callNow')}
             </Button>
           </CardContent>
         </Card>
@@ -1074,16 +954,16 @@ useEffect(() => {
               </div>
               <div>
                 <h3 className="font-semibold text-sm sm:text-base">
-                  Email Support
+                  {t('myAccount.support.emailSupport')}
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  24/7 response within 24hrs
+                  {t('myAccount.support.emailResponse')}
                 </p>
               </div>
             </div>
-            <p className="text-sm sm:text-base mb-2">support@store.com</p>
+            <p className="text-sm sm:text-base mb-2">{t('myAccount.support.emailAddress')}</p>
             <Button variant="outline" className="w-full">
-              Send Email
+              {t('myAccount.support.sendEmail')}
             </Button>
           </CardContent>
         </Card>
@@ -1092,33 +972,32 @@ useEffect(() => {
       <Card>
         <CardHeader>
           <CardTitle className="text-base sm:text-lg">
-            Frequently Asked Questions
+            {t('myAccount.support.faq')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="p-3 sm:p-4 bg-muted rounded-lg">
             <h4 className="font-medium text-sm sm:text-base">
-              How do I track my order?
+              {t('myAccount.support.faq1.question')}
             </h4>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              You can track your order using the tracking number sent to your
-              email.
+              {t('myAccount.support.faq1.answer')}
             </p>
           </div>
           <div className="p-3 sm:p-4 bg-muted rounded-lg">
             <h4 className="font-medium text-sm sm:text-base">
-              What is your return policy?
+              {t('myAccount.support.faq2.question')}
             </h4>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              We offer 30-day returns for most items in original condition.
+              {t('myAccount.support.faq2.answer')}
             </p>
           </div>
           <div className="p-3 sm:p-4 bg-muted rounded-lg">
             <h4 className="font-medium text-sm sm:text-base">
-              How do I change my shipping address?
+              {t('myAccount.support.faq3.question')}
             </h4>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              You can update your address in the Address Book section.
+              {t('myAccount.support.faq3.answer')}
             </p>
           </div>
         </CardContent>
@@ -1132,8 +1011,6 @@ useEffect(() => {
         return renderOverview();
       case "orders":
         return renderOrders();
-      // case 'addresses': return renderAddresses();
-      // case 'payments': return renderPaymentMethods();
       case "wishlist":
         return renderWishlist();
       case "settings":
@@ -1160,7 +1037,7 @@ useEffect(() => {
             ) : (
               <Menu className="w-6 h-6" />
             )}
-            <span className="text-sm sm:text-base">Account Menu</span>
+            <span className="text-sm sm:text-base">{t('myAccount.mobileMenu')}</span>
           </Button>
         </div>
 
@@ -1222,7 +1099,7 @@ useEffect(() => {
                     className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 text-sm sm:text-base"
                   >
                     <LogOut className="w-4 h-4 sm:w-5 sm:h-5 mr-3" />
-                    Logout
+                    {t('myAccount.logout')}
                   </Button>
                 </nav>
               </CardContent>
@@ -1238,7 +1115,3 @@ useEffect(() => {
 };
 
 export default MyAccountDashboard;
-function fetchUserProfile(): any {
-  throw new Error("Function not implemented.");
-}
-

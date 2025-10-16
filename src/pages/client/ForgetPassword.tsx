@@ -8,8 +8,10 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { forgotPassword, clearError, setResetEmail } from "../../features/auth/authSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Alert, AlertDescription } from "../../components/ui/alert";
+import { useTranslation } from 'react-i18next';
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -61,12 +63,12 @@ export default function ForgotPasswordPage() {
 
   const validateForm = () => {
     if (!email.trim()) {
-      setLocalError('Email is required');
+      setLocalError(t('forgotPassword.errors.emailRequired'));
       return false;
     }
     
     if (!isValidEmail(email)) {
-      setLocalError('Please enter a valid email address');
+      setLocalError(t('forgotPassword.errors.emailInvalid'));
       return false;
     }
     
@@ -105,14 +107,14 @@ export default function ForgotPasswordPage() {
           disabled={isForgotPassword}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Sign In
+          {t('forgotPassword.backToSignIn')}
         </Button>
 
         <Card className="shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-semibold">Forgot Password?</CardTitle>
+            <CardTitle className="text-2xl font-semibold">{t('forgotPassword.title')}</CardTitle>
             <CardDescription>
-              No worries! Enter your email and we'll send you a reset code.
+              {t('forgotPassword.description')}
             </CardDescription>
           </CardHeader>
           
@@ -120,13 +122,13 @@ export default function ForgotPasswordPage() {
             <CardContent className="space-y-4">
               {/* Email Input */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t('forgotPassword.emailLabel')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="john.doe@example.com"
+                    placeholder={t('forgotPassword.emailPlaceholder')}
                     value={email}
                     onChange={(e) => handleEmailChange(e.target.value)}
                     className={`pl-10 ${displayError ? 'border-destructive' : ''}`}
@@ -145,8 +147,7 @@ export default function ForgotPasswordPage() {
               {/* Info Message */}
               <div className="p-3 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  We'll send a 6-digit verification code to this email address. 
-                  The code will expire in 5 minutes.
+                  {t('forgotPassword.infoMessage')}
                 </p>
               </div>
             </CardContent>
@@ -161,23 +162,23 @@ export default function ForgotPasswordPage() {
                 {isForgotPassword ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    Sending Code...
+                    {t('forgotPassword.sendingCode')}
                   </div>
                 ) : (
-                  'Send Reset Code'
+                  t('forgotPassword.sendResetCode')
                 )}
               </Button>
 
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
-                  Remember your password?{' '}
+                  {t('forgotPassword.rememberPassword')}{' '}
                   <Button 
                     variant="link" 
                     className="p-0 h-auto font-medium"
                     onClick={() => navigate('/sign-in')}
                     disabled={isForgotPassword}
                   >
-                    Sign in here
+                    {t('forgotPassword.signInHere')}
                   </Button>
                 </p>
               </div>

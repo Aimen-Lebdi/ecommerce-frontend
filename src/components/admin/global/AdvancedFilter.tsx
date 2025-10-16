@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import { Filter, X } from "lucide-react";
 import { Button } from "../..//ui/button";
 import { Input } from "../../ui/input";
@@ -74,6 +75,7 @@ export function AdvancedFilter({
   onFiltersChange,
   initialFilters,
 }: AdvancedFilterProps) {
+  const { t } = useTranslation();
   const [filters, setFilters] = React.useState<AdvancedFilters>(
     initialFilters || { numeric: [], date: [] }
   );
@@ -186,10 +188,19 @@ export function AdvancedFilter({
       : dateOperators.find((op) => op.value === filter.operator)?.label;
 
     if (filter.operator === "between" && filter.value2 !== null) {
-      return `${column_config.label}: ${operatorLabel} ${filter.value} and ${filter.value2}`;
+      return t('advancedFilter.filterDisplay.between', {
+        label: column_config.label,
+        operator: operatorLabel,
+        value1: filter.value,
+        value2: filter.value2
+      });
     }
 
-    return `${column_config.label}: ${operatorLabel} ${filter.value}`;
+    return t('advancedFilter.filterDisplay.simple', {
+      label: column_config.label,
+      operator: operatorLabel,
+      value: filter.value
+    });
   };
 
   const activeFilters = [
@@ -203,7 +214,7 @@ export function AdvancedFilter({
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className="relative">
             <Filter className="h-4 w-4 mr-2" />
-            Advanced Filters
+            {t('advancedFilter.trigger')}
             {getActiveFilterCount() > 0 && (
               <Badge
                 variant="secondary"
@@ -217,10 +228,10 @@ export function AdvancedFilter({
         <PopoverContent className="min-w-96 p-4 " align="end">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="font-medium">Advanced Filters</h4>
+              <h4 className="font-medium">{t('advancedFilter.title')}</h4>
               {getActiveFilterCount() > 0 && (
                 <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-                  Clear All
+                  {t('advancedFilter.clearAll')}
                 </Button>
               )}
             </div>
@@ -232,14 +243,14 @@ export function AdvancedFilter({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium">
-                      Numeric Filters
+                      {t('advancedFilter.numericFilters')}
                     </Label>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={addNumericFilter}
                     >
-                      Add Filter
+                      {t('advancedFilter.addFilter')}
                     </Button>
                   </div>
 
@@ -250,7 +261,7 @@ export function AdvancedFilter({
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">
-                          Filter {index + 1}
+                          {t('advancedFilter.filterNumber', { number: index + 1 })}
                         </span>
                         <Button
                           variant="ghost"
@@ -263,7 +274,7 @@ export function AdvancedFilter({
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <Label className="text-xs">Column</Label>
+                          <Label className="text-xs">{t('advancedFilter.column')}</Label>
                           <Select
                             value={filter.column}
                             onValueChange={(value) =>
@@ -286,7 +297,7 @@ export function AdvancedFilter({
                         </div>
 
                         <div>
-                          <Label className="text-xs">Operator</Label>
+                          <Label className="text-xs">{t('advancedFilter.operator')}</Label>
                           <Select
                             value={filter.operator}
                             onValueChange={(value: NumericFilter["operator"]) =>
@@ -309,13 +320,13 @@ export function AdvancedFilter({
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <Label className="text-xs">Value</Label>
+                          <Label className="text-xs">{t('advancedFilter.value')}</Label>
                           <Input
                             type="number"
                             className="h-8"
                             placeholder={
                               config.numeric[filter.column]?.placeholder ||
-                              "Enter value"
+                              t('advancedFilter.enterValue')
                             }
                             value={filter.value || ""}
                             onChange={(e) =>
@@ -330,11 +341,11 @@ export function AdvancedFilter({
 
                         {filter.operator === "between" && (
                           <div>
-                            <Label className="text-xs">To Value</Label>
+                            <Label className="text-xs">{t('advancedFilter.toValue')}</Label>
                             <Input
                               type="number"
                               className="h-8"
-                              placeholder="Max value"
+                              placeholder={t('advancedFilter.maxValue')}
                               value={filter.value2 || ""}
                               onChange={(e) =>
                                 updateNumericFilter(index, {
@@ -359,14 +370,14 @@ export function AdvancedFilter({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">
-                        Date Filters
+                        {t('advancedFilter.dateFilters')}
                       </Label>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={addDateFilter}
                       >
-                        Add Filter
+                        {t('advancedFilter.addFilter')}
                       </Button>
                     </div>
 
@@ -377,7 +388,7 @@ export function AdvancedFilter({
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">
-                            Filter {index + 1}
+                            {t('advancedFilter.filterNumber', { number: index + 1 })}
                           </span>
                           <Button
                             variant="ghost"
@@ -390,7 +401,7 @@ export function AdvancedFilter({
 
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <Label className="text-xs">Column</Label>
+                            <Label className="text-xs">{t('advancedFilter.column')}</Label>
                             <Select
                               value={filter.column}
                               onValueChange={(value) =>
@@ -413,7 +424,7 @@ export function AdvancedFilter({
                           </div>
 
                           <div>
-                            <Label className="text-xs">Operator</Label>
+                            <Label className="text-xs">{t('advancedFilter.operator')}</Label>
                             <Select
                               value={filter.operator}
                               onValueChange={(value: DateFilter["operator"]) =>
@@ -436,7 +447,7 @@ export function AdvancedFilter({
 
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <Label className="text-xs">Date</Label>
+                            <Label className="text-xs">{t('advancedFilter.date')}</Label>
                             <Input
                               type="date"
                               className="h-8"
@@ -451,7 +462,7 @@ export function AdvancedFilter({
 
                           {filter.operator === "between" && (
                             <div>
-                              <Label className="text-xs">To Date</Label>
+                              <Label className="text-xs">{t('advancedFilter.toDate')}</Label>
                               <Input
                                 type="date"
                                 className="h-8"
@@ -476,10 +487,10 @@ export function AdvancedFilter({
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancel
+                {t('advancedFilter.cancel')}
               </Button>
               <Button onClick={applyFilters}>
-                Apply Filters ({getActiveFilterCount()})
+                {t('advancedFilter.applyFilters', { count: getActiveFilterCount() })}
               </Button>
             </div>
           </div>

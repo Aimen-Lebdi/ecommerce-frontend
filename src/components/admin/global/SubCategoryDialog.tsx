@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import { Button } from "../../ui/button";
 import {
   Dialog,
@@ -63,6 +64,7 @@ export function SubCategoryDialog({
   onSave,
   isLoading = false,
 }: SubCategoryDialogProps) {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const {categories} = useAppSelector((state) => state.categories);
   
@@ -118,8 +120,8 @@ export function SubCategoryDialog({
 
   const validate = () => {
     const e: Errors = {};
-    if (!selectedCategory) e.category = "Category is required";
-    if (!subCategoryName.trim()) e.name = "Subcategory name is required";
+    if (!selectedCategory) e.category = t('subCategoryDialog.errors.categoryRequired');
+    if (!subCategoryName.trim()) e.name = t('subCategoryDialog.errors.nameRequired');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -220,21 +222,21 @@ if (image instanceof File) {
 
   // Update the save button to show loading state
   const saveButtonContent = isLoading ? (
-    mode === "edit" ? "Updating..." : "Saving..."
+    mode === "edit" ? t('subCategoryDialog.buttons.updating') : t('subCategoryDialog.buttons.saving')
   ) : (
-    mode === "edit" ? "Update" : "Save"
+    mode === "edit" ? t('subCategoryDialog.buttons.update') : t('subCategoryDialog.buttons.save')
   );
 
   const dialogContent = (
     <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>
-          {mode === "edit" ? "Edit Subcategory" : "Add New Subcategory"}
+          {mode === "edit" ? t('subCategoryDialog.titles.edit') : t('subCategoryDialog.titles.add')}
         </DialogTitle>
         <DialogDescription>
           {mode === "edit"
-            ? "Update the subcategory details below."
-            : "Choose a parent category and enter the subcategory details below."
+            ? t('subCategoryDialog.descriptions.edit')
+            : t('subCategoryDialog.descriptions.add')
           }
         </DialogDescription>
       </DialogHeader>
@@ -242,7 +244,7 @@ if (image instanceof File) {
       <div className="grid gap-4 py-4">
         {/* Category Selector */}
         <div className="grid gap-2">
-          <Label htmlFor="category">Category</Label>
+          <Label htmlFor="category">{t('subCategoryDialog.labels.category')}</Label>
           <Select
             value={selectedCategory}
             onValueChange={(value) => {
@@ -255,7 +257,7 @@ if (image instanceof File) {
               aria-invalid={!!errors.category}
               className={errors.category ? "border-red-500" : ""}
             >
-              <SelectValue placeholder="Select a parent category" />
+              <SelectValue placeholder={t('subCategoryDialog.placeholders.category')} />
             </SelectTrigger>
             <SelectContent>
               {categories.map((category) => (
@@ -272,10 +274,10 @@ if (image instanceof File) {
 
         {/* Subcategory Name */}
         <div className="grid gap-2">
-          <Label htmlFor="sub-category-name">Subcategory Name</Label>
+          <Label htmlFor="sub-category-name">{t('subCategoryDialog.labels.subcategoryName')}</Label>
           <Input
             id="sub-category-name"
-            placeholder="e.g., Laptops"
+            placeholder={t('subCategoryDialog.placeholders.subcategoryName')}
             value={subCategoryName}
             onChange={(e) => {
               setSubCategoryName(e.target.value);
@@ -292,7 +294,7 @@ if (image instanceof File) {
 
         {/* Image Upload */}
         <div className="grid gap-2">
-          <Label htmlFor="upload-images">Upload image</Label>
+          <Label htmlFor="upload-images">{t('subCategoryDialog.labels.uploadImage')}</Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
               ${
@@ -343,9 +345,9 @@ if (image instanceof File) {
               <>
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
-                  Drag & drop your image here or{" "}
+                  {t('subCategoryDialog.uploadArea.dragDrop')}{" "}
                   <span className="text-blue-600 hover:underline">
-                    click to browse
+                    {t('subCategoryDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
               </>
@@ -363,7 +365,7 @@ if (image instanceof File) {
           )}
           {image && !errors.image && (
             <p className="mt-2 text-xs text-green-600">
-              Selected: {image.name}
+              {t('subCategoryDialog.uploadArea.selected')} {image.name}
             </p>
           )}
         </div>
@@ -392,7 +394,7 @@ if (image instanceof File) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
-          <span className="hidden lg:inline">Add Subcategory</span>
+          <span className="hidden lg:inline">{t('subCategoryDialog.buttons.addSubcategory')}</span>
         </Button>
       </DialogTrigger>
       {dialogContent}

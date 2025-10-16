@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -62,33 +62,34 @@ import {
   IconPlayerPlay,
   IconInfoCircle,
 } from "@tabler/icons-react";
+import { useTranslation } from 'react-i18next';
 
 // Status badge helper functions
-const getDeliveryStatusBadge = (status: string) => {
+const getDeliveryStatusBadge = (status: string, t: any) => {
   const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
-    pending: { label: "Pending", variant: "secondary" },
-    confirmed: { label: "Confirmed", variant: "default" },
-    shipped: { label: "Shipped", variant: "default" },
-    in_transit: { label: "In Transit", variant: "default" },
-    out_for_delivery: { label: "Out for Delivery", variant: "default" },
-    delivered: { label: "Delivered", variant: "default" },
-    completed: { label: "Completed", variant: "default" },
-    failed: { label: "Failed", variant: "destructive" },
-    returned: { label: "Returned", variant: "destructive" },
-    cancelled: { label: "Cancelled", variant: "destructive" },
+    pending: { label: t('orders.status.pending'), variant: "secondary" },
+    confirmed: { label: t('orders.status.confirmed'), variant: "default" },
+    shipped: { label: t('orders.status.shipped'), variant: "default" },
+    in_transit: { label: t('orders.status.inTransit'), variant: "default" },
+    out_for_delivery: { label: t('orders.status.outForDelivery'), variant: "default" },
+    delivered: { label: t('orders.status.delivered'), variant: "default" },
+    completed: { label: t('orders.status.completed'), variant: "default" },
+    failed: { label: t('orders.status.failed'), variant: "destructive" },
+    returned: { label: t('orders.status.returned'), variant: "destructive" },
+    cancelled: { label: t('orders.status.cancelled'), variant: "destructive" },
   };
   return statusConfig[status] || statusConfig.pending;
 };
 
-const getPaymentStatusBadge = (status: string) => {
+const getPaymentStatusBadge = (status: string, t: any) => {
   const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
-    pending: { label: "Pending", variant: "secondary" },
-    authorized: { label: "Authorized", variant: "default" },
-    confirmed: { label: "Confirmed", variant: "default" },
-    completed: { label: "Completed", variant: "default" },
-    failed: { label: "Failed", variant: "destructive" },
-    refunded: { label: "Refunded", variant: "destructive" },
-    partially_refunded: { label: "Partially Refunded", variant: "destructive" },
+    pending: { label: t('orders.paymentStatus.pending'), variant: "secondary" },
+    authorized: { label: t('orders.paymentStatus.authorized'), variant: "default" },
+    confirmed: { label: t('orders.paymentStatus.confirmed'), variant: "default" },
+    completed: { label: t('orders.paymentStatus.completed'), variant: "default" },
+    failed: { label: t('orders.paymentStatus.failed'), variant: "destructive" },
+    refunded: { label: t('orders.paymentStatus.refunded'), variant: "destructive" },
+    partially_refunded: { label: t('orders.paymentStatus.partiallyRefunded'), variant: "destructive" },
   };
   return statusConfig[status] || statusConfig.pending;
 };
@@ -125,13 +126,14 @@ function OrderDetailsDialog({
   isCancelling: boolean;
   isSimulating: boolean;
 }) {
+  const { t } = useTranslation();
   const [cancelReason, setCancelReason] = React.useState("");
   const [showCancelDialog, setShowCancelDialog] = React.useState(false);
   const [simulationSpeed, setSimulationSpeed] = React.useState("fast");
   const [simulationScenario, setSimulationScenario] = React.useState("success");
 
-  const deliveryStatusConfig = getDeliveryStatusBadge(order.deliveryStatus);
-  const paymentStatusConfig = getPaymentStatusBadge(order.paymentStatus);
+  const deliveryStatusConfig = getDeliveryStatusBadge(order.deliveryStatus, t);
+  const paymentStatusConfig = getPaymentStatusBadge(order.paymentStatus, t);
 
   const handleCancelConfirm = () => {
     onCancel(order._id, cancelReason);
@@ -152,10 +154,13 @@ function OrderDetailsDialog({
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
-              Order #{order._id.slice(-8).toUpperCase()}
+              {t('orders.details.orderNumber', { id: order._id.slice(-8).toUpperCase() })}
             </DialogTitle>
             <DialogDescription>
-              Created on {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString()}
+              {t('orders.details.createdOn', { 
+                date: new Date(order.createdAt).toLocaleDateString(),
+                time: new Date(order.createdAt).toLocaleTimeString()
+              })}
             </DialogDescription>
           </DialogHeader>
 
@@ -163,20 +168,20 @@ function OrderDetailsDialog({
             {/* Status Section */}
             <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Delivery Status</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('orders.details.deliveryStatus')}</p>
                 <Badge variant={deliveryStatusConfig.variant} className="text-sm">
                   <IconClock className="w-4 h-4 mr-1" />
                   {deliveryStatusConfig.label}
                 </Badge>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Payment Status</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('orders.details.paymentStatus')}</p>
                 <Badge variant={paymentStatusConfig.variant} className="text-sm">
                   {paymentStatusConfig.label}
                 </Badge>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Payment Method</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('orders.details.paymentMethod')}</p>
                 <Badge variant="outline" className="text-sm capitalize">
                   <IconCreditCard className="w-4 h-4 mr-1" />
                   {order.paymentMethodType}
@@ -184,7 +189,7 @@ function OrderDetailsDialog({
               </div>
               {order.trackingNumber && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Tracking Number</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('orders.details.trackingNumber')}</p>
                   <p className="font-mono font-medium">{order.trackingNumber}</p>
                 </div>
               )}
@@ -194,19 +199,19 @@ function OrderDetailsDialog({
             <div className="space-y-3">
               <h3 className="font-semibold flex items-center gap-2">
                 <IconUser className="w-5 h-5" />
-                Customer Information
+                {t('orders.details.customerInfo')}
               </h3>
               <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
                 <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
+                  <p className="text-sm text-muted-foreground">{t('orders.details.name')}</p>
                   <p className="font-medium">{order.user.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-sm text-muted-foreground">{t('orders.details.email')}</p>
                   <p className="font-medium">{order.user.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="text-sm text-muted-foreground">{t('orders.details.phone')}</p>
                   <p className="font-medium">{order.user.phone || order.shippingAddress.phone}</p>
                 </div>
               </div>
@@ -216,7 +221,7 @@ function OrderDetailsDialog({
             <div className="space-y-3">
               <h3 className="font-semibold flex items-center gap-2">
                 <IconMapPin className="w-5 h-5" />
-                Shipping Address
+                {t('orders.details.shippingAddress')}
               </h3>
               <div className="p-4 border rounded-lg">
                 <p className="font-medium">{order.shippingAddress.wilaya}, {order.shippingAddress.dayra}</p>
@@ -232,7 +237,7 @@ function OrderDetailsDialog({
             <div className="space-y-3">
               <h3 className="font-semibold flex items-center gap-2">
                 <IconPackage className="w-5 h-5" />
-                Order Items ({order.cartItems.length})
+                {t('orders.details.orderItems', { count: order.cartItems.length })}
               </h3>
               <div className="space-y-2">
                 {order.cartItems.map((item) => (
@@ -245,9 +250,9 @@ function OrderDetailsDialog({
                     <div className="flex-1">
                       <p className="font-medium">{item.product.title}</p>
                       {item.color && (
-                        <p className="text-sm text-muted-foreground">Color: {item.color}</p>
+                        <p className="text-sm text-muted-foreground">{t('orders.details.color')}: {item.color}</p>
                       )}
-                      <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                      <p className="text-sm text-muted-foreground">{t('orders.details.quantity')}: {item.quantity}</p>
                     </div>
                     <p className="font-semibold">{item.price} DZD</p>
                   </div>
@@ -257,27 +262,27 @@ function OrderDetailsDialog({
 
             {/* Order Summary */}
             <div className="space-y-3">
-              <h3 className="font-semibold">Order Summary</h3>
+              <h3 className="font-semibold">{t('orders.details.orderSummary')}</h3>
               <div className="space-y-2 p-4 border rounded-lg">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="text-muted-foreground">{t('orders.details.subtotal')}</span>
                   <span>{(order.totalOrderPrice - (order.shippingPrice || 0)).toFixed(2)} DZD</span>
                 </div>
                 {order.shippingPrice > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="text-muted-foreground">{t('orders.details.shipping')}</span>
                     <span>{order.shippingPrice} DZD</span>
                   </div>
                 )}
                 {order.taxPrice > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax</span>
+                    <span className="text-muted-foreground">{t('orders.details.tax')}</span>
                     <span>{order.taxPrice} DZD</span>
                   </div>
                 )}
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
+                    <span>{t('orders.details.total')}</span>
                     <span>{order.totalOrderPrice} DZD</span>
                   </div>
                 </div>
@@ -288,7 +293,7 @@ function OrderDetailsDialog({
             <div className="space-y-3">
               <h3 className="font-semibold flex items-center gap-2">
                 <IconClock className="w-5 h-5" />
-                Status History
+                {t('orders.details.statusHistory')}
               </h3>
               <div className="space-y-2">
                 {order.statusHistory.map((history, idx) => (
@@ -297,7 +302,7 @@ function OrderDetailsDialog({
                       <p className="font-medium capitalize">{history.status.replace(/_/g, ' ')}</p>
                       <p className="text-sm text-muted-foreground">{history.note}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(history.timestamp).toLocaleString()} • Updated by {history.updatedBy}
+                        {new Date(history.timestamp).toLocaleString()} • {t('orders.details.updatedBy')} {history.updatedBy}
                       </p>
                     </div>
                   </div>
@@ -310,16 +315,16 @@ function OrderDetailsDialog({
               <div className="space-y-3">
                 <h3 className="font-semibold flex items-center gap-2">
                   <IconTruck className="w-5 h-5" />
-                  Delivery Tracking
+                  {t('orders.details.deliveryTracking')}
                 </h3>
                 {isLoadingTracking ? (
                   <div className="p-4 border rounded-lg">
-                    <p className="text-muted-foreground">Loading tracking information...</p>
+                    <p className="text-muted-foreground">{t('orders.details.loadingTracking')}</p>
                   </div>
                 ) : trackingInfo ? (
                   <div className="p-4 border rounded-lg">
                     <p className="text-sm text-muted-foreground">
-                      Tracking information available for: {order.trackingNumber}
+                      {t('orders.details.trackingAvailable', { number: order.trackingNumber })}
                     </p>
                   </div>
                 ) : null}
@@ -335,7 +340,7 @@ function OrderDetailsDialog({
                   className="flex-1"
                 >
                   <IconCircleCheck className="w-4 h-4 mr-2" />
-                  {isConfirming ? "Confirming..." : "Confirm Order (Cash)"}
+                  {isConfirming ? t('orders.actions.confirming') : t('orders.actions.confirmCash')}
                 </Button>
               )}
               
@@ -346,7 +351,7 @@ function OrderDetailsDialog({
                   className="flex-1"
                 >
                   <IconCircleCheck className="w-4 h-4 mr-2" />
-                  {isConfirming ? "Confirming..." : "Confirm Payment (Card)"}
+                  {isConfirming ? t('orders.actions.confirming') : t('orders.actions.confirmCard')}
                 </Button>
               )}
 
@@ -358,7 +363,7 @@ function OrderDetailsDialog({
                   className="flex-1"
                 >
                   <IconTruck className="w-4 h-4 mr-2" />
-                  {isShipping ? "Shipping..." : "Ship Order"}
+                  {isShipping ? t('orders.actions.shipping') : t('orders.actions.shipOrder')}
                 </Button>
               )}
 
@@ -370,7 +375,7 @@ function OrderDetailsDialog({
                   className="flex-1"
                 >
                   <IconX className="w-4 h-4 mr-2" />
-                  Cancel Order
+                  {t('orders.actions.cancelOrder')}
                 </Button>
               )}
 
@@ -382,9 +387,9 @@ function OrderDetailsDialog({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="fast">Fast</SelectItem>
-                        <SelectItem value="normal">Normal</SelectItem>
-                        <SelectItem value="slow">Slow</SelectItem>
+                        <SelectItem value="fast">{t('orders.simulation.fast')}</SelectItem>
+                        <SelectItem value="normal">{t('orders.simulation.normal')}</SelectItem>
+                        <SelectItem value="slow">{t('orders.simulation.slow')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select value={simulationScenario} onValueChange={setSimulationScenario}>
@@ -392,8 +397,8 @@ function OrderDetailsDialog({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="success">Success</SelectItem>
-                        <SelectItem value="failed">Failed</SelectItem>
+                        <SelectItem value="success">{t('orders.simulation.success')}</SelectItem>
+                        <SelectItem value="failed">{t('orders.simulation.failed')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button 
@@ -403,12 +408,12 @@ function OrderDetailsDialog({
                       className="flex-1"
                     >
                       <IconPlayerPlay className="w-4 h-4 mr-2" />
-                      {isSimulating ? "Simulating..." : "Simulate Delivery"}
+                      {isSimulating ? t('orders.actions.simulating') : t('orders.actions.simulateDelivery')}
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     <IconInfoCircle className="w-3 h-3 inline mr-1" />
-                    Testing only: Simulates delivery status updates
+                    {t('orders.simulation.testingNote')}
                   </p>
                 </div>
               )}
@@ -421,16 +426,16 @@ function OrderDetailsDialog({
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+            <AlertDialogTitle>{t('orders.cancelDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel this order? This action cannot be undone.
+              {t('orders.cancelDialog.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">
-            <Label htmlFor="cancel-reason">Cancellation Reason (Optional)</Label>
+            <Label htmlFor="cancel-reason">{t('orders.cancelDialog.reasonLabel')}</Label>
             <Textarea
               id="cancel-reason"
-              placeholder="Enter reason for cancellation..."
+              placeholder={t('orders.cancelDialog.reasonPlaceholder')}
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               className="mt-2"
@@ -438,9 +443,9 @@ function OrderDetailsDialog({
             />
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>No, keep order</AlertDialogCancel>
+            <AlertDialogCancel>{t('orders.cancelDialog.keepOrder')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleCancelConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Yes, cancel order
+              {t('orders.cancelDialog.confirmCancel')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -449,145 +454,147 @@ function OrderDetailsDialog({
   );
 }
 
-// Define columns
-const ordersColumns: ColumnDef<Order>[] = [
-  {
-    accessorKey: "_id",
-    header: "Order ID",
-    cell: ({ row }) => (
-      <div className="font-mono text-sm font-medium">
-        #{(row.getValue("_id") as string).slice(-8).toUpperCase()}
-      </div>
-    ),
-    enableHiding: false,
-  },
-  {
-    accessorKey: "user.name",
-    header: "Customer",
-    cell: ({ row }) => {
-      const order = row.original;
-      const initials = order.user.name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase();
-      
-      return (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="text-xs">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="font-medium">{order.user.name}</div>
-            <div className="text-xs text-muted-foreground">
-              {order.user.email}
+export default function Orders() {
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+
+  // Define columns
+  const ordersColumns: ColumnDef<Order>[] = [
+    {
+      accessorKey: "_id",
+      header: t('orders.columns.orderId'),
+      cell: ({ row }) => (
+        <div className="font-mono text-sm font-medium">
+          #{t('orders.orderNumber', { id: (row.getValue("_id") as string).slice(-8).toUpperCase() })}
+        </div>
+      ),
+      enableHiding: false,
+    },
+    {
+      accessorKey: "user.name",
+      header: t('orders.columns.customer'),
+      cell: ({ row }) => {
+        const order = row.original;
+        const initials = order.user.name
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .toUpperCase();
+        
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="text-xs">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium">{order.user.name}</div>
+              <div className="text-xs text-muted-foreground">
+                {order.user.email}
+              </div>
             </div>
           </div>
-        </div>
-      );
+        );
+      },
     },
-  },
-  {
-    accessorKey: "deliveryStatus",
-    header: "Delivery Status",
-    cell: ({ row }) => {
-      const status = row.getValue("deliveryStatus") as string;
-      const config = getDeliveryStatusBadge(status);
-      return (
-        <Badge variant={config.variant} className="text-xs">
-          {config.label}
-        </Badge>
-      );
+    {
+      accessorKey: "deliveryStatus",
+      header: t('orders.columns.deliveryStatus'),
+      cell: ({ row }) => {
+        const status = row.getValue("deliveryStatus") as string;
+        const config = getDeliveryStatusBadge(status, t);
+        return (
+          <Badge variant={config.variant} className="text-xs">
+            {config.label}
+          </Badge>
+        );
+      },
     },
-  },
-  {
-    accessorKey: "paymentStatus",
-    header: "Payment",
-    cell: ({ row }) => {
-      const status = row.getValue("paymentStatus") as string;
-      const config = getPaymentStatusBadge(status);
-      return (
-        <Badge variant={config.variant} className="text-xs">
-          {config.label}
-        </Badge>
-      );
+    {
+      accessorKey: "paymentStatus",
+      header: t('orders.columns.payment'),
+      cell: ({ row }) => {
+        const status = row.getValue("paymentStatus") as string;
+        const config = getPaymentStatusBadge(status, t);
+        return (
+          <Badge variant={config.variant} className="text-xs">
+            {config.label}
+          </Badge>
+        );
+      },
     },
-  },
-  {
-    accessorKey: "paymentMethodType",
-    header: "Method",
-    cell: ({ row }) => {
-      const method = row.getValue("paymentMethodType") as string;
-      return (
-        <div className="text-sm font-medium capitalize">
-          {method}
-        </div>
-      );
+    {
+      accessorKey: "paymentMethodType",
+      header: t('orders.columns.method'),
+      cell: ({ row }) => {
+        const method = row.getValue("paymentMethodType") as string;
+        return (
+          <div className="text-sm font-medium capitalize">
+            {method}
+          </div>
+        );
+      },
     },
-  },
-  {
-    accessorKey: "cartItems",
-    header: "Items",
-    cell: ({ row }) => {
-      const cartItems = row.getValue("cartItems") as Order['cartItems'];
-      return (
-        <div className="text-center font-medium">
-          {cartItems.length}
-        </div>
-      );
+    {
+      accessorKey: "cartItems",
+      header: t('orders.columns.items'),
+      cell: ({ row }) => {
+        const cartItems = row.getValue("cartItems") as Order['cartItems'];
+        return (
+          <div className="text-center font-medium">
+            {cartItems.length}
+          </div>
+        );
+      },
     },
-  },
-  {
-    accessorKey: "totalOrderPrice",
-    header: "Total",
-    cell: ({ row }) => {
-      const total = row.getValue("totalOrderPrice") as number;
-      return (
-        <div className="text-right font-medium">
-          {total.toFixed(2)} DZD
-        </div>
-      );
+    {
+      accessorKey: "totalOrderPrice",
+      header: t('orders.columns.total'),
+      cell: ({ row }) => {
+        const total = row.getValue("totalOrderPrice") as number;
+        return (
+          <div className="text-right font-medium">
+            {total.toFixed(2)} DZD
+          </div>
+        );
+      },
     },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Order Date",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
-      return (
-        <div className="text-sm text-muted-foreground">
-          {date.toLocaleDateString()}
-        </div>
-      );
+    {
+      accessorKey: "createdAt",
+      header: t('orders.columns.orderDate'),
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("createdAt"));
+        return (
+          <div className="text-sm text-muted-foreground">
+            {date.toLocaleDateString()}
+          </div>
+        );
+      },
     },
-  },
-];
+  ];
 
-// Advanced filter configuration
-const advancedFilterConfig = {
-  numeric: {
-    totalOrderPrice: {
-      label: "Total Price",
-      placeholder: "Enter amount",
+  // Advanced filter configuration
+  const advancedFilterConfig = {
+    numeric: {
+      totalOrderPrice: {
+        label: t('orders.filters.totalPrice'),
+        placeholder: t('orders.filters.amountPlaceholder'),
+      },
     },
-  },
-  date: {
-    createdAt: {
-      label: "Order Date",
+    date: {
+      createdAt: {
+        label: t('orders.filters.orderDate'),
+      },
+      paidAt: {
+        label: t('orders.filters.paymentDate'),
+      },
+      deliveredAt: {
+        label: t('orders.filters.deliveryDate'),
+      },
     },
-    paidAt: {
-      label: "Payment Date",
-    },
-    deliveredAt: {
-      label: "Delivery Date",
-    },
-  },
-};
+  };
 
-export default function Orders() {
-  const dispatch = useAppDispatch();
   const {
     orders,
     pagination,
@@ -645,7 +652,7 @@ export default function Orders() {
   const handleConfirmOrder = async (id: string) => {
     try {
       await dispatch(confirmOrder(id)).unwrap();
-      toast.success("Order confirmed successfully");
+      toast.success(t('orders.toasts.confirmSuccess'));
       setDetailsDialogOpen(false);
     } catch (error) {
       console.error("Failed to confirm order:", error);
@@ -655,7 +662,7 @@ export default function Orders() {
   const handleConfirmCardOrder = async (id: string) => {
     try {
       await dispatch(confirmCardOrder(id)).unwrap();
-      toast.success("Card payment confirmed successfully");
+      toast.success(t('orders.toasts.confirmCardSuccess'));
       setDetailsDialogOpen(false);
     } catch (error) {
       console.error("Failed to confirm card order:", error);
@@ -665,7 +672,7 @@ export default function Orders() {
   const handleShipOrder = async (id: string) => {
     try {
       await dispatch(shipOrder(id)).unwrap();
-      toast.success("Order shipped successfully");
+      toast.success(t('orders.toasts.shipSuccess'));
       setDetailsDialogOpen(false);
     } catch (error) {
       console.error("Failed to ship order:", error);
@@ -675,7 +682,7 @@ export default function Orders() {
   const handleCancelOrder = async (id: string, reason?: string) => {
     try {
       await dispatch(cancelOrder({ id, reason })).unwrap();
-      toast.success("Order cancelled successfully");
+      toast.success(t('orders.toasts.cancelSuccess'));
     } catch (error) {
       console.error("Failed to cancel order:", error);
     }
@@ -684,7 +691,7 @@ export default function Orders() {
   const handleSimulateDelivery = async (id: string, speed: string, scenario: string) => {
     try {
       await dispatch(simulateDelivery({ id, speed, scenario })).unwrap();
-      toast.success(`Delivery simulation started (${scenario} scenario)`);
+      toast.success(t('orders.toasts.simulationStarted', { scenario: t(`orders.simulation.${scenario}`) }));
     } catch (error) {
       console.error("Failed to simulate delivery:", error);
     }
@@ -695,7 +702,7 @@ export default function Orders() {
     ...ordersColumns,
     {
       id: "actions",
-      header: "Actions",
+      header: t('orders.columns.actions'),
       cell: ({ row }) => {
         const order = row.original;
         return (
@@ -706,7 +713,7 @@ export default function Orders() {
             className="text-xs"
           >
             <IconEye className="w-4 h-4 mr-1" />
-            View Details
+            {t('orders.actions.viewDetails')}
           </Button>
         );
       },
@@ -718,9 +725,9 @@ export default function Orders() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
-            <h1 className="text-2xl font-semibold">Orders</h1>
+            <h1 className="text-2xl font-semibold">{t('orders.title')}</h1>
             <p className="text-muted-foreground">
-              Manage customer orders and track their delivery status.
+              {t('orders.subtitle')}
             </p>
           </div>
 

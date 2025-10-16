@@ -3,8 +3,10 @@ import { ArrowLeft, Mail, Smartphone, CheckCircle2, AlertCircle } from 'lucide-r
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { verifyResetCode, clearError, setResetEmail } from '../../features/auth/authSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const CodeVerificationPage = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,7 +22,7 @@ const CodeVerificationPage = () => {
   const [localError, setLocalError] = useState('');
   const [contactMethod] = useState({ 
     type: 'email', 
-    value: resetEmail || (location.state as any)?.email || 'your email'
+    value: resetEmail || (location.state as any)?.email || t('codeVerification.yourEmail')
   });
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -65,7 +67,7 @@ const CodeVerificationPage = () => {
     const expiryInterval = setInterval(() => {
       setExpiryTimer(prev => {
         if (prev <= 1) {
-          setLocalError('Verification code has expired. Please request a new one.');
+          setLocalError(t('codeVerification.errors.codeExpired'));
           return 0;
         }
         return prev - 1;
@@ -151,12 +153,12 @@ const CodeVerificationPage = () => {
 
   const handleVerification = async (codeToVerify: string[] = code) => {
     if (codeToVerify.some(digit => digit === '')) {
-      setLocalError('Please enter the complete verification code');
+      setLocalError(t('codeVerification.errors.incompleteCode'));
       return;
     }
 
     if (expiryTimer === 0) {
-      setLocalError('Verification code has expired. Please request a new one.');
+      setLocalError(t('codeVerification.errors.codeExpired'));
       return;
     }
 
@@ -210,14 +212,14 @@ const CodeVerificationPage = () => {
             disabled={isVerifyingResetCode}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Forgot Password
+            {t('codeVerification.backToForgotPassword')}
           </button>
           
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Verify Reset Code
+            {t('codeVerification.title')}
           </h1>
           <p className="text-muted-foreground">
-            We sent a verification code to your {contactMethod.type}
+            {t('codeVerification.description')}
           </p>
           
           <div className="flex items-center mt-2 p-3 bg-muted rounded-lg">
@@ -237,7 +239,7 @@ const CodeVerificationPage = () => {
           {/* Code Input */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-card-foreground mb-4">
-              Enter verification code
+              {t('codeVerification.enterCode')}
             </label>
             <div className="flex gap-2 justify-center">
               {code.map((digit, index) => (
@@ -254,7 +256,7 @@ const CodeVerificationPage = () => {
                   className={`w-12 h-12 text-center text-xl font-semibold border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-colors ${
                     displayError ? 'border-destructive' : 'border-input hover:border-ring/50'
                   }`}
-                  aria-label={`Digit ${index + 1} of verification code`}
+                  aria-label={t('codeVerification.digitAriaLabel', { number: index + 1 })}
                   disabled={isVerifyingResetCode || verifyResetCodeSuccess}
                 />
               ))}
@@ -272,7 +274,7 @@ const CodeVerificationPage = () => {
           {/* Timer Info */}
           <div className="mb-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Code expires in: <span className="font-mono font-medium">{formatTime(expiryTimer)}</span>
+              {t('codeVerification.codeExpires')} <span className="font-mono font-medium">{formatTime(expiryTimer)}</span>
             </p>
           </div>
 
@@ -285,24 +287,24 @@ const CodeVerificationPage = () => {
             {isVerifyingResetCode ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                Verifying...
+                {t('codeVerification.verifying')}
               </div>
             ) : (
-              'Verify Code'
+              t('codeVerification.verifyButton')
             )}
           </button>
 
           {/* Resend Code */}
           <div className="text-center">
             <p className="text-sm text-muted-foreground mb-2">
-              Didn't receive the code?
+              {t('codeVerification.didNotReceive')}
             </p>
             <button
               onClick={handleResendCode}
               disabled={!canResend || isVerifyingResetCode}
               className="text-sm text-primary hover:underline disabled:text-muted-foreground disabled:no-underline disabled:cursor-not-allowed transition-colors"
             >
-              {canResend ? 'Resend Code' : `Resend in ${resendTimer}s`}
+              {canResend ? t('codeVerification.resendCode') : t('codeVerification.resendIn', { seconds: resendTimer })}
             </button>
           </div>
         </div>
@@ -310,12 +312,12 @@ const CodeVerificationPage = () => {
         {/* Help Text */}
         <div className="mt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            Having trouble? Contact our{' '}
+            {t('codeVerification.havingTrouble')}{' '}
             <button 
               onClick={() => console.log('Open support')}
               className="text-primary hover:underline"
             >
-              support team
+              {t('codeVerification.supportTeam')}
             </button>
           </p>
         </div>

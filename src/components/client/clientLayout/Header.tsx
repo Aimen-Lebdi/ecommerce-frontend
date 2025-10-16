@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   ShoppingCart,
@@ -33,10 +33,12 @@ import { ModeToggle } from "../../mode-toggle";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { signOut } from "../../../features/auth/authSlice";
+import { useTranslation } from "react-i18next";
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -50,6 +52,44 @@ export function Header() {
     navigate("/sign-in");
   };
 
+  // Language change handler
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    // Update HTML dir and lang attributes
+    const htmlElement = document.documentElement;
+    if (lng === 'ar') {
+      htmlElement.setAttribute('dir', 'rtl');
+      htmlElement.setAttribute('lang', 'ar');
+    } else {
+      htmlElement.setAttribute('dir', 'ltr');
+      htmlElement.setAttribute('lang', lng);
+    }
+    
+    // Save preference to localStorage
+    localStorage.setItem('preferred-language', lng);
+  };
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('preferred-language');
+    if (savedLanguage && savedLanguage !== i18n.language) {
+      changeLanguage(savedLanguage);
+    } else if (i18n.language === 'ar') {
+      // Ensure dir is set if current language is Arabic
+      document.documentElement.setAttribute('dir', 'rtl');
+      document.documentElement.setAttribute('lang', 'ar');
+    }
+  }, [changeLanguage, i18n.language]);
+
+  // Get current language code
+  const getCurrentLanguageCode = () => {
+    const lang = i18n.language;
+    if (lang.startsWith('en')) return 'EN';
+    if (lang.startsWith('fr')) return 'FR';
+    if (lang.startsWith('ar')) return 'AR';
+    return 'EN';
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Top Bar - Promotional */}
@@ -57,8 +97,8 @@ export function Header() {
         <div className="container mx-auto px-4">
           <div className="flex h-10 items-center justify-center text-sm">
             <p className="text-muted-foreground">
-              Free shipping on orders over $50! Use code:{" "}
-              <span className="font-semibold text-primary">FREESHIP</span>
+              {t('header.promoText')}{" "}
+              <span className="font-semibold text-primary">{t('header.promoCode')}</span>
             </p>
           </div>
         </div>
@@ -75,7 +115,7 @@ export function Header() {
                   C
                 </span>
               </div>
-              <span className="font-bold text-xl">CLICON</span>
+              <span className="font-bold text-xl">{t('header.logo')}</span>
             </Link>
           </div>
 
@@ -85,7 +125,7 @@ export function Header() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search for products..."
+                placeholder={t('header.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4"
@@ -101,14 +141,20 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm">
                     <Globe className="h-4 w-4 mr-1" />
-                    EN
+                    {getCurrentLanguageCode()}
                     <ChevronDown className="h-3 w-3 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>English</DropdownMenuItem>
-                  <DropdownMenuItem>Français</DropdownMenuItem>
-                  <DropdownMenuItem>العربية</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage('en')}>
+                    English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage('fr')}>
+                    Français
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage('ar')}>
+                    العربية
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -143,7 +189,7 @@ export function Header() {
                       </p>
                       {isAdmin && (
                         <Badge variant="secondary" className="mt-1 text-xs">
-                          Admin
+                          {t('header.adminBadge')}
                         </Badge>
                       )}
                     </div>
@@ -155,7 +201,7 @@ export function Header() {
                         <DropdownMenuItem asChild>
                           <Link to="/admin" className="cursor-pointer">
                             <Shield className="mr-2 h-4 w-4" />
-                            Admin Panel
+                            {t('header.adminPanel')}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -165,7 +211,7 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link to="/my-account" className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
-                        My Account
+                        {t('header.myAccount')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -174,7 +220,7 @@ export function Header() {
                         className="cursor-pointer"
                       >
                         <Package className="mr-2 h-4 w-4" />
-                        Orders
+                        {t('header.orders')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -183,7 +229,7 @@ export function Header() {
                         className="cursor-pointer"
                       >
                         <Heart className="mr-2 h-4 w-4" />
-                        Wishlist
+                        {t('header.wishlist')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -192,19 +238,19 @@ export function Header() {
                       className="cursor-pointer text-destructive focus:text-destructive"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
+                      {t('header.signOut')}
                     </DropdownMenuItem>
                   </>
                 ) : (
                   <>
                     <DropdownMenuItem asChild>
                       <Link to="/sign-in" className="cursor-pointer">
-                        Sign In
+                        {t('header.signIn')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/sign-up" className="cursor-pointer">
-                        Register
+                        {t('header.register')}
                       </Link>
                     </DropdownMenuItem>
                   </>
@@ -221,21 +267,27 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="right" className="w-80 px-4">
                 <div className="flex flex-col space-y-4 mt-10">
-                  <Input placeholder="Search products..." />
+                  <Input placeholder={t('header.searchPlaceholder')} />
                   <div className="flex items-center justify-between">
                     {/* Language Selector */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
                           <Globe className="h-4 w-4 mr-1" />
-                          EN
+                          {getCurrentLanguageCode()}
                           <ChevronDown className="h-3 w-3 ml-1" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
-                        <DropdownMenuItem>English</DropdownMenuItem>
-                        <DropdownMenuItem>Français</DropdownMenuItem>
-                        <DropdownMenuItem>العربية</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => changeLanguage('en')}>
+                          English
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => changeLanguage('fr')}>
+                          Français
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => changeLanguage('ar')}>
+                          العربية
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                     <ModeToggle />
@@ -251,7 +303,7 @@ export function Header() {
                         </p>
                         {isAdmin && (
                           <Badge variant="secondary" className="mt-1 text-xs">
-                            Admin
+                            {t('header.adminBadge')}
                           </Badge>
                         )}
                       </div>
@@ -265,7 +317,7 @@ export function Header() {
                             onClick={() => setMobileMenuOpen(false)}
                           >
                             <Shield className="mr-2 h-4 w-4" />
-                            Admin Panel
+                            {t('header.adminPanel')}
                           </Link>
                           <div className="border-b my-2" />
                         </>
@@ -276,21 +328,21 @@ export function Header() {
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        My Account
+                        {t('header.myAccount')}
                       </Link>
                       <Link
                         to="/my-account?tab=orders"
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Orders
+                        {t('header.orders')}
                       </Link>
                       <Link
                         to="/my-account?tab=wishlist"
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Wishlist
+                        {t('header.wishlist')}
                       </Link>
                       <button
                         onClick={() => {
@@ -299,7 +351,7 @@ export function Header() {
                         }}
                         className="block w-full text-left py-2 text-sm font-medium text-destructive hover:text-destructive/90"
                       >
-                        Sign Out
+                        {t('header.signOut')}
                       </button>
                     </div>
                   ) : (
@@ -309,14 +361,14 @@ export function Header() {
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Sign In
+                        {t('header.signIn')}
                       </Link>
                       <Link
                         to="/sign-up"
                         className="block py-2 text-sm font-medium hover:text-primary"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Register
+                        {t('header.register')}
                       </Link>
                     </div>
                   )}
@@ -327,36 +379,36 @@ export function Header() {
                       className="block py-2 text-lg font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Home
+                      {t('header.nav.home')}
                     </Link>
                     <Link
                       to="/shop"
                       className="block py-2 text-lg font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Shop
+                      {t('header.nav.shop')}
                     </Link>
                     <a
                       href="/categories"
                       className="block py-2 text-lg font-medium"
                     >
-                      Categories
+                      {t('header.nav.categories')}
                     </a>
                     <a href="/deals" className="block py-2 text-lg font-medium">
-                      Deals
+                      {t('header.nav.deals')}
                     </a>
                     <Link
                       to="/about"
                       className="block py-2 text-lg font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      About
+                      {t('header.nav.about')}
                     </Link>
                     <a
                       href="/contact"
                       className="block py-2 text-lg font-medium"
                     >
-                      Contact
+                      {t('header.nav.contact')}
                     </a>
                   </div>
                 </div>
@@ -372,7 +424,7 @@ export function Header() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search for products..."
+            placeholder={t('header.searchPlaceholder')}
             className="pl-10 pr-4"
           />
         </div>
@@ -385,13 +437,13 @@ export function Header() {
             <NavigationMenuList className="flex-wrap">
               <NavigationMenuItem>
                 <Link to="/" className="px-4 py-3 text-sm font-medium">
-                  Home
+                  {t('header.nav.home')}
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
                 <Link to="/shop" className="px-4 py-3 text-sm font-medium">
-                  Shop
+                  {t('header.nav.shop')}
                 </Link>
               </NavigationMenuItem>
 
@@ -400,7 +452,7 @@ export function Header() {
                   href="/contact"
                   className="px-4 py-3 text-sm font-medium"
                 >
-                  Contact
+                  {t('header.nav.contact')}
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import {
   IconCloudUpload,
   IconPlus,
@@ -49,6 +50,7 @@ export function BrandDialog({
   onSave,
   isLoading = false, // Add loading prop with default
 }: BrandDialogProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = React.useState(false);
   const [brandName, setBrandName] = React.useState("");
   const [originalName, setOriginalName] = React.useState(""); // Track original name
@@ -82,7 +84,7 @@ export function BrandDialog({
 
   const validate = () => {
     const e: Errors = {};
-    if (!brandName.trim()) e.name = "Brand name is required";
+    if (!brandName.trim()) e.name = t('brandDialog.errors.nameRequired');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -176,31 +178,31 @@ if (image instanceof File) {
 
   // Update the save button to show loading state
   const saveButtonContent = isLoading ? (
-    mode === "edit" ? "Updating..." : "Saving..."
+    mode === "edit" ? t('brandDialog.buttons.updating') : t('brandDialog.buttons.saving')
   ) : (
-    mode === "edit" ? "Update" : "Save"
+    mode === "edit" ? t('brandDialog.buttons.update') : t('brandDialog.buttons.save')
   );
 
   const dialogContent = (
     <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>
-          {mode === "edit" ? "Edit Brand" : "Add New Brand"}
+          {mode === "edit" ? t('brandDialog.titles.edit') : t('brandDialog.titles.add')}
         </DialogTitle>
         <DialogDescription>
           {mode === "edit"
-            ? "Update the brand details below."
-            : "Enter the brand details below."}
+            ? t('brandDialog.descriptions.edit')
+            : t('brandDialog.descriptions.add')}
         </DialogDescription>
       </DialogHeader>
 
       <div className="grid gap-4 py-4">
         {/* Brand Name */}
         <div className="grid gap-2">
-          <Label htmlFor="brand-name">Brand Name</Label>
+          <Label htmlFor="brand-name">{t('brandDialog.labels.brandName')}</Label>
           <Input
             id="brand-name"
-            placeholder="e.g., Nike"
+            placeholder={t('brandDialog.placeholders.brandName')}
             value={brandName}
             onChange={(e) => {
               setBrandName(e.target.value);
@@ -217,7 +219,7 @@ if (image instanceof File) {
 
         {/* Image Upload */}
         <div className="grid gap-2">
-          <Label htmlFor="upload-images">Brand Logo</Label>
+          <Label htmlFor="upload-images">{t('brandDialog.labels.brandLogo')}</Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
               ${
@@ -250,7 +252,7 @@ if (image instanceof File) {
               <>
                 <img
                   src={preview}
-                  alt="Brand Logo Preview"
+                  alt={t('brandDialog.uploadArea.altPreview')}
                   className="h-40 w-auto rounded-md object-contain bg-white p-2"
                 />
                 <button
@@ -268,13 +270,13 @@ if (image instanceof File) {
               <>
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
-                  Drag & drop brand logo here or{" "}
+                  {t('brandDialog.uploadArea.dragDrop')}{" "}
                   <span className="text-blue-600 hover:underline">
-                    click to browse
+                    {t('brandDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  PNG, JPG, or SVG format recommended
+                  {t('brandDialog.uploadArea.formatRecommendation')}
                 </p>
               </>
             )}
@@ -291,7 +293,7 @@ if (image instanceof File) {
           )}
           {image && !errors.image && (
             <p className="mt-2 text-xs text-green-600">
-              Selected: {image.name}
+              {t('brandDialog.uploadArea.selected')} {image.name}
             </p>
           )}
         </div>
@@ -320,7 +322,7 @@ if (image instanceof File) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
-          <span className="hidden lg:inline">Add Brand</span>
+          <span className="hidden lg:inline">{t('brandDialog.buttons.addBrand')}</span>
         </Button>
       </DialogTrigger>
       {dialogContent}

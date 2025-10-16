@@ -28,6 +28,7 @@ import {
   type CreateUserData,
   type UpdateUserData,
 } from "../../features/users/usersSlice";
+import { useTranslation } from 'react-i18next';
 
 // Define the User entity type to match backend response
 export interface User {
@@ -41,11 +42,11 @@ export interface User {
   updatedAt?: string;
 }
 
-// Define columns specific to Users
-const usersColumns: ColumnDef<User>[] = [
+// Define columns specific to Users - we'll create this inside the component to access t function
+const getUsersColumns = (t: (key: string) => string): ColumnDef<User>[] => [
   {
     accessorKey: "name",
-    header: "User",
+    header: t('users.columns.user'),
     cell: ({ row }) => {
       const user = row.original;
       const initials = user.name
@@ -71,7 +72,7 @@ const usersColumns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "role",
-    header: "Role",
+    header: t('users.columns.role'),
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
       const variants = {
@@ -85,19 +86,19 @@ const usersColumns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "active",
-    header: "Status",
+    header: t('users.columns.status'),
     cell: ({ row }) => {
       const active = row.getValue("active") as boolean;
       return (
         <Badge variant={active ? "default" : "secondary"}>
-          {active ? "active" : "inactive"}
+          {active ? t('users.status.active') : t('users.status.inactive')}
         </Badge>
       );
     },
   },
   {
     accessorKey: "createdAt",
-    header: "Joined",
+    header: t('users.columns.joined'),
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
@@ -122,6 +123,7 @@ const advancedFilterConfig = {
 };
 
 export default function Users() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const {
     users,
@@ -134,6 +136,9 @@ export default function Users() {
     isDeletingMany,
     currentQueryParams,
   } = useAppSelector((state) => state.users);
+
+  // Create columns inside the component to access t function
+  const usersColumns = React.useMemo(() => getUsersColumns(t), [t]);
 
   // Load initial data on component mount
   React.useEffect(() => {
@@ -174,7 +179,7 @@ export default function Users() {
   }) => {
     try {
       await dispatch(createUser(userData as CreateUserData)).unwrap();
-      toast.success("User added successfully");
+      toast.success(t('users.messages.addSuccess'));
       // Note: createUser thunk automatically refetches data
     } catch (error) {
       console.error("Failed to add user:", error);
@@ -196,7 +201,7 @@ export default function Users() {
       await dispatch(
         updateUser({ id, userData: userData as UpdateUserData })
       ).unwrap();
-      toast.success("User updated successfully");
+      toast.success(t('users.messages.updateSuccess'));
       // Note: updateUser thunk automatically refetches data
     } catch (error) {
       console.error("Failed to update user:", error);
@@ -208,7 +213,7 @@ export default function Users() {
   const handleDeleteUser = async (id: string) => {
     try {
       await dispatch(deleteUser(id)).unwrap();
-      toast.success("User deleted successfully");
+      toast.success(t('users.messages.deleteSuccess'));
       // Note: deleteUser thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete user:", error);
@@ -221,15 +226,13 @@ export default function Users() {
     try {
       await dispatch(deleteManyUsers(ids)).unwrap();
       toast.success(
-        `${ids.length} ${
-          ids.length === 1 ? "user" : "users"
-        } deleted successfully`
+        t('users.messages.bulkDeleteSuccess', { count: ids.length })
       );
       // Note: deleteManyUsers thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete users:", error);
       // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
-      toast.error("Failed to delete selected users");
+      toast.error(t('users.messages.bulkDeleteError'));
     }
   };
 
@@ -238,9 +241,9 @@ export default function Users() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
-            <h1 className="text-2xl font-semibold">Users</h1>
+            <h1 className="text-2xl font-semibold">{t('users.title')}</h1>
             <p className="text-muted-foreground">
-              Manage user accounts and their access levels.
+              {t('users.description')}
             </p>
           </div>
 
@@ -281,7 +284,7 @@ export default function Users() {
                       updatedData,
                       rowData,
                     });
-                    toast.error("Error: User ID is missing");
+                    toast.error(t('users.messages.missingIdError'));
                     return;
                   }
 
@@ -303,7 +306,7 @@ export default function Users() {
             advancedFilterConfig={advancedFilterConfig}
             enableDragAndDrop={false} // Disable drag and drop for users
             filterColumn="role"
-            filterPlaceholder="Filter by role..."
+            filterPlaceholder={t('users.filterPlaceholder')}
             // Set page size for initial load
             pageSize={10}
           />

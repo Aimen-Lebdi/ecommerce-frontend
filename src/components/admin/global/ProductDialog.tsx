@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import {
   IconCloudUpload,
   IconPlus,
@@ -119,6 +120,7 @@ export function ProductDialog({
   onSubmit,
   isSubmitting = false,
 }: ProductDialogProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = React.useState(false);
 
   // Form state
@@ -279,17 +281,17 @@ export function ProductDialog({
   // Validation
   const validate = () => {
     const e: Errors = {};
-    if (!category) e.category = "Category is required";
-    if (!name.trim()) e.name = "Product name is required";
-    if (!description.trim()) e.description = "Description is required";
+    if (!category) e.category = t('productDialog.errors.categoryRequired');
+    if (!name.trim()) e.name = t('productDialog.errors.nameRequired');
+    if (!description.trim()) e.description = t('productDialog.errors.descriptionRequired');
     if (!price || isNaN(Number(price)) || Number(price) <= 0)
-      e.price = "Valid price is required";
+      e.price = t('productDialog.errors.priceRequired');
     if (!quantity || isNaN(Number(quantity)) || Number(quantity) < 0)
-      e.quantity = "Valid quantity is required";
-    if (!colors.trim()) e.colors = "At least one color is required";
-    if (mode === "add" && !mainImage) e.mainImage = "Main image is required";
+      e.quantity = t('productDialog.errors.quantityRequired');
+    if (!colors.trim()) e.colors = t('productDialog.errors.colorsRequired');
+    if (mode === "add" && !mainImage) e.mainImage = t('productDialog.errors.mainImageRequired');
     if (mode === "edit" && !mainImage && !previewMain)
-      e.mainImage = "Main image is required";
+      e.mainImage = t('productDialog.errors.mainImageRequired');
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -449,7 +451,7 @@ if (otherImages.length > 0) {
   const handleRemoveMain = () => {
     setMainImage(null);
     setPreviewMain(null);
-    setErrors((prev) => ({ ...prev, mainImage: "Main image is required" }));
+    setErrors((prev) => ({ ...prev, mainImage: t('productDialog.errors.mainImageRequired') }));
   };
 
   const handleOtherFiles = (files: FileList) => {
@@ -484,19 +486,19 @@ if (otherImages.length > 0) {
     <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto custom-scroll">
       <DialogHeader>
         <DialogTitle>
-          {mode === "edit" ? "Edit Product" : "Add New Product"}
+          {mode === "edit" ? t('productDialog.titles.edit') : t('productDialog.titles.add')}
         </DialogTitle>
         <DialogDescription>
           {mode === "edit"
-            ? "Update the product details below."
-            : "Enter the product details below."}
+            ? t('productDialog.descriptions.edit')
+            : t('productDialog.descriptions.add')}
         </DialogDescription>
       </DialogHeader>
 
       <div className="grid gap-4 py-4">
         {/* Category */}
         <div className="grid gap-2">
-          <Label>Category</Label>
+          <Label>{t('productDialog.labels.category')}</Label>
           <Select
             value={category}
             onValueChange={handleCategoryChange}
@@ -505,7 +507,7 @@ if (otherImages.length > 0) {
             <SelectTrigger className={errors.category ? "border-red-500" : ""}>
               <SelectValue
                 placeholder={
-                  loading ? "Loading categories..." : "Choose category"
+                  loading ? t('productDialog.placeholders.loadingCategories') : t('productDialog.placeholders.chooseCategory')
                 }
               />
             </SelectTrigger>
@@ -525,8 +527,8 @@ if (otherImages.length > 0) {
         {/* Subcategory */}
         <div className="grid gap-2">
           <Label>
-            Subcategory{" "}
-            <span className="text-muted-foreground text-sm">(Optional)</span>
+            {t('productDialog.labels.subcategory')}{" "}
+            <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
           </Label>
           <Select
             value={subcategory}
@@ -547,15 +549,15 @@ if (otherImages.length > 0) {
               <SelectValue
                 placeholder={
                   !category
-                    ? "Select category first"
-                    : "Choose subcategory (optional)"
+                    ? t('productDialog.placeholders.selectCategoryFirst')
+                    : t('productDialog.placeholders.chooseSubcategory')
                 }
               />
             </SelectTrigger>
             <SelectContent>
               {/* Add "None" option */}
               <SelectItem value="none">
-                <span className="text-muted-foreground italic">None</span>
+                <span className="text-muted-foreground italic">{t('productDialog.options.none')}</span>
               </SelectItem>
 
               {filteredSubcategories.length > 0
@@ -567,7 +569,7 @@ if (otherImages.length > 0) {
                 : category && (
                     <SelectItem value="no-subcategories" disabled>
                       <span className="text-muted-foreground italic">
-                        No subcategories available
+                        {t('productDialog.options.noSubcategories')}
                       </span>
                     </SelectItem>
                   )}
@@ -580,7 +582,7 @@ if (otherImages.length > 0) {
           {/* Show helper text based on category selection */}
           {category && filteredSubcategories.length === 0 && (
             <p className="text-xs text-muted-foreground">
-              This category has no subcategories available.
+              {t('productDialog.helperText.noSubcategories')}
             </p>
           )}
         </div>
@@ -588,8 +590,8 @@ if (otherImages.length > 0) {
         {/* Brand */}
         <div className="grid gap-2">
           <Label>
-            Brand{" "}
-            <span className="text-muted-foreground text-sm">(Optional)</span>
+            {t('productDialog.labels.brand')}{" "}
+            <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
           </Label>
           <Select
             value={brand}
@@ -607,14 +609,14 @@ if (otherImages.length > 0) {
             <SelectTrigger className={errors.brand ? "border-red-500" : ""}>
               <SelectValue
                 placeholder={
-                  loading ? "Loading brands..." : "Choose brand (optional)"
+                  loading ? t('productDialog.placeholders.loadingBrands') : t('productDialog.placeholders.chooseBrand')
                 }
               />
             </SelectTrigger>
             <SelectContent>
               {/* Add "None" option */}
               <SelectItem value="none">
-                <span className="text-muted-foreground italic">None</span>
+                <span className="text-muted-foreground italic">{t('productDialog.options.none')}</span>
               </SelectItem>
 
               {brands.map((br) => (
@@ -631,9 +633,9 @@ if (otherImages.length > 0) {
 
         {/* Product Name */}
         <div className="grid gap-2">
-          <Label>Product Name</Label>
+          <Label>{t('productDialog.labels.productName')}</Label>
           <Input
-            placeholder="e.g., iPhone 15 Pro Max"
+            placeholder={t('productDialog.placeholders.productName')}
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -648,9 +650,9 @@ if (otherImages.length > 0) {
 
         {/* Description */}
         <div className="grid gap-2">
-          <Label>Description</Label>
+          <Label>{t('productDialog.labels.description')}</Label>
           <Textarea
-            placeholder="Enter detailed product description..."
+            placeholder={t('productDialog.placeholders.description')}
             value={description}
             onChange={(e) => {
               setDescription(e.target.value);
@@ -669,10 +671,10 @@ if (otherImages.length > 0) {
         {/* Price, Discount Price & Quantity */}
         <div className="grid grid-cols-3 gap-4">
           <div className="grid gap-2">
-            <Label>Price ($)</Label>
+            <Label>{t('productDialog.labels.price')}</Label>
             <Input
               type="number"
-              placeholder="99.99"
+              placeholder={t('productDialog.placeholders.price')}
               value={price}
               onChange={(e) => {
                 setPrice(e.target.value);
@@ -694,12 +696,12 @@ if (otherImages.length > 0) {
           </div>
           <div className="grid gap-2">
             <Label>
-              Discount Price ($){" "}
-              <span className="text-muted-foreground text-sm">(Optional)</span>
+              {t('productDialog.labels.discountPrice')}{" "}
+              <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
             </Label>
             <Input
               type="number"
-              placeholder="79.99"
+              placeholder={t('productDialog.placeholders.discountPrice')}
               value={priceAfterDiscount}
               onChange={(e) => setPriceAfterDiscount(e.target.value)}
               step="0.01"
@@ -707,10 +709,10 @@ if (otherImages.length > 0) {
             />
           </div>
           <div className="grid gap-2">
-            <Label>Quantity</Label>
+            <Label>{t('productDialog.labels.quantity')}</Label>
             <Input
               type="number"
-              placeholder="100"
+              placeholder={t('productDialog.placeholders.quantity')}
               value={quantity}
               onChange={(e) => {
                 setQuantity(e.target.value);
@@ -733,9 +735,9 @@ if (otherImages.length > 0) {
 
         {/* Colors */}
         <div className="grid gap-2">
-          <Label>Colors (comma separated)</Label>
+          <Label>{t('productDialog.labels.colors')}</Label>
           <Input
-            placeholder="e.g., Black, Silver, Gold, Space Gray"
+            placeholder={t('productDialog.placeholders.colors')}
             value={colors}
             onChange={(e) => {
               setColors(e.target.value);
@@ -752,7 +754,7 @@ if (otherImages.length > 0) {
 
         {/* Main Image Upload */}
         <div className="grid gap-2">
-          <Label>Main Product Image</Label>
+          <Label>{t('productDialog.labels.mainImage')}</Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
               ${
@@ -785,7 +787,7 @@ if (otherImages.length > 0) {
               <>
                 <img
                   src={previewMain}
-                  alt="Main Preview"
+                  alt={t('productDialog.uploadArea.mainPreviewAlt')}
                   className="h-40 w-auto rounded-md object-cover"
                 />
                 <button
@@ -803,9 +805,9 @@ if (otherImages.length > 0) {
               <>
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
-                  Drag & drop main product image here or{" "}
+                  {t('productDialog.uploadArea.dragDropMain')}{" "}
                   <span className="text-blue-600 hover:underline">
-                    click to browse
+                    {t('productDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
               </>
@@ -823,7 +825,7 @@ if (otherImages.length > 0) {
           )}
           {mainImage && !errors.mainImage && (
             <p className="mt-2 text-xs text-green-600">
-              Selected: {mainImage.name}
+              {t('productDialog.uploadArea.selected')} {mainImage.name}
             </p>
           )}
         </div>
@@ -831,8 +833,8 @@ if (otherImages.length > 0) {
         {/* Other Images Upload */}
         <div className="grid gap-2">
           <Label>
-            Additional Images{" "}
-            <span className="text-muted-foreground text-sm">(Optional)</span>
+            {t('productDialog.labels.additionalImages')}{" "}
+            <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
           </Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
@@ -866,7 +868,7 @@ if (otherImages.length > 0) {
                   <div key={idx} className="relative">
                     <img
                       src={src}
-                      alt={`Preview ${idx + 1}`}
+                      alt={t('productDialog.uploadArea.otherPreviewAlt', { index: idx + 1 })}
                       className="h-24 w-24 object-cover rounded-md"
                     />
                     <button
@@ -886,9 +888,9 @@ if (otherImages.length > 0) {
               <>
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
-                  Drag & drop multiple images here or{" "}
+                  {t('productDialog.uploadArea.dragDropOthers')}{" "}
                   <span className="text-blue-600 hover:underline">
-                    click to browse
+                    {t('productDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
               </>
@@ -909,7 +911,7 @@ if (otherImages.length > 0) {
           )}
           {otherImages.length > 0 && !errors.images && (
             <p className="mt-2 text-xs text-green-600">
-              Selected: {otherImages.length} additional image(s)
+              {t('productDialog.uploadArea.selectedImages', { count: otherImages.length })}
             </p>
           )}
         </div>
@@ -920,11 +922,11 @@ if (otherImages.length > 0) {
           <IconPhoto className="mr-2 h-4 w-4" />
           {isSubmitting
             ? mode === "edit"
-              ? "Updating..."
-              : "Saving..."
+              ? t('productDialog.buttons.updating')
+              : t('productDialog.buttons.saving')
             : mode === "edit"
-            ? "Update Product"
-            : "Save Product"}
+            ? t('productDialog.buttons.updateProduct')
+            : t('productDialog.buttons.saveProduct')}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -945,7 +947,7 @@ if (otherImages.length > 0) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
-          <span className="hidden lg:inline">Add Product</span>
+          <span className="hidden lg:inline">{t('productDialog.buttons.addProduct')}</span>
         </Button>
       </DialogTrigger>
       {dialogContent}

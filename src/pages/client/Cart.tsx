@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import {
   Minus,
   Plus,
@@ -42,11 +43,11 @@ import {
   clearError,
 } from "../../features/cart/cartSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
-import { toast } from "sonner"; // ✅ Import directly from sonner
+import { toast } from "sonner";
 
 const Cart = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  // const { toast } = Toaster()
 
   const {
     cartItems,
@@ -92,7 +93,7 @@ const Cart = () => {
       await dispatch(
         updateCartItemQuantity({ itemId, quantity: newQuantity })
       ).unwrap();
-      toast.success("Cart updated successfully");
+      toast.success(t('cart.cartUpdated'));
     } catch (err) {
       // Error handled by slice
     }
@@ -101,7 +102,7 @@ const Cart = () => {
   const removeItem = async (itemId: string) => {
     try {
       await dispatch(removeCartItem(itemId)).unwrap();
-      toast.success("Item removed from cart");
+      toast.success(t('cart.itemRemoved'));
     } catch (err) {
       // Error handled by slice
     }
@@ -115,21 +116,21 @@ const Cart = () => {
     try {
       await dispatch(addProductToWishlist(productId)).unwrap();
       await dispatch(removeCartItem(itemId)).unwrap();
-      toast.success(`${productName} moved to wishlist`);
+      toast.success(t('cart.movedToWishlist', { productName }));
     } catch (err: any) {
-      toast.error(err || "Failed to move to wishlist");
+      toast.error(err || t('cart.moveToWishlistFailed'));
     }
   };
 
   const applyPromoCode = async () => {
     if (!promoCode.trim()) {
-      toast.error("Please enter a promo code");
+      toast.error(t('cart.enterPromoCode'));
       return;
     }
 
     try {
       await dispatch(applyCoupon(promoCode)).unwrap();
-      toast.success("Coupon applied successfully");
+      toast.success(t('cart.couponApplied'));
       setPromoCode("");
     } catch (err) {
       // Error handled by slice
@@ -142,7 +143,7 @@ const Cart = () => {
       <div className="container py-10 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading cart...</p>
+          <p className="text-sm text-muted-foreground">{t('cart.loadingCart')}</p>
         </div>
       </div>
     );
@@ -155,14 +156,14 @@ const Cart = () => {
         <div className="max-w-2xl mx-auto text-center space-y-6">
           <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground" />
           <div>
-            <h1 className="text-2xl font-bold">Your cart is empty</h1>
+            <h1 className="text-2xl font-bold">{t('cart.emptyCart')}</h1>
             <p className="text-muted-foreground mt-2">
-              Looks like you haven't added anything to your cart yet.
+              {t('cart.emptyCartDescription')}
             </p>
           </div>
           <Link to="/shop">
             <Button size="lg" className="mt-4">
-              Continue Shopping
+              {t('cart.continueShopping')}
             </Button>
           </Link>
         </div>
@@ -181,9 +182,9 @@ const Cart = () => {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Shopping Cart</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">{t('cart.shoppingCart')}</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            {numOfCartItems} {numOfCartItems === 1 ? "item" : "items"}
+            {numOfCartItems} {numOfCartItems === 1 ? t('cart.item') : t('cart.items')}
           </p>
         </div>
       </div>
@@ -291,7 +292,7 @@ const Cart = () => {
                           disabled={isRemoving}
                         >
                           <Heart className="h-3 w-3 mr-1" />
-                          Save
+                          {t('cart.save')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -301,7 +302,7 @@ const Cart = () => {
                           disabled={isRemoving}
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
-                          Remove
+                          {t('cart.remove')}
                         </Button>
                       </div>
                     </div>
@@ -309,7 +310,7 @@ const Cart = () => {
                     {/* Subtotal */}
                     <div className="text-right mt-2">
                       <span className="text-sm font-semibold">
-                        Subtotal: ${(item.price * item.quantity).toFixed(2)}
+                        {t('cart.subtotal')}: ${(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -324,7 +325,7 @@ const Cart = () => {
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1">
                   <Input
-                    placeholder="Enter promo code"
+                    placeholder={t('cart.enterPromoCodePlaceholder')}
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     className="w-full"
@@ -341,14 +342,14 @@ const Cart = () => {
                   ) : (
                     <Tag className="h-4 w-4 mr-2" />
                   )}
-                  Apply
+                  {t('cart.apply')}
                 </Button>
               </div>
               {totalPriceAfterDiscount && appliedCoupon && (
                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-green-800">
-                      Coupon applied: {appliedCoupon.code}
+                      {t('cart.couponAppliedLabel')}: {appliedCoupon.code}
                     </span>
                     <span className="text-sm font-semibold text-green-800">
                       -${appliedCoupon.discount.toFixed(2)}
@@ -365,24 +366,24 @@ const Cart = () => {
           {/* Order Summary */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Order Summary</CardTitle>
+              <CardTitle className="text-lg">{t('cart.orderSummary')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between text-sm">
-                <span>Subtotal</span>
+                <span>{t('cart.subtotal')}</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
 
               {totalPriceAfterDiscount && appliedCoupon && (
                 <div className="flex justify-between text-sm text-green-600">
-                  <span>Discount</span>
+                  <span>{t('cart.discount')}</span>
                   <span>-${appliedCoupon.discount.toFixed(2)}</span>
                 </div>
               )}
 
               {/* Shipping Options */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Shipping</label>
+                <label className="text-sm font-medium">{t('cart.shipping')}</label>
                 <Select
                   value={shippingMethod}
                   onValueChange={setShippingMethod}
@@ -392,29 +393,29 @@ const Cart = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="standard">
-                      Standard (5-7 days) - {subtotal > 75 ? "FREE" : "$9.99"}
+                      {t('cart.standardShipping')} - {subtotal > 75 ? t('cart.free') : "$9.99"}
                     </SelectItem>
                     <SelectItem value="express">
-                      Express (2-3 days) - $15.99
+                      {t('cart.expressShipping')} - $15.99
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex justify-between text-sm">
-                <span>Shipping</span>
+                <span>{t('cart.shipping')}</span>
                 <span>${shippingCost.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-sm">
-                <span>Tax</span>
+                <span>{t('cart.tax')}</span>
                 <span>${taxAmount.toFixed(2)}</span>
               </div>
 
               <Separator />
 
               <div className="flex justify-between text-lg font-semibold">
-                <span>Total</span>
+                <span>{t('cart.total')}</span>
                 <span>${total.toFixed(2)}</span>
               </div>
 
@@ -422,7 +423,7 @@ const Cart = () => {
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
                 <Truck className="h-4 w-4" />
                 <span>
-                  Estimated delivery:{" "}
+                  {t('cart.estimatedDelivery')}:{" "}
                   {shippingMethod === "express" ? "Dec 8-10" : "Dec 12-15"}
                 </span>
               </div>
@@ -430,11 +431,11 @@ const Cart = () => {
               {/* Checkout Button */}
               <Button size="lg" className="w-full mt-4">
                 <Lock className="h-4 w-4 mr-2" />
-                <Link to="/checkout">Secure Checkout</Link>
+                <Link to="/checkout">{t('cart.secureCheckout')}</Link>
               </Button>
 
               <Button variant="outline" size="lg" className="w-full" asChild>
-                <Link to="/shop">Continue Shopping</Link>
+                <Link to="/shop">{t('cart.continueShopping')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -444,15 +445,15 @@ const Cart = () => {
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-sm">
                 <Shield className="h-4 w-4 text-green-600" />
-                <span>Secure 256-bit SSL encryption</span>
+                <span>{t('cart.secureEncryption')}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <CreditCard className="h-4 w-4 text-blue-600" />
-                <span>Multiple payment options</span>
+                <span>{t('cart.multiplePaymentOptions')}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Truck className="h-4 w-4 text-purple-600" />
-                <span>Free returns within 30 days</span>
+                <span>{t('cart.freeReturns')}</span>
               </div>
             </CardContent>
           </Card>
@@ -460,7 +461,7 @@ const Cart = () => {
           {/* Payment Methods */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">We Accept</CardTitle>
+              <CardTitle className="text-base">{t('cart.weAccept')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex gap-2 flex-wrap">

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import { type ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import {
@@ -40,7 +41,10 @@ export interface Category {
 const categoriesColumns: ColumnDef<Category>[] = [
   {
     accessorKey: "name",
-    header: "Category",
+    header: () => {
+      const { t } = useTranslation();
+      return t('categories.table.headers.category');
+    },
     cell: ({ row }) => {
       const category = row.original;
       return (
@@ -61,7 +65,10 @@ const categoriesColumns: ColumnDef<Category>[] = [
   },
   {
     accessorKey: "productCount",
-    header: "Products",
+    header: () => {
+      const { t } = useTranslation();
+      return t('categories.table.headers.products');
+    },
     cell: ({ row }) => {
       const count = row.original.productCount || 0;
       return (
@@ -71,7 +78,10 @@ const categoriesColumns: ColumnDef<Category>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Created",
+    header: () => {
+      const { t } = useTranslation();
+      return t('categories.table.headers.created');
+    },
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
@@ -97,6 +107,7 @@ const advancedFilterConfig = {
 };
 
 export default function Categories() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const {
     categories,
@@ -148,7 +159,7 @@ export default function Categories() {
       await dispatch(
         createCategory(categoryData as CreateCategoryData)
       ).unwrap();
-      toast.success("Category added successfully");
+      toast.success(t('categories.messages.addSuccess'));
       // Note: createCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to add category:", error);
@@ -165,7 +176,7 @@ export default function Categories() {
       await dispatch(
         updateCategory({ id, categoryData: categoryData as UpdateCategoryData })
       ).unwrap();
-      toast.success("Category updated successfully");
+      toast.success(t('categories.messages.updateSuccess'));
       // Note: updateCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to update category:", error);
@@ -177,7 +188,7 @@ export default function Categories() {
   const handleDeleteCategory = async (id: string) => {
     try {
       await dispatch(deleteCategory(id)).unwrap();
-      toast.success("Category deleted successfully");
+      toast.success(t('categories.messages.deleteSuccess'));
       // Note: deleteCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete category:", error);
@@ -190,15 +201,13 @@ export default function Categories() {
     try {
       await dispatch(deleteManyCategories(ids)).unwrap();
       toast.success(
-        `${ids.length} ${
-          ids.length === 1 ? "category" : "categories"
-        } deleted successfully`
+        t('categories.messages.bulkDeleteSuccess', { count: ids.length })
       );
       // Note: deleteManyCategories thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete categories:", error);
       // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
-      toast.error("Failed to delete selected categories");
+      toast.error(t('categories.messages.bulkDeleteError'));
     }
   };
 
@@ -207,9 +216,9 @@ export default function Categories() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
-            <h1 className="text-2xl font-semibold">Categories</h1>
+            <h1 className="text-2xl font-semibold">{t('categories.title')}</h1>
             <p className="text-muted-foreground">
-              Manage your product categories and their details.
+              {t('categories.description')}
             </p>
           </div>
 

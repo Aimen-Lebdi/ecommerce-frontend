@@ -12,8 +12,10 @@ import { Progress } from '../../components/ui/progress';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { signUp, clearError } from '../../features/auth/authSlice';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function SignUpPage() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -113,20 +115,15 @@ export default function SignUpPage() {
     const newErrors = {};
 
     // Required fields - use firstName as name for backend
-    if (!formData.firstName.trim()) newErrors.firstName = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!isValidEmail(formData.email)) newErrors.email = 'Please enter a valid email address';
+    if (!formData.firstName.trim()) newErrors.firstName = t('signUp.errors.nameRequired');
+    if (!formData.email.trim()) newErrors.email = t('signUp.errors.emailRequired');
+    else if (!isValidEmail(formData.email)) newErrors.email = t('signUp.errors.emailInvalid');
     
-    if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters long';
-    // else if (passwordStrength < 3) newErrors.password = 'Password is too weak. Include uppercase, lowercase, numbers, and symbols.';
+    if (!formData.password) newErrors.password = t('signUp.errors.passwordRequired');
+    else if (formData.password.length < 6) newErrors.password = t('signUp.errors.passwordLength');
     
-    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-    else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    
-    // if (formData.phone && !isValidPhone(formData.phone)) newErrors.phone = 'Please enter a valid phone number';
-    
-    // if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree to the Terms of Service and Privacy Policy';
+    if (!formData.confirmPassword) newErrors.confirmPassword = t('signUp.errors.confirmPasswordRequired');
+    else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = t('signUp.errors.passwordsDontMatch');
 
     return newErrors;
   };
@@ -166,11 +163,11 @@ export default function SignUpPage() {
   };
 
   const getPasswordStrengthText = () => {
-    if (passwordStrength <= 1) return 'Very Weak';
-    if (passwordStrength <= 2) return 'Weak';
-    if (passwordStrength <= 3) return 'Fair';
-    if (passwordStrength <= 4) return 'Good';
-    return 'Strong';
+    if (passwordStrength <= 1) return t('signUp.passwordStrength.veryWeak');
+    if (passwordStrength <= 2) return t('signUp.passwordStrength.weak');
+    if (passwordStrength <= 3) return t('signUp.passwordStrength.fair');
+    if (passwordStrength <= 4) return t('signUp.passwordStrength.good');
+    return t('signUp.passwordStrength.strong');
   };
 
   const getPasswordStrengthValue = () => {
@@ -187,14 +184,14 @@ export default function SignUpPage() {
           onClick={() => navigate('/sign-in')}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Login
+          {t('signUp.backToLogin')}
         </Button>
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Create Your Account</CardTitle>
+            <CardTitle className="text-2xl">{t('signUp.title')}</CardTitle>
             <CardDescription>
-              Join thousands of happy customers
+              {t('signUp.description')}
             </CardDescription>
           </CardHeader>
           
@@ -208,14 +205,14 @@ export default function SignUpPage() {
                   <path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Continue with Google
+                {t('signUp.continueWithGoogle')}
               </Button>
               
               <Button variant="outline" className="w-full" type="button">
                 <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="#1877F2">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
-                Continue with Facebook
+                {t('signUp.continueWithFacebook')}
               </Button>
             </div>
 
@@ -225,7 +222,7 @@ export default function SignUpPage() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with email
+                  {t('signUp.orContinueWithEmail')}
                 </span>
               </div>
             </div>
@@ -235,12 +232,12 @@ export default function SignUpPage() {
               {/* Name Fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">Name *</Label>
+                  <Label htmlFor="firstName">{t('signUp.nameLabel')}</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="firstName"
-                      placeholder="John Doe"
+                      placeholder={t('signUp.namePlaceholder')}
                       value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       className={`pl-10 ${errors.firstName ? 'border-destructive' : ''}`}
@@ -258,13 +255,13 @@ export default function SignUpPage() {
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email">{t('signUp.emailLabel')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="john.doe@example.com"
+                    placeholder={t('signUp.emailPlaceholder')}
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
@@ -281,13 +278,13 @@ export default function SignUpPage() {
 
               {/* Password */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
+                <Label htmlFor="password">{t('signUp.passwordLabel')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a strong password"
+                    placeholder={t('signUp.passwordPlaceholder')}
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
@@ -323,20 +320,8 @@ export default function SignUpPage() {
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className={`flex items-center gap-1 ${formData.password.length >= 8 ? 'text-green-600' : 'text-muted-foreground'}`}>
                         {formData.password.length >= 6 ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                        6+ characters
+                        {t('signUp.passwordRequirements.characters')}
                       </div>
-                      {/* <div className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-muted-foreground'}`}>
-                        {/[A-Z]/.test(formData.password) ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                        Uppercase
-                      </div>
-                      <div className={`flex items-center gap-1 ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-muted-foreground'}`}>
-                        {/[a-z]/.test(formData.password) ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                        Lowercase
-                      </div>
-                      <div className={`flex items-center gap-1 ${/[0-9]/.test(formData.password) ? 'text-green-600' : 'text-muted-foreground'}`}>
-                        {/[0-9]/.test(formData.password) ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                        Number
-                      </div> */}
                     </div>
                   </div>
                 )}
@@ -351,13 +336,13 @@ export default function SignUpPage() {
 
               {/* Confirm Password */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                <Label htmlFor="confirmPassword">{t('signUp.confirmPasswordLabel')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm your password"
+                    placeholder={t('signUp.confirmPasswordPlaceholder')}
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                     className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
@@ -380,7 +365,7 @@ export default function SignUpPage() {
                 {formData.confirmPassword && formData.password === formData.confirmPassword && !errors.confirmPassword && (
                   <p className="text-xs text-green-600 flex items-center gap-1">
                     <Check className="h-3 w-3" />
-                    Passwords match
+                    {t('signUp.passwordsMatch')}
                   </p>
                 )}
                 {errors.confirmPassword && (
@@ -390,58 +375,6 @@ export default function SignUpPage() {
                   </p>
                 )}
               </div>
-
-              {/* Checkboxes */}
-              {/* <div className="space-y-4">
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="agreeToTerms"
-                    checked={formData.agreeToTerms}
-                    onCheckedChange={(checked) => handleInputChange('agreeToTerms', checked)}
-                    className="mt-0.5"
-                    disabled={isSigningUp}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <Label
-                      htmlFor="agreeToTerms"
-                      className="text-sm font-normal leading-tight"
-                    >
-                      I agree to the{' '}
-                      <Button variant="link" className="p-0 h-auto text-primary underline">
-                        Terms of Service
-                      </Button>{' '}
-                      and{' '}
-                      <Button variant="link" className="p-0 h-auto text-primary underline">
-                        Privacy Policy
-                      </Button>
-                    </Label>
-                  </div>
-                </div>
-                {errors.agreeToTerms && (
-                  <p className="text-xs text-destructive flex items-center gap-1 ml-6">
-                    <X className="h-3 w-3" />
-                    {errors.agreeToTerms}
-                  </p>
-                )}
-
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="marketingEmails"
-                    checked={formData.marketingEmails}
-                    onCheckedChange={(checked) => handleInputChange('marketingEmails', checked)}
-                    className="mt-0.5"
-                    disabled={isSigningUp}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <Label
-                      htmlFor="marketingEmails"
-                      className="text-sm font-normal text-muted-foreground leading-tight"
-                    >
-                      Send me promotional emails and exclusive offers (you can unsubscribe anytime)
-                    </Label>
-                  </div>
-                </div>
-              </div> */}
 
               {/* Submit Button */}
               <Button
@@ -453,10 +386,10 @@ export default function SignUpPage() {
                 {isSigningUp ? (
                   <>
                     <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Creating Account...
+                    {t('signUp.creatingAccount')}
                   </>
                 ) : (
-                  'Create Account'
+                  t('signUp.createAccount')
                 )}
               </Button>
 
@@ -475,23 +408,23 @@ export default function SignUpPage() {
             <div className="border-t pt-6 space-y-4">
               <div className="flex items-center justify-center gap-2 text-muted-foreground text-sm">
                 <Shield className="h-4 w-4" />
-                <span>Your information is secure and encrypted</span>
+                <span>{t('signUp.secureInfo')}</span>
               </div>
               <p className="text-center text-xs text-muted-foreground">
-                We respect your privacy and will never share your personal information with third parties.
+                {t('signUp.privacyNotice')}
               </p>
             </div>
 
             {/* Sign In Link */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
+                {t('signUp.alreadyHaveAccount')}{' '}
                 <Button 
                   variant="link" 
                   className="p-0 h-auto font-medium"
                   onClick={() => navigate('/sign-in')}
                 >
-                  Sign in here
+                  {t('signUp.signInHere')}
                 </Button>
               </p>
             </div>

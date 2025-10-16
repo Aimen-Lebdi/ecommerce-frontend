@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   Star,
   ShoppingCart,
@@ -28,12 +29,13 @@ import {
 } from "../../features/products/productsSlice";
 import { addProductToCart } from "../../features/cart/cartSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
-import { toast } from "sonner"; // ✅ Import directly from sonner
+import { toast } from "sonner";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   const {
     currentProduct: product,
@@ -46,6 +48,7 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
   // Fetch product on component mount
   useEffect(() => {
     if (id) {
@@ -73,7 +76,7 @@ const ProductDetails = () => {
   // Reset selected image when product changes
   useEffect(() => {
     setSelectedImageIndex(0);
-    setSelectedColor(null); // Add this line
+    setSelectedColor(null);
   }, [product?._id]);
 
   // Handle add to cart
@@ -89,13 +92,13 @@ const ProductDetails = () => {
         })
       ).unwrap();
 
-      toast.success(`${product.name} has been added to your cart`);
+      toast.success(t('productDetail.addedToCart', { productName: product.name }));
 
       // Reset quantity and color after adding
       setQuantity(1);
       setSelectedColor(null);
     } catch (error: any) {
-      toast.error(error || "Failed to add product to cart");
+      toast.error(error || t('productDetail.failedToAddToCart'));
     } finally {
       setIsAddingToCart(false);
     }
@@ -120,7 +123,7 @@ const ProductDetails = () => {
       <div className="container py-10 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading product...</p>
+          <p className="text-sm text-muted-foreground">{t('productDetail.loadingProduct')}</p>
         </div>
       </div>
     );
@@ -133,13 +136,13 @@ const ProductDetails = () => {
         <Alert variant="destructive" className="max-w-2xl mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="ml-2">
-            {productError || "Product not found"}
+            {productError || t('productDetail.productNotFound')}
           </AlertDescription>
         </Alert>
         <div className="flex justify-center mt-6">
           <Button onClick={() => navigate("/shop")} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Shop
+            {t('productDetail.backToShop')}
           </Button>
         </div>
       </div>
@@ -169,11 +172,11 @@ const ProductDetails = () => {
       {/* Breadcrumbs */}
       <div className="text-xs md:text-sm text-muted-foreground">
         <Link to="/shop" className="hover:underline">
-          Shop
+          {t('productDetail.breadcrumbs.shop')}
         </Link>{" "}
         /{" "}
         <span className="hover:underline cursor-pointer">
-          {product.category?.name || "Category"}
+          {product.category?.name || t('productDetail.breadcrumbs.category')}
         </span>{" "}
         / <span className="font-medium text-foreground">{product.name}</span>
       </div>
@@ -233,9 +236,9 @@ const ProductDetails = () => {
               {product.brand && (
                 <Badge variant="outline">{product.brand.name}</Badge>
               )}
-              {!inStock && <Badge variant="destructive">Out of Stock</Badge>}
+              {!inStock && <Badge variant="destructive">{t('productDetail.outOfStock')}</Badge>}
               {inStock && product.quantity < 10 && (
-                <Badge variant="secondary">Only {product.quantity} left</Badge>
+                <Badge variant="secondary">{t('productDetail.onlyLeft', { quantity: product.quantity })}</Badge>
               )}
             </div>
           </div>
@@ -255,8 +258,8 @@ const ProductDetails = () => {
               ))}
             </div>
             <span className="text-xs md:text-sm text-muted-foreground">
-              {product.rating?.toFixed(1) || "No rating"} (
-              {product.ratingsQuantity || 0} reviews)
+              {product.rating?.toFixed(1) || t('productDetail.noRating')} (
+              {product.ratingsQuantity || 0} {t('productDetail.reviews')})
             </span>
           </div>
 
@@ -271,7 +274,7 @@ const ProductDetails = () => {
                   ${product.price.toFixed(2)}
                 </span>
                 <Badge variant="destructive" className="text-xs md:text-sm">
-                  Save {discountPercentage}%
+                  {t('productDetail.save', { percentage: discountPercentage })}
                 </Badge>
               </>
             )}
@@ -281,7 +284,7 @@ const ProductDetails = () => {
           {product.colors && product.colors.length > 0 && (
             <div>
               <p className="text-sm font-medium mb-2">
-                Select Color:{" "}
+                {t('productDetail.selectColor')}:{" "}
                 {selectedColor && (
                   <span className="text-primary">({selectedColor})</span>
                 )}
@@ -306,7 +309,7 @@ const ProductDetails = () => {
             <div className="flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-2">
                 <label htmlFor="quantity" className="text-sm font-medium">
-                  Quantity:
+                  {t('productDetail.quantity')}:
                 </label>
                 <Input
                   id="quantity"
@@ -331,30 +334,30 @@ const ProductDetails = () => {
                 onClick={handleAddToCart}
                 title={
                   !inStock
-                    ? "Out of stock"
+                    ? t('productDetail.outOfStock')
                     : product.colors &&
                       product.colors.length > 0 &&
                       !selectedColor
-                    ? "Please select a color"
+                    ? t('productDetail.pleaseSelectColor')
                     : ""
                 }
               >
                 {isAddingToCart ? (
                   <>
                     <Loader2 className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 animate-spin" />
-                    <span className="text-xs md:text-sm">Adding...</span>
+                    <span className="text-xs md:text-sm">{t('productDetail.adding')}</span>
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
                     <span className="text-xs md:text-sm">
                       {!inStock
-                        ? "Out of Stock"
+                        ? t('productDetail.outOfStock')
                         : product.colors &&
                           product.colors.length > 0 &&
                           !selectedColor
-                        ? "Select Color"
-                        : "Add to Cart"}
+                        ? t('productDetail.selectColorButton')
+                        : t('productDetail.addToCart')}
                     </span>
                   </>
                 )}
@@ -364,7 +367,7 @@ const ProductDetails = () => {
                 className="h-9 md:h-10"
                 disabled={!inStock}
               >
-                <span className="text-xs md:text-sm">Buy Now</span>
+                <span className="text-xs md:text-sm">{t('productDetail.buyNow')}</span>
               </Button>
               <Button
                 variant="outline"
@@ -373,9 +376,9 @@ const ProductDetails = () => {
                 onClick={async () => {
                   try {
                     await dispatch(addProductToWishlist(product._id)).unwrap();
-                    toast.success(`${product.name} added to wishlist`);
+                    toast.success(t('productDetail.addedToWishlist', { productName: product.name }));
                   } catch (err: any) {
-                    toast.error(err || "Failed to add to wishlist");
+                    toast.error(err || t('productDetail.failedToAddToWishlist'));
                   }
                 }}
               >
@@ -385,9 +388,9 @@ const ProductDetails = () => {
 
             {/* Product Info Icons */}
             <div className="text-xs md:text-sm text-muted-foreground space-y-1">
-              <p>✅ Free Shipping on orders over $50</p>
-              <p>🔒 Secure Payment</p>
-              <p>↩ 30-day returns</p>
+              <p>{t('productDetail.features.freeShipping')}</p>
+              <p>{t('productDetail.features.securePayment')}</p>
+              <p>{t('productDetail.features.returns')}</p>
             </div>
           </div>
 
@@ -395,23 +398,23 @@ const ProductDetails = () => {
           <div className="pt-4 border-t">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <span className="text-muted-foreground">Category:</span>
-                <p className="font-medium">{product.category?.name || "N/A"}</p>
+                <span className="text-muted-foreground">{t('productDetail.info.category')}:</span>
+                <p className="font-medium">{product.category?.name || t('productDetail.info.na')}</p>
               </div>
               {product.subCategory && (
                 <div>
-                  <span className="text-muted-foreground">Subcategory:</span>
+                  <span className="text-muted-foreground">{t('productDetail.info.subcategory')}:</span>
                   <p className="font-medium">{product.subCategory.name}</p>
                 </div>
               )}
               {product.brand && (
                 <div>
-                  <span className="text-muted-foreground">Brand:</span>
+                  <span className="text-muted-foreground">{t('productDetail.info.brand')}:</span>
                   <p className="font-medium">{product.brand.name}</p>
                 </div>
               )}
               <div>
-                <span className="text-muted-foreground">SKU:</span>
+                <span className="text-muted-foreground">{t('productDetail.info.sku')}:</span>
                 <p className="font-medium text-xs">
                   {product._id.slice(-8).toUpperCase()}
                 </p>
@@ -425,13 +428,13 @@ const ProductDetails = () => {
       <Tabs defaultValue="description" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="description" className="text-xs md:text-sm">
-            Description
+            {t('productDetail.tabs.description')}
           </TabsTrigger>
           <TabsTrigger value="specs" className="text-xs md:text-sm">
-            Specifications
+            {t('productDetail.tabs.specifications')}
           </TabsTrigger>
           <TabsTrigger value="reviews" className="text-xs md:text-sm">
-            Reviews ({product.ratingsQuantity || 0})
+            {t('productDetail.tabs.reviews')} ({product.ratingsQuantity || 0})
           </TabsTrigger>
         </TabsList>
 
@@ -452,22 +455,22 @@ const ProductDetails = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">
-                      Product Name:
+                      {t('productDetail.specs.productName')}:
                     </span>
                     <span className="text-sm font-medium">{product.name}</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">
-                      Category:
+                      {t('productDetail.specs.category')}:
                     </span>
                     <span className="text-sm font-medium">
-                      {product.category?.name || "N/A"}
+                      {product.category?.name || t('productDetail.info.na')}
                     </span>
                   </div>
                   {product.subCategory && (
                     <div className="flex justify-between border-b pb-2">
                       <span className="text-sm text-muted-foreground">
-                        Subcategory:
+                        {t('productDetail.specs.subcategory')}:
                       </span>
                       <span className="text-sm font-medium">
                         {product.subCategory.name}
@@ -477,7 +480,7 @@ const ProductDetails = () => {
                   {product.brand && (
                     <div className="flex justify-between border-b pb-2">
                       <span className="text-sm text-muted-foreground">
-                        Brand:
+                        {t('productDetail.specs.brand')}:
                       </span>
                       <span className="text-sm font-medium">
                         {product.brand.name}
@@ -488,7 +491,7 @@ const ProductDetails = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">
-                      Price:
+                      {t('productDetail.specs.price')}:
                     </span>
                     <span className="text-sm font-medium">
                       ${product.price.toFixed(2)}
@@ -497,7 +500,7 @@ const ProductDetails = () => {
                   {product.priceAfterDiscount && (
                     <div className="flex justify-between border-b pb-2">
                       <span className="text-sm text-muted-foreground">
-                        Discounted Price:
+                        {t('productDetail.specs.discountedPrice')}:
                       </span>
                       <span className="text-sm font-medium text-green-600">
                         ${product.priceAfterDiscount.toFixed(2)}
@@ -506,18 +509,18 @@ const ProductDetails = () => {
                   )}
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">
-                      Availability:
+                      {t('productDetail.specs.availability')}:
                     </span>
                     <span className="text-sm font-medium">
                       {inStock
-                        ? `In Stock (${product.quantity})`
-                        : "Out of Stock"}
+                        ? t('productDetail.specs.inStock', { quantity: product.quantity })
+                        : t('productDetail.outOfStock')}
                     </span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-sm text-muted-foreground">Sold:</span>
+                    <span className="text-sm text-muted-foreground">{t('productDetail.specs.sold')}:</span>
                     <span className="text-sm font-medium">
-                      {product.sold || 0} units
+                      {product.sold || 0} {t('productDetail.specs.units')}
                     </span>
                   </div>
                 </div>
@@ -532,10 +535,10 @@ const ProductDetails = () => {
               <div className="text-center py-8">
                 <Star className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                 <p className="text-sm md:text-base text-muted-foreground">
-                  No reviews yet. Be the first to review this product!
+                  {t('productDetail.reviewsSection.noReviews')}
                 </p>
                 <Button className="mt-4" variant="outline">
-                  Write a Review
+                  {t('productDetail.reviewsSection.writeReview')}
                 </Button>
               </div>
             </CardContent>
@@ -547,7 +550,7 @@ const ProductDetails = () => {
       {relatedProducts.length > 0 && (
         <div>
           <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">
-            Related Products
+            {t('productDetail.relatedProducts')}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {relatedProducts.map((rp) => (
@@ -572,7 +575,7 @@ const ProductDetails = () => {
                           variant="destructive"
                           className="absolute top-2 right-2 text-xs"
                         >
-                          Sale
+                          {t('productDetail.sale')}
                         </Badge>
                       )}
                     </div>

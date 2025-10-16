@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Lock,
@@ -27,14 +28,6 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "../../components/ui/select";
-// import { Checkbox } from "../../components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import {
   Collapsible,
@@ -45,7 +38,6 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { fetchCart } from "../../features/cart/cartSlice";
 import {
   createCashOrder,
-  // createCheckoutSession,
   clearError,
   clearCheckoutSession,
 } from "../../features/orders/ordersSlice";
@@ -53,6 +45,7 @@ import { toast } from "sonner";
 import axiosInstance from "../../utils/axiosInstance";
 
 const Checkout = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -78,7 +71,6 @@ const Checkout = () => {
   // Form state
   const [customerInfo, setCustomerInfo] = useState({
     email: user?.email || "",
-    // phone: user?.address?.phone || "",
     userName: user?.name || "",
   });
 
@@ -87,21 +79,12 @@ const Checkout = () => {
     phone: "",
     dayra: "",
     wilaya: "",
-    // zipCode: "",
-    country: "DZ", // Default to Algeria
+    country: "DZ",
   });
-
-  // const [paymentInfo, setPaymentInfo] = useState({
-  //   cardNumber: "",
-  //   expiryDate: "",
-  //   cvv: "",
-  //   cardholderName: "",
-  // });
 
   // Checkout state
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
-  // const [saveInfo, setSaveInfo] = useState(false);
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false);
 
   // Fetch cart on mount
@@ -112,15 +95,14 @@ const Checkout = () => {
   // Redirect if cart is empty
   useEffect(() => {
     if (!cartLoading && cartItems.length === 0) {
-      toast.error("Your cart is empty");
+      toast.error(t('checkout.cartEmpty'));
       navigate("/cart");
     }
-  }, [cartItems, cartLoading, navigate]);
+  }, [cartItems, cartLoading, navigate, t]);
 
   // Handle checkout session redirect
   useEffect(() => {
     if (checkoutSession && checkoutSession.url) {
-      // Redirect to Stripe checkout
       window.location.href = checkoutSession.url;
     }
   }, [checkoutSession]);
@@ -128,11 +110,11 @@ const Checkout = () => {
   // Handle successful order creation
   useEffect(() => {
     if (currentOrder && !isCreatingOrder) {
-      toast.success("Order placed successfully!");
+      toast.success(t('checkout.orderPlacedSuccess'));
       navigate(`/order-confirmation/${currentOrder._id}`);
       dispatch(clearCheckoutSession());
     }
-  }, [currentOrder, isCreatingOrder, navigate, dispatch]);
+  }, [currentOrder, isCreatingOrder, navigate, dispatch, t]);
 
   // Show errors
   useEffect(() => {
@@ -147,22 +129,19 @@ const Checkout = () => {
   const shippingCost = 500;
   const total = subtotal + shippingCost;
 
-  // Update the handlePlaceOrder function in Checkout.tsx:
-
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
-      toast.error("Please fill in all required fields");
+      toast.error(t('checkout.fillRequiredFields'));
       return;
     }
 
     if (!cartId) {
-      toast.error("Cart not found. Please try again.");
+      toast.error(t('checkout.cartNotFound'));
       return;
     }
 
     try {
       if (paymentMethod === "cash") {
-        // Create COD order
         const orderData = {
           shippingAddress: {
             details: shippingAddress.details,
@@ -174,8 +153,6 @@ const Checkout = () => {
 
         await dispatch(createCashOrder({ cartId, orderData })).unwrap();
       } else {
-        // For card payment, we need to pass shipping address to the backend
-        // The backend will create the Stripe session and redirect
         const response = await axiosInstance.post(
           `/api/orders/checkout-session/${cartId}`,
           {
@@ -188,13 +165,12 @@ const Checkout = () => {
           }
         );
 
-        // Redirect to Stripe checkout
         if (response.data.session && response.data.session.url) {
           window.location.href = response.data.session.url;
         }
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to create order");
+      toast.error(error.response?.data?.message || t('checkout.orderCreationFailed'));
       console.error("Order creation failed:", error);
     }
   };
@@ -227,7 +203,7 @@ const Checkout = () => {
       <div className="container py-10 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading checkout...</p>
+          <p className="text-sm text-muted-foreground">{t('checkout.loadingCheckout')}</p>
         </div>
       </div>
     );
@@ -249,7 +225,7 @@ const Checkout = () => {
             </button>
             <div className="flex items-center gap-2">
               <Lock className="h-4 w-4 text-green-600" />
-              <h1 className="text-xl md:text-2xl font-bold">Secure Checkout</h1>
+              <h1 className="text-xl md:text-2xl font-bold">{t('checkout.secureCheckout')}</h1>
             </div>
           </div>
         </div>
@@ -271,14 +247,14 @@ const Checkout = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-sm font-medium">
-                            Order summary
+                            {t('checkout.orderSummary')}
                           </span>
                           <Badge variant="secondary" className="text-xs">
                             {cartItems.reduce(
                               (sum, item) => sum + item.quantity,
                               0
                             )}{" "}
-                            items
+                            {t('checkout.items')}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-2">
@@ -328,20 +304,16 @@ const Checkout = () => {
                       <Separator />
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span>Subtotal</span>
+                          <span>{t('checkout.subtotal')}</span>
                           <span>DA{subtotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Shipping</span>
+                          <span>{t('checkout.shipping')}</span>
                           <span>DA{shippingCost.toFixed(2)}</span>
                         </div>
-                        {/* <div className="flex justify-between">
-                          <span>Tax</span>
-                          <span>DA{taxAmount.toFixed(2)}</span>
-                        </div> */}
                         <Separator />
                         <div className="flex justify-between font-bold">
-                          <span>Total</span>
+                          <span>{t('checkout.total')}</span>
                           <span>DA{total.toFixed(2)}</span>
                         </div>
                       </div>
@@ -356,13 +328,13 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  Contact Information
+                  {t('checkout.contactInformation')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">User Name *</Label>
+                    <Label htmlFor="firstName">{t('checkout.userName')} *</Label>
                     <Input
                       id="firstName"
                       value={customerInfo.userName}
@@ -372,13 +344,13 @@ const Checkout = () => {
                           firstName: e.target.value,
                         }))
                       }
-                      placeholder="Ahmed"
+                      placeholder={t('checkout.userNamePlaceholder')}
                       disabled={isProcessing}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
+                  <Label htmlFor="email">{t('checkout.emailAddress')} *</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -392,14 +364,14 @@ const Checkout = () => {
                           email: e.target.value,
                         }))
                       }
-                      placeholder="ahmed.benali@example.com"
+                      placeholder={t('checkout.emailPlaceholder')}
                       disabled={isProcessing}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">
-                    Phone Number {paymentMethod === "cash" && "*"}
+                    {t('checkout.phoneNumber')} {paymentMethod === "cash" && "*"}
                   </Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -414,13 +386,13 @@ const Checkout = () => {
                           phone: e.target.value,
                         }))
                       }
-                      placeholder="+213 555 123 456"
+                      placeholder={t('checkout.phonePlaceholder')}
                       disabled={isProcessing}
                     />
                   </div>
                   {paymentMethod === "cash" && (
                     <p className="text-xs text-muted-foreground">
-                      Required for COD delivery coordination
+                      {t('checkout.phoneRequiredCOD')}
                     </p>
                   )}
                 </div>
@@ -432,13 +404,13 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Home className="h-4 w-4" />
-                  Shipping Address
+                  {t('checkout.shippingAddress')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="wilaya">Wilaya</Label>
+                    <Label htmlFor="wilaya">{t('checkout.wilaya')}</Label>
                     <Input
                       value={shippingAddress.wilaya}
                       onChange={(e) =>
@@ -447,12 +419,12 @@ const Checkout = () => {
                           wilaya: e.target.value,
                         }))
                       }
-                      placeholder="Algiers"
+                      placeholder={t('checkout.wilayaPlaceholder')}
                       disabled={isProcessing}
                     ></Input>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="dayra">Dayra</Label>
+                    <Label htmlFor="dayra">{t('checkout.dayra')}</Label>
                     <Input
                       value={shippingAddress.dayra}
                       onChange={(e) =>
@@ -461,13 +433,13 @@ const Checkout = () => {
                           dayra: e.target.value,
                         }))
                       }
-                      placeholder="Algiers"
+                      placeholder={t('checkout.dayraPlaceholder')}
                       disabled={isProcessing}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">Street Address *</Label>
+                  <Label htmlFor="address">{t('checkout.streetAddress')} *</Label>
                   <Input
                     value={shippingAddress.details}
                     onChange={(e) =>
@@ -476,7 +448,7 @@ const Checkout = () => {
                         details: e.target.value,
                       }))
                     }
-                    placeholder="123 Rue de la Liberté"
+                    placeholder={t('checkout.streetAddressPlaceholder')}
                     disabled={isProcessing}
                   />
                 </div>
@@ -488,7 +460,7 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Truck className="h-4 w-4" />
-                  Shipping Method
+                  {t('checkout.shippingMethod')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -501,10 +473,10 @@ const Checkout = () => {
                     <RadioGroupItem value="express" id="express" />
                     <div className="flex-1">
                       <Label htmlFor="express" className="font-medium">
-                        Yalidine Express Shipping
+                        {t('checkout.yalidineExpress')}
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        2-3 business days
+                        {t('checkout.businessDays')}
                       </p>
                     </div>
                     <span className="font-semibold">500 DA</span>
@@ -518,7 +490,7 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4" />
-                  Payment Information
+                  {t('checkout.paymentInformation')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -533,10 +505,10 @@ const Checkout = () => {
                     <RadioGroupItem value="cash" id="cash" />
                     <div className="flex-1">
                       <Label htmlFor="cash" className="font-medium">
-                        Cash on Delivery (COD)
+                        {t('checkout.cashOnDelivery')}
                       </Label>
                       <p className="text-xs text-muted-foreground">
-                        Pay when you receive your order
+                        {t('checkout.payOnReceive')}
                       </p>
                     </div>
                   </div>
@@ -544,10 +516,10 @@ const Checkout = () => {
                     <RadioGroupItem value="card" id="card" />
                     <div className="flex-1">
                       <Label htmlFor="card" className="font-medium">
-                        Credit or Debit Card
+                        {t('checkout.creditDebitCard')}
                       </Label>
                       <p className="text-xs text-muted-foreground">
-                        Secure payment via Stripe
+                        {t('checkout.securePaymentStripe')}
                       </p>
                     </div>
                   </div>
@@ -559,11 +531,10 @@ const Checkout = () => {
                       <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium text-blue-900 text-sm">
-                          Cash on Delivery
+                          {t('checkout.cashOnDelivery')}
                         </p>
                         <p className="text-xs text-blue-700 mt-1">
-                          Pay in cash when your order is delivered. Make sure to
-                          have the exact amount ready.
+                          {t('checkout.codDescription')}
                         </p>
                       </div>
                     </div>
@@ -576,11 +547,10 @@ const Checkout = () => {
                       <Shield className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium text-green-900 text-sm">
-                          Secure Card Payment
+                          {t('checkout.secureCardPayment')}
                         </p>
                         <p className="text-xs text-green-700 mt-1">
-                          You'll be redirected to Stripe's secure checkout page.
-                          Your payment information is encrypted and secure.
+                          {t('checkout.stripeRedirectInfo')}
                         </p>
                       </div>
                     </div>
@@ -595,7 +565,7 @@ const Checkout = () => {
             <div className="sticky top-6 space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
+                  <CardTitle>{t('checkout.orderSummary')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {cartItems.map((item) => (
@@ -630,20 +600,16 @@ const Checkout = () => {
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Subtotal</span>
+                      <span>{t('checkout.subtotal')}</span>
                       <span>{subtotal.toFixed(2)} DA</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Shipping</span>
+                      <span>{t('checkout.shipping')}</span>
                       <span>{shippingCost.toFixed(2)} DA</span>
                     </div>
-                    {/* <div className="flex justify-between text-sm">
-                      <span>Tax</span>
-                      <span>DA{taxAmount.toFixed(2)}</span>
-                    </div> */}
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
-                      <span>Total</span>
+                      <span>{t('checkout.total')}</span>
                       <span>{total.toFixed(2)} DA</span>
                     </div>
                   </div>
@@ -655,15 +621,15 @@ const Checkout = () => {
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center gap-2 text-sm">
                     <Shield className="h-4 w-4 text-green-600" />
-                    <span>256-bit SSL secured</span>
+                    <span>{t('checkout.sslSecured')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-blue-600" />
-                    <span>Money-back guarantee</span>
+                    <span>{t('checkout.moneyBackGuarantee')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Truck className="h-4 w-4 text-purple-600" />
-                    <span>Free returns within 30 days</span>
+                    <span>{t('checkout.freeReturns')}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -671,7 +637,7 @@ const Checkout = () => {
               {/* Payment Methods */}
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-sm font-medium mb-3">We accept</p>
+                  <p className="text-sm font-medium mb-3">{t('checkout.weAccept')}</p>
                   <div className="flex gap-2 flex-wrap">
                     {["Visa", "Mastercard", "COD", "Stripe"].map((method) => (
                       <Badge key={method} variant="outline" className="text-xs">
@@ -696,12 +662,12 @@ const Checkout = () => {
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Processing...
+                {t('checkout.processing')}
               </>
             ) : (
               <>
                 <Lock className="h-4 w-4 mr-2" />
-                Place Order • DA{total.toFixed(2)}
+                {t('checkout.placeOrder')} • DA{total.toFixed(2)}
               </>
             )}
           </Button>
@@ -719,18 +685,17 @@ const Checkout = () => {
               {isProcessing ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Processing Order...
+                  {t('checkout.processingOrder')}
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Place Order • DA{total.toFixed(2)}
+                  {t('checkout.placeOrder')} • DA{total.toFixed(2)}
                 </>
               )}
             </Button>
             <p className="text-xs text-center text-muted-foreground mt-2">
-              By placing your order, you agree to our Terms of Service and
-              Privacy Policy
+              {t('checkout.termsAgreement')}
             </p>
           </div>
         </div>

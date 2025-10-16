@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import {
   Package,
   Truck,
@@ -30,6 +31,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 
 const OrderTracking = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -61,7 +63,7 @@ const OrderTracking = () => {
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">
-            Loading tracking info...
+            {t('orderTracking.loading')}
           </p>
         </div>
       </div>
@@ -74,12 +76,12 @@ const OrderTracking = () => {
         <div className="max-w-2xl mx-auto text-center">
           <AlertCircle className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <h1 className="text-2xl font-bold mb-2">
-            Tracking information not available
+            {t('orderTracking.trackingNotAvailable')}
           </h1>
           <p className="text-muted-foreground mb-6">
-            Unable to load tracking information for this order.
+            {t('orderTracking.unableToLoad')}
           </p>
-          <Button onClick={() => navigate("/orders")}>View All Orders</Button>
+          <Button onClick={() => navigate("/orders")}>{t('orderTracking.viewAllOrders')}</Button>
         </div>
       </div>
     );
@@ -88,7 +90,7 @@ const OrderTracking = () => {
   const order = trackingInfo.order;
 
   const formatDate = (dateString?: Date) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return t('orderTracking.notAvailable');
     try {
       return format(new Date(dateString), "MMM d, yyyy 'at' h:mm a");
     } catch {
@@ -136,12 +138,12 @@ const OrderTracking = () => {
   };
 
   const statusSteps = [
-    { key: "pending", label: "Order Placed" },
-    { key: "confirmed", label: "Confirmed" },
-    { key: "shipped", label: "Shipped" },
-    { key: "in_transit", label: "In Transit" },
-    { key: "out_for_delivery", label: "Out for Delivery" },
-    { key: "delivered", label: "Delivered" },
+    { key: "pending", label: t('orderTracking.statusSteps.orderPlaced') },
+    { key: "confirmed", label: t('orderTracking.statusSteps.confirmed') },
+    { key: "shipped", label: t('orderTracking.statusSteps.shipped') },
+    { key: "in_transit", label: t('orderTracking.statusSteps.inTransit') },
+    { key: "out_for_delivery", label: t('orderTracking.statusSteps.outForDelivery') },
+    { key: "delivered", label: t('orderTracking.statusSteps.delivered') },
   ];
 
   const getCurrentStepIndex = () => {
@@ -157,11 +159,11 @@ const OrderTracking = () => {
         <div className="mb-6 sm:mb-8">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {t('orderTracking.back')}
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold">Track Your Order</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('orderTracking.trackYourOrder')}</h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Order #{order.orderNumber}
+            {t('orderTracking.orderNumber', { number: order.orderNumber })}
           </p>
         </div>
 
@@ -182,8 +184,8 @@ const OrderTracking = () => {
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground">
                   {order.trackingNumber
-                    ? `Tracking: ${order.trackingNumber}`
-                    : "Order is being processed"}
+                    ? t('orderTracking.trackingNumber', { number: order.trackingNumber })
+                    : t('orderTracking.orderBeingProcessed')}
                 </p>
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
@@ -191,13 +193,13 @@ const OrderTracking = () => {
                   variant={order.isPaid ? "default" : "secondary"}
                   className="flex-1 sm:flex-none justify-center"
                 >
-                  {order.isPaid ? "Paid" : "Payment Pending"}
+                  {order.isPaid ? t('orderTracking.paid') : t('orderTracking.paymentPending')}
                 </Badge>
                 <Badge
                   variant={order.isDelivered ? "default" : "secondary"}
                   className="flex-1 sm:flex-none justify-center"
                 >
-                  {order.isDelivered ? "Delivered" : "In Progress"}
+                  {order.isDelivered ? t('orderTracking.delivered') : t('orderTracking.inProgress')}
                 </Badge>
               </div>
             </div>
@@ -211,7 +213,7 @@ const OrderTracking = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-base sm:text-lg">
-                Delivery Progress
+                {t('orderTracking.deliveryProgress')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -283,7 +285,7 @@ const OrderTracking = () => {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-base sm:text-lg">
-              Order History
+              {t('orderTracking.orderHistory')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -312,7 +314,7 @@ const OrderTracking = () => {
                           {history.note}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Updated by: {history.updatedBy}
+                          {t('orderTracking.updatedBy', { name: history.updatedBy })}
                         </p>
                       </div>
                     </div>
@@ -331,14 +333,14 @@ const OrderTracking = () => {
             <CardHeader>
               <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                Delivery Address
+                {t('orderTracking.deliveryAddress')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-sm space-y-1">
-                <p className="font-medium">Shipping Address</p>
+                <p className="font-medium">{t('orderTracking.shippingAddress')}</p>
                 <p className="text-muted-foreground">
-                  Contact for delivery information
+                  {t('orderTracking.contactForDelivery')}
                 </p>
               </div>
             </CardContent>
@@ -348,21 +350,21 @@ const OrderTracking = () => {
             <CardHeader>
               <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                 <Package className="w-4 h-4" />
-                Order Summary
+                {t('orderTracking.orderSummary')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Amount</span>
+                  <span className="text-muted-foreground">{t('orderTracking.totalAmount')}</span>
                   <span className="font-semibold">
                     ${order.totalOrderPrice.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Payment Status</span>
+                  <span className="text-muted-foreground">{t('orderTracking.paymentStatus')}</span>
                   <Badge variant={order.isPaid ? "default" : "secondary"}>
-                    {order.isPaid ? "Paid" : "Pending"}
+                    {order.isPaid ? t('orderTracking.paid') : t('orderTracking.pending')}
                   </Badge>
                 </div>
               </div>
@@ -379,15 +381,14 @@ const OrderTracking = () => {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-base sm:text-lg mb-1">
-                  Need Help?
+                  {t('orderTracking.needHelp')}
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Contact our customer support team if you have any questions
-                  about your order.
+                  {t('orderTracking.contactSupportDescription')}
                 </p>
               </div>
               <Button variant="outline" className="w-full sm:w-auto" asChild>
-                <Link to="/contact">Contact Support</Link>
+                <Link to="/contact">{t('orderTracking.contactSupport')}</Link>
               </Button>
             </div>
           </CardContent>
@@ -398,11 +399,11 @@ const OrderTracking = () => {
           <Button className="flex-1" asChild>
             <Link to={`/order-confirmation/${id}`}>
               <Package className="w-4 h-4 mr-2" />
-              View Order Details
+              {t('orderTracking.viewOrderDetails')}
             </Link>
           </Button>
           <Button variant="outline" className="flex-1" asChild>
-            <Link to="/orders">View All Orders</Link>
+            <Link to="/orders">{t('orderTracking.viewAllOrders')}</Link>
           </Button>
         </div>
       </div>

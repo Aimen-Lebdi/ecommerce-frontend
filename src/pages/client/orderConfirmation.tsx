@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Check,
   Package,
@@ -19,10 +20,8 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   getOrder,
   clearError,
-  // getOrderBySession,
 } from "../../features/orders/ordersSlice";
 import { Button } from "../../components/ui/button";
-// import { Card, CardContent } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 import { toast } from "sonner";
@@ -33,27 +32,19 @@ const OrderConfirmationPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   const { currentOrder, loadingOrder, orderError } = useAppSelector(
     (state) => state.orders
   );
   const [emailSent] = useState(true);
 
-  // Fetch order on mount
   useEffect(() => {
     if (id) {
-      // Check if it's a Stripe session ID (starts with cs_test_ or cs_live_)
-      // if (id.startsWith('cs_')) {
-      // It's a Stripe session ID
       dispatch(getOrder(id));
-      // } else {
-      //   // It's a regular order ID (from COD)
-      //   dispatch(getOrder(id));
-      // }
     }
   }, [id, dispatch]);
 
-  // Handle errors
   useEffect(() => {
     if (orderError) {
       toast.error(orderError);
@@ -62,13 +53,14 @@ const OrderConfirmationPage = () => {
     }
   }, [orderError, dispatch, navigate]);
 
-  // Loading state
   if (loadingOrder || !currentOrder) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-gray-600">Loading your order...</p>
+          <p className="text-gray-600">
+            {t("orderConfirmation.loading.message")}
+          </p>
         </div>
       </div>
     );
@@ -76,7 +68,6 @@ const OrderConfirmationPage = () => {
 
   const order = currentOrder;
 
-  // Format date
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     try {
@@ -86,7 +77,6 @@ const OrderConfirmationPage = () => {
     }
   };
 
-  // Calculate totals
   const subtotal = order.cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -95,7 +85,6 @@ const OrderConfirmationPage = () => {
   const tax = order.taxPrice || 0;
   const total = order.totalOrderPrice;
 
-  // Get status badge color
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -116,7 +105,6 @@ const OrderConfirmationPage = () => {
     }
   };
 
-  // Get payment status badge
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case "completed":
@@ -134,51 +122,45 @@ const OrderConfirmationPage = () => {
   };
 
   const handleDownloadInvoice = async () => {
-  try {
-    const blob = await downloadInvoiceAPI(order._id);
-    
-    // Create download link
-    const url = window.URL.createObjectURL(new Blob([blob]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `invoice-${order._id}.pdf`);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode?.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    toast.success("Invoice downloaded successfully!");
-  } catch (error) {
-    toast.error("Failed to download invoice");
-    console.error(error);
-  }
-};
+    try {
+      const blob = await downloadInvoiceAPI(order._id);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `invoice-${order._id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success(t("orderConfirmation.toasts.invoiceSuccess"));
+    } catch (error) {
+      toast.error(t("orderConfirmation.toasts.invoiceError"));
+      console.error(error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Success Header */}
         <div className="bg-white rounded-lg shadow-sm border border-green-200 p-4 sm:p-6 mb-6">
           <div className="text-center">
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              Thank You for Your Order!
+              {t("orderConfirmation.header.title")}
             </h1>
             <p className="text-sm sm:text-base text-gray-600 mb-4">
-              Your order has been confirmed and is being processed
+              {t("orderConfirmation.header.subtitle")}
             </p>
             <div className="bg-gray-50 rounded-lg p-3 sm:p-4 inline-block">
               <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                Order Number
+                {t("orderConfirmation.header.orderNumberLabel")}
               </p>
               <p className="text-base sm:text-lg font-mono font-semibold text-gray-900 break-all">
                 {order._id}
               </p>
             </div>
-
-            {/* Status Badges */}
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               <Badge
                 className={`${getStatusColor(
@@ -192,59 +174,68 @@ const OrderConfirmationPage = () => {
                   order.paymentStatus
                 )} border px-3 py-1`}
               >
-                Payment: {order.paymentStatus.toUpperCase()}
+                {t("orderConfirmation.header.paymentStatus", {
+                  status: order.paymentStatus.toUpperCase(),
+                })}
               </Badge>
               <Badge variant="outline" className="px-3 py-1">
-                {order.paymentMethodType === "cash" ? "COD" : "Card Payment"}
+                {t(
+                  order.paymentMethodType === "cash"
+                    ? "orderConfirmation.payment.cod"
+                    : "orderConfirmation.payment.cardPayment"
+                )}
               </Badge>
             </div>
           </div>
         </div>
 
-        {/* Email Confirmation Notice */}
         {emailSent && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-6 flex items-start space-x-3">
             <Mail className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-blue-800 font-medium text-sm sm:text-base">
-                Confirmation email sent
+                {t("orderConfirmation.emailBanner.title")}
               </p>
-              <p className="text-blue-700 text-xs sm:text-sm break-words">
-                We've sent a confirmation email to{" "}
-                <strong>{order.user.email}</strong>
-              </p>
+              <p
+                className="text-blue-700 text-xs sm:text-sm break-words"
+                dangerouslySetInnerHTML={{
+                  __html: t("orderConfirmation.emailBanner.confirmationSentTo", {
+                    email: order.user.email,
+                  }),
+                }}
+              />
             </div>
           </div>
         )}
 
-        {/* COD Information Banner */}
         {order.paymentMethodType === "cash" && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-6 flex items-start space-x-3">
             <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <p className="text-amber-800 font-medium text-sm sm:text-base">
-                Cash on Delivery
+                {t("orderConfirmation.payment.cod")}
               </p>
-              <p className="text-amber-700 text-xs sm:text-sm">
-                Please prepare <strong>${total.toFixed(2)}</strong> in cash for
-                payment upon delivery.
-              </p>
+              <p
+                className="text-amber-700 text-xs sm:text-sm"
+                dangerouslySetInnerHTML={{
+                  __html: t("orderConfirmation.codBanner.prepareCash", {
+                    amount: total.toFixed(2),
+                  }),
+                }}
+              />
             </div>
           </div>
         )}
 
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Order Summary - Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Order Items */}
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
               <div className="flex items-center space-x-2 mb-4">
                 <Package className="w-5 h-5 text-gray-600" />
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                  Order Items
+                  {t("orderConfirmation.items.title")}
                 </h2>
               </div>
-
               <div className="space-y-3 sm:space-y-4">
                 {order.cartItems.map((item) => (
                   <div
@@ -255,9 +246,6 @@ const OrderConfirmationPage = () => {
                       src={item.product.imageCover}
                       alt={item.product.title}
                       className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg flex-shrink-0"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/placeholder.png";
-                      }}
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
@@ -265,11 +253,15 @@ const OrderConfirmationPage = () => {
                       </h3>
                       {item.color && (
                         <p className="text-xs sm:text-sm text-gray-600">
-                          Color: {item.color}
+                          {t("orderConfirmation.items.color", {
+                            color: item.color,
+                          })}
                         </p>
                       )}
                       <p className="text-xs sm:text-sm text-gray-600">
-                        Qty: {item.quantity}
+                        {t("orderConfirmation.items.quantity", {
+                          qty: item.quantity,
+                        })}
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -282,19 +274,17 @@ const OrderConfirmationPage = () => {
               </div>
             </div>
 
-            {/* Shipping Information */}
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
               <div className="flex items-center space-x-2 mb-4">
                 <Truck className="w-5 h-5 text-gray-600" />
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                  Shipping Information
+                  {t("orderConfirmation.shipping.title")}
                 </h2>
               </div>
-
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">
-                    Delivery Address
+                    {t("orderConfirmation.shipping.deliveryAddress")}
                   </h3>
                   <div className="text-xs sm:text-sm text-gray-600 space-y-1">
                     <div className="flex items-start gap-2">
@@ -318,10 +308,9 @@ const OrderConfirmationPage = () => {
                     )}
                   </div>
                 </div>
-
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">
-                    Delivery Status
+                    {t("orderConfirmation.shipping.deliveryStatus")}
                   </h3>
                   <div className="space-y-2">
                     <Badge
@@ -331,33 +320,33 @@ const OrderConfirmationPage = () => {
                     >
                       {order.deliveryStatus.replace("_", " ").toUpperCase()}
                     </Badge>
-
                     {order.trackingNumber && (
                       <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-xs sm:text-sm font-medium text-blue-800">
-                          Tracking Number
+                          {t("orderConfirmation.shipping.trackingNumber")}
                         </p>
                         <p className="text-xs sm:text-sm text-blue-700 font-mono mt-1">
                           {order.trackingNumber}
                         </p>
                       </div>
                     )}
-
                     {order.deliveryAgency && (
                       <div className="text-xs sm:text-sm text-gray-600">
-                        <p>Delivery Partner: {order.deliveryAgency.name}</p>
+                        <p>
+                          {t("orderConfirmation.shipping.deliveryPartner", {
+                            name: order.deliveryAgency.name,
+                          })}
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-
-              {/* Status History */}
               {order.statusHistory && order.statusHistory.length > 0 && (
                 <div className="mt-4 pt-4 border-t">
                   <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2 text-sm sm:text-base">
                     <Clock className="w-4 h-4" />
-                    Order Timeline
+                    {t("orderConfirmation.shipping.timelineTitle")}
                   </h3>
                   <div className="space-y-3">
                     {order.statusHistory
@@ -386,15 +375,13 @@ const OrderConfirmationPage = () => {
               )}
             </div>
 
-            {/* Payment Information */}
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
               <div className="flex items-center space-x-2 mb-4">
                 <CreditCard className="w-5 h-5 text-gray-600" />
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                  Payment Information
+                  {t("orderConfirmation.payment.title")}
                 </h2>
               </div>
-
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -403,18 +390,24 @@ const OrderConfirmationPage = () => {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm sm:text-base">
-                        {order.paymentMethodType === "cash"
-                          ? "Cash on Delivery"
-                          : "Card Payment"}
+                        {t(
+                          order.paymentMethodType === "cash"
+                            ? "orderConfirmation.payment.cod"
+                            : "orderConfirmation.payment.cardPayment"
+                        )}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-600">
-                        Status:{" "}
+                        {t("orderConfirmation.payment.statusLabel")}
                         <span
                           className={
                             order.isPaid ? "text-green-600" : "text-yellow-600"
                           }
                         >
-                          {order.isPaid ? "Paid" : "Pending"}
+                          {t(
+                            order.isPaid
+                              ? "orderConfirmation.payment.paid"
+                              : "orderConfirmation.payment.pending"
+                          )}
                         </span>
                       </p>
                     </div>
@@ -427,63 +420,69 @@ const OrderConfirmationPage = () => {
                     {order.paymentStatus.toUpperCase()}
                   </Badge>
                 </div>
-
                 {order.paymentMethodType === "cash" && order.codAmount && (
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                     <p className="text-xs sm:text-sm font-medium text-amber-900">
-                      Amount to pay on delivery: ${order.codAmount.toFixed(2)}
+                      {t("orderConfirmation.payment.amountToPay", {
+                        amount: order.codAmount.toFixed(2),
+                      })}
                     </p>
                   </div>
                 )}
-
                 {order.isPaid && order.paidAt && (
                   <p className="text-xs sm:text-sm text-gray-600">
-                    Paid on: {formatDate(order.paidAt)}
+                    {t("orderConfirmation.payment.paidOn", {
+                      date: formatDate(order.paidAt),
+                    })}
                   </p>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Order Summary Sidebar */}
           <div className="space-y-4 sm:space-y-6">
-            {/* Order Total */}
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
               <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-                Order Summary
+                {t("orderConfirmation.summary.title")}
               </h2>
-
               <div className="space-y-2 sm:space-y-3">
                 <div className="flex justify-between text-xs sm:text-sm">
-                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-gray-600">
+                    {t("orderConfirmation.summary.subtotal")}
+                  </span>
                   <span className="text-gray-900">${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
-                  <span className="text-gray-600">Shipping</span>
+                  <span className="text-gray-600">
+                    {t("orderConfirmation.summary.shipping")}
+                  </span>
                   <span className="text-gray-900">${shipping.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
-                  <span className="text-gray-600">Tax</span>
+                  <span className="text-gray-600">
+                    {t("orderConfirmation.summary.tax")}
+                  </span>
                   <span className="text-gray-900">${tax.toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-base sm:text-lg font-semibold">
-                  <span className="text-gray-900">Total</span>
+                  <span className="text-gray-900">
+                    {t("orderConfirmation.summary.total")}
+                  </span>
                   <span className="text-gray-900">${total.toFixed(2)}</span>
                 </div>
               </div>
-
               <div className="mt-4 pt-4 border-t text-xs text-gray-500">
-                Order placed on {formatDate(order.createdAt)}
+                {t("orderConfirmation.summary.placedOn", {
+                  date: formatDate(order.createdAt),
+                })}
               </div>
             </div>
 
-            {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
               <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">
-                Quick Actions
+                {t("orderConfirmation.actions.title")}
               </h3>
-
               <div className="space-y-2 sm:space-y-3">
                 {order.trackingNumber && (
                   <Button
@@ -492,49 +491,48 @@ const OrderConfirmationPage = () => {
                     asChild
                   >
                     <Link to={`/orders/${order._id}/tracking`}>
-                      <span>Track Order</span>
+                      <span>{t("orderConfirmation.actions.trackOrder")}</span>
                       <Truck className="w-4 h-4" />
                     </Link>
                   </Button>
                 )}
-
                 <Button
-  variant="outline"
-  className="w-full justify-between text-xs sm:text-sm"
-  onClick={handleDownloadInvoice}
->
-  <span>Download Invoice</span>
-  <Download className="w-4 h-4" />
-</Button>
-
+                  variant="outline"
+                  className="w-full justify-between text-xs sm:text-sm"
+                  onClick={handleDownloadInvoice}
+                >
+                  <span>
+                    {t("orderConfirmation.actions.downloadInvoice")}
+                  </span>
+                  <Download className="w-4 h-4" />
+                </Button>
                 <Button
                   variant="outline"
                   className="w-full justify-between text-xs sm:text-sm"
                   onClick={() => {
                     navigator.share?.({
-                      title: "Order Confirmation",
-                      text: `Order #${order._id}`,
+                      title: t("orderConfirmation.actions.shareTitle"),
+                      text: t("orderConfirmation.actions.shareText", { id: order._id }),
                       url: window.location.href,
                     });
                   }}
                 >
-                  <span>Share Order</span>
+                  <span>{t("orderConfirmation.actions.shareOrder")}</span>
                   <Share className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            {/* Support Information */}
             <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
               <h3 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                Need Help?
+                {t("orderConfirmation.support.title")}
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <Phone className="w-4 h-4 text-gray-600 flex-shrink-0" />
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-900">
-                      Customer Support
+                      {t("orderConfirmation.support.customerSupport")}
                     </p>
                     <p className="text-xs text-gray-600">1-800-SUPPORT</p>
                   </div>
@@ -543,7 +541,7 @@ const OrderConfirmationPage = () => {
                   <Mail className="w-4 h-4 text-gray-600 flex-shrink-0" />
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-900">
-                      Email Support
+                      {t("orderConfirmation.support.emailSupport")}
                     </p>
                     <p className="text-xs text-gray-600 break-all">
                       support@store.com
@@ -555,18 +553,16 @@ const OrderConfirmationPage = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="mt-6 sm:mt-8 bg-white rounded-lg shadow-sm p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {order.trackingNumber && (
               <Button className="flex-1 text-sm sm:text-base" asChild>
                 <Link to={`/orders/${order._id}/tracking`}>
                   <Truck className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  Track Your Order
+                  {t("orderConfirmation.actions.trackYourOrder")}
                 </Link>
               </Button>
             )}
-
             <Button
               variant="outline"
               className="flex-1 text-sm sm:text-base"
@@ -574,38 +570,38 @@ const OrderConfirmationPage = () => {
             >
               <Link to="/orders">
                 <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                View All Orders
+                {t("orderConfirmation.actions.viewAllOrders")}
               </Link>
             </Button>
-
             <Button
               variant="default"
               className="flex-1 text-sm sm:text-base"
               asChild
             >
               <Link to="/shop">
-                <span>Continue Shopping</span>
+                <span>{t("orderConfirmation.actions.continueShopping")}</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Link>
             </Button>
           </div>
         </div>
 
-        {/* Additional Information */}
         <div className="mt-4 sm:mt-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
           <h3 className="font-medium text-blue-900 mb-2 text-sm sm:text-base">
-            What happens next?
+            {t("orderConfirmation.nextSteps.title")}
           </h3>
           <ul className="text-xs sm:text-sm text-blue-800 space-y-1">
             <li>
               •{" "}
-              {order.paymentMethodType === "cash"
-                ? "Your order will be confirmed by the seller within 1-2 business days"
-                : "We'll process your payment and confirm your order"}
+              {t(
+                order.paymentMethodType === "cash"
+                  ? "orderConfirmation.nextSteps.codConfirmation"
+                  : "orderConfirmation.nextSteps.cardConfirmation"
+              )}
             </li>
-            <li>• You'll receive shipping updates via email and SMS</li>
-            <li>• Track your package using the order number above</li>
-            <li>• Contact us if you have any questions or concerns</li>
+            <li>• {t("orderConfirmation.nextSteps.shippingUpdates")}</li>
+            <li>• {t("orderConfirmation.nextSteps.trackPackage")}</li>
+            <li>• {t("orderConfirmation.nextSteps.contactUs")}</li>
           </ul>
         </div>
       </div>

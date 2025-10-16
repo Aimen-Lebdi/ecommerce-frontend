@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import {
   IconCloudUpload,
   IconPlus,
@@ -52,6 +53,7 @@ export function CategoryDialog({
     isLoading = false, // Add loading prop with default
 
 }: CategoryDialogProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = React.useState(false);
   const [categoryName, setCategoryName] = React.useState("");
   const [originalName, setOriginalName] = React.useState(""); // ✅ Track original name
@@ -88,7 +90,7 @@ export function CategoryDialog({
 
   const validate = () => {
     const e: Errors = {};
-    if (!categoryName.trim()) e.name = "Category name is required";
+    if (!categoryName.trim()) e.name = t('categoryDialog.errors.nameRequired');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -182,21 +184,21 @@ if (image instanceof File) {
 
   // Update the save button to show loading state
   const saveButtonContent = isLoading ? (
-    mode === "edit" ? "Updating..." : "Saving..."
+    mode === "edit" ? t('categoryDialog.buttons.updating') : t('categoryDialog.buttons.saving')
   ) : (
-    mode === "edit" ? "Update" : "Save"
+    mode === "edit" ? t('categoryDialog.buttons.update') : t('categoryDialog.buttons.save')
   );
 
   const dialogContent = (
     <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>
-          {mode === "edit" ? "Edit Category" : "Add New Category"}
+          {mode === "edit" ? t('categoryDialog.titles.edit') : t('categoryDialog.titles.add')}
         </DialogTitle>
         <DialogDescription>
           {mode === "edit"
-            ? "Update the category details below."
-            : "Enter the category details below."}
+            ? t('categoryDialog.descriptions.edit')
+            : t('categoryDialog.descriptions.add')}
         </DialogDescription>
       </DialogHeader>
 
@@ -204,10 +206,10 @@ if (image instanceof File) {
 
         {/* Category Name */}
         <div className="grid gap-2">
-          <Label htmlFor="category-name">Category Name</Label>
+          <Label htmlFor="category-name">{t('categoryDialog.labels.categoryName')}</Label>
           <Input
             id="category-name"
-            placeholder="e.g., Electronics"
+            placeholder={t('categoryDialog.placeholders.categoryName')}
             value={categoryName}
             onChange={(e) => {
               setCategoryName(e.target.value);
@@ -224,7 +226,7 @@ if (image instanceof File) {
 
         {/* Image Upload */}
         <div className="grid gap-2">
-          <Label htmlFor="upload-images">Upload image</Label>
+          <Label htmlFor="upload-images">{t('categoryDialog.labels.uploadImage')}</Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
               ${
@@ -275,9 +277,9 @@ if (image instanceof File) {
               <>
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
-                  Drag & drop your image here or{" "}
+                  {t('categoryDialog.uploadArea.dragDrop')}{" "}
                   <span className="text-blue-600 hover:underline">
-                    click to browse
+                    {t('categoryDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
               </>
@@ -295,7 +297,7 @@ if (image instanceof File) {
           )}
           {image && !errors.image && (
             <p className="mt-2 text-xs text-green-600">
-              Selected: {image.name}
+              {t('categoryDialog.uploadArea.selected')} {image.name}
             </p>
           )}
         </div>
@@ -324,7 +326,7 @@ if (image instanceof File) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
-          <span className="hidden lg:inline">Add Category</span>
+          <span className="hidden lg:inline">{t('categoryDialog.buttons.addCategory')}</span>
         </Button>
       </DialogTrigger>
       {dialogContent}

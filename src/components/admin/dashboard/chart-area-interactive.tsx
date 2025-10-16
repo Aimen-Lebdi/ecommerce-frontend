@@ -31,6 +31,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
 import { fetchGrowthRate } from "../../../features/analytics/analyticsSlice"
 import { Skeleton } from "../../ui/skeleton"
+import { useTranslation } from 'react-i18next';
 
 const chartConfig = {
   desktop: {
@@ -40,6 +41,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function ChartAreaInteractive() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch()
   const { growthRateData, growthRateLoading, growthRateError } = 
     useAppSelector((state) => state.analytics)
@@ -67,8 +69,8 @@ export function ChartAreaInteractive() {
     return (
       <Card className="@container/card">
         <CardHeader>
-          <CardTitle>Growth Rate</CardTitle>
-          <CardDescription>Loading chart data...</CardDescription>
+          <CardTitle>{t('chart.growthRate.title')}</CardTitle>
+          <CardDescription>{t('chart.growthRate.loading')}</CardDescription>
         </CardHeader>
         <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
           <Skeleton className="h-[250px] w-full" />
@@ -81,7 +83,7 @@ export function ChartAreaInteractive() {
     return (
       <Card className="@container/card border-destructive">
         <CardHeader>
-          <CardTitle>Growth Rate</CardTitle>
+          <CardTitle>{t('chart.growthRate.title')}</CardTitle>
           <CardDescription className="text-destructive">
             {growthRateError}
           </CardDescription>
@@ -93,10 +95,10 @@ export function ChartAreaInteractive() {
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Growth Rate</CardTitle>
+        <CardTitle>{t('chart.growthRate.title')}</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
-            Total revenue: ${totalRevenue.toLocaleString()}
+            {t('chart.growthRate.totalRevenue')}: ${totalRevenue.toLocaleString()}
           </span>
           <span className="@[540px]/card:hidden">
             ${totalRevenue.toLocaleString()}
@@ -110,27 +112,27 @@ export function ChartAreaInteractive() {
             variant="outline"
             className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
           >
-            <ToggleGroupItem value="90d">Last 3 months</ToggleGroupItem>
-            <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
-            <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
+            <ToggleGroupItem value="90d">{t('chart.timeRange.last3Months')}</ToggleGroupItem>
+            <ToggleGroupItem value="30d">{t('chart.timeRange.last30Days')}</ToggleGroupItem>
+            <ToggleGroupItem value="7d">{t('chart.timeRange.last7Days')}</ToggleGroupItem>
           </ToggleGroup>
           <Select value={timeRange} onValueChange={handleTimeRangeChange}>
             <SelectTrigger
               className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
               size="sm"
-              aria-label="Select a value"
+              aria-label={t('chart.timeRange.selectAriaLabel')}
             >
-              <SelectValue placeholder="Last 3 months" />
+              <SelectValue placeholder={t('chart.timeRange.last3Months')} />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="90d" className="rounded-lg">
-                Last 3 months
+                {t('chart.timeRange.last3Months')}
               </SelectItem>
               <SelectItem value="30d" className="rounded-lg">
-                Last 30 days
+                {t('chart.timeRange.last30Days')}
               </SelectItem>
               <SelectItem value="7d" className="rounded-lg">
-                Last 7 days
+                {t('chart.timeRange.last7Days')}
               </SelectItem>
             </SelectContent>
           </Select>

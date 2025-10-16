@@ -24,6 +24,7 @@ import {
   type CreateProductData,
   type UpdateProductData,
 } from "../../features/products/productsSlice";
+import { useTranslation } from 'react-i18next';
 
 // Define the Product entity type to match backend response
 export interface Product {
@@ -56,135 +57,136 @@ export interface Product {
   updatedAt?: string;
 }
 
-// Define columns specific to Products
-const productsColumns: ColumnDef<Product>[] = [
-  {
-    accessorKey: "name",
-    header: "Product",
-    cell: ({ row }) => {
-      const product = row.original;
-      return (
-        <div className="flex items-center space-x-3">
-          <Avatar className="h-10 w-10">
-            <AvatarImage
-              src={product.mainImage}
-              alt={product.name}
-            />
-            <AvatarFallback>
-              {product.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="space-y-1">
-            <p className="font-medium">{product.name}</p>
-            <p className="text-sm text-muted-foreground">
-              SKU: {product.slug}
-            </p>
-          </div>
-        </div>
-      );
-    },
-    enableHiding: false,
-  },
-  {
-    accessorKey: "category",
-    header: "Category",
-    cell: ({ row }) => (
-      <Badge variant="secondary">
-        {row.original.category?.name || "N/A"}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "subcategory",
-    header: "SubCategory",
-    cell: ({ row }) => (
-      <Badge variant="outline">
-        {row.original.subCategory?.name || "N/A"}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "brand",
-    header: "Brand",
-    cell: ({ row }) => (
-      
-      <Badge variant="outline">
-        {row.original.brand?.name || "N/A"}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "price",
-    header: "Price",
-    cell: ({ row }) => {
-      const price = row.getValue("price") as number;
-      return `$${price.toFixed(2)}`;
-    },
-  },
-  {
-    accessorKey: "sold",
-    header: "sold",
-    cell: ({ row }) => {
-      const sold = row.original.sold;
-      return (
-        <div className="text-center font-medium">
-          {sold}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "quantity",
-    header: "Stock",
-    cell: ({ row }) => {
-      const stock = row.original.quantity;
-      const getStatusColor = (stock: number) => {
-        if (stock === 0) return "destructive";
-        if (stock < 10) return "secondary";
-        return "default";
-      };
-      return (
-        <Badge variant={getStatusColor(stock)}>
-          {stock}
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
-      return (
-        <div className="text-sm">
-          {date.toLocaleDateString()}
-        </div>
-      );
-    },
-  },
-];
-
-// Advanced filter configuration for products
-const advancedFilterConfig = {
-  numeric: {
-    price: {
-      label: "Price",
-      placeholder: "Enter product price",
-    },
-    quantity: {
-      label: "Stock",
-      placeholder: "Enter product stock",
-    },
-  },
-  date: {
-    createdAt: {
-      label: "Created Date",
-    },
-  },
-};
-
 export default function Products() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
+
+  // Define columns specific to Products
+  const productsColumns: ColumnDef<Product>[] = [
+    {
+      accessorKey: "name",
+      header: t('products.columns.product'),
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <div className="flex items-center space-x-3">
+            <Avatar className="h-10 w-10">
+              <AvatarImage
+                src={product.mainImage}
+                alt={product.name}
+              />
+              <AvatarFallback>
+                {product.name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-1">
+              <p className="font-medium">{product.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('products.sku')}: {product.slug}
+              </p>
+            </div>
+          </div>
+        );
+      },
+      enableHiding: false,
+    },
+    {
+      accessorKey: "category",
+      header: t('products.columns.category'),
+      cell: ({ row }) => (
+        <Badge variant="secondary">
+          {row.original.category?.name || t('products.notAvailable')}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "subcategory",
+      header: t('products.columns.subcategory'),
+      cell: ({ row }) => (
+        <Badge variant="outline">
+          {row.original.subCategory?.name || t('products.notAvailable')}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "brand",
+      header: t('products.columns.brand'),
+      cell: ({ row }) => (
+        <Badge variant="outline">
+          {row.original.brand?.name || t('products.notAvailable')}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "price",
+      header: t('products.columns.price'),
+      cell: ({ row }) => {
+        const price = row.getValue("price") as number;
+        return `$${price.toFixed(2)}`;
+      },
+    },
+    {
+      accessorKey: "sold",
+      header: t('products.columns.sold'),
+      cell: ({ row }) => {
+        const sold = row.original.sold;
+        return (
+          <div className="text-center font-medium">
+            {sold}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "quantity",
+      header: t('products.columns.stock'),
+      cell: ({ row }) => {
+        const stock = row.original.quantity;
+        const getStatusColor = (stock: number) => {
+          if (stock === 0) return "destructive";
+          if (stock < 10) return "secondary";
+          return "default";
+        };
+        return (
+          <Badge variant={getStatusColor(stock)}>
+            {stock}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: t('products.columns.created'),
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("createdAt"));
+        return (
+          <div className="text-sm">
+            {date.toLocaleDateString()}
+          </div>
+        );
+      },
+    },
+  ];
+
+  // Advanced filter configuration for products
+  const advancedFilterConfig = {
+    numeric: {
+      price: {
+        label: t('products.filters.price'),
+        placeholder: t('products.filters.pricePlaceholder'),
+      },
+      quantity: {
+        label: t('products.filters.stock'),
+        placeholder: t('products.filters.stockPlaceholder'),
+      },
+    },
+    date: {
+      createdAt: {
+        label: t('products.filters.createdDate'),
+      },
+    },
+  };
+
   const {
     products,
     pagination,
@@ -244,7 +246,7 @@ export default function Products() {
       await dispatch(
         createProduct(productData as CreateProductData)
       ).unwrap();
-      toast.success("Product added successfully");
+      toast.success(t('products.toasts.addSuccess'));
       // Note: createProduct thunk automatically refetches data
     } catch (error) {
       console.error("Failed to add product:", error);
@@ -273,7 +275,7 @@ export default function Products() {
       await dispatch(
         updateProduct({ id, productData: productData as UpdateProductData })
       ).unwrap();
-      toast.success("Product updated successfully");
+      toast.success(t('products.toasts.updateSuccess'));
       // Note: updateProduct thunk automatically refetches data
     } catch (error) {
       console.error("Failed to update product:", error);
@@ -285,7 +287,7 @@ export default function Products() {
   const handleDeleteProduct = async (id: string) => {
     try {
       await dispatch(deleteProduct(id)).unwrap();
-      toast.success("Product deleted successfully");
+      toast.success(t('products.toasts.deleteSuccess'));
       // Note: deleteProduct thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete product:", error);
@@ -298,15 +300,16 @@ export default function Products() {
     try {
       await dispatch(deleteManyProducts(ids)).unwrap();
       toast.success(
-        `${ids.length} ${
-          ids.length === 1 ? "product" : "products"
-        } deleted successfully`
+        t('products.toasts.bulkDeleteSuccess', { 
+          count: ids.length,
+          product: t(ids.length === 1 ? 'products.productSingular' : 'products.productPlural')
+        })
       );
       // Note: deleteManyProducts thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete products:", error);
       // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
-      toast.error("Failed to delete selected products");
+      toast.error(t('products.toasts.bulkDeleteError'));
     }
   };
 
@@ -315,9 +318,9 @@ export default function Products() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
-            <h1 className="text-2xl font-semibold">Products</h1>
+            <h1 className="text-2xl font-semibold">{t('products.title')}</h1>
             <p className="text-muted-foreground">
-              Manage your products and their details.
+              {t('products.subtitle')}
             </p>
           </div>
 

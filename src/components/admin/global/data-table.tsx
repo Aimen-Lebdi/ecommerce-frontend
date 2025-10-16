@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-case-declarations */
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import {
   closestCenter,
   DndContext,
@@ -120,7 +121,7 @@ export interface ServerQueryParams {
   sort?: string;
   keyword?: string;
   fields?: string;
-  [key: string]: any; // For dynamic filter parameters
+  [key: string]: any;
 }
 
 // Pagination metadata interface
@@ -137,14 +138,12 @@ export interface PaginationMeta {
 export interface DataTableProps<TData extends BaseEntity> {
   data: TData[];
   columns: ColumnDef<TData>[];
-  // Server-side specific props
   serverSide?: boolean;
   pagination?: PaginationMeta;
   loading?: boolean;
-  error?: string | null; // Add error prop for handling 404/empty results
+  error?: string | null;
   onQueryParamsChange?: (params: ServerQueryParams) => void;
   currentQueryParams?: ServerQueryParams;
-  // Existing props
   dialogComponent?: React.ReactNode;
   editDialogComponent?: (
     rowData: TData,
@@ -169,6 +168,7 @@ export interface DataTableProps<TData extends BaseEntity> {
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: number | string }) {
+  const { t } = useTranslation();
   const { attributes, listeners } = useSortable({
     id,
   });
@@ -182,8 +182,89 @@ function DragHandle({ id }: { id: number | string }) {
       className="text-muted-foreground size-7 hover:bg-transparent"
     >
       <IconGripVertical className="text-muted-foreground size-3" />
-      <span className="sr-only">Drag to reorder</span>
+      <span className="sr-only">{t('dataTable.dragHandle.srOnly')}</span>
     </Button>
+  );
+}
+
+// Separate component for Actions Cell
+function ActionsCellComponent<TData extends BaseEntity>({
+  row,
+  editDialogComponent,
+  onRowUpdate,
+  onRowDelete,
+  isDeleting,
+}: {
+  row: Row<TData>;
+  editDialogComponent?: (
+    rowData: TData,
+    onSave: (updatedData: TData) => void
+  ) => React.ReactNode;
+  onRowUpdate?: (updatedRow: TData) => void;
+  onRowDelete?: (id: string) => void;
+  isDeleting?: boolean;
+}) {
+  const { t } = useTranslation();
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
+
+  const handleEditSave = (updatedData: TData) => {
+    onRowUpdate?.(updatedData);
+    setEditDialogOpen(false);
+  };
+
+  const handleEditClick = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleDeleteClick = () => {
+    if (onRowDelete && (row.original._id || row.original.id)) {
+      const id = row.original._id || row.original.id;
+      onRowDelete(id.toString());
+    }
+  };
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+            size="icon"
+          >
+            <IconDotsVertical />
+            <span className="sr-only">{t('dataTable.actions.openMenu')}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-32">
+          <DropdownMenuItem onClick={handleEditClick}>
+            {t('dataTable.actions.viewEdit')}
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={handleDeleteClick}
+            disabled={isDeleting}
+          >
+            {isDeleting ? t('dataTable.actions.deleting') : t('dataTable.actions.delete')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {editDialogComponent &&
+        editDialogOpen &&
+        React.cloneElement(
+          editDialogComponent(
+            row.original,
+            handleEditSave
+          ) as React.ReactElement,
+          {
+            open: editDialogOpen,
+            onOpenChange: setEditDialogOpen,
+          }
+        )}
+    </>
   );
 }
 
@@ -199,69 +280,15 @@ export function ActionsColumn<TData extends BaseEntity>(
 ) {
   return {
     id: "actions",
-    cell: ({ row }: { row: Row<TData> }) => {
-      const [editDialogOpen, setEditDialogOpen] = React.useState(false);
-
-      const handleEditSave = (updatedData: TData) => {
-        onRowUpdate?.(updatedData);
-        setEditDialogOpen(false);
-      };
-
-      const handleEditClick = () => {
-        setEditDialogOpen(true);
-      };
-
-      const handleDeleteClick = () => {
-        if (onRowDelete && (row.original._id || row.original.id)) {
-          const id = row.original._id || row.original.id;
-          onRowDelete(id.toString());
-        }
-      };
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-                size="icon"
-              >
-                <IconDotsVertical />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem onClick={handleEditClick}>
-                View & Edit
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={handleDeleteClick}
-                disabled={isDeleting}
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {editDialogComponent &&
-            editDialogOpen &&
-            React.cloneElement(
-              editDialogComponent(
-                row.original,
-                handleEditSave
-              ) as React.ReactElement,
-              {
-                open: editDialogOpen,
-                onOpenChange: setEditDialogOpen,
-              }
-            )}
-        </>
-      );
-    },
+    cell: ({ row }: { row: Row<TData> }) => (
+      <ActionsCellComponent
+        row={row}
+        editDialogComponent={editDialogComponent}
+        onRowUpdate={onRowUpdate}
+        onRowDelete={onRowDelete}
+        isDeleting={isDeleting}
+      />
+    ),
   } as ColumnDef<TData>;
 }
 
@@ -276,31 +303,45 @@ export function DragColumn<TData extends BaseEntity>() {
   } as ColumnDef<TData>;
 }
 
+// Separate component for Selection Header Cell
+function SelectionHeaderCell({ table }: { table: any }) {
+  const { t } = useTranslation();
+  
+  return (
+    <div className="flex items-center justify-center">
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label={t('dataTable.selection.selectAll')}
+      />
+    </div>
+  );
+}
+
+// Separate component for Selection Row Cell
+function SelectionRowCell({ row }: { row: any }) {
+  const { t } = useTranslation();
+  
+  return (
+    <div className="flex items-center justify-center">
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label={t('dataTable.selection.selectRow')}
+      />
+    </div>
+  );
+}
+
 // Generic selection column component
 export function SelectionColumn<TData extends BaseEntity>() {
   return {
     id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
+    header: ({ table }) => <SelectionHeaderCell table={table} />,
+    cell: ({ row }) => <SelectionRowCell row={row} />,
     enableSorting: false,
     enableHiding: false,
   } as ColumnDef<TData>;
@@ -316,6 +357,7 @@ function BulkDeleteButton<TData extends BaseEntity>({
   onBulkDelete?: (ids: string[]) => void;
   isBulkDeleting?: boolean;
 }) {
+  const { t } = useTranslation();
   const selectedCount = selectedRows.length;
 
   const handleBulkDelete = () => {
@@ -344,28 +386,26 @@ function BulkDeleteButton<TData extends BaseEntity>({
         >
           <IconTrash className="h-4 w-4" />
           <span className="hidden sm:inline">
-            Delete {selectedCount} {selectedCount === 1 ? "item" : "items"}
+            {t('dataTable.bulkDelete.button', { count: selectedCount })}
           </span>
-          <span className="sm:hidden">Delete ({selectedCount})</span>
+          <span className="sm:hidden">{t('dataTable.bulkDelete.buttonShort', { count: selectedCount })}</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirm Bulk Delete</AlertDialogTitle>
+          <AlertDialogTitle>{t('dataTable.bulkDelete.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete {selectedCount}{" "}
-            {selectedCount === 1 ? "item" : "items"}? This action cannot be
-            undone.
+            {t('dataTable.bulkDelete.description', { count: selectedCount })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t('dataTable.bulkDelete.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleBulkDelete}
             disabled={isBulkDeleting}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isBulkDeleting ? "Deleting..." : "Delete"}
+            {isBulkDeleting ? t('dataTable.bulkDelete.deleting') : t('dataTable.bulkDelete.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -402,7 +442,6 @@ function DraggableRow<TData extends BaseEntity>({ row }: { row: Row<TData> }) {
 function getAdvancedFilterKeys(filters: AdvancedFilters): string[] {
   const keys = new Set<string>();
 
-  // Add keys from numeric filters
   filters.numeric.forEach((filter) => {
     keys.add(filter.column);
     keys.add(`${filter.column}[gt]`);
@@ -411,7 +450,6 @@ function getAdvancedFilterKeys(filters: AdvancedFilters): string[] {
     keys.add(`${filter.column}[lte]`);
   });
 
-  // Add keys from date filters
   filters.date.forEach((filter) => {
     keys.add(filter.column);
     keys.add(`${filter.column}[gt]`);
@@ -431,7 +469,6 @@ function cleanQueryParams(
   const cleanedParams = { ...currentParams };
   const filterKeys = getAdvancedFilterKeys(advancedFilters);
 
-  // Remove all possible filter keys
   filterKeys.forEach((key) => {
     delete cleanedParams[key];
   });
@@ -445,7 +482,6 @@ function convertAdvancedFiltersToQueryParams(
 ): Record<string, any> {
   const params: Record<string, any> = {};
 
-  // Process numeric filters
   filters.numeric.forEach((filter) => {
     if (filter.value !== null) {
       const { column, operator, value, value2 } = filter;
@@ -476,14 +512,12 @@ function convertAdvancedFiltersToQueryParams(
     }
   });
 
-  // Process date filters - Fix the operator mapping
   filters.date.forEach((filter) => {
     if (filter.value !== null) {
       const { column, operator, value, value2 } = filter;
 
       switch (operator) {
         case "eq":
-          // For exact date matching, we should use date range for the entire day
           const startOfDay = new Date(value);
           const endOfDay = new Date(value);
           endOfDay.setHours(23, 59, 59, 999);
@@ -500,7 +534,7 @@ function convertAdvancedFiltersToQueryParams(
           if (value2 !== null) {
             const startDate = new Date(value);
             const endDate = new Date(value2);
-            endDate.setHours(23, 59, 59, 999); // Include the entire end day
+            endDate.setHours(23, 59, 59, 999);
             params[`${column}[gte]`] = startDate.toISOString();
             params[`${column}[lte]`] = endDate.toISOString();
           }
@@ -515,14 +549,12 @@ function convertAdvancedFiltersToQueryParams(
 export function DataTable<TData extends BaseEntity>({
   data: initialData,
   columns,
-  // Server-side props
   serverSide = false,
   pagination: serverPagination,
   loading = false,
-  error = null, // Add error prop
+  error = null,
   onQueryParamsChange,
   currentQueryParams: externalQueryParams,
-  // Existing props
   dialogComponent,
   editDialogComponent,
   onRowDelete,
@@ -541,19 +573,18 @@ export function DataTable<TData extends BaseEntity>({
   onRowUpdate,
   pageSize = 10,
 }: DataTableProps<TData>) {
-  // Client-side state (used when serverSide is false)
+  const { t } = useTranslation();
+  
   const [data, setData] = React.useState(() => initialData || []);
   const [filteredData, setFilteredData] = React.useState(
     () => initialData || []
   );
 
-  // Server-side state (used when serverSide is true)
   const currentQueryParams = externalQueryParams || {
     page: 1,
     limit: pageSize,
   };
 
-  // Common state for both modes
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -569,7 +600,6 @@ export function DataTable<TData extends BaseEntity>({
     }
   );
 
-  // Client-side pagination state
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize,
@@ -587,7 +617,6 @@ export function DataTable<TData extends BaseEntity>({
     [data]
   );
 
-  // Handle server-side query parameter changes
   const updateServerQueryParams = React.useCallback(
     (updates: Partial<ServerQueryParams>) => {
       if (!serverSide || !onQueryParamsChange) return;
@@ -598,7 +627,6 @@ export function DataTable<TData extends BaseEntity>({
     [serverSide, onQueryParamsChange, currentQueryParams]
   );
 
-  // Handle client-side advanced filtering (only when serverSide is false)
   const applyClientSideAdvancedFilters = React.useCallback(
     (data: TData[], filters: AdvancedFilters): TData[] => {
       if (
@@ -609,7 +637,6 @@ export function DataTable<TData extends BaseEntity>({
       }
 
       return data.filter((row) => {
-        // Check numeric filters
         const numericMatch = filters.numeric.every((filter) => {
           if (filter.value === null) return true;
 
@@ -638,7 +665,6 @@ export function DataTable<TData extends BaseEntity>({
           }
         });
 
-        // Check date filters
         const dateMatch = filters.date.every((filter) => {
           if (filter.value === null) return true;
 
@@ -677,7 +703,6 @@ export function DataTable<TData extends BaseEntity>({
     [serverSide]
   );
 
-  // Apply client-side advanced filters when data or filters change (only in client-side mode)
   React.useEffect(() => {
     if (!serverSide) {
       const filtered = applyClientSideAdvancedFilters(data, advancedFilters);
@@ -685,16 +710,13 @@ export function DataTable<TData extends BaseEntity>({
     }
   }, [data, advancedFilters, serverSide, applyClientSideAdvancedFilters]);
 
-  // Handle sorting changes
   const handleSortingChange = React.useCallback(
     (newSorting: SortingState | ((old: SortingState) => SortingState)) => {
-      // Handle both direct state and function updates
       const resolvedSorting =
         typeof newSorting === "function" ? newSorting(sorting) : newSorting;
       setSorting(resolvedSorting);
 
       if (serverSide) {
-        // Convert TanStack table sorting to server format
         let sortParam = "";
         if (resolvedSorting.length > 0) {
           const { id, desc } = resolvedSorting[0];
@@ -703,31 +725,27 @@ export function DataTable<TData extends BaseEntity>({
 
         updateServerQueryParams({
           sort: sortParam || undefined,
-          page: 1, // Reset to first page when sorting
+          page: 1,
         });
       }
     },
     [serverSide, updateServerQueryParams, sorting]
   );
 
-  // Handle pagination changes
   const handlePaginationChange = React.useCallback(
     (newPagination: { pageIndex: number; pageSize: number }) => {
       if (serverSide) {
-        // Server-side pagination
         updateServerQueryParams({
-          page: newPagination.pageIndex + 1, // Convert 0-based to 1-based
+          page: newPagination.pageIndex + 1,
           limit: newPagination.pageSize,
         });
       } else {
-        // Client-side pagination
         setPagination(newPagination);
       }
     },
     [serverSide, updateServerQueryParams]
   );
 
-  // Handle global filter (search) changes
   const handleGlobalFilterChange = React.useCallback(
     (value: string) => {
       setGlobalFilter(value);
@@ -735,20 +753,18 @@ export function DataTable<TData extends BaseEntity>({
       if (serverSide) {
         updateServerQueryParams({
           keyword: value || undefined,
-          page: 1, // Reset to first page when searching
+          page: 1,
         });
       }
     },
     [serverSide, updateServerQueryParams]
   );
 
-  // Handle column filter changes
   const handleColumnFiltersChange = React.useCallback(
     (newColumnFilters: ColumnFiltersState) => {
       setColumnFilters(newColumnFilters);
 
       if (serverSide) {
-        // For server-side, we'll handle the specific filter column
         const filterValue = newColumnFilters.find(
           (f) => f.id === filterColumn
         )?.value;
@@ -760,20 +776,18 @@ export function DataTable<TData extends BaseEntity>({
 
         updateServerQueryParams({
           ...filterParams,
-          page: 1, // Reset to first page when filtering
+          page: 1,
         });
       }
     },
     [serverSide, updateServerQueryParams, filterColumn]
   );
 
-  // Handle column visibility changes (affects fields parameter)
   const handleColumnVisibilityChange = React.useCallback(
     (newVisibility: VisibilityState) => {
       setColumnVisibility(newVisibility);
 
       if (serverSide) {
-        // Build fields parameter from visible columns
         const visibleColumns = columns
           .filter((col) => {
             if ("accessorKey" in col && col.accessorKey) {
@@ -785,14 +799,10 @@ export function DataTable<TData extends BaseEntity>({
           .map((col) => col.accessorKey as string)
           .filter(Boolean);
 
-        // Always include essential fields needed for the UI to work properly
         const essentialFields = ["_id", "name", "slug", "mainImage", "image"];
         const allRequiredFields = [
           ...new Set([...essentialFields, ...visibleColumns]),
         ];
-
-        console.log("Visible columns:", visibleColumns);
-        console.log("All required fields:", allRequiredFields);
 
         if (allRequiredFields.length > 0) {
           updateServerQueryParams({
@@ -804,39 +814,29 @@ export function DataTable<TData extends BaseEntity>({
     [serverSide, updateServerQueryParams, columns]
   );
 
-  // FIXED: Handle advanced filters change with proper parameter cleaning
   const handleAdvancedFiltersChange = React.useCallback(
     (filters: AdvancedFilters) => {
       setAdvancedFilters(filters);
 
       if (serverSide) {
-        // Clean old filter parameters first
         const cleanedParams = cleanQueryParams(
           currentQueryParams,
           advancedFilters
         );
 
-        // Convert new advanced filters to query parameters
         const filterParams = convertAdvancedFiltersToQueryParams(filters);
 
-        // Merge cleaned params with new filter params
         const newParams = {
           ...cleanedParams,
           ...filterParams,
-          page: 1, // Reset to first page when filtering
+          page: 1,
         };
 
-        // Remove undefined values
         Object.keys(newParams).forEach((key) => {
           if (newParams[key] === undefined) {
             delete newParams[key];
           }
         });
-
-        console.log("Advanced filters:", filters);
-        console.log("Cleaned params:", cleanedParams);
-        console.log("New filter params:", filterParams);
-        console.log("Final params:", newParams);
 
         onQueryParamsChange?.(newParams);
       }
@@ -844,7 +844,6 @@ export function DataTable<TData extends BaseEntity>({
     [serverSide, currentQueryParams, advancedFilters, onQueryParamsChange]
   );
 
-  // Handle row updates
   const handleRowUpdate = React.useCallback(
     (updatedRow: TData) => {
       if (!serverSide) {
@@ -861,19 +860,16 @@ export function DataTable<TData extends BaseEntity>({
     [serverSide, onDataChange, onRowUpdate]
   );
 
-  // Handle bulk delete with row selection reset
   const handleBulkDelete = React.useCallback(
     (ids: string[]) => {
       if (onBulkDelete) {
         onBulkDelete(ids);
-        // Clear row selection after successful delete
         setRowSelection({});
       }
     },
     [onBulkDelete]
   );
 
-  // Build final columns array with optional system columns
   const finalColumns = React.useMemo(() => {
     const cols: ColumnDef<TData>[] = [];
 
@@ -907,16 +903,14 @@ export function DataTable<TData extends BaseEntity>({
     isDeleting,
   ]);
 
-  // Determine which data to use and pagination configuration
   const tableData = serverSide ? initialData : filteredData;
   const tablePagination = serverSide
     ? {
-        pageIndex: (serverPagination?.currentPage || 1) - 1, // Convert 1-based to 0-based
+        pageIndex: (serverPagination?.currentPage || 1) - 1,
         pageSize: serverPagination?.limit || pageSize,
       }
     : pagination;
 
-  // Configure table instance
   const table = useReactTable({
     data: tableData,
     columns: finalColumns,
@@ -937,22 +931,19 @@ export function DataTable<TData extends BaseEntity>({
     onPaginationChange: handlePaginationChange,
     onGlobalFilterChange: handleGlobalFilterChange,
     getCoreRowModel: getCoreRowModel(),
-    // Only enable client-side features when not in server-side mode
     getFilteredRowModel: serverSide ? undefined : getFilteredRowModel(),
     getPaginationRowModel: serverSide ? undefined : getPaginationRowModel(),
     getSortedRowModel: serverSide ? undefined : getSortedRowModel(),
     getFacetedRowModel: serverSide ? undefined : getFacetedRowModel(),
     getFacetedUniqueValues: serverSide ? undefined : getFacetedUniqueValues(),
-    // For server-side mode, we need to provide manual pagination info
     manualPagination: serverSide,
     manualSorting: serverSide,
     manualFiltering: serverSide,
     pageCount: serverSide ? serverPagination?.numberOfPages : undefined,
   });
 
-  // Handle drag and drop (only in client-side mode)
   function handleDragEnd(event: DragEndEvent) {
-    if (serverSide) return; // Disable drag and drop in server-side mode
+    if (serverSide) return;
 
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
@@ -966,7 +957,6 @@ export function DataTable<TData extends BaseEntity>({
     }
   }
 
-  // Sync external data changes (for client-side mode)
   React.useEffect(() => {
     if (!serverSide) {
       setData(initialData);
@@ -984,17 +974,14 @@ export function DataTable<TData extends BaseEntity>({
         newSorting = [{ id: columnId, desc: isDesc }];
       }
 
-      // Only update if different to avoid infinite loops
       if (JSON.stringify(newSorting) !== JSON.stringify(sorting)) {
         setSorting(newSorting);
       }
     }
   }, [serverSide, currentQueryParams.sort, sorting]);
 
-  // Get selected rows for bulk operations
   const selectedRows = table.getFilteredSelectedRowModel().rows;
 
-  // Calculate pagination info for display
   const paginationInfo =
     serverSide && serverPagination
       ? {
@@ -1011,7 +998,6 @@ export function DataTable<TData extends BaseEntity>({
           canNextPage: table.getCanNextPage(),
         };
 
-  // FIXED: Enhanced table content with proper error and empty state handling
   const TableContent = () => (
     <Table>
       <TableHeader className="bg-muted sticky top-0 z-10">
@@ -1059,7 +1045,7 @@ export function DataTable<TData extends BaseEntity>({
               colSpan={finalColumns.length}
               className="h-24 text-center"
             >
-              Loading...
+              {t('dataTable.loading')}
             </TableCell>
           </TableRow>
         ) : error || table.getRowModel().rows?.length === 0 ? (
@@ -1070,13 +1056,13 @@ export function DataTable<TData extends BaseEntity>({
             >
               {error ? (
                 <div className="text-muted-foreground">
-                  <p className="font-medium">No Results Found</p>
+                  <p className="font-medium">{t('dataTable.noResults')}</p>
                   <p className="text-sm mt-1">
-                    Try adjusting your search or filter criteria
+                    {t('dataTable.adjustFilters')}
                   </p>
                 </div>
               ) : (
-                "No results."
+                t('dataTable.noData')
               )}
             </TableCell>
           </TableRow>
@@ -1116,7 +1102,7 @@ export function DataTable<TData extends BaseEntity>({
         <div className="flex items-center gap-2 flex-wrap">
           {enableGlobalFilter && (
             <Input
-              placeholder="Search..."
+              placeholder={t('dataTable.search')}
               value={globalFilter}
               onChange={(e) => handleGlobalFilterChange(e.target.value)}
               className="max-w-sm"
@@ -1149,8 +1135,8 @@ export function DataTable<TData extends BaseEntity>({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
                 <IconLayoutColumns />
-                <span className="hidden lg:inline">Customize Columns</span>
-                <span className="lg:hidden">Columns</span>
+                <span className="hidden lg:inline">{t('dataTable.customizeColumns')}</span>
+                <span className="lg:hidden">{t('dataTable.columns')}</span>
                 <IconChevronDown />
               </Button>
             </DropdownMenuTrigger>
@@ -1204,7 +1190,6 @@ export function DataTable<TData extends BaseEntity>({
         </div>
 
         <div className="flex items-center justify-between px-4">
-          {/* Bulk Delete Button */}
           {enableRowSelection && onBulkDelete && (
             <BulkDeleteButton
               selectedRows={selectedRows}
@@ -1215,15 +1200,17 @@ export function DataTable<TData extends BaseEntity>({
 
           {enableRowSelection && (
             <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-              {table.getFilteredSelectedRowModel().rows.length} of{" "}
-              {table.getFilteredRowModel().rows.length} row(s) selected.
+              {t('dataTable.rowsSelected', {
+                selected: table.getFilteredSelectedRowModel().rows.length,
+                total: table.getFilteredRowModel().rows.length,
+              })}
             </div>
           )}
 
           <div className="flex w-full items-center gap-8 lg:w-fit">
             <div className="hidden items-center gap-2 lg:flex">
               <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                Rows per page
+                {t('dataTable.rowsPerPage')}
               </Label>
               <Select
                 value={`${tablePagination.pageSize}`}
@@ -1232,7 +1219,7 @@ export function DataTable<TData extends BaseEntity>({
                   if (serverSide) {
                     updateServerQueryParams({
                       limit: newPageSize,
-                      page: 1, // Reset to first page when changing page size
+                      page: 1,
                     });
                   } else {
                     table.setPageSize(newPageSize);
@@ -1252,7 +1239,10 @@ export function DataTable<TData extends BaseEntity>({
               </Select>
             </div>
             <div className="flex w-fit items-center justify-center text-sm font-medium">
-              Page {paginationInfo.currentPage} of {paginationInfo.totalPages}
+              {t('dataTable.pageInfo', {
+                current: paginationInfo.currentPage,
+                total: paginationInfo.totalPages,
+              })}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
               <Button
@@ -1267,7 +1257,7 @@ export function DataTable<TData extends BaseEntity>({
                 }}
                 disabled={!paginationInfo.canPreviousPage}
               >
-                <span className="sr-only">Go to first page</span>
+                <span className="sr-only">{t('dataTable.firstPage')}</span>
                 <IconChevronsLeft />
               </Button>
               <Button
@@ -1288,7 +1278,7 @@ export function DataTable<TData extends BaseEntity>({
                 }}
                 disabled={!paginationInfo.canPreviousPage}
               >
-                <span className="sr-only">Go to previous page</span>
+                <span className="sr-only">{t('dataTable.previousPage')}</span>
                 <IconChevronLeft />
               </Button>
               <Button
@@ -1309,7 +1299,7 @@ export function DataTable<TData extends BaseEntity>({
                 }}
                 disabled={!paginationInfo.canNextPage}
               >
-                <span className="sr-only">Go to next page</span>
+                <span className="sr-only">{t('dataTable.nextPage')}</span>
                 <IconChevronRight />
               </Button>
               <Button
@@ -1327,7 +1317,7 @@ export function DataTable<TData extends BaseEntity>({
                 }}
                 disabled={!paginationInfo.canNextPage}
               >
-                <span className="sr-only">Go to last page</span>
+                <span className="sr-only">{t('dataTable.lastPage')}</span>
                 <IconChevronsRight />
               </Button>
             </div>

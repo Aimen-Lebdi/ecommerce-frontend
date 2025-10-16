@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
 import { toast } from "sonner";
@@ -45,7 +46,10 @@ export interface SubCategory {
 const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   {
     accessorKey: "name",
-    header: "Subcategory",
+    header: () => {
+      const { t } = useTranslation();
+      return t('subCategories.table.headers.subcategory');
+    },
     cell: ({ row }) => {
       const subcategory = row.original;
       return (
@@ -66,10 +70,14 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: () => {
+      const { t } = useTranslation();
+      return t('subCategories.table.headers.category');
+    },
     cell: ({ row }) => {
+      const { t } = useTranslation();
       const category = row.original.category;
-      const categoryName = typeof category === 'object' ? category.name : 'Unknown';
+      const categoryName = typeof category === 'object' ? category.name : t('subCategories.table.unknownCategory');
       return (
         <Badge variant="outline" className="text-muted-foreground">
           {categoryName}
@@ -79,7 +87,10 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   },
   {
     accessorKey: "productCount",
-    header: "Products",
+    header: () => {
+      const { t } = useTranslation();
+      return t('subCategories.table.headers.products');
+    },
     cell: ({ row }) => {
       const count = row.original.productCount || 0;
       return (
@@ -89,7 +100,10 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Created",
+    header: () => {
+      const { t } = useTranslation();
+      return t('subCategories.table.headers.created');
+    },
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
@@ -115,6 +129,7 @@ const advancedFilterConfig = {
 };
 
 export default function SubCategories() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const {
     subcategories,
@@ -167,7 +182,7 @@ export default function SubCategories() {
       await dispatch(
         createSubCategory(subCategoryData as CreateSubCategoryData)
       ).unwrap();
-      toast.success("Subcategory added successfully");
+      toast.success(t('subCategories.messages.addSuccess'));
       // Note: createSubCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to add subcategory:", error);
@@ -184,7 +199,7 @@ export default function SubCategories() {
       await dispatch(
         updateSubCategory({ id, subCategoryData: subCategoryData as UpdateSubCategoryData })
       ).unwrap();
-      toast.success("Subcategory updated successfully");
+      toast.success(t('subCategories.messages.updateSuccess'));
       // Note: updateSubCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to update subcategory:", error);
@@ -196,7 +211,7 @@ export default function SubCategories() {
   const handleDeleteSubCategory = async (id: string) => {
     try {
       await dispatch(deleteSubCategory(id)).unwrap();
-      toast.success("Subcategory deleted successfully");
+      toast.success(t('subCategories.messages.deleteSuccess'));
       // Note: deleteSubCategory thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete subcategory:", error);
@@ -209,15 +224,13 @@ export default function SubCategories() {
     try {
       await dispatch(deleteManySubCategories(ids)).unwrap();
       toast.success(
-        `${ids.length} ${
-          ids.length === 1 ? "subcategory" : "subcategories"
-        } deleted successfully`
+        t('subCategories.messages.bulkDeleteSuccess', { count: ids.length })
       );
       // Note: deleteManySubCategories thunk automatically refetches data
     } catch (error) {
       console.error("Failed to delete subcategories:", error);
       // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
-      toast.error("Failed to delete selected subcategories");
+      toast.error(t('subCategories.messages.bulkDeleteError'));
     }
   };
 
@@ -226,9 +239,9 @@ export default function SubCategories() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
-            <h1 className="text-2xl font-semibold">Subcategories</h1>
+            <h1 className="text-2xl font-semibold">{t('subCategories.title')}</h1>
             <p className="text-muted-foreground">
-              Manage your product subcategories and their details.
+              {t('subCategories.description')}
             </p>
           </div>
 

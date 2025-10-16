@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
+import { useTranslation } from 'react-i18next';
 import {
   IconCloudUpload,
   IconPlus,
@@ -71,6 +72,7 @@ export function UserDialog({
   onSave,
   isLoading = false,
 }: UserDialogProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = React.useState(false);
 
   // Form state
@@ -121,24 +123,24 @@ export function UserDialog({
 
   const validate = () => {
     const e: Errors = {};
-    if (!name.trim()) e.name = "Name is required";
+    if (!name.trim()) e.name = t('userDialog.errors.nameRequired');
     // if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      e.email = "Valid email is required";
+      e.email = t('userDialog.errors.emailRequired');
 
     if (mode === "add") {
-      if (!password) e.password = "Password is required";
+      if (!password) e.password = t('userDialog.errors.passwordRequired');
       if (password.length < 6)
-        e.password = "Password must be at least 6 characters";
+        e.password = t('userDialog.errors.passwordMinLength');
       if (confirmPassword !== password)
-        e.confirmPassword = "Passwords do not match";
+        e.confirmPassword = t('userDialog.errors.passwordsDontMatch');
     } else if (mode === "edit" && password) {
       if (password.length < 6)
-        e.password = "Password must be at least 6 characters";
+        e.password = t('userDialog.errors.passwordMinLength');
       if (confirmPassword !== password)
-        e.confirmPassword = "Passwords do not match";
+        e.confirmPassword = t('userDialog.errors.passwordsDontMatch');
     }
 
-    if (!role) e.role = "Role is required";
+    if (!role) e.role = t('userDialog.errors.roleRequired');
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -249,7 +251,7 @@ export function UserDialog({
     setPreview(null);
 
     if (mode === "add") {
-      setErrors((prev) => ({ ...prev, image: "User image is required" }));
+      setErrors((prev) => ({ ...prev, image: t('userDialog.errors.imageRequired') }));
     } else {
       setImageRemoved(true);
     }
@@ -264,32 +266,32 @@ export function UserDialog({
 
   const saveButtonContent = isLoading
     ? mode === "edit"
-      ? "Updating..."
-      : "Saving..."
+      ? t('userDialog.buttons.updating')
+      : t('userDialog.buttons.saving')
     : mode === "edit"
-    ? "Update"
-    : "Save";
+    ? t('userDialog.buttons.update')
+    : t('userDialog.buttons.save');
 
   const dialogContent = (
     <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>
-          {mode === "edit" ? "Edit User" : "Add New User"}
+          {mode === "edit" ? t('userDialog.titles.edit') : t('userDialog.titles.add')}
         </DialogTitle>
         <DialogDescription>
           {mode === "edit"
-            ? "Update the user details below."
-            : "Enter the user details below."}
+            ? t('userDialog.descriptions.edit')
+            : t('userDialog.descriptions.add')}
         </DialogDescription>
       </DialogHeader>
 
       <div className="grid gap-4 py-4">
         {/* Name */}
         <div className="grid gap-2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">{t('userDialog.labels.name')}</Label>
           <Input
             id="name"
-            placeholder="e.g., John Doe"
+            placeholder={t('userDialog.placeholders.name')}
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -306,11 +308,11 @@ export function UserDialog({
 
         {/* Email */}
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('userDialog.labels.email')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="e.g., john@example.com"
+            placeholder={t('userDialog.placeholders.email')}
             value={email}
             // onChange={(e) => {
             //   setEmail(e.target.value);
@@ -327,7 +329,7 @@ export function UserDialog({
 
         {/* Role */}
         <div className="grid gap-2">
-          <Label htmlFor="user-role">Role</Label>
+          <Label htmlFor="user-role">{t('userDialog.labels.role')}</Label>
           <Select
             value={role}
             onValueChange={(value: "admin" | "user") => {
@@ -336,11 +338,11 @@ export function UserDialog({
             }}
           >
             <SelectTrigger id="user-role">
-              <SelectValue placeholder="Choose role" />
+              <SelectValue placeholder={t('userDialog.placeholders.role')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="user">User</SelectItem>
+              <SelectItem value="admin">{t('userDialog.roles.admin')}</SelectItem>
+              <SelectItem value="user">{t('userDialog.roles.user')}</SelectItem>
             </SelectContent>
           </Select>
           {errors.role && (
@@ -352,11 +354,11 @@ export function UserDialog({
         {mode === "edit" && (
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div className="space-y-0.5">
-              <Label htmlFor="active-status">Account Status</Label>
+              <Label htmlFor="active-status">{t('userDialog.labels.accountStatus')}</Label>
               <p className="text-sm text-muted-foreground">
                 {active
-                  ? "User account is currently active"
-                  : "User account is currently inactive"}
+                  ? t('userDialog.status.active')
+                  : t('userDialog.status.inactive')}
               </p>
             </div>
             <Switch
@@ -369,7 +371,7 @@ export function UserDialog({
 
         {/* User Image Upload */}
         <div className="grid gap-2">
-          <Label htmlFor="upload-user-image">Upload user image</Label>
+          <Label htmlFor="upload-user-image">{t('userDialog.labels.uploadUserImage')}</Label>
           <div
             className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
               ${
@@ -402,7 +404,7 @@ export function UserDialog({
               <>
                 <img
                   src={preview}
-                  alt="Preview"
+                  alt={t('userDialog.uploadArea.altPreview')}
                   className="h-40 w-40 rounded-full object-cover"
                 />
                 <button
@@ -420,9 +422,9 @@ export function UserDialog({
               <>
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
-                  Drag & drop your user image here or{" "}
+                  {t('userDialog.uploadArea.dragDrop')}{" "}
                   <span className="text-blue-600 hover:underline">
-                    click to browse
+                    {t('userDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
               </>
@@ -440,7 +442,7 @@ export function UserDialog({
           )}
           {image && !errors.image && (
             <p className="mt-2 text-xs text-green-600">
-              Selected: {image.name}
+              {t('userDialog.uploadArea.selected')} {image.name}
             </p>
           )}
         </div>
@@ -468,7 +470,7 @@ export function UserDialog({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
-          <span className="hidden lg:inline">Add User</span>
+          <span className="hidden lg:inline">{t('userDialog.buttons.addUser')}</span>
         </Button>
       </DialogTrigger>
       {dialogContent}

@@ -10,6 +10,7 @@ import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchDashboardCards } from "../../../features/analytics/analyticsSlice";
 import { Skeleton } from "../../../components/ui/skeleton";
+import { useTranslation } from 'react-i18next';
 
 // Generate mini chart data based on trend
 const generateMiniChartData = (trend: "up" | "down" | "neutral") => {
@@ -56,6 +57,7 @@ function CardSkeleton() {
 }
 
 export function SectionCards() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { revenue, customers, orders, topProduct, cardsLoading, cardsError } = 
     useAppSelector((state) => state.analytics);
@@ -97,7 +99,7 @@ export function SectionCards() {
       {/* Total Revenue */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('cards.revenue.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
@@ -114,8 +116,10 @@ export function SectionCards() {
               <IconTrendingDown className="w-4 h-4" />
             ) : null}
             {revenue?.percentageChange !== undefined 
-              ? `${revenue.percentageChange > 0 ? "+" : ""}${revenue.percentageChange}% compared to last month`
-              : "No change"}
+              ? t('cards.revenue.changeText', { 
+                  percentage: revenue.percentageChange > 0 ? `+${revenue.percentageChange}` : revenue.percentageChange.toString()
+                })
+              : t('cards.noChange')}
           </p>
           <MiniChart 
             data={revenueData} 
@@ -127,7 +131,7 @@ export function SectionCards() {
       {/* New Customers */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">New Customers</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('cards.customers.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
@@ -144,8 +148,10 @@ export function SectionCards() {
               <IconTrendingDown className="w-4 h-4" />
             ) : null}
             {customers?.percentageChange !== undefined 
-              ? `${customers.percentageChange > 0 ? "+" : ""}${customers.percentageChange}% this period`
-              : "No change"}
+              ? t('cards.customers.changeText', { 
+                  percentage: customers.percentageChange > 0 ? `+${customers.percentageChange}` : customers.percentageChange.toString()
+                })
+              : t('cards.noChange')}
           </p>
           <MiniChart 
             data={customersData} 
@@ -157,7 +163,7 @@ export function SectionCards() {
       {/* Total Orders */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('cards.orders.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
@@ -174,8 +180,10 @@ export function SectionCards() {
               <IconTrendingDown className="w-4 h-4" />
             ) : null}
             {orders?.percentageChange !== undefined 
-              ? `${orders.percentageChange > 0 ? "+" : ""}${orders.percentageChange}% order flow this month`
-              : "Steady order flow"}
+              ? t('cards.orders.changeText', { 
+                  percentage: orders.percentageChange > 0 ? `+${orders.percentageChange}` : orders.percentageChange.toString()
+                })
+              : t('cards.orders.steadyFlow')}
           </p>
           <MiniChart 
             data={ordersData} 
@@ -187,11 +195,11 @@ export function SectionCards() {
       {/* Top Product */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Top Product</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('cards.topProduct.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold truncate" title={topProduct?.name}>
-            {topProduct?.name || "No sales yet"}
+            {topProduct?.name || t('cards.topProduct.noSales')}
           </div>
           <p className={`text-xs flex items-center gap-1 ${
             topProduct?.trend === "up" ? "text-green-500" : 
@@ -204,8 +212,10 @@ export function SectionCards() {
               <IconTrendingDown className="w-4 h-4" />
             ) : null}
             {topProduct?.percentageChange !== undefined 
-              ? `${topProduct.percentageChange > 0 ? "+" : ""}${topProduct.percentageChange}% this month`
-              : "No data"}
+              ? t('cards.topProduct.changeText', { 
+                  percentage: topProduct.percentageChange > 0 ? `+${topProduct.percentageChange}` : topProduct.percentageChange.toString()
+                })
+              : t('cards.noData')}
           </p>
           <MiniChart 
             data={productData} 

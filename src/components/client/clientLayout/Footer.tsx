@@ -14,11 +14,11 @@ import {
 } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
-;
-
-
+import { useTranslation } from 'react-i18next';
 
 export function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="border-t bg-muted/30">
       {/* Trust Badges */}
@@ -27,23 +27,23 @@ export function Footer() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="flex flex-col items-center space-y-2">
               <Truck className="h-8 w-8 text-primary" />
-              <h4 className="font-semibold text-sm">Free Shipping</h4>
-              <p className="text-xs text-muted-foreground">On orders over $50</p>
+              <h4 className="font-semibold text-sm">{t('footer.trustBadges.freeShipping.title')}</h4>
+              <p className="text-xs text-muted-foreground">{t('footer.trustBadges.freeShipping.description')}</p>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Package className="h-8 w-8 text-primary" />
-              <h4 className="font-semibold text-sm">Easy Returns</h4>
-              <p className="text-xs text-muted-foreground">30-day return policy</p>
+              <h4 className="font-semibold text-sm">{t('footer.trustBadges.easyReturns.title')}</h4>
+              <p className="text-xs text-muted-foreground">{t('footer.trustBadges.easyReturns.description')}</p>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Shield className="h-8 w-8 text-primary" />
-              <h4 className="font-semibold text-sm">Secure Payment</h4>
-              <p className="text-xs text-muted-foreground">SSL encrypted</p>
+              <h4 className="font-semibold text-sm">{t('footer.trustBadges.securePayment.title')}</h4>
+              <p className="text-xs text-muted-foreground">{t('footer.trustBadges.securePayment.description')}</p>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Phone className="h-8 w-8 text-primary" />
-              <h4 className="font-semibold text-sm">24/7 Support</h4>
-              <p className="text-xs text-muted-foreground">Customer service</p>
+              <h4 className="font-semibold text-sm">{t('footer.trustBadges.support.title')}</h4>
+              <p className="text-xs text-muted-foreground">{t('footer.trustBadges.support.description')}</p>
             </div>
           </div>
         </div>
@@ -54,69 +54,68 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-lg font-bold text-primary-foreground">C</span>
               </div>
-              <span className="font-bold text-xl">CLICON</span>
+              <span className="font-bold text-xl">{t('footer.logo')}</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Your trusted online marketplace for quality products at great prices. 
-              Shop with confidence and enjoy fast, reliable service.
+              {t('footer.companyDescription')}
             </p>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 <MapPin className="h-4 w-4" />
-                <span>123 Commerce St, City, State 12345</span>
+                <span>{t('footer.address')}</span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>{t('footer.phone')}</span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 <Mail className="h-4 w-4" />
-                <span>support@clicon.com</span>
+                <span>{t('footer.email')}</span>
               </div>
             </div>
           </div>
 
           {/* Customer Service */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Customer Service</h3>
+            <h3 className="font-semibold text-lg">{t('footer.customerService.title')}</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="/help" className="text-muted-foreground hover:text-foreground">Help Center</a></li>
-              <li><a href="/shipping" className="text-muted-foreground hover:text-foreground">Shipping Info</a></li>
-              <li><a href="/returns" className="text-muted-foreground hover:text-foreground">Returns & Exchanges</a></li>
-              <li><a href="/size-guide" className="text-muted-foreground hover:text-foreground">Size Guide</a></li>
-              <li><a href="/track-order" className="text-muted-foreground hover:text-foreground">Track Your Order</a></li>
-              <li><a href="/contact" className="text-muted-foreground hover:text-foreground">Contact Us</a></li>
+              <li><a href="/help" className="text-muted-foreground hover:text-foreground">{t('footer.customerService.helpCenter')}</a></li>
+              <li><a href="/shipping" className="text-muted-foreground hover:text-foreground">{t('footer.customerService.shippingInfo')}</a></li>
+              <li><a href="/returns" className="text-muted-foreground hover:text-foreground">{t('footer.customerService.returnsExchanges')}</a></li>
+              <li><a href="/size-guide" className="text-muted-foreground hover:text-foreground">{t('footer.customerService.sizeGuide')}</a></li>
+              <li><a href="/track-order" className="text-muted-foreground hover:text-foreground">{t('footer.customerService.trackOrder')}</a></li>
+              <li><a href="/contact" className="text-muted-foreground hover:text-foreground">{t('footer.customerService.contactUs')}</a></li>
             </ul>
           </div>
 
           {/* Company */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Company</h3>
+            <h3 className="font-semibold text-lg">{t('footer.company.title')}</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="/about" className="text-muted-foreground hover:text-foreground">About Us</a></li>
-              <li><a href="/careers" className="text-muted-foreground hover:text-foreground">Careers</a></li>
-              <li><a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a></li>
-              <li><a href="/press" className="text-muted-foreground hover:text-foreground">Press</a></li>
-              <li><a href="/investors" className="text-muted-foreground hover:text-foreground">Investors</a></li>
-              <li><a href="/sustainability" className="text-muted-foreground hover:text-foreground">Sustainability</a></li>
+              <li><a href="/about" className="text-muted-foreground hover:text-foreground">{t('footer.company.aboutUs')}</a></li>
+              <li><a href="/careers" className="text-muted-foreground hover:text-foreground">{t('footer.company.careers')}</a></li>
+              <li><a href="/blog" className="text-muted-foreground hover:text-foreground">{t('footer.company.blog')}</a></li>
+              <li><a href="/press" className="text-muted-foreground hover:text-foreground">{t('footer.company.press')}</a></li>
+              <li><a href="/investors" className="text-muted-foreground hover:text-foreground">{t('footer.company.investors')}</a></li>
+              <li><a href="/sustainability" className="text-muted-foreground hover:text-foreground">{t('footer.company.sustainability')}</a></li>
             </ul>
           </div>
 
           {/* Newsletter */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Stay Connected</h3>
+            <h3 className="font-semibold text-lg">{t('footer.newsletter.title')}</h3>
             <p className="text-sm text-muted-foreground">
-              Subscribe to get special offers, free giveaways, and updates.
+              {t('footer.newsletter.description')}
             </p>
             <div className="space-y-3">
-              <Input placeholder="Enter your email" />
-              <Button className="w-full">Subscribe</Button>
+              <Input placeholder={t('footer.newsletter.placeholder')} />
+              <Button className="w-full">{t('footer.newsletter.subscribe')}</Button>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 rtl:space-x-reverse">
               <a href="#" className="text-muted-foreground hover:text-foreground">
                 <Facebook className="h-5 w-5" />
               </a>
@@ -141,19 +140,19 @@ export function Footer() {
       <div className="border-t">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 rtl:md:space-x-reverse">
               <p className="text-sm text-muted-foreground">
-                © {new Date().getFullYear()} CLICON. All rights reserved.
+                {t('footer.copyright', { year: new Date().getFullYear() })}
               </p>
-              <div className="flex space-x-4 text-sm">
-                <a href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy Policy</a>
-                <a href="/terms" className="text-muted-foreground hover:text-foreground">Terms of Service</a>
-                <a href="/cookies" className="text-muted-foreground hover:text-foreground">Cookie Policy</a>
+              <div className="flex space-x-4 rtl:space-x-reverse text-sm">
+                <a href="/privacy" className="text-muted-foreground hover:text-foreground">{t('footer.legal.privacyPolicy')}</a>
+                <a href="/terms" className="text-muted-foreground hover:text-foreground">{t('footer.legal.termsOfService')}</a>
+                <a href="/cookies" className="text-muted-foreground hover:text-foreground">{t('footer.legal.cookiePolicy')}</a>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">We accept:</span>
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <span className="text-sm text-muted-foreground">{t('footer.paymentMethods.title')}</span>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 <CreditCard className="h-6 w-10 bg-muted rounded p-1" />
                 <div className="h-6 w-10 bg-muted rounded flex items-center justify-center text-xs font-bold">VISA</div>
                 <div className="h-6 w-10 bg-muted rounded flex items-center justify-center text-xs font-bold">MC</div>
@@ -165,4 +164,4 @@ export function Footer() {
       </div>
     </footer>
   );
-};
+}

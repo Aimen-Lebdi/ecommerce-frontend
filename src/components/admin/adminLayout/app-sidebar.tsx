@@ -26,67 +26,71 @@ import {
   SidebarMenuItem,
 } from "../../admin/adminLayout/sidebar";
 import { Link } from "react-router-dom";
-
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/admin",
-      icon: LayoutDashboard,
-    },
-    {
-      title: "Categories",
-      url: "/admin/categories",
-      icon: List,
-    },
-    {
-      title: "SubCategories",
-      url: "/admin/sub-categories",
-      icon: Boxes,
-    },
-    {
-      title: "Brands",
-      url: "/admin/brands",
-      icon: TagIcon,
-    },
-    {
-      title: "Products",
-      url: "/admin/products",
-      icon: Package,
-    },
-    {
-      title: "Orders",
-      url: "/admin/orders",
-      icon: ShoppingCart,
-    },
-    {
-      title: "Users",
-      url: "/admin/users",
-      icon: Users,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Back to Store",
-      url: "/",
-      icon: ShoppingCartIcon,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-  ],
-};
+import { useTranslation } from 'react-i18next';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { t } = useTranslation();
+  
+
+  const data = {
+    user: {
+      name: "shadcn",
+      email: "m@example.com",
+      avatar: "/avatars/shadcn.jpg",
+    },
+    navMain: [
+      {
+        title: t('sidebar.nav.dashboard'),
+        url: "/admin",
+        icon: LayoutDashboard,
+      },
+      {
+        title: t('sidebar.nav.categories'),
+        url: "/admin/categories",
+        icon: List,
+      },
+      {
+        title: t('sidebar.nav.subcategories'),
+        url: "/admin/sub-categories",
+        icon: Boxes,
+      },
+      {
+        title: t('sidebar.nav.brands'),
+        url: "/admin/brands",
+        icon: TagIcon,
+      },
+      {
+        title: t('sidebar.nav.products'),
+        url: "/admin/products",
+        icon: Package,
+      },
+      {
+        title: t('sidebar.nav.orders'),
+        url: "/admin/orders",
+        icon: ShoppingCart,
+      },
+      {
+        title: t('sidebar.nav.users'),
+        url: "/admin/users",
+        icon: Users,
+      },
+    ],
+    navSecondary: [
+      {
+        title: t('sidebar.nav.backToStore'),
+        url: "/",
+        icon: ShoppingCartIcon,
+      },
+      {
+        title: t('sidebar.nav.getHelp'),
+        url: "#",
+        icon: IconHelp,
+      },
+    ],
+  };
+
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -94,9 +98,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link to="/admin">
+              <Link to="/admin" className="flex items-center gap-2">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">{t('sidebar.companyName')}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

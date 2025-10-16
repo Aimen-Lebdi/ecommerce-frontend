@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from 'react-i18next';
 import {
   Grid3X3,
   List,
@@ -44,17 +45,6 @@ import { fetchBrands } from "../../features/brands/brandsSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
 
-const sortOptions = [
-  { value: "createdAt", label: "Newest First" },
-  { value: "-createdAt", label: "Oldest First" },
-  { value: "price", label: "Price: Low to High" },
-  { value: "-price", label: "Price: High to Low" },
-  { value: "-rating", label: "Highest Rated" },
-  { value: "-sold", label: "Most Popular" },
-  { value: "name", label: "Name: A to Z" },
-  { value: "-name", label: "Name: Z to A" },
-];
-
 // FiltersPanel component - MOVED OUTSIDE ShopPage
 const FiltersPanel = memo(
   ({
@@ -79,15 +69,17 @@ const FiltersPanel = memo(
     activeFilters,
     onClearFilters,
   }) => {
+    const { t } = useTranslation();
+
     return (
       <div className="space-y-6">
         {/* Categories */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Categories</Label>
+          <Label className="text-sm font-medium">{t('shop.filters.categories')}</Label>
           {categoriesLoading ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm text-muted-foreground">Loading...</span>
+              <span className="text-sm text-muted-foreground">{t('shop.loading')}</span>
             </div>
           ) : (
             <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
@@ -116,12 +108,12 @@ const FiltersPanel = memo(
         {/* Subcategories */}
         {selectedCategories.length > 0 && (
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Subcategories</Label>
+            <Label className="text-sm font-medium">{t('shop.filters.subcategories')}</Label>
             {subcategoriesLoading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm text-muted-foreground">
-                  Loading...
+                  {t('shop.loading')}
                 </span>
               </div>
             ) : availableSubCategories.length > 0 ? (
@@ -152,7 +144,7 @@ const FiltersPanel = memo(
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                No subcategories available
+                {t('shop.filters.noSubcategories')}
               </p>
             )}
           </div>
@@ -160,11 +152,11 @@ const FiltersPanel = memo(
 
         {/* Brands */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Brands</Label>
+          <Label className="text-sm font-medium">{t('shop.filters.brands')}</Label>
           {brandsLoading ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm text-muted-foreground">Loading...</span>
+              <span className="text-sm text-muted-foreground">{t('shop.loading')}</span>
             </div>
           ) : (
             <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
@@ -192,14 +184,14 @@ const FiltersPanel = memo(
 
         {/* Price Range */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Price Range</Label>
+          <Label className="text-sm font-medium">{t('shop.filters.priceRange')}</Label>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label
                 htmlFor="min-price"
                 className="text-xs text-muted-foreground"
               >
-                Min Price
+                {t('shop.filters.minPrice')}
               </Label>
               <Input
                 id="min-price"
@@ -224,7 +216,7 @@ const FiltersPanel = memo(
                 htmlFor="max-price"
                 className="text-xs text-muted-foreground"
               >
-                Max Price
+                {t('shop.filters.maxPrice')}
               </Label>
               <Input
                 id="max-price"
@@ -251,18 +243,18 @@ const FiltersPanel = memo(
             onClick={onApplyPriceFilter}
             className="w-full"
           >
-            Apply Price Filter
+            {t('shop.filters.applyPriceFilter')}
           </Button>
           {(filters.minPrice || filters.maxPrice) && (
             <div className="text-xs text-muted-foreground text-center">
-              Active: ${filters.minPrice || "0"} - ${filters.maxPrice || "∞"}
+              {t('shop.filters.active')}: ${filters.minPrice || "0"} - ${filters.maxPrice || "∞"}
             </div>
           )}
         </div>
 
         {/* Special Filters */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Special Offers</Label>
+          <Label className="text-sm font-medium">{t('shop.filters.specialOffers')}</Label>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -273,7 +265,7 @@ const FiltersPanel = memo(
                 }
               />
               <Label htmlFor="on-sale" className="text-sm font-normal">
-                On Sale
+                {t('shop.filters.onSale')}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
@@ -285,7 +277,7 @@ const FiltersPanel = memo(
                 }
               />
               <Label htmlFor="in-stock" className="text-sm font-normal">
-                In Stock Only
+                {t('shop.filters.inStockOnly')}
               </Label>
             </div>
           </div>
@@ -294,7 +286,7 @@ const FiltersPanel = memo(
         {/* Clear Filters */}
         {activeFilters > 0 && (
           <Button variant="outline" onClick={onClearFilters} className="w-full">
-            Clear All Filters ({activeFilters})
+            {t('shop.filters.clearAllFilters')} ({activeFilters})
           </Button>
         )}
       </div>
@@ -306,6 +298,18 @@ FiltersPanel.displayName = "FiltersPanel";
 
 const ShopPage = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  const sortOptions = [
+    { value: "createdAt", label: t('shop.sort.newestFirst') },
+    { value: "-createdAt", label: t('shop.sort.oldestFirst') },
+    { value: "price", label: t('shop.sort.priceLowToHigh') },
+    { value: "-price", label: t('shop.sort.priceHighToLow') },
+    { value: "-rating", label: t('shop.sort.highestRated') },
+    { value: "-sold", label: t('shop.sort.mostPopular') },
+    { value: "name", label: t('shop.sort.nameAToZ') },
+    { value: "-name", label: t('shop.sort.nameZToA') },
+  ];
 
   // Redux state
   const {
@@ -556,7 +560,7 @@ const ShopPage = () => {
                 )}
                 {product.quantity === 0 && (
                   <Badge className="bg-gray-600 hover:bg-gray-700 text-xs px-1.5 py-0.5">
-                    Out of Stock
+                    {t('shop.product.outOfStock')}
                   </Badge>
                 )}
               </div>
@@ -567,14 +571,14 @@ const ShopPage = () => {
                   className="h-7 w-7 bg-white/90 hover:bg-white"
                   onClick={async (e) => {
                     e.preventDefault();
-                    e.stopPropagation(); // Add this to prevent Link navigation
+                    e.stopPropagation();
                     try {
                       await dispatch(
                         addProductToWishlist(product._id)
                       ).unwrap();
-                      toast.success(`${product.name} added to wishlist`);
+                      toast.success(t('shop.product.addedToWishlist', { productName: product.name }));
                     } catch (err: any) {
-                      toast.error(err || "Failed to add to wishlist");
+                      toast.error(err || t('shop.product.failedToAddToWishlist'));
                     }
                   }}
                 >
@@ -585,7 +589,7 @@ const ShopPage = () => {
                   variant="outline"
                   className="h-7 w-7 bg-white/90 hover:bg-white"
                   onClick={(e) => {
-                    e.stopPropagation(); // This is now just for safety
+                    e.stopPropagation();
                   }}
                 >
                   <Eye className="h-4 w-4" />
@@ -650,8 +654,8 @@ const ShopPage = () => {
                 }`}
               >
                 {product.quantity > 0
-                  ? `In Stock (${product.quantity})`
-                  : "Out of Stock"}
+                  ? t('shop.product.inStock', { quantity: product.quantity })
+                  : t('shop.product.outOfStock')}
               </span>
             </div>
           </CardContent>
@@ -743,7 +747,7 @@ const ShopPage = () => {
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  ({product.ratingsQuantity || 0} reviews)
+                  ({product.ratingsQuantity || 0} {t('shop.product.reviews')})
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -764,8 +768,8 @@ const ShopPage = () => {
                     }`}
                   >
                     {product.quantity > 0
-                      ? `In Stock (${product.quantity})`
-                      : "Out of Stock"}
+                      ? t('shop.product.inStock', { quantity: product.quantity })
+                      : t('shop.product.outOfStock')}
                   </span>
                 </div>
               </div>
@@ -820,10 +824,10 @@ const ShopPage = () => {
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-          Shop All Products
+          {t('shop.header.title')}
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base">
-          Discover our complete collection of premium products
+          {t('shop.header.subtitle')}
         </p>
       </div>
 
@@ -833,7 +837,7 @@ const ShopPage = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Filters</h2>
+                <h2 className="text-lg font-semibold">{t('shop.filters.title')}</h2>
                 {activeFilters > 0 && (
                   <Badge variant="secondary">{activeFilters}</Badge>
                 )}
@@ -875,7 +879,7 @@ const ShopPage = () => {
                 <SheetTrigger asChild>
                   <Button variant="outline" className="lg:hidden">
                     <SlidersHorizontal className="h-4 w-4 mr-2" />
-                    Filters
+                    {t('shop.filters.title')}
                     {activeFilters > 0 && (
                       <Badge className="ml-2" variant="secondary">
                         {activeFilters}
@@ -885,7 +889,7 @@ const ShopPage = () => {
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80 sm:w-96">
                   <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
+                    <SheetTitle>{t('shop.filters.title')}</SheetTitle>
                   </SheetHeader>
                   <div className="mt-6 p-6 overflow-y-auto h-full pb-16">
                     <FiltersPanel
@@ -918,11 +922,11 @@ const ShopPage = () => {
               <p className="text-sm text-muted-foreground">
                 {pagination ? (
                   <>
-                    Showing {products?.length || 0} of{" "}
-                    {pagination.totalResults || 0} results
+                    {t('shop.results.showing')} {products?.length || 0} {t('shop.results.of')}{" "}
+                    {pagination.totalResults || 0} {t('shop.results.results')}
                   </>
                 ) : (
-                  "Loading..."
+                  t('shop.loading')
                 )}
               </p>
             </div>
@@ -931,7 +935,7 @@ const ShopPage = () => {
               {/* Sort */}
               <Select value={filters.sort} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Sort by" />
+                  <SelectValue placeholder={t('shop.sort.sortBy')} />
                 </SelectTrigger>
                 <SelectContent>
                   {sortOptions.map((option) => (
@@ -1021,7 +1025,7 @@ const ShopPage = () => {
               })}
               {(filters.minPrice || filters.maxPrice) && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  Price: {filters.minPrice || "0"} - {filters.maxPrice || "∞"}
+                  {t('shop.filters.priceLabel')}: {filters.minPrice || "0"} - {filters.maxPrice || "∞"}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => clearSpecificFilter("price")}
@@ -1030,7 +1034,7 @@ const ShopPage = () => {
               )}
               {filters.onSale && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  On Sale
+                  {t('shop.filters.onSale')}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => clearSpecificFilter("onSale")}
@@ -1039,7 +1043,7 @@ const ShopPage = () => {
               )}
               {filters.inStock && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  In Stock Only
+                  {t('shop.filters.inStockOnly')}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => clearSpecificFilter("inStock")}
@@ -1054,7 +1058,7 @@ const ShopPage = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                <p className="text-muted-foreground">Loading products...</p>
+                <p className="text-muted-foreground">{t('shop.loadingProducts')}</p>
               </div>
             </div>
           )}
@@ -1080,7 +1084,7 @@ const ShopPage = () => {
               {pagination && pagination.numberOfPages > 1 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t">
                   <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                    Showing page {pagination.currentPage} of{" "}
+                    {t('shop.pagination.showingPage')} {pagination.currentPage} {t('shop.pagination.of')}{" "}
                     {pagination.numberOfPages}
                   </div>
 
@@ -1095,7 +1099,7 @@ const ShopPage = () => {
                       className="hidden sm:flex"
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" />
-                      Previous
+                      {t('shop.pagination.previous')}
                     </Button>
 
                     <Button
@@ -1144,7 +1148,7 @@ const ShopPage = () => {
                       disabled={!pagination.nextPage}
                       className="hidden sm:flex"
                     >
-                      Next
+                      {t('shop.pagination.next')}
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
 
@@ -1168,13 +1172,13 @@ const ShopPage = () => {
               <div className="mb-4">
                 <ShoppingCart className="h-12 w-12 mx-auto text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">No products found</h3>
+              <h3 className="text-lg font-semibold mb-2">{t('shop.noProducts.title')}</h3>
               <p className="text-muted-foreground mb-4">
-                Try adjusting your filters to see more results
+                {t('shop.noProducts.message')}
               </p>
               {activeFilters > 0 && (
                 <Button onClick={clearFilters} variant="outline">
-                  Clear all filters
+                  {t('shop.noProducts.clearFilters')}
                 </Button>
               )}
             </div>

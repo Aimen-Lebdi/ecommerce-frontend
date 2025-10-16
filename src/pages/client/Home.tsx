@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -23,40 +24,40 @@ import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
 const heroSlides = [
   {
     id: 1,
-    title: "Summer Sale 2024",
-    subtitle: "Up to 70% Off Electronics",
-    description: "Don't miss out on amazing deals on smartphones, laptops, and more!",
+    title: "home.hero.slides.summerSale.title",
+    subtitle: "home.hero.slides.summerSale.subtitle",
+    description: "home.hero.slides.summerSale.description",
     image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop",
-    cta: "Shop Now",
-    badge: "Limited Time"
+    cta: "home.hero.slides.summerSale.cta",
+    badge: "home.hero.slides.summerSale.badge"
   },
   {
     id: 2,
-    title: "New iPhone 15 Pro",
-    subtitle: "Revolutionary Performance",
-    description: "Experience the power of A17 Pro chip with titanium design.",
+    title: "home.hero.slides.iphone.title",
+    subtitle: "home.hero.slides.iphone.subtitle",
+    description: "home.hero.slides.iphone.description",
     image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=1200&h=600&fit=crop",
-    cta: "Pre-Order Now",
-    badge: "New Launch"
+    cta: "home.hero.slides.iphone.cta",
+    badge: "home.hero.slides.iphone.badge"
   },
   {
     id: 3,
-    title: "Gaming Collection",
-    subtitle: "Level Up Your Setup",
-    description: "Premium gaming gear for the ultimate gaming experience.",
+    title: "home.hero.slides.gaming.title",
+    subtitle: "home.hero.slides.gaming.subtitle",
+    description: "home.hero.slides.gaming.description",
     image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=600&fit=crop",
-    cta: "Explore Gaming",
-    badge: "Gaming Week"
+    cta: "home.hero.slides.gaming.cta",
+    badge: "home.hero.slides.gaming.badge"
   }
 ];
 
 const categories = [
-  { name: "Smartphones", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&h=200&fit=crop", count: "250+ items" },
-  { name: "Laptops", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=200&h=200&fit=crop", count: "180+ items" },
-  { name: "Headphones", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop", count: "120+ items" },
-  { name: "Gaming", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=200&h=200&fit=crop", count: "95+ items" },
-  { name: "Cameras", image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=200&h=200&fit=crop", count: "85+ items" },
-  { name: "Smart Home", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop", count: "75+ items" }
+  { name: "home.categories.smartphones", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&h=200&fit=crop", count: "home.categories.smartphonesCount" },
+  { name: "home.categories.laptops", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=200&h=200&fit=crop", count: "home.categories.laptopsCount" },
+  { name: "home.categories.headphones", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop", count: "home.categories.headphonesCount" },
+  { name: "home.categories.gaming", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=200&h=200&fit=crop", count: "home.categories.gamingCount" },
+  { name: "home.categories.cameras", image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=200&h=200&fit=crop", count: "home.categories.camerasCount" },
+  { name: "home.categories.smartHome", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop", count: "home.categories.smartHomeCount" }
 ];
 
 const featuredProducts = [
@@ -68,7 +69,7 @@ const featuredProducts = [
     originalPrice: 399.99,
     rating: 4.8,
     reviews: 2847,
-    badge: "Best Seller",
+    badge: "home.products.badges.bestSeller",
     inStock: true
   },
   {
@@ -79,7 +80,7 @@ const featuredProducts = [
     originalPrice: null,
     rating: 4.9,
     reviews: 1523,
-    badge: "New",
+    badge: "home.products.badges.new",
     inStock: true
   },
   {
@@ -90,7 +91,7 @@ const featuredProducts = [
     originalPrice: 2699.99,
     rating: 4.7,
     reviews: 892,
-    badge: "Sale",
+    badge: "home.products.badges.sale",
     inStock: false
   },
   {
@@ -101,7 +102,7 @@ const featuredProducts = [
     originalPrice: 999.99,
     rating: 4.6,
     reviews: 1247,
-    badge: "Hot Deal",
+    badge: "home.products.badges.hotDeal",
     inStock: true
   }
 ];
@@ -112,59 +113,60 @@ const testimonials = [
     name: "Sarah Johnson",
     avatar: "https://images.unsplash.com/photo-1494790108755-2616b332-1c3f?w=100&h=100&fit=crop",
     rating: 5,
-    text: "Amazing service and fast delivery! The product quality exceeded my expectations.",
-    product: "iPhone 15 Pro"
+    text: "home.testimonials.items.sarah.text",
+    product: "home.testimonials.items.sarah.product"
   },
   {
     id: 2,
     name: "Mike Chen",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
     rating: 5,
-    text: "Great prices and excellent customer support. Will definitely shop here again!",
-    product: "Sony Headphones"
+    text: "home.testimonials.items.mike.text",
+    product: "home.testimonials.items.mike.product"
   },
   {
     id: 3,
     name: "Emily Davis",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
     rating: 5,
-    text: "The shopping experience was smooth and the product arrived exactly as described.",
-    product: "MacBook Pro"
+    text: "home.testimonials.items.emily.text",
+    product: "home.testimonials.items.emily.product"
   }
 ];
 
 const blogPosts = [
   {
     id: 1,
-    title: "The Future of Mobile Technology in 2024",
-    excerpt: "Discover the latest trends and innovations shaping the smartphone industry.",
+    title: "home.blog.posts.mobileTech.title",
+    excerpt: "home.blog.posts.mobileTech.excerpt",
     image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=250&fit=crop",
-    date: "Dec 15, 2024",
-    readTime: "5 min read",
-    category: "Technology"
+    date: "home.blog.posts.mobileTech.date",
+    readTime: "home.blog.posts.mobileTech.readTime",
+    category: "home.blog.posts.mobileTech.category"
   },
   {
     id: 2,
-    title: "Ultimate Guide to Gaming Setups",
-    excerpt: "Everything you need to know about building the perfect gaming station.",
+    title: "home.blog.posts.gamingSetup.title",
+    excerpt: "home.blog.posts.gamingSetup.excerpt",
     image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=250&fit=crop",
-    date: "Dec 12, 2024",
-    readTime: "8 min read",
-    category: "Gaming"
+    date: "home.blog.posts.gamingSetup.date",
+    readTime: "home.blog.posts.gamingSetup.readTime",
+    category: "home.blog.posts.gamingSetup.category"
   },
   {
     id: 3,
-    title: "Smart Home Automation Tips",
-    excerpt: "Transform your home with these smart automation ideas and products.",
+    title: "home.blog.posts.smartHome.title",
+    excerpt: "home.blog.posts.smartHome.excerpt",
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=250&fit=crop",
-    date: "Dec 10, 2024",
-    readTime: "6 min read",
-    category: "Smart Home"
+    date: "home.blog.posts.smartHome.date",
+    readTime: "home.blog.posts.smartHome.readTime",
+    category: "home.blog.posts.smartHome.category"
   }
 ];
 
 // Hero Section Component
 const HeroSection = () => {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -195,26 +197,26 @@ const HeroSection = () => {
             <div className="relative w-full h-full">
               <img
                 src={slide.image}
-                alt={slide.title}
+                alt={t(slide.title)}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/40" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-white max-w-2xl px-6">
                   <Badge className="mb-4 bg-red-600 hover:bg-red-700">
-                    {slide.badge}
+                    {t(slide.badge)}
                   </Badge>
                   <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                    {slide.title}
+                    {t(slide.title)}
                   </h1>
                   <h2 className="text-xl md:text-2xl mb-4 text-gray-200">
-                    {slide.subtitle}
+                    {t(slide.subtitle)}
                   </h2>
                   <p className="text-lg mb-8 text-gray-300">
-                    {slide.description}
+                    {t(slide.description)}
                   </p>
                   <Button size="lg" className="text-lg px-8 py-4">
-                    {slide.cta}
+                    {t(slide.cta)}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </div>
@@ -260,26 +262,28 @@ const HeroSection = () => {
 
 // Features Section
 const FeaturesSection = () => {
+  const { t } = useTranslation();
+  
   const features = [
     {
       icon: <Truck className="h-8 w-8" />,
-      title: "Free Shipping",
-      description: "Free shipping on all orders over $50"
+      title: "home.features.freeShipping.title",
+      description: "home.features.freeShipping.description"
     },
     {
       icon: <RotateCcw className="h-8 w-8" />,
-      title: "Easy Returns",
-      description: "30-day hassle-free return policy"
+      title: "home.features.easyReturns.title",
+      description: "home.features.easyReturns.description"
     },
     {
       icon: <Shield className="h-8 w-8" />,
-      title: "Secure Payment",
-      description: "Your payments are safe and encrypted"
+      title: "home.features.securePayment.title",
+      description: "home.features.securePayment.description"
     },
     {
       icon: <Headphones className="h-8 w-8" />,
-      title: "24/7 Support",
-      description: "Round-the-clock customer service"
+      title: "home.features.support.title",
+      description: "home.features.support.description"
     }
   ];
 
@@ -292,8 +296,8 @@ const FeaturesSection = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 text-primary rounded-full mb-4">
                 {feature.icon}
               </div>
-              <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground text-sm">{feature.description}</p>
+              <h3 className="font-semibold text-lg mb-2">{t(feature.title)}</h3>
+              <p className="text-muted-foreground text-sm">{t(feature.description)}</p>
             </div>
           ))}
         </div>
@@ -304,12 +308,14 @@ const FeaturesSection = () => {
 
 // Categories Section
 const CategoriesSection = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="mb-12">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-4">Shop by Category</h2>
+        <h2 className="text-3xl font-bold mb-4">{t('home.categories.title')}</h2>
         <p className="text-muted-foreground text-lg">
-          Discover our wide range of product categories
+          {t('home.categories.subtitle')}
         </p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -319,12 +325,12 @@ const CategoriesSection = () => {
               <div className="w-full h-32 mb-4 overflow-hidden rounded-lg">
                 <img
                   src={category.image}
-                  alt={category.name}
+                  alt={t(category.name)}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
-              <h3 className="font-semibold mb-1">{category.name}</h3>
-              <p className="text-sm text-muted-foreground">{category.count}</p>
+              <h3 className="font-semibold mb-1">{t(category.name)}</h3>
+              <p className="text-sm text-muted-foreground">{t(category.count)}</p>
             </CardContent>
           </Card>
         ))}
@@ -335,15 +341,17 @@ const CategoriesSection = () => {
 
 // Featured Products Section
 const FeaturedProductsSection = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="mb-12">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-3xl font-bold mb-2">Featured Products</h2>
-          <p className="text-muted-foreground">Our best-selling and most popular items</p>
+          <h2 className="text-3xl font-bold mb-2">{t('home.products.title')}</h2>
+          <p className="text-muted-foreground">{t('home.products.subtitle')}</p>
         </div>
         <Button variant="outline">
-          View All <ArrowRight className="ml-2 h-4 w-4" />
+          {t('home.products.viewAll')} <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
       
@@ -359,9 +367,9 @@ const FeaturedProductsSection = () => {
                 />
                 <Badge 
                   className="absolute top-3 left-3" 
-                  variant={product.badge === 'Sale' ? 'destructive' : product.badge === 'New' ? 'default' : 'secondary'}
+                  variant={product.badge === 'home.products.badges.sale' ? 'destructive' : product.badge === 'home.products.badges.new' ? 'default' : 'secondary'}
                 >
-                  {product.badge}
+                  {t(product.badge)}
                 </Badge>
                 <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button size="icon" variant="outline" className="h-8 w-8 bg-white/80 hover:bg-white">
@@ -396,11 +404,11 @@ const FeaturedProductsSection = () => {
               </div>
               <div className="flex items-center justify-between">
                 <span className={`text-sm ${product.inStock ? 'text-green-600' : 'text-red-600'}`}>
-                  {product.inStock ? 'In Stock' : 'Out of Stock'}
+                  {product.inStock ? t('home.products.inStock') : t('home.products.outOfStock')}
                 </span>
                 <Button size="sm" disabled={!product.inStock}>
                   <ShoppingCart className="h-4 w-4 mr-1" />
-                  Add to Cart
+                  {t('home.products.addToCart')}
                 </Button>
               </div>
             </CardContent>
@@ -413,13 +421,15 @@ const FeaturedProductsSection = () => {
 
 // Testimonials Section
 const TestimonialsSection = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="py-12 bg-muted/30 rounded-2xl mb-12">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">What Our Customers Say</h2>
+          <h2 className="text-3xl font-bold mb-4">{t('home.testimonials.title')}</h2>
           <p className="text-muted-foreground text-lg">
-            Don't take our word for it - see what our satisfied customers have to say
+            {t('home.testimonials.subtitle')}
           </p>
         </div>
         
@@ -436,7 +446,7 @@ const TestimonialsSection = () => {
                     />
                   ))}
                 </div>
-                <p className="text-muted-foreground mb-4 italic">"{testimonial.text}"</p>
+                <p className="text-muted-foreground mb-4 italic">"{t(testimonial.text)}"</p>
                 <div className="flex items-center justify-center gap-3">
                   <Avatar>
                     <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
@@ -444,7 +454,7 @@ const TestimonialsSection = () => {
                   </Avatar>
                   <div className="text-left">
                     <p className="font-semibold">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">Verified Buyer - {testimonial.product}</p>
+                    <p className="text-sm text-muted-foreground">{t('home.testimonials.verifiedBuyer')} - {t(testimonial.product)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -458,29 +468,30 @@ const TestimonialsSection = () => {
 
 // Newsletter Section
 const NewsletterSection = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
 
   return (
     <section className="py-12 bg-primary text-primary-foreground rounded-2xl mb-12">
       <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
+        <h2 className="text-3xl font-bold mb-4">{t('home.newsletter.title')}</h2>
         <p className="text-xl mb-8 opacity-90">
-          Subscribe to our newsletter for exclusive deals and latest updates
+          {t('home.newsletter.subtitle')}
         </p>
         <div className="max-w-md mx-auto flex gap-4">
           <Input
             type="email"
-            placeholder="Enter your email address"
+            placeholder={t('home.newsletter.placeholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="bg-white text-black"
           />
           <Button variant="secondary" size="lg">
-            Subscribe
+            {t('home.newsletter.button')}
           </Button>
         </div>
         <p className="text-sm opacity-75 mt-4">
-          No spam, unsubscribe at any time. We respect your privacy.
+          {t('home.newsletter.privacyNote')}
         </p>
       </div>
     </section>
@@ -489,15 +500,17 @@ const NewsletterSection = () => {
 
 // Blog Section
 const BlogSection = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="mb-12">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-3xl font-bold mb-2">Latest From Our Blog</h2>
-          <p className="text-muted-foreground">Stay informed with our latest articles and insights</p>
+          <h2 className="text-3xl font-bold mb-2">{t('home.blog.title')}</h2>
+          <p className="text-muted-foreground">{t('home.blog.subtitle')}</p>
         </div>
         <Button variant="outline">
-          View All Posts <ArrowRight className="ml-2 h-4 w-4" />
+          {t('home.blog.viewAll')} <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
       
@@ -508,22 +521,22 @@ const BlogSection = () => {
               <div className="overflow-hidden rounded-t-lg">
                 <img
                   src={post.image}
-                  alt={post.title}
+                  alt={t(post.title)}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
             </CardHeader>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-3">
-                <Badge variant="secondary">{post.category}</Badge>
-                <span className="text-sm text-muted-foreground">{post.readTime}</span>
+                <Badge variant="secondary">{t(post.category)}</Badge>
+                <span className="text-sm text-muted-foreground">{t(post.readTime)}</span>
               </div>
-              <h3 className="font-semibold text-lg mb-2 line-clamp-2">{post.title}</h3>
-              <p className="text-muted-foreground mb-4 line-clamp-2">{post.excerpt}</p>
+              <h3 className="font-semibold text-lg mb-2 line-clamp-2">{t(post.title)}</h3>
+              <p className="text-muted-foreground mb-4 line-clamp-2">{t(post.excerpt)}</p>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{post.date}</span>
+                <span className="text-sm text-muted-foreground">{t(post.date)}</span>
                 <Button variant="ghost" size="sm">
-                  Read More <ArrowRight className="ml-1 h-3 w-3" />
+                  {t('home.blog.readMore')} <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
               </div>
             </CardContent>

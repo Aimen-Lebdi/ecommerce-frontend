@@ -18,206 +18,208 @@ import {
   type Activity,
 } from "../../features/activities/activitiesSlice";
 import { toast } from "sonner";
-
-// Helper function to get relative time
-const getRelativeTime = (timestamp: string) => {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffInMinutes = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60)
-  );
-
-  if (diffInMinutes < 1) return "Just now";
-  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours}h ago`;
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays}d ago`;
-};
-
-// Helper function to get activity type configuration
-const getActivityTypeConfig = (type: string) => {
-  const typeConfig = {
-    order: { variant: "default" as const, label: "Order" },
-    user: { variant: "secondary" as const, label: "User" },
-    product: { variant: "default" as const, label: "Product" },
-    category: { variant: "secondary" as const, label: "Category" },
-    subcategory: { variant: "secondary" as const, label: "SubCategory" },
-    brand: { variant: "default" as const, label: "Brand" },
-    review: { variant: "secondary" as const, label: "Review" },
-    coupon: { variant: "default" as const, label: "Coupon" },
-    cart: { variant: "secondary" as const, label: "Cart" },
-  };
-
-  return (
-    typeConfig[type as keyof typeof typeConfig] || {
-      variant: "default" as const,
-      label: type,
-    }
-  );
-};
-
-// Helper function to get status configuration
-const getStatusConfig = (status: string) => {
-  const variants = {
-    success: "default" as const,
-    pending: "secondary" as const,
-    failed: "destructive" as const,
-  };
-
-  return variants[status as keyof typeof variants] || "default";
-};
-
-// Define columns specific to Recent Activities on Dashboard
-const recentActivitiesColumns: ColumnDef<Activity>[] = [
-  {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => {
-      const type = row.getValue("type") as string;
-      const config = getActivityTypeConfig(type);
-
-      return (
-        <Badge variant={config.variant} className="text-xs">
-          {config.label}
-        </Badge>
-      );
-    },
-    enableHiding: false,
-  },
-  {
-    accessorKey: "activity",
-    header: "Activity",
-    cell: ({ row }) => {
-      const activity = row.original;
-      return (
-        <div>
-          <div className="font-medium text-sm">{activity.activity}</div>
-          <div className="text-xs text-muted-foreground line-clamp-1">
-            {activity.description}
-          </div>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "user",
-    header: "User",
-    cell: ({ row }) => {
-      const user = row.original.user;
-      return (
-        <div className="text-sm">
-          <div className="font-medium">{user.name}</div>
-          <div className="text-xs text-muted-foreground capitalize">
-            {user.role}
-          </div>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      const variant = getStatusConfig(status);
-
-      return (
-        <Badge variant={variant} className="text-xs capitalize">
-          {status}
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
-    cell: ({ row }) => {
-      const amount = row.getValue("amount") as number | undefined;
-      if (amount === undefined || amount === null) {
-        return <div className="text-center text-muted-foreground">-</div>;
-      }
-
-      return (
-        <div
-          className={`text-center font-medium text-sm ${
-            amount < 0 ? "text-red-600" : "text-green-600"
-          }`}
-        >
-          {amount < 0 ? "-" : ""}${Math.abs(amount).toFixed(2)}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Time",
-    cell: ({ row }) => {
-      const timestamp = row.getValue("createdAt") as string;
-      return (
-        <div className="text-xs text-muted-foreground">
-          {getRelativeTime(timestamp)}
-        </div>
-      );
-    },
-  },
-];
-
-// Advanced filter configuration for activities
-const advancedFilterConfig = {
-  select: {
-    type: {
-      label: "Activity Type",
-      options: [
-        { value: "all", label: "All Types" },
-        { value: "order", label: "Order" },
-        { value: "user", label: "User" },
-        { value: "product", label: "Product" },
-        { value: "category", label: "Category" },
-        { value: "subcategory", label: "SubCategory" },
-        { value: "brand", label: "Brand" },
-        { value: "review", label: "Review" },
-        { value: "coupon", label: "Coupon" },
-        { value: "cart", label: "Cart" },
-      ],
-    },
-    status: {
-      label: "Status",
-      options: [
-        { value: "all", label: "All Statuses" },
-        { value: "success", label: "Success" },
-        { value: "pending", label: "Pending" },
-        { value: "failed", label: "Failed" },
-      ],
-    },
-    timeframe: {
-      label: "Time Range",
-      options: [
-        { value: "all", label: "All Time" },
-        { value: "1h", label: "Last Hour" },
-        { value: "24h", label: "Last 24 Hours" },
-        { value: "7d", label: "Last 7 Days" },
-        { value: "30d", label: "Last 30 Days" },
-      ],
-    },
-  },
-  numeric: {
-    amount: {
-      label: "Amount",
-      placeholder: "Enter amount",
-    },
-  },
-  date: {
-    createdAt: {
-      label: "Created Date",
-    },
-  },
-};
+import { useTranslation } from 'react-i18next';
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
+
+  // Helper function to get relative time
+  const getRelativeTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
+    if (diffInMinutes < 1) return t('dashboard.time.justNow');
+    if (diffInMinutes < 60) return t('dashboard.time.minutesAgo', { minutes: diffInMinutes });
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return t('dashboard.time.hoursAgo', { hours: diffInHours });
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    return t('dashboard.time.daysAgo', { days: diffInDays });
+  };
+
+  // Helper function to get activity type configuration
+  const getActivityTypeConfig = (type: string) => {
+    const typeConfig = {
+      order: { variant: "default" as const, label: t('dashboard.activityTypes.order') },
+      user: { variant: "secondary" as const, label: t('dashboard.activityTypes.user') },
+      product: { variant: "default" as const, label: t('dashboard.activityTypes.product') },
+      category: { variant: "secondary" as const, label: t('dashboard.activityTypes.category') },
+      subcategory: { variant: "secondary" as const, label: t('dashboard.activityTypes.subcategory') },
+      brand: { variant: "default" as const, label: t('dashboard.activityTypes.brand') },
+      review: { variant: "secondary" as const, label: t('dashboard.activityTypes.review') },
+      coupon: { variant: "default" as const, label: t('dashboard.activityTypes.coupon') },
+      cart: { variant: "secondary" as const, label: t('dashboard.activityTypes.cart') },
+    };
+
+    return (
+      typeConfig[type as keyof typeof typeConfig] || {
+        variant: "default" as const,
+        label: type,
+      }
+    );
+  };
+
+  // Helper function to get status configuration
+  const getStatusConfig = (status: string) => {
+    const variants = {
+      success: "default" as const,
+      pending: "secondary" as const,
+      failed: "destructive" as const,
+    };
+
+    return variants[status as keyof typeof variants] || "default";
+  };
+
+  // Define columns specific to Recent Activities on Dashboard
+  const recentActivitiesColumns: ColumnDef<Activity>[] = [
+    {
+      accessorKey: "type",
+      header: t('dashboard.columns.type'),
+      cell: ({ row }) => {
+        const type = row.getValue("type") as string;
+        const config = getActivityTypeConfig(type);
+
+        return (
+          <Badge variant={config.variant} className="text-xs">
+            {config.label}
+          </Badge>
+        );
+      },
+      enableHiding: false,
+    },
+    {
+      accessorKey: "activity",
+      header: t('dashboard.columns.activity'),
+      cell: ({ row }) => {
+        const activity = row.original;
+        return (
+          <div>
+            <div className="font-medium text-sm">{activity.activity}</div>
+            <div className="text-xs text-muted-foreground line-clamp-1">
+              {activity.description}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "user",
+      header: t('dashboard.columns.user'),
+      cell: ({ row }) => {
+        const user = row.original.user;
+        return (
+          <div className="text-sm">
+            <div className="font-medium">{user.name}</div>
+            <div className="text-xs text-muted-foreground capitalize">
+              {user.role}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: t('dashboard.columns.status'),
+      cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        const variant = getStatusConfig(status);
+
+        return (
+          <Badge variant={variant} className="text-xs capitalize">
+            {status}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "amount",
+      header: t('dashboard.columns.amount'),
+      cell: ({ row }) => {
+        const amount = row.getValue("amount") as number | undefined;
+        if (amount === undefined || amount === null) {
+          return <div className="text-center text-muted-foreground">-</div>;
+        }
+
+        return (
+          <div
+            className={`text-center font-medium text-sm ${
+              amount < 0 ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {amount < 0 ? "-" : ""}${Math.abs(amount).toFixed(2)}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: t('dashboard.columns.time'),
+      cell: ({ row }) => {
+        const timestamp = row.getValue("createdAt") as string;
+        return (
+          <div className="text-xs text-muted-foreground">
+            {getRelativeTime(timestamp)}
+          </div>
+        );
+      },
+    },
+  ];
+
+  // Advanced filter configuration for activities
+  const advancedFilterConfig = {
+    select: {
+      type: {
+        label: t('dashboard.filters.activityType'),
+        options: [
+          { value: "all", label: t('dashboard.filters.allTypes') },
+          { value: "order", label: t('dashboard.activityTypes.order') },
+          { value: "user", label: t('dashboard.activityTypes.user') },
+          { value: "product", label: t('dashboard.activityTypes.product') },
+          { value: "category", label: t('dashboard.activityTypes.category') },
+          { value: "subcategory", label: t('dashboard.activityTypes.subcategory') },
+          { value: "brand", label: t('dashboard.activityTypes.brand') },
+          { value: "review", label: t('dashboard.activityTypes.review') },
+          { value: "coupon", label: t('dashboard.activityTypes.coupon') },
+          { value: "cart", label: t('dashboard.activityTypes.cart') },
+        ],
+      },
+      status: {
+        label: t('dashboard.filters.status'),
+        options: [
+          { value: "all", label: t('dashboard.filters.allStatuses') },
+          { value: "success", label: t('dashboard.statuses.success') },
+          { value: "pending", label: t('dashboard.statuses.pending') },
+          { value: "failed", label: t('dashboard.statuses.failed') },
+        ],
+      },
+      timeframe: {
+        label: t('dashboard.filters.timeRange'),
+        options: [
+          { value: "all", label: t('dashboard.filters.allTime') },
+          { value: "1h", label: t('dashboard.filters.lastHour') },
+          { value: "24h", label: t('dashboard.filters.last24Hours') },
+          { value: "7d", label: t('dashboard.filters.last7Days') },
+          { value: "30d", label: t('dashboard.filters.last30Days') },
+        ],
+      },
+    },
+    numeric: {
+      amount: {
+        label: t('dashboard.filters.amount'),
+        placeholder: t('dashboard.filters.amountPlaceholder'),
+      },
+    },
+    date: {
+      createdAt: {
+        label: t('dashboard.filters.createdDate'),
+      },
+    },
+  };
 
   // Get activities from Redux store
   const {
@@ -244,16 +246,16 @@ export default function Dashboard() {
     joinDashboard: user?.role === "admin",
     onConnect: () => {
       console.log("Dashboard socket connected");
-      toast.success("Connected to live updates");
+      toast.success(t('dashboard.socket.connected'));
     },
     onDisconnect: () => {
       console.log("Dashboard socket disconnected");
-      toast.error("Disconnected from live updates");
+      toast.error(t('dashboard.socket.disconnected'));
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       console.error("Dashboard socket error:", error);
-      toast.error("Connection error occurred");
+      toast.error(t('dashboard.socket.error'));
     },
   });
 
@@ -326,8 +328,8 @@ export default function Dashboard() {
       requestActivityStats();
     }
 
-    toast.success("Activities refreshed");
-  }, [dispatch, isConnected, requestActivityStats]);
+    toast.success(t('dashboard.refreshSuccess'));
+  }, [dispatch, isConnected, requestActivityStats, t]);
 
   // Join dashboard room when component mounts (for admins)
   React.useEffect(() => {
@@ -359,21 +361,21 @@ export default function Dashboard() {
             <div className="px-4 lg:px-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold">Recent Activities</h3>
+                  <h3 className="text-lg font-semibold">{t('dashboard.recentActivities.title')}</h3>
                   <div className="flex items-center gap-2">
                     <p className="text-sm text-muted-foreground">
-                      Latest activities across your store
+                      {t('dashboard.recentActivities.subtitle')}
                     </p>
                     <div className="flex items-center gap-2">
                       {isConnected ? (
                         <div className="flex items-center gap-1">
                           <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-xs text-green-600">Live</span>
+                          <span className="text-xs text-green-600">{t('dashboard.status.live')}</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
                           <div className="h-2 w-2 bg-red-500 rounded-full"></div>
-                          <span className="text-xs text-red-600">Offline</span>
+                          <span className="text-xs text-red-600">{t('dashboard.status.offline')}</span>
                         </div>
                       )}
                     </div>
@@ -384,7 +386,7 @@ export default function Dashboard() {
                   disabled={dashboardLoading}
                   className="px-3 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {dashboardLoading ? "Refreshing..." : "Refresh"}
+                  {dashboardLoading ? t('dashboard.refreshing') : t('dashboard.refresh')}
                 </button>
               </div>
             </div>
@@ -404,7 +406,7 @@ export default function Dashboard() {
               advancedFilterConfig={advancedFilterConfig}
               enableDragAndDrop={false}
               filterColumn="type"
-              filterPlaceholder="Filter by activity type..."
+              filterPlaceholder={t('dashboard.filterPlaceholder')}
               pageSize={10}
               showRowActions={false}
             />
