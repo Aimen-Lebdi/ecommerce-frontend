@@ -83,7 +83,7 @@ const Checkout = () => {
   });
 
   // Checkout state
-  const [shippingMethod, setShippingMethod] = useState("standard");
+  // const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false);
 
@@ -464,24 +464,21 @@ const Checkout = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RadioGroup
-                  value={shippingMethod}
-                  onValueChange={setShippingMethod}
-                  disabled={isProcessing}
-                >
-                  <div className="flex items-center space-x-3 p-4 border rounded-lg">
-                    <RadioGroupItem value="express" id="express" />
-                    <div className="flex-1">
-                      <Label htmlFor="express" className="font-medium">
-                        {t('checkout.yalidineExpress')}
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('checkout.businessDays')}
-                      </p>
-                    </div>
-                    <span className="font-semibold">500 DA</span>
-                  </div>
-                </RadioGroup>
+                <div className="flex items-center space-x-3 p-4 border rounded-lg">
+  <div className="w-4 h-4 rounded-full border border-primary flex items-center justify-center">
+    <div className="w-2 h-2 bg-primary rounded-full" />
+  </div>
+  <div className="flex-1">
+    <Label className="font-medium">
+      {t('checkout.yalidineExpress')}
+    </Label>
+    <p className="text-sm text-muted-foreground">
+      {t('checkout.businessDays')}
+    </p>
+  </div>
+  <span className="font-semibold">500 DA</span>
+</div>
+
               </CardContent>
             </Card>
 

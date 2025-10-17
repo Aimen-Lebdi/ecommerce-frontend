@@ -99,8 +99,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link to="/admin" className="flex items-center gap-2">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">{t('sidebar.companyName')}</span>
+                <img src="../../../../public/logo.png" alt="" className="!size-5" />
+                <img src="../../../../public/shopName.png" alt="" className="h-7" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

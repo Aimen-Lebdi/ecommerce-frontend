@@ -580,6 +580,8 @@
     "privacyNotice": "Nous respectons votre vie privée et ne partagerons jamais vos informations personnelles avec des tiers.",
     "alreadyHaveAccount": "Vous avez déjà un compte ?",
     "signInHere": "Connectez-vous ici",
+    "googleComingSoon": "Connexion Google bientôt disponible !",
+    "facebookComingSoon": "Connexion Facebook bientôt disponible !",
     "errors": {
       "nameRequired": "Le nom est requis",
       "emailRequired": "L'email est requis",
@@ -1413,7 +1415,7 @@
       "placeholder": "Entrez votre email",
       "subscribe": "S'abonner"
     },
-    "copyright": "© {{year}} CLICON. Tous droits réservés.",
+    "copyright": "© {{year}} Cliqo. Tous droits réservés.",
     "legal": {
       "privacyPolicy": "Politique de Confidentialité",
       "termsOfService": "Conditions d'Utilisation",

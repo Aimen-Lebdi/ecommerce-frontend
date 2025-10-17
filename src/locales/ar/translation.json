@@ -580,6 +580,8 @@
     "privacyNotice": "نحن نحترم خصوصيتك ولن نشارك معلوماتك الشخصية مع أطراف ثالثة.",
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
     "signInHere": "سجل الدخول من هنا",
+    "googleComingSoon": "تسجيل الدخول عبر جوجل قريباً!",
+    "facebookComingSoon": "تسجيل الدخول عبر فيسبوك قريباً!",
     "errors": {
       "nameRequired": "الاسم مطلوب",
       "emailRequired": "البريد الإلكتروني مطلوب",
@@ -1413,7 +1415,7 @@
       "placeholder": "أدخل بريدك الإلكتروني",
       "subscribe": "اشتراك"
     },
-    "copyright": "© {{year}} CLICON. جميع الحقوق محفوظة.",
+    "copyright": "© {{year}} Cliqo. جميع الحقوق محفوظة.",
     "legal": {
       "privacyPolicy": "سياسة الخصوصية",
       "termsOfService": "شروط الخدمة",

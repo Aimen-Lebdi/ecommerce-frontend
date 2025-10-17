@@ -55,10 +55,11 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-lg font-bold text-primary-foreground">C</span>
+              <div className="h-8 w-8 rounded-lg flex items-center justify-center">
+                <img src="../../../../public/logo.png" alt="" />
               </div>
-              <span className="font-bold text-xl">{t('footer.logo')}</span>
+              <img src="../../../../public/shopName.png" alt="" className=" h-8" />
+              {/* <span className="font-bold text-xl">{t('footer.logo')}</span> */}
             </div>
             <p className="text-sm text-muted-foreground">
               {t('footer.companyDescription')}

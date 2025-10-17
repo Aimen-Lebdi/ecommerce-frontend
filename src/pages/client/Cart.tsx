@@ -27,13 +27,13 @@ import {
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "../../components/ui/select";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchCart,
@@ -62,7 +62,7 @@ const Cart = () => {
   } = useAppSelector((state) => state.cart);
 
   const [promoCode, setPromoCode] = useState("");
-  const [shippingMethod, setShippingMethod] = useState("standard");
+  // const [shippingMethod, setShippingMethod] = useState("standard");
 
   // Fetch cart on component mount
   useEffect(() => {
@@ -80,9 +80,8 @@ const Cart = () => {
   // Calculate totals
   const subtotal = totalCartPrice;
   const promoDiscount = appliedCoupon ? appliedCoupon.discount : 0;
-  const shippingCost =
-    shippingMethod === "express" ? 15.99 : subtotal > 75 ? 0 : 9.99;
-  const taxRate = 0.08; // 8% tax
+  const shippingCost =500;
+  const taxRate = 0; 
   const taxAmount = (subtotal - promoDiscount) * taxRate;
   const total = subtotal - promoDiscount + shippingCost + taxAmount;
 
@@ -240,7 +239,7 @@ const Cart = () => {
                       {/* Price */}
                       <div className="text-right">
                         <div className="font-semibold text-sm md:text-base">
-                          ${item.price.toFixed(2)}
+                          {item.price.toFixed(2)} DA
                         </div>
                       </div>
                     </div>
@@ -310,7 +309,7 @@ const Cart = () => {
                     {/* Subtotal */}
                     <div className="text-right mt-2">
                       <span className="text-sm font-semibold">
-                        {t('cart.subtotal')}: ${(item.price * item.quantity).toFixed(2)}
+                        {t('cart.subtotal')}: {(item.price * item.quantity).toFixed(2)} DA
                       </span>
                     </div>
                   </div>
@@ -352,7 +351,7 @@ const Cart = () => {
                       {t('cart.couponAppliedLabel')}: {appliedCoupon.code}
                     </span>
                     <span className="text-sm font-semibold text-green-800">
-                      -${appliedCoupon.discount.toFixed(2)}
+                      {appliedCoupon.discount.toFixed(2)} DA
                     </span>
                   </div>
                 </div>
@@ -371,18 +370,18 @@ const Cart = () => {
             <CardContent className="space-y-4">
               <div className="flex justify-between text-sm">
                 <span>{t('cart.subtotal')}</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{subtotal.toFixed(2)} DA</span>
               </div>
 
               {totalPriceAfterDiscount && appliedCoupon && (
                 <div className="flex justify-between text-sm text-green-600">
                   <span>{t('cart.discount')}</span>
-                  <span>-${appliedCoupon.discount.toFixed(2)}</span>
+                  <span>{appliedCoupon.discount.toFixed(2)} DA</span>
                 </div>
               )}
 
               {/* Shipping Options */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label className="text-sm font-medium">{t('cart.shipping')}</label>
                 <Select
                   value={shippingMethod}
@@ -400,31 +399,30 @@ const Cart = () => {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
 
               <div className="flex justify-between text-sm">
                 <span>{t('cart.shipping')}</span>
-                <span>${shippingCost.toFixed(2)}</span>
+                <span>{shippingCost.toFixed(2)} DA</span>
               </div>
 
               <div className="flex justify-between text-sm">
                 <span>{t('cart.tax')}</span>
-                <span>${taxAmount.toFixed(2)}</span>
+                <span>{taxAmount.toFixed(2)} DA</span>
               </div>
 
               <Separator />
 
               <div className="flex justify-between text-lg font-semibold">
                 <span>{t('cart.total')}</span>
-                <span>${total.toFixed(2)}</span>
+                <span>{total.toFixed(2)} DA</span>
               </div>
 
               {/* Estimated Delivery */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
                 <Truck className="h-4 w-4" />
                 <span>
-                  {t('cart.estimatedDelivery')}:{" "}
-                  {shippingMethod === "express" ? "Dec 8-10" : "Dec 12-15"}
+                  {t('cart.estimatedDelivery')} 2 - 3 days
                 </span>
               </div>
 

@@ -81,7 +81,7 @@ const OrderConfirmationPage = () => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shipping = order.shippingPrice || 0;
+  const shipping = order.shippingPrice || 500;
   const tax = order.taxPrice || 0;
   const total = order.totalOrderPrice;
 
@@ -116,6 +116,17 @@ const OrderConfirmationPage = () => {
       case "failed":
       case "refunded":
         return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getPaymentMethodColor = (status: string) => {
+    switch (status) {
+      case "cash":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "card":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -178,7 +189,9 @@ const OrderConfirmationPage = () => {
                   status: order.paymentStatus.toUpperCase(),
                 })}
               </Badge>
-              <Badge variant="outline" className="px-3 py-1">
+              <Badge className={`${getPaymentMethodColor(
+                  order.paymentMethodType
+                )} border px-3 py-1`}>
                 {t(
                   order.paymentMethodType === "cash"
                     ? "orderConfirmation.payment.cod"
@@ -243,7 +256,7 @@ const OrderConfirmationPage = () => {
                     className="flex space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gray-50 rounded-lg"
                   >
                     <img
-                      src={item.product.imageCover}
+                      src={item.product.mainImage}
                       alt={item.product.title}
                       className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg flex-shrink-0"
                     />
@@ -266,7 +279,7 @@ const OrderConfirmationPage = () => {
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="font-semibold text-gray-900 text-sm sm:text-base">
-                        ${item.price.toFixed(2)}
+                        {item.price.toFixed(2)} DA
                       </p>
                     </div>
                   </div>
@@ -450,26 +463,26 @@ const OrderConfirmationPage = () => {
                   <span className="text-gray-600">
                     {t("orderConfirmation.summary.subtotal")}
                   </span>
-                  <span className="text-gray-900">${subtotal.toFixed(2)}</span>
+                  <span className="text-gray-900">{subtotal.toFixed(2)} DA</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">
                     {t("orderConfirmation.summary.shipping")}
                   </span>
-                  <span className="text-gray-900">${shipping.toFixed(2)}</span>
+                  <span className="text-gray-900">{shipping.toFixed(2)} DA</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">
                     {t("orderConfirmation.summary.tax")}
                   </span>
-                  <span className="text-gray-900">${tax.toFixed(2)}</span>
+                  <span className="text-gray-900">{tax.toFixed(2)} DA</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-base sm:text-lg font-semibold">
                   <span className="text-gray-900">
                     {t("orderConfirmation.summary.total")}
                   </span>
-                  <span className="text-gray-900">${total.toFixed(2)}</span>
+                  <span className="text-gray-900">{total.toFixed(2)} DA</span>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t text-xs text-gray-500">
@@ -486,7 +499,7 @@ const OrderConfirmationPage = () => {
               <div className="space-y-2 sm:space-y-3">
                 {order.trackingNumber && (
                   <Button
-                    variant="outline"
+                    // variant="outline"
                     className="w-full justify-between text-xs sm:text-sm"
                     asChild
                   >
@@ -497,7 +510,7 @@ const OrderConfirmationPage = () => {
                   </Button>
                 )}
                 <Button
-                  variant="outline"
+                  // variant="outline"
                   className="w-full justify-between text-xs sm:text-sm"
                   onClick={handleDownloadInvoice}
                 >
@@ -507,7 +520,7 @@ const OrderConfirmationPage = () => {
                   <Download className="w-4 h-4" />
                 </Button>
                 <Button
-                  variant="outline"
+                  // variant="outline"
                   className="w-full justify-between text-xs sm:text-sm"
                   onClick={() => {
                     navigator.share?.({
@@ -564,11 +577,11 @@ const OrderConfirmationPage = () => {
               </Button>
             )}
             <Button
-              variant="outline"
+              // variant="outline"
               className="flex-1 text-sm sm:text-base"
               asChild
             >
-              <Link to="/orders">
+              <Link to="/my-account?tab=orders">
                 <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 {t("orderConfirmation.actions.viewAllOrders")}
               </Link>

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
   Grid3X3,
   List,
@@ -75,11 +76,15 @@ const FiltersPanel = memo(
       <div className="space-y-6">
         {/* Categories */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">{t('shop.filters.categories')}</Label>
+          <Label className="text-sm font-medium">
+            {t("shop.filters.categories")}
+          </Label>
           {categoriesLoading ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm text-muted-foreground">{t('shop.loading')}</span>
+              <span className="text-sm text-muted-foreground">
+                {t("shop.loading")}
+              </span>
             </div>
           ) : (
             <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
@@ -108,12 +113,14 @@ const FiltersPanel = memo(
         {/* Subcategories */}
         {selectedCategories.length > 0 && (
           <div className="space-y-3">
-            <Label className="text-sm font-medium">{t('shop.filters.subcategories')}</Label>
+            <Label className="text-sm font-medium">
+              {t("shop.filters.subcategories")}
+            </Label>
             {subcategoriesLoading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm text-muted-foreground">
-                  {t('shop.loading')}
+                  {t("shop.loading")}
                 </span>
               </div>
             ) : availableSubCategories.length > 0 ? (
@@ -144,7 +151,7 @@ const FiltersPanel = memo(
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                {t('shop.filters.noSubcategories')}
+                {t("shop.filters.noSubcategories")}
               </p>
             )}
           </div>
@@ -152,11 +159,15 @@ const FiltersPanel = memo(
 
         {/* Brands */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">{t('shop.filters.brands')}</Label>
+          <Label className="text-sm font-medium">
+            {t("shop.filters.brands")}
+          </Label>
           {brandsLoading ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm text-muted-foreground">{t('shop.loading')}</span>
+              <span className="text-sm text-muted-foreground">
+                {t("shop.loading")}
+              </span>
             </div>
           ) : (
             <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
@@ -184,14 +195,16 @@ const FiltersPanel = memo(
 
         {/* Price Range */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">{t('shop.filters.priceRange')}</Label>
+          <Label className="text-sm font-medium">
+            {t("shop.filters.priceRange")}
+          </Label>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label
                 htmlFor="min-price"
                 className="text-xs text-muted-foreground"
               >
-                {t('shop.filters.minPrice')}
+                {t("shop.filters.minPrice")}
               </Label>
               <Input
                 id="min-price"
@@ -216,7 +229,7 @@ const FiltersPanel = memo(
                 htmlFor="max-price"
                 className="text-xs text-muted-foreground"
               >
-                {t('shop.filters.maxPrice')}
+                {t("shop.filters.maxPrice")}
               </Label>
               <Input
                 id="max-price"
@@ -243,18 +256,21 @@ const FiltersPanel = memo(
             onClick={onApplyPriceFilter}
             className="w-full"
           >
-            {t('shop.filters.applyPriceFilter')}
+            {t("shop.filters.applyPriceFilter")}
           </Button>
           {(filters.minPrice || filters.maxPrice) && (
             <div className="text-xs text-muted-foreground text-center">
-              {t('shop.filters.active')}: ${filters.minPrice || "0"} - ${filters.maxPrice || "∞"}
+              {t("shop.filters.active")}: ${filters.minPrice || "0"} - $
+              {filters.maxPrice || "∞"}
             </div>
           )}
         </div>
 
         {/* Special Filters */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">{t('shop.filters.specialOffers')}</Label>
+          <Label className="text-sm font-medium">
+            {t("shop.filters.specialOffers")}
+          </Label>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -265,7 +281,7 @@ const FiltersPanel = memo(
                 }
               />
               <Label htmlFor="on-sale" className="text-sm font-normal">
-                {t('shop.filters.onSale')}
+                {t("shop.filters.onSale")}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
@@ -277,7 +293,7 @@ const FiltersPanel = memo(
                 }
               />
               <Label htmlFor="in-stock" className="text-sm font-normal">
-                {t('shop.filters.inStockOnly')}
+                {t("shop.filters.inStockOnly")}
               </Label>
             </div>
           </div>
@@ -286,7 +302,7 @@ const FiltersPanel = memo(
         {/* Clear Filters */}
         {activeFilters > 0 && (
           <Button variant="outline" onClick={onClearFilters} className="w-full">
-            {t('shop.filters.clearAllFilters')} ({activeFilters})
+            {t("shop.filters.clearAllFilters")} ({activeFilters})
           </Button>
         )}
       </div>
@@ -299,16 +315,17 @@ FiltersPanel.displayName = "FiltersPanel";
 const ShopPage = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const sortOptions = [
-    { value: "createdAt", label: t('shop.sort.newestFirst') },
-    { value: "-createdAt", label: t('shop.sort.oldestFirst') },
-    { value: "price", label: t('shop.sort.priceLowToHigh') },
-    { value: "-price", label: t('shop.sort.priceHighToLow') },
-    { value: "-rating", label: t('shop.sort.highestRated') },
-    { value: "-sold", label: t('shop.sort.mostPopular') },
-    { value: "name", label: t('shop.sort.nameAToZ') },
-    { value: "-name", label: t('shop.sort.nameZToA') },
+    { value: "createdAt", label: t("shop.sort.newestFirst") },
+    { value: "-createdAt", label: t("shop.sort.oldestFirst") },
+    { value: "price", label: t("shop.sort.priceLowToHigh") },
+    { value: "-price", label: t("shop.sort.priceHighToLow") },
+    { value: "-rating", label: t("shop.sort.highestRated") },
+    { value: "-sold", label: t("shop.sort.mostPopular") },
+    { value: "name", label: t("shop.sort.nameAToZ") },
+    { value: "-name", label: t("shop.sort.nameZToA") },
   ];
 
   // Redux state
@@ -340,6 +357,7 @@ const ShopPage = () => {
     maxPrice: "",
     inStock: false,
     onSale: false,
+    keyword: "",
   });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
@@ -349,6 +367,14 @@ const ShopPage = () => {
     minPrice: "",
     maxPrice: "",
   });
+
+  // Get keyword from URL on mount and when URL changes
+  useEffect(() => {
+    const keywordFromUrl = searchParams.get("keyword");
+    if (keywordFromUrl) {
+      setFilters((prev) => ({ ...prev, keyword: keywordFromUrl, page: 1 }));
+    }
+  }, [searchParams]);
 
   // Fetch initial data
   useEffect(() => {
@@ -373,6 +399,11 @@ const ShopPage = () => {
       limit: filters.limit,
       sort: filters.sort,
     };
+
+    // Add keyword to query params if present
+    if (filters.keyword) {
+      queryParams.keyword = filters.keyword;
+    }
 
     if (selectedCategories.length > 0) {
       queryParams.category = selectedCategories.join(",");
@@ -419,6 +450,7 @@ const ShopPage = () => {
     if (filters.minPrice || filters.maxPrice) count++;
     if (filters.inStock) count++;
     if (filters.onSale) count++;
+    if (filters.keyword) count++;
     setActiveFilters(count);
   }, [selectedCategories, selectedSubCategories, selectedBrands, filters]);
 
@@ -488,9 +520,12 @@ const ShopPage = () => {
       maxPrice: "",
       inStock: false,
       onSale: false,
+      keyword: "",
       page: 1,
     }));
-  }, []);
+    // Clear keyword from URL
+    setSearchParams({});
+  }, [setSearchParams]);
 
   const clearSpecificFilter = (type, value) => {
     switch (type) {
@@ -517,6 +552,10 @@ const ShopPage = () => {
         break;
       case "onSale":
         setFilters((prev) => ({ ...prev, onSale: false, page: 1 }));
+        break;
+      case "keyword":
+        setFilters((prev) => ({ ...prev, keyword: "", page: 1 }));
+        setSearchParams({});
         break;
     }
   };
@@ -552,18 +591,6 @@ const ShopPage = () => {
                 alt={product.name}
                 className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                {hasDiscount && (
-                  <Badge className="bg-red-600 hover:bg-red-700 text-xs px-1.5 py-0.5">
-                    -{discountPercentage}%
-                  </Badge>
-                )}
-                {product.quantity === 0 && (
-                  <Badge className="bg-gray-600 hover:bg-gray-700 text-xs px-1.5 py-0.5">
-                    {t('shop.product.outOfStock')}
-                  </Badge>
-                )}
-              </div>
               <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100 sm:group-hover:scale-110">
                 <Button
                   size="icon"
@@ -576,9 +603,15 @@ const ShopPage = () => {
                       await dispatch(
                         addProductToWishlist(product._id)
                       ).unwrap();
-                      toast.success(t('shop.product.addedToWishlist', { productName: product.name }));
+                      toast.success(
+                        t("shop.product.addedToWishlist", {
+                          productName: product.name,
+                        })
+                      );
                     } catch (err: any) {
-                      toast.error(err || t('shop.product.failedToAddToWishlist'));
+                      toast.error(
+                        err || t("shop.product.failedToAddToWishlist")
+                      );
                     }
                   }}
                 >
@@ -639,11 +672,11 @@ const ShopPage = () => {
             </div>
             <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
               <span className="text-base sm:text-lg font-bold">
-                ${discountPrice}
+                {discountPrice} DA
               </span>
               {hasDiscount && (
                 <span className="text-xs sm:text-sm text-muted-foreground line-through">
-                  ${product.price}
+                  {product.price} DA
                 </span>
               )}
             </div>
@@ -654,8 +687,8 @@ const ShopPage = () => {
                 }`}
               >
                 {product.quantity > 0
-                  ? t('shop.product.inStock', { quantity: product.quantity })
-                  : t('shop.product.outOfStock')}
+                  ? t("shop.product.inStock", { quantity: product.quantity })
+                  : t("shop.product.outOfStock")}
               </span>
             </div>
           </CardContent>
@@ -747,18 +780,18 @@ const ShopPage = () => {
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  ({product.ratingsQuantity || 0} {t('shop.product.reviews')})
+                  ({product.ratingsQuantity || 0} {t("shop.product.reviews")})
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-lg sm:text-xl font-bold">
-                      ${discountPrice}
+                      {discountPrice} DA
                     </span>
                     {hasDiscount && (
                       <span className="text-sm text-muted-foreground line-through">
-                        ${product.price}
+                        {product.price} DA
                       </span>
                     )}
                   </div>
@@ -768,8 +801,10 @@ const ShopPage = () => {
                     }`}
                   >
                     {product.quantity > 0
-                      ? t('shop.product.inStock', { quantity: product.quantity })
-                      : t('shop.product.outOfStock')}
+                      ? t("shop.product.inStock", {
+                          quantity: product.quantity,
+                        })
+                      : t("shop.product.outOfStock")}
                   </span>
                 </div>
               </div>
@@ -824,10 +859,12 @@ const ShopPage = () => {
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-          {t('shop.header.title')}
+          {t("shop.header.title")}
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base">
-          {t('shop.header.subtitle')}
+          {filters.keyword
+            ? t("shop.header.searchResults", { query: filters.keyword })
+            : t("shop.header.subtitle")}
         </p>
       </div>
 
@@ -837,7 +874,9 @@ const ShopPage = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">{t('shop.filters.title')}</h2>
+                <h2 className="text-lg font-semibold">
+                  {t("shop.filters.title")}
+                </h2>
                 {activeFilters > 0 && (
                   <Badge variant="secondary">{activeFilters}</Badge>
                 )}
@@ -879,7 +918,7 @@ const ShopPage = () => {
                 <SheetTrigger asChild>
                   <Button variant="outline" className="lg:hidden">
                     <SlidersHorizontal className="h-4 w-4 mr-2" />
-                    {t('shop.filters.title')}
+                    {t("shop.filters.title")}
                     {activeFilters > 0 && (
                       <Badge className="ml-2" variant="secondary">
                         {activeFilters}
@@ -889,9 +928,9 @@ const ShopPage = () => {
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80 sm:w-96">
                   <SheetHeader>
-                    <SheetTitle>{t('shop.filters.title')}</SheetTitle>
+                    <SheetTitle>{t("shop.filters.title")}</SheetTitle>
                   </SheetHeader>
-                  <div className="mt-6 p-6 overflow-y-auto h-full pb-16">
+                  <div className=" px-6 pb-5 overflow-y-auto h-full">
                     <FiltersPanel
                       isMobile={true}
                       categories={categories}
@@ -922,11 +961,12 @@ const ShopPage = () => {
               <p className="text-sm text-muted-foreground">
                 {pagination ? (
                   <>
-                    {t('shop.results.showing')} {products?.length || 0} {t('shop.results.of')}{" "}
-                    {pagination.totalResults || 0} {t('shop.results.results')}
+                    {t("shop.results.showing")} {products?.length || 0}{" "}
+                    {t("shop.results.of")} {pagination.totalResults || 0}{" "}
+                    {t("shop.results.results")}
                   </>
                 ) : (
-                  t('shop.loading')
+                  t("shop.loading")
                 )}
               </p>
             </div>
@@ -935,7 +975,7 @@ const ShopPage = () => {
               {/* Sort */}
               <Select value={filters.sort} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder={t('shop.sort.sortBy')} />
+                  <SelectValue placeholder={t("shop.sort.sortBy")} />
                 </SelectTrigger>
                 <SelectContent>
                   {sortOptions.map((option) => (
@@ -969,6 +1009,15 @@ const ShopPage = () => {
           {/* Active Filters */}
           {activeFilters > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
+              {filters.keyword && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Search: "{filters.keyword}"
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => clearSpecificFilter("keyword")}
+                  />
+                </Badge>
+              )}
               {selectedCategories.map((categoryId) => {
                 const category = categories.find((c) => c._id === categoryId);
                 return category ? (
@@ -1025,7 +1074,8 @@ const ShopPage = () => {
               })}
               {(filters.minPrice || filters.maxPrice) && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  {t('shop.filters.priceLabel')}: {filters.minPrice || "0"} - {filters.maxPrice || "∞"}
+                  {t("shop.filters.priceLabel")}: {filters.minPrice || "0"} -{" "}
+                  {filters.maxPrice || "∞"}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => clearSpecificFilter("price")}
@@ -1034,7 +1084,7 @@ const ShopPage = () => {
               )}
               {filters.onSale && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  {t('shop.filters.onSale')}
+                  {t("shop.filters.onSale")}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => clearSpecificFilter("onSale")}
@@ -1043,7 +1093,7 @@ const ShopPage = () => {
               )}
               {filters.inStock && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  {t('shop.filters.inStockOnly')}
+                  {t("shop.filters.inStockOnly")}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => clearSpecificFilter("inStock")}
@@ -1058,7 +1108,9 @@ const ShopPage = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                <p className="text-muted-foreground">{t('shop.loadingProducts')}</p>
+                <p className="text-muted-foreground">
+                  {t("shop.loadingProducts")}
+                </p>
               </div>
             </div>
           )}
@@ -1084,8 +1136,8 @@ const ShopPage = () => {
               {pagination && pagination.numberOfPages > 1 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t">
                   <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                    {t('shop.pagination.showingPage')} {pagination.currentPage} {t('shop.pagination.of')}{" "}
-                    {pagination.numberOfPages}
+                    {t("shop.pagination.showingPage")} {pagination.currentPage}{" "}
+                    {t("shop.pagination.of")} {pagination.numberOfPages}
                   </div>
 
                   <div className="flex items-center gap-2 order-1 sm:order-2">
@@ -1099,7 +1151,7 @@ const ShopPage = () => {
                       className="hidden sm:flex"
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" />
-                      {t('shop.pagination.previous')}
+                      {t("shop.pagination.previous")}
                     </Button>
 
                     <Button
@@ -1148,7 +1200,7 @@ const ShopPage = () => {
                       disabled={!pagination.nextPage}
                       className="hidden sm:flex"
                     >
-                      {t('shop.pagination.next')}
+                      {t("shop.pagination.next")}
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
 
@@ -1172,13 +1224,19 @@ const ShopPage = () => {
               <div className="mb-4">
                 <ShoppingCart className="h-12 w-12 mx-auto text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">{t('shop.noProducts.title')}</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                {t("shop.noProducts.title")}
+              </h3>
               <p className="text-muted-foreground mb-4">
-                {t('shop.noProducts.message')}
+                {filters.keyword
+                  ? t("shop.noProducts.searchMessage", {
+                      query: filters.keyword,
+                    })
+                  : t("shop.noProducts.message")}
               </p>
               {activeFilters > 0 && (
                 <Button onClick={clearFilters} variant="outline">
-                  {t('shop.noProducts.clearFilters')}
+                  {t("shop.noProducts.clearFilters")}
                 </Button>
               )}
             </div>

@@ -358,7 +358,7 @@ const OrderTracking = () => {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('orderTracking.totalAmount')}</span>
                   <span className="font-semibold">
-                    ${order.totalOrderPrice.toFixed(2)}
+                    {order.totalOrderPrice.toFixed(2)} DA
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -388,7 +388,7 @@ const OrderTracking = () => {
                 </p>
               </div>
               <Button variant="outline" className="w-full sm:w-auto" asChild>
-                <Link to="/contact">{t('orderTracking.contactSupport')}</Link>
+                <Link to=''>{t('orderTracking.contactSupport')}</Link>
               </Button>
             </div>
           </CardContent>
@@ -403,7 +403,7 @@ const OrderTracking = () => {
             </Link>
           </Button>
           <Button variant="outline" className="flex-1" asChild>
-            <Link to="/orders">{t('orderTracking.viewAllOrders')}</Link>
+            <Link to="/my-account?tab=orders">{t('orderTracking.viewAllOrders')}</Link>
           </Button>
         </div>
       </div>

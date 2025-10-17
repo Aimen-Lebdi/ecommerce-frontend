@@ -37,7 +37,7 @@ export interface Order {
     product: {
       _id: string;
       title: string;
-      imageCover?: string;
+      mainImage?: string;
     };
     quantity: number;
     color?: string;

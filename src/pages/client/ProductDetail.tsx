@@ -266,12 +266,12 @@ const ProductDetails = () => {
           {/* Price */}
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-2xl md:text-3xl font-bold">
-              ${displayPrice.toFixed(2)}
+              {displayPrice.toFixed(2)} DA
             </span>
             {product.priceAfterDiscount && (
               <>
                 <span className="line-through text-muted-foreground text-base md:text-lg">
-                  ${product.price.toFixed(2)}
+                  {product.price.toFixed(2)} DA
                 </span>
                 <Badge variant="destructive" className="text-xs md:text-sm">
                   {t('productDetail.save', { percentage: discountPercentage })}
@@ -362,13 +362,13 @@ const ProductDetails = () => {
                   </>
                 )}
               </Button>
-              <Button
+              {/* <Button
                 variant="secondary"
                 className="h-9 md:h-10"
                 disabled={!inStock}
               >
                 <span className="text-xs md:text-sm">{t('productDetail.buyNow')}</span>
-              </Button>
+              </Button> */}
               <Button
                 variant="outline"
                 size="icon"
@@ -494,7 +494,7 @@ const ProductDetails = () => {
                       {t('productDetail.specs.price')}:
                     </span>
                     <span className="text-sm font-medium">
-                      ${product.price.toFixed(2)}
+                      {product.price.toFixed(2)} DA
                     </span>
                   </div>
                   {product.priceAfterDiscount && (
@@ -503,7 +503,7 @@ const ProductDetails = () => {
                         {t('productDetail.specs.discountedPrice')}:
                       </span>
                       <span className="text-sm font-medium text-green-600">
-                        ${product.priceAfterDiscount.toFixed(2)}
+                        {product.priceAfterDiscount.toFixed(2)} DA
                       </span>
                     </div>
                   )}
@@ -584,11 +584,11 @@ const ProductDetails = () => {
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm md:text-base font-bold">
-                        ${(rp.priceAfterDiscount || rp.price).toFixed(2)}
+                        {(rp.priceAfterDiscount || rp.price).toFixed(2)} DA
                       </span>
                       {rp.priceAfterDiscount && (
                         <span className="text-xs text-muted-foreground line-through">
-                          ${rp.price.toFixed(2)}
+                          DA{rp.price.toFixed(2)}
                         </span>
                       )}
                     </div>

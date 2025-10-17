@@ -409,7 +409,7 @@ useEffect(() => {
               </div>
               <div>
                 <p className="text-xl sm:text-2xl font-semibold">
-                  ${userData.totalSpent.toFixed(2)}
+                  {userData.totalSpent.toFixed(2)} DA
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   {t('myAccount.overview.totalSpent')}
@@ -464,7 +464,7 @@ useEffect(() => {
                     </p>
                   </div>
                   <p className="font-semibold text-base">
-                    ${order.total.toFixed(2)}
+                    {order.total.toFixed(2)} DA
                   </p>
                 </div>
               ))}
@@ -527,7 +527,7 @@ useEffect(() => {
                   <div className="text-xs sm:text-sm text-muted-foreground">
                     {t('myAccount.orders.orderSummary', { 
                       items: order.cartItems.length, 
-                      total: order.totalOrderPrice.toFixed(2) 
+                      total: order.totalOrderPrice.toFixed(2) + " DA"
                     })}
                   </div>
 
@@ -600,7 +600,7 @@ useEffect(() => {
                   </h3>
                 </Link>
                 <p className="text-sm sm:text-base font-semibold text-primary">
-                  ${item.price.toFixed(2)}
+                  {item.price.toFixed(2)} DA
                 </p>
                 <div className="flex gap-1.5 sm:gap-2">
                   <Button
