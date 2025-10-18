@@ -124,7 +124,7 @@ export function UserDialog({
   const validate = () => {
     const e: Errors = {};
     if (!name.trim()) e.name = t('userDialog.errors.nameRequired');
-    // if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       e.email = t('userDialog.errors.emailRequired');
 
     if (mode === "add") {

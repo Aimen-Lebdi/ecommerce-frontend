@@ -20,6 +20,7 @@ import {
   type CreateCashOrderData,
   type TrackingInfo,
   getOrderBySessionAPI,
+  fetchMyOrdersAPI,
 } from "./ordersAPI";
 
 // Define the Order type to match backend response
@@ -152,6 +153,41 @@ export const fetchOrders = createAsyncThunk<
 >("orders/fetchOrders", async (queryParams, { rejectWithValue }) => {
   try {
     const response: OrdersResponse = await fetchOrdersAPI(queryParams);
+
+    return {
+      orders: response.documents,
+      pagination: {
+        ...response.pagination,
+        totalResults: response.result,
+      },
+    };
+  } catch (err: any) {
+    const status = err.response?.status;
+    const message = err.response?.data?.message || err.message;
+
+    if (status === 404) {
+      return {
+        orders: [],
+        pagination: {
+          currentPage: 1,
+          limit: queryParams.limit || 10,
+          numberOfPages: 0,
+          totalResults: 0,
+        },
+      };
+    }
+
+    return rejectWithValue({ message, status });
+  }
+});
+// Async thunk to fetch orders
+export const fetchMyOrders = createAsyncThunk<
+  { orders: Order[]; pagination: PaginationMeta },
+  OrdersQueryParams,
+  { rejectValue: { message: string; status?: number } }
+>("orders/fetchMyOrders", async (queryParams, { rejectWithValue }) => {
+  try {
+    const response: OrdersResponse = await fetchMyOrdersAPI(queryParams);
 
     return {
       orders: response.documents,
@@ -399,6 +435,21 @@ const ordersSlice = createSlice({
         state.pagination = action.payload.pagination;
       })
       .addCase(fetchOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "An error occurred";
+      })
+      // Fetch My orders
+      .addCase(fetchMyOrders.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+        state.currentQueryParams = action.meta.arg;
+      })
+      .addCase(fetchMyOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload.orders;
+        state.pagination = action.payload.pagination;
+      })
+      .addCase(fetchMyOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
       })

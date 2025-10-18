@@ -19,7 +19,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "../../components/ui/avatar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchCategories } from "../../features/categories/categoriesSlice";
 import { fetchProducts } from "../../features/products/productsSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
@@ -65,7 +65,7 @@ const testimonials = [
     id: 1,
     name: "Sarah Johnson",
     avatar:
-      "https://images.unsplash.com/photo-1494790108755-2616b332-1c3f?w=100&h=100&fit=crop",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
     rating: 5,
     text: "home.testimonials.items.sarah.text",
     product: "home.testimonials.items.sarah.product",
@@ -363,6 +363,7 @@ const CategoriesSection = () => {
 const FeaturedProductsSection = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { products, loading } = useSelector((state) => state.products);
 
@@ -482,18 +483,17 @@ const FeaturedProductsSection = () => {
                         <Heart className="h-4 w-4" />
                       </Button>
                       <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8 bg-white/80 hover:bg-white"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Link
-                          to={`/product/${product._id}`}
-                          className="flex items-center justify-center w-full h-full"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
+  size="icon"
+  variant="outline"
+  className="h-8 w-8 bg-white/80 hover:bg-white"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/product/${product._id}`);
+  }}
+>
+  <Eye className="h-4 w-4" />
+</Button>
                     </div>
                   </div>
                 </CardHeader>

@@ -1242,10 +1242,10 @@
       "selectRow": "Sélectionner la ligne"
     },
     "bulkDelete": {
-      "button": "Supprimer {{count}} {{count, plural, one {élément} other {éléments}}}",
+      "button": "Supprimer {{count}} ",
       "buttonShort": "Supprimer ({{count}})",
       "title": "Confirmer la Suppression Multiple",
-      "description": "Êtes-vous sûr de vouloir supprimer {{count}} {{count, plural, one {élément} other {éléments}}} ? Cette action ne peut pas être annulée.",
+      "description": "Êtes-vous sûr de vouloir supprimer {{count}}  ? Cette action ne peut pas être annulée.",
       "cancel": "Annuler",
       "delete": "Supprimer",
       "deleting": "Suppression..."

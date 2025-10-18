@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useCallback, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { useAppSelector } from "../app/hooks";
 import { socketService } from "./socketService";
-import { setConnectionStatus } from "../activities/activitiesSlice";
 
 interface UseSocketOptions {
   autoConnect?: boolean;
@@ -22,22 +20,24 @@ export const useSocket = (options: UseSocketOptions = {}) => {
     onError,
   } = options;
 
-  const dispatch = useAppDispatch();
   const { isConnected } = useAppSelector((state) => state.activities);
-  const { user, token } = useAppSelector((state) => state.auth);
+  // FIXED: Use accessToken instead of token
+  const { user, accessToken } = useAppSelector((state) => state.auth);
   
   const isConnecting = useRef(false);
   const hasJoinedDashboard = useRef(false);
 
   // Connect to socket
   const connect = useCallback(async () => {
-    if (!token || isConnecting.current) {
+    // FIXED: Check accessToken instead of token
+    if (!accessToken || isConnecting.current || isConnected) {
       return;
     }
 
     try {
       isConnecting.current = true;
-      await socketService.connect(token);
+      // FIXED: Pass accessToken to socket service
+      await socketService.connect(accessToken);
       onConnect?.();
     } catch (error) {
       console.error("Socket connection failed:", error);
@@ -45,7 +45,7 @@ export const useSocket = (options: UseSocketOptions = {}) => {
     } finally {
       isConnecting.current = false;
     }
-  }, [token, onConnect, onError]);
+  }, [accessToken, isConnected, onConnect, onError]);
 
   // Disconnect from socket
   const disconnect = useCallback(() => {
@@ -55,7 +55,7 @@ export const useSocket = (options: UseSocketOptions = {}) => {
   }, [onDisconnect]);
 
   // Join dashboard room (for admins)
-  const joinDashboard = useCallback(() => {
+  const joinDashboardRoom = useCallback(() => {
     if (socketService.isConnected() && user?.role === "admin" && !hasJoinedDashboard.current) {
       socketService.joinDashboard();
       hasJoinedDashboard.current = true;
@@ -100,17 +100,17 @@ export const useSocket = (options: UseSocketOptions = {}) => {
 
   // Auto-connect effect
   useEffect(() => {
-    if (autoConnect && token && !isConnected && !isConnecting.current) {
+    if (autoConnect && accessToken && !isConnected && !isConnecting.current) {
       connect();
     }
-  }, [autoConnect, token, isConnected, connect]);
+  }, [autoConnect, accessToken, isConnected, connect]);
 
   // Auto-join dashboard for admins
   useEffect(() => {
     if (joinDashboard && isConnected && user?.role === "admin" && !hasJoinedDashboard.current) {
-      joinDashboard();
+      joinDashboardRoom();
     }
-  }, [joinDashboard, isConnected, user?.role, joinDashboard]);
+  }, [joinDashboard, isConnected, user?.role, joinDashboardRoom]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -119,7 +119,7 @@ export const useSocket = (options: UseSocketOptions = {}) => {
         disconnect();
       }
     };
-  }, []);
+  }, [isConnected, disconnect]);
 
   // Health check interval
   useEffect(() => {
@@ -136,7 +136,7 @@ export const useSocket = (options: UseSocketOptions = {}) => {
     isConnected,
     connect,
     disconnect,
-    joinDashboard,
+    joinDashboard: joinDashboardRoom,
     leaveDashboard,
     filterActivities,
     requestActivityStats,
@@ -145,3 +145,5 @@ export const useSocket = (options: UseSocketOptions = {}) => {
     socketService,
   };
 };
+
+export default useSocket;

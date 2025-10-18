@@ -66,21 +66,25 @@ export default function SignInPage() {
     };
   }, [dispatch, error]);
 
-  // Redirect if already authenticated
+  // FIXED: Redirect if already authenticated - check localStorage for tokens
   useEffect(() => {
-    if (isAuthenticated && user && !tokenExpired) {
-      // Get the intended destination from location state or default based on role
-      const from =
-        location.state?.from?.pathname ||
-        (user.role === "admin" ? "/admin" : "/");
+    const storedAccessToken = localStorage.getItem("accessToken");
+    const storedUser = localStorage.getItem("user");
+    
+    if (isAuthenticated && user && !tokenExpired && !loading && !isSigningIn && storedAccessToken && storedUser) {
+      const from = location.state?.from?.pathname || (user.role === "admin" ? "/admin" : "/");
+      
+      console.log('SignIn: Redirecting authenticated user to:', from);
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, user, navigate, location, tokenExpired]);
+  }, [isAuthenticated, user, navigate, location, tokenExpired, loading, isSigningIn]);
 
-  // Only redirect if truly authenticated (not expired)
-  if (isAuthenticated && !tokenExpired && !loading) {
-    // Get the intended destination from location state, or default to home
-    const from = (location.state as any)?.from?.pathname || "/";
+  // FIXED: Early return check
+  const storedAccessToken = localStorage.getItem("accessToken");
+  const storedUser = localStorage.getItem("user");
+  if (isAuthenticated && user && !tokenExpired && !loading && !isSigningIn && storedAccessToken && storedUser) {
+    const from = (location.state as any)?.from?.pathname || 
+                 (user?.role === "admin" ? "/admin" : "/");
     return <Navigate to={from} replace />;
   }
 

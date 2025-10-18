@@ -11,7 +11,7 @@ import {
   TagIcon,
   ShoppingCartIcon,
 } from "lucide-react";
-import { IconHelp, IconInnerShadowTop } from "@tabler/icons-react";
+import { IconHelp } from "@tabler/icons-react";
 
 import { NavMain } from "../../ui/nav-main";
 import { NavSecondary } from "../../ui/nav-secondary";
@@ -99,8 +99,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link to="/admin" className="flex items-center gap-2">
-                <img src="../../../../public/logo.png" alt="" className="!size-5" />
-                <img src="../../../../public/shopName.png" alt="" className="h-7" />
+                <img src="/logo.png" alt="" className="!size-5" />
+                <img src="/shopName.png" alt="" className="h-7" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

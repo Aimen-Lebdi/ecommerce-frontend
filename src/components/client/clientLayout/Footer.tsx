@@ -56,9 +56,9 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                <img src="../../../../public/logo.png" alt="" />
+                <img src="/logo.png" alt="" />
               </div>
-              <img src="../../../../public/shopName.png" alt="" className=" h-8" />
+              <img src="/shopName.png" alt="" className=" h-8" />
               {/* <span className="font-bold text-xl">{t('footer.logo')}</span> */}
             </div>
             <p className="text-sm text-muted-foreground">

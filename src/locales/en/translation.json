@@ -1242,10 +1242,10 @@
       "selectRow": "Select row"
     },
     "bulkDelete": {
-      "button": "Delete {{count}} {{count, plural, one {item} other {items}}}",
+      "button": "Delete {{count}} ",
       "buttonShort": "Delete ({{count}})",
       "title": "Confirm Bulk Delete",
-      "description": "Are you sure you want to delete {{count}} {{count, plural, one {item} other {items}}}? This action cannot be undone.",
+      "description": "Are you sure you want to delete {{count}} ? This action cannot be undone.",
       "cancel": "Cancel",
       "delete": "Delete",
       "deleting": "Deleting..."

@@ -120,9 +120,9 @@ export function Header() {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                  <img src="../../../../public/logo.png" alt="" />
+                  <img src="/logo.png" alt="" />
               </div>
-                  <img src="../../../../public/shopName.png" alt="" className=" h-8" />
+                  <img src="/shopName.png" alt="" className=" h-8" />
             </Link>
           </div>
 

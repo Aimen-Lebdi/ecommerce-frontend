@@ -10,7 +10,7 @@ import {
 } from "../../components/admin/global/data-table";
 import { SectionCards } from "../../components/admin/dashboard/section-cards";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import useSocket from "../../socket/useSocket";
+import { useSocketContext } from "../../socket/useSocket";
 import {
   fetchDashboardActivities,
   setQueryParams,
@@ -23,6 +23,11 @@ import { useTranslation } from 'react-i18next';
 export default function Dashboard() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const { socketService, isConnected } = useSocketContext();
+
+  // Track if we've joined dashboard in this session
+  const hasJoinedDashboardRef = React.useRef(false);
+  const dashboardJoinAttemptRef = React.useRef(false);
 
   // Helper function to get relative time
   const getRelativeTime = (timestamp: string) => {
@@ -227,37 +232,10 @@ export default function Dashboard() {
     realtimeActivities,
     dashboardLoading,
     dashboardError,
-    isConnected,
     currentQueryParams,
   } = useAppSelector((state) => state.activities);
 
   const { user } = useAppSelector((state) => state.auth);
-
-  // Initialize socket connection
-  const {
-    connect,
-    disconnect,
-    joinDashboard,
-    leaveDashboard,
-    filterActivities,
-    requestActivityStats,
-  } = useSocket({
-    autoConnect: true,
-    joinDashboard: user?.role === "admin",
-    onConnect: () => {
-      console.log("Dashboard socket connected");
-      toast.success(t('dashboard.socket.connected'));
-    },
-    onDisconnect: () => {
-      console.log("Dashboard socket disconnected");
-      toast.error(t('dashboard.socket.disconnected'));
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (error: any) => {
-      console.error("Dashboard socket error:", error);
-      toast.error(t('dashboard.socket.error'));
-    },
-  });
 
   // Combine dashboard activities with realtime activities
   const combinedActivities = React.useMemo(() => {
@@ -283,6 +261,7 @@ export default function Dashboard() {
 
   // Load initial dashboard activities on component mount
   React.useEffect(() => {
+    console.log("📊 Dashboard mounted, fetching initial activities...");
     dispatch(fetchDashboardActivities());
   }, [dispatch]);
 
@@ -293,6 +272,31 @@ export default function Dashboard() {
       dispatch(clearDashboardError());
     }
   }, [dashboardError, dispatch]);
+
+  // FIXED: Join dashboard room when socket is connected and user is admin
+  React.useEffect(() => {
+    if (isConnected && user?.role === "admin" && !hasJoinedDashboardRef.current && !dashboardJoinAttemptRef.current) {
+      dashboardJoinAttemptRef.current = true;
+      
+      console.log("📊 Admin connected, joining dashboard room...");
+      
+      // Small delay to ensure socket is fully ready
+      setTimeout(() => {
+        socketService.joinDashboard();
+        hasJoinedDashboardRef.current = true;
+        dashboardJoinAttemptRef.current = false;
+      }, 500);
+    }
+
+    // Cleanup on unmount or disconnect
+    return () => {
+      if (hasJoinedDashboardRef.current && socketService.isDashboardJoined()) {
+        console.log("👋 Leaving dashboard on unmount/disconnect");
+        socketService.leaveDashboard();
+        hasJoinedDashboardRef.current = false;
+      }
+    };
+  }, [isConnected, user?.role, socketService]);
 
   // Handle query parameter changes from the DataTable
   const handleQueryParamsChange = React.useCallback(
@@ -311,38 +315,26 @@ export default function Dashboard() {
         }
 
         if (isConnected && Object.keys(filters).length > 0) {
-          filterActivities(filters);
+          socketService.filterActivities(filters);
         }
       }
 
       dispatch(fetchDashboardActivities());
     },
-    [dispatch, isConnected, filterActivities]
+    [dispatch, isConnected, socketService]
   );
 
   // Handle refresh button
   const handleRefresh = React.useCallback(() => {
+    console.log("🔄 Refreshing dashboard data...");
     dispatch(fetchDashboardActivities());
 
     if (isConnected) {
-      requestActivityStats();
+      socketService.requestActivityStats();
     }
 
     toast.success(t('dashboard.refreshSuccess'));
-  }, [dispatch, isConnected, requestActivityStats, t]);
-
-  // Join dashboard room when component mounts (for admins)
-  React.useEffect(() => {
-    if (isConnected && user?.role === "admin") {
-      joinDashboard;
-    }
-
-    return () => {
-      if (isConnected) {
-        leaveDashboard;
-      }
-    };
-  }, [isConnected, user?.role, joinDashboard, leaveDashboard]);
+  }, [dispatch, isConnected, socketService, t]);
 
   return (
     <div className="flex flex-1 flex-col">

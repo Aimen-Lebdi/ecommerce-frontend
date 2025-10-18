@@ -1,8 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useRef } from "react";
-import { useAppSelector, useAppDispatch } from "../app/hooks";
+import { useAppSelector } from "../app/hooks";
 import { socketService } from "./socketService";
-// import { setConnectionStatus } from "../activities/activitiesSlice";
 import { toast } from "sonner";
 
 interface SocketContextType {
@@ -19,16 +18,18 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  const dispatch = useAppDispatch();
-  const { token, user } = useAppSelector((state) => state?.auth || {});
+  const { accessToken, user, isRefreshing } = useAppSelector((state) => state?.auth || {});
   const { isConnected } = useAppSelector((state) => state?.activities || { isConnected: false });
   
   const isConnecting = useRef(false);
   const connectionAttempts = useRef(0);
   const maxConnectionAttempts = 3;
+  const mountedRef = useRef(true);
+  const lastAccessTokenRef = useRef<string | null>(null);
 
   const connect = async () => {
-    if (!token || isConnecting.current || isConnected) {
+    // Don't connect while refreshing or if no token
+    if (!accessToken || isConnecting.current || isConnected || isRefreshing) {
       return;
     }
 
@@ -36,27 +37,30 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       isConnecting.current = true;
       connectionAttempts.current++;
       
-      await socketService.connect(token);
+      console.log(`🔌 Connecting socket (attempt ${connectionAttempts.current}/${maxConnectionAttempts})...`);
       
-      // Reset connection attempts on successful connection
+      await socketService.connect(accessToken);
+      
+      console.log("✅ Socket connected successfully");
+      lastAccessTokenRef.current = accessToken;
       connectionAttempts.current = 0;
       
     } catch (error) {
-      console.error("Socket connection failed:", error);
+      console.error("❌ Socket connection failed:", error);
       
-      // Show user-friendly error message
       if (connectionAttempts.current >= maxConnectionAttempts) {
-        toast.error("Unable to connect to live updates. Please check your connection.");
-      }
-      
-      // Don't retry automatically if max attempts reached
-      if (connectionAttempts.current < maxConnectionAttempts) {
-        // Retry after a delay
+        toast.error("Unable to connect to live updates. Please refresh the page.");
+        connectionAttempts.current = 0;
+      } else if (connectionAttempts.current < maxConnectionAttempts && mountedRef.current) {
+        // Exponential backoff retry
+        const retryDelay = 2000 * Math.pow(2, connectionAttempts.current - 1);
+        console.log(`🔄 Retrying in ${retryDelay}ms...`);
+        
         setTimeout(() => {
-          if (token && !isConnected) {
+          if (mountedRef.current && accessToken && !isConnected && !isRefreshing) {
             connect();
           }
-        }, 2000 * connectionAttempts.current); // Exponential backoff
+        }, retryDelay);
       }
       
     } finally {
@@ -65,27 +69,63 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   };
 
   const disconnect = () => {
+    console.log("🔌 Disconnecting socket...");
     socketService.disconnect();
     connectionAttempts.current = 0;
+    lastAccessTokenRef.current = null;
   };
 
-  // Auto-connect when token is available
+  // FIXED: Monitor isRefreshing flag - disconnect when refresh starts
   useEffect(() => {
-    if (token && !isConnected && !isConnecting.current) {
-      connect();
-    }
-  }, [token, isConnected]);
-
-  // Auto-disconnect when token is removed (logout)
-  useEffect(() => {
-    if (!token && isConnected) {
+    if (isRefreshing && isConnected) {
+      console.log("🔄 Token refresh in progress, disconnecting socket...");
       disconnect();
     }
-  }, [token, isConnected]);
+  }, [isRefreshing, isConnected]);
+
+  // FIXED: Connect/reconnect when token changes and refresh is complete
+  useEffect(() => {
+    // Only proceed if we have all required data and not refreshing
+    if (!accessToken || !user || isRefreshing) {
+      return;
+    }
+
+    // If token changed, disconnect and reconnect
+    if (lastAccessTokenRef.current && lastAccessTokenRef.current !== accessToken) {
+      console.log("🔄 Access token changed, reconnecting socket...");
+      disconnect();
+      
+      // Small delay to ensure old connection is fully closed
+      setTimeout(() => {
+        if (mountedRef.current) {
+          connect();
+        }
+      }, 500);
+    } 
+    // If no previous token and not connected, connect
+    else if (!lastAccessTokenRef.current && !isConnected && !isConnecting.current) {
+      // Initial connection - add delay for token to settle
+      setTimeout(() => {
+        if (mountedRef.current && accessToken && !isRefreshing) {
+          console.log("🔄 Initial socket connection...");
+          connect();
+        }
+      }, 1000);
+    }
+  }, [accessToken, user, isRefreshing]);
+
+  // Disconnect when token is removed (logout)
+  useEffect(() => {
+    if (!accessToken && isConnected) {
+      console.log("🔓 No access token, disconnecting...");
+      disconnect();
+    }
+  }, [accessToken, isConnected]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      mountedRef.current = false;
       if (isConnected) {
         disconnect();
       }
@@ -95,8 +135,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   // Monitor connection status changes
   useEffect(() => {
     if (isConnected && connectionAttempts.current > 0) {
-      // Successfully reconnected
       toast.success("Reconnected to live updates");
+      connectionAttempts.current = 0;
     }
   }, [isConnected]);
 

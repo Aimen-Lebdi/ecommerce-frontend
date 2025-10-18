@@ -30,7 +30,7 @@ import {
   Upload,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { fetchOrders } from "../../features/orders/ordersSlice";
+import { fetchMyOrders } from "../../features/orders/ordersSlice";
 import {
   fetchWishlist,
   removeProductFromWishlist,
@@ -120,7 +120,7 @@ const { isUpdatingLoggedUser, isUpdatingLoggedPassword } = useAppSelector(
   // Fetch data on mount
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchOrders({ limit: 10, sort: "-createdAt" }));
+      dispatch(fetchMyOrders({  sort: "-createdAt" }));
       dispatch(fetchWishlist());
     }
   }, [dispatch, isAuthenticated]);

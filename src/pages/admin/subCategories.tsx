@@ -77,7 +77,10 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
     cell: ({ row }) => {
       const { t } = useTranslation();
       const category = row.original.category;
-      const categoryName = typeof category === 'object' ? category.name : t('subCategories.table.unknownCategory');
+      const categoryName = 
+        category && typeof category === 'object' 
+          ? category.name 
+          : t('subCategories.table.unknownCategory');
       return (
         <Badge variant="outline" className="text-muted-foreground">
           {categoryName}

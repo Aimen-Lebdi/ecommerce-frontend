@@ -76,6 +76,25 @@ export const fetchOrdersAPI = async (
   return response.data;
 };
 
+// Fetch orders function with query parameters support
+export const fetchMyOrdersAPI = async (
+  queryParams: OrdersQueryParams = {}
+): Promise<OrdersResponse> => {
+  const params = new URLSearchParams();
+
+  Object.entries(queryParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.append(key, value.toString());
+    }
+  });
+
+  const queryString = params.toString();
+  const url = queryString ? `/api/v1/orders/myOrders?${queryString}` : "/api/v1/orders/myOrders";
+
+  const response = await axiosInstance.get(url);
+  return response.data;
+};
+
 // Get specific order
 export const getOrderAPI = async (id: string) => {
   const response = await axiosInstance.get(`/api/v1/orders/${id}`);

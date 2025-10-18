@@ -1242,10 +1242,10 @@
       "selectRow": "تحديد الصف"
     },
     "bulkDelete": {
-      "button": "حذف {{count}} {{count, plural, one {عنصر} other {عنصر}}}",
+      "button": "حذف {{count}} ",
       "buttonShort": "حذف ({{count}})",
       "title": "تأكيد الحذف الجماعي",
-      "description": "هل أنت متأكد من رغبتك في حذف {{count}} {{count, plural, one {عنصر} other {عنصر}}}؟ لا يمكن التراجع عن هذا الإجراء.",
+      "description": "هل أنت متأكد من رغبتك في حذف {{count}} ؟ لا يمكن التراجع عن هذا الإجراء.",
       "cancel": "إلغاء",
       "delete": "حذف",
       "deleting": "جاري الحذف..."

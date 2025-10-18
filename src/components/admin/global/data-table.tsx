@@ -871,17 +871,21 @@ export function DataTable<TData extends BaseEntity>({
   );
 
   const finalColumns = React.useMemo(() => {
-    const cols: ColumnDef<TData>[] = [];
+  const cols: ColumnDef<TData>[] = [];
 
-    if (enableDragAndDrop && !serverSide) {
-      cols.push(DragColumn<TData>());
-    }
+  if (enableDragAndDrop && !serverSide) {
+    cols.push(DragColumn<TData>());
+  }
 
-    if (enableRowSelection) {
-      cols.push(SelectionColumn<TData>());
-    }
+  if (enableRowSelection) {
+    cols.push(SelectionColumn<TData>());
+  }
 
-    cols.push(...columns);
+  cols.push(...columns);
+
+  // FIX: Only add ActionsColumn if no actions column exists already
+  const hasActionsColumn = columns.some(col => col.id === "actions");
+  if (!hasActionsColumn) {
     cols.push(
       ActionsColumn<TData>(
         editDialogComponent,
@@ -890,18 +894,19 @@ export function DataTable<TData extends BaseEntity>({
         isDeleting
       )
     );
+  }
 
-    return cols;
-  }, [
-    columns,
-    enableDragAndDrop,
-    enableRowSelection,
-    serverSide,
-    editDialogComponent,
-    handleRowUpdate,
-    onRowDelete,
-    isDeleting,
-  ]);
+  return cols;
+}, [
+  columns,
+  enableDragAndDrop,
+  enableRowSelection,
+  serverSide,
+  editDialogComponent,
+  handleRowUpdate,
+  onRowDelete,
+  isDeleting,
+]);
 
   const tableData = serverSide ? initialData : filteredData;
   const tablePagination = serverSide

@@ -96,10 +96,10 @@ export function SubCategoryDialog({
       setSubCategoryName(existingData.name || "");
       setOriginalName(existingData.name || "");
       
-      // Handle category (could be populated object or string ID)
-      const categoryId = typeof existingData.category === 'object' 
+      // Handle category (could be populated object or string ID) - safely handle null
+      const categoryId = existingData.category && typeof existingData.category === 'object' 
         ? existingData.category._id 
-        : existingData.category;
+        : (typeof existingData.category === 'string' ? existingData.category : "");
       setSelectedCategory(categoryId);
       setOriginalCategory(categoryId);
       
