@@ -313,13 +313,13 @@ export function Header() {
                       {t("header.nav.shop")}
                     </Link>
                     <Link
-                      to="/#"
+                      to="/about"
                       className="block py-2 text-md font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t("header.nav.about")}
                     </Link>
-                    <Link to="/#" className="block py-2 text-md font-medium">
+                    <Link to="/my-account?tab=support" className="block py-2 text-md font-medium">
                       {t("header.nav.contact")}
                     </Link>
                   </div>
@@ -362,13 +362,13 @@ export function Header() {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/#" className="px-4 py-3 text-md font-medium">
+                <Link to="/about" className="px-4 py-3 text-md font-medium">
                   {t("header.nav.about")}
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/#" className="px-4 py-3 text-md font-medium">
+                <Link to="/my-account?tab=support" className="px-4 py-3 text-md font-medium">
                   {t("header.nav.contact")}
                 </Link>
               </NavigationMenuItem>

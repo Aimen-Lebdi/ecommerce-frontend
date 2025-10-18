@@ -1364,7 +1364,7 @@
       "categories": "Catégories",
       "deals": "Promotions",
       "about": "À Propos",
-      "contact": "Contact"
+      "contact": "Contactez-nous"
     }
   },
   "footer": {
@@ -1423,6 +1423,111 @@
     },
     "paymentMethods": {
       "title": "Nous acceptons :"
+    }
+  },
+  "about": {
+    "hero": {
+      "badge": "Notre Histoire",
+      "title": "Bienvenue dans Notre Voyage",
+      "subtitle": "Découvrez comment nous révolutionnons le commerce électronique avec la qualité, l'innovation et des valeurs mettant le client en premier"
+    },
+    "story": {
+      "title": "Notre Histoire",
+      "paragraph1": "Fondée en 2020, notre voyage a commencé avec une vision simple : rendre les produits de qualité accessibles à tous. Nous avons commencé dans un petit garage et sommes devenus une plateforme de commerce électronique fiable servant des milliers de clients dans le monde.",
+      "paragraph2": "Aujourd'hui, nous nous associons avec les meilleures marques et fournisseurs pour vous offrir une sélection incroyable de produits dans plusieurs catégories. Notre engagement envers l'excellence nous a établis comme leader du secteur.",
+      "paragraph3": "Nous croyons à la transparence, à la fiabilité et à mettre nos clients en premier. Chaque produit, chaque interaction et chaque expérience est conçu en pensant à vous.",
+      "cta": "En Savoir Plus"
+    },
+    "stats": {
+      "title": "Par Les Chiffres",
+      "customers": {
+        "number": "50K+",
+        "label": "Clients Satisfaits"
+      },
+      "products": {
+        "number": "10K+",
+        "label": "Produits"
+      },
+      "orders": {
+        "number": "100K+",
+        "label": "Commandes Livrées"
+      },
+      "countries": {
+        "number": "25+",
+        "label": "Pays"
+      }
+    },
+    "values": {
+      "title": "Nos Valeurs Fondamentales",
+      "subtitle": "Ces principes guident chaque décision que nous prenons et chaque interaction avec nos clients",
+      "quality": {
+        "title": "La Qualité D'Abord",
+        "description": "Nous nous assurons que chaque produit répond à nos normes de qualité strictes"
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "Évolution constante pour vous apporter la dernière technologie"
+      },
+      "community": {
+        "title": "Communauté",
+        "description": "Créer une communauté prospère de clients satisfaits"
+      },
+      "sustainability": {
+        "title": "Durabilité",
+        "description": "Engagés envers les pratiques écologiques et la responsabilité mondiale"
+      }
+    },
+    "whyChooseUs": {
+      "title": "Pourquoi Nous Choisir",
+      "subtitle": "Ce qui nous distingue de la concurrence",
+      "reason1": {
+        "title": "Livraison Rapide et Fiable",
+        "description": "Nous garantissons une livraison ponctuelle avec suivi en temps réel pour toutes les commandes"
+      },
+      "reason2": {
+        "title": "Shopping Sécurisé",
+        "description": "Vos données sont protégées par le chiffrement de qualité industrielle et les mesures de sécurité"
+      },
+      "reason3": {
+        "title": "Retours Faciles",
+        "description": "Politique de retour de 30 jours sans questions posées - nous voulons que vous soyez heureux"
+      },
+      "reason4": {
+        "title": "Client D'Abord",
+        "description": "Support client 24/7 prêt à vous aider pour toute question ou préoccupation"
+      }
+    },
+    "team": {
+      "title": "Rencontrez Notre Équipe",
+      "subtitle": "Des individus talentueux passionnés par la livraison de l'excellence",
+      "members": {
+        "member1": {
+          "name": "PDG & Fondateur",
+          "role": "Opérations",
+          "bio": "Diriger la vision avec plus de 15 ans d'expertise"
+        },
+        "member2": {
+          "name": "Directeur Marketing",
+          "role": "Stratégie de Croissance",
+          "bio": "Construire des relations clients significatives"
+        },
+        "member3": {
+          "name": "Chef Technologie",
+          "role": "Développement Produit",
+          "bio": "Innover pour des expériences transparentes"
+        },
+        "member4": {
+          "name": "Chef du Succès Client",
+          "role": "Support",
+          "bio": "Assurer la satisfaction des clients quotidiennement"
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à Nous Rejoindre?",
+      "subtitle": "Commencez à faire du shopping maintenant et découvrez la différence que la qualité et le service client peuvent faire",
+      "button1": "Commencer les Achats",
+      "button2": "Nous Contacter"
     }
   }
 }

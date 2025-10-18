@@ -1287,41 +1287,41 @@
     },
     "timeRange": {
       "last3Months": "Last 3 months",
-      "last30Days": "Last 30 days", 
+      "last30Days": "Last 30 days",
       "last7Days": "Last 7 days",
       "selectAriaLabel": "Select a value"
     }
   },
   "tables": {
-      "bestOrders": {
-        "title": "Best Orders",
-        "empty": "No orders yet",
-        "headers": {
-          "orderId": "Order ID",
-          "customer": "Customer",
-          "total": "Total",
-          "date": "Date"
-        }
-      },
-      "topCustomers": {
-        "title": "Top Customers",
-        "empty": "No customers yet",
-        "headers": {
-          "customer": "Customer",
-          "orders": "Orders",
-          "revenue": "Revenue"
-        }
-      },
-      "bestProducts": {
-        "title": "Best Products",
-        "empty": "No products sold yet",
-        "headers": {
-          "product": "Product",
-          "unitsSold": "Units Sold",
-          "revenue": "Revenue"
-        }
-      },
-      "topBadge": "Top 5"
+    "bestOrders": {
+      "title": "Best Orders",
+      "empty": "No orders yet",
+      "headers": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "total": "Total",
+        "date": "Date"
+      }
+    },
+    "topCustomers": {
+      "title": "Top Customers",
+      "empty": "No customers yet",
+      "headers": {
+        "customer": "Customer",
+        "orders": "Orders",
+        "revenue": "Revenue"
+      }
+    },
+    "bestProducts": {
+      "title": "Best Products",
+      "empty": "No products sold yet",
+      "headers": {
+        "product": "Product",
+        "unitsSold": "Units Sold",
+        "revenue": "Revenue"
+      }
+    },
+    "topBadge": "Top 5"
   },
   "cards": {
     "revenue": {
@@ -1364,7 +1364,7 @@
       "categories": "Categories",
       "deals": "Deals",
       "about": "About",
-      "contact": "Contact"
+      "contact": "Contact Us"
     }
   },
   "footer": {
@@ -1423,6 +1423,111 @@
     },
     "paymentMethods": {
       "title": "We accept:"
+    }
+  },
+  "about": {
+    "hero": {
+      "badge": "Our Story",
+      "title": "Welcome to Our Journey",
+      "subtitle": "Discover how we're revolutionizing e-commerce with quality, innovation, and customer-first values"
+    },
+    "story": {
+      "title": "Our Story",
+      "paragraph1": "Founded in 2020, our journey began with a simple vision: to make quality products accessible to everyone. We started from a small garage and have grown into a trusted e-commerce platform serving thousands of customers worldwide.",
+      "paragraph2": "Today, we partner with the best brands and suppliers to bring you an incredible selection of products across multiple categories. Our commitment to excellence has made us a leader in the industry.",
+      "paragraph3": "We believe in transparency, reliability, and putting our customers first. Every product, every interaction, and every experience is designed with you in mind.",
+      "cta": "Learn More"
+    },
+    "stats": {
+      "title": "By The Numbers",
+      "customers": {
+        "number": "50K+",
+        "label": "Happy Customers"
+      },
+      "products": {
+        "number": "10K+",
+        "label": "Products"
+      },
+      "orders": {
+        "number": "100K+",
+        "label": "Orders Delivered"
+      },
+      "countries": {
+        "number": "25+",
+        "label": "Countries"
+      }
+    },
+    "values": {
+      "title": "Our Core Values",
+      "subtitle": "These principles guide every decision we make and every interaction we have with our customers",
+      "quality": {
+        "title": "Quality First",
+        "description": "We ensure every product meets our strict quality standards"
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "Constantly evolving to bring you the latest technology"
+      },
+      "community": {
+        "title": "Community",
+        "description": "Building a thriving community of satisfied customers"
+      },
+      "sustainability": {
+        "title": "Sustainability",
+        "description": "Committed to eco-friendly practices and global responsibility"
+      }
+    },
+    "whyChooseUs": {
+      "title": "Why Choose Us",
+      "subtitle": "What sets us apart from the competition",
+      "reason1": {
+        "title": "Fast & Reliable Shipping",
+        "description": "We guarantee timely delivery with real-time tracking for all orders"
+      },
+      "reason2": {
+        "title": "Secure Shopping",
+        "description": "Your data is protected with industry-leading encryption and security measures"
+      },
+      "reason3": {
+        "title": "Easy Returns",
+        "description": "30-day return policy with no questions asked - we want you to be happy"
+      },
+      "reason4": {
+        "title": "Customer First",
+        "description": "24/7 customer support ready to help with any questions or concerns"
+      }
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "subtitle": "Talented individuals passionate about delivering excellence",
+      "members": {
+        "member1": {
+          "name": "CEO & Founder",
+          "role": "Operations",
+          "bio": "Leading the vision with 15+ years of expertise"
+        },
+        "member2": {
+          "name": "Marketing Director",
+          "role": "Growth Strategy",
+          "bio": "Building meaningful customer relationships"
+        },
+        "member3": {
+          "name": "Tech Lead",
+          "role": "Product Development",
+          "bio": "Innovating for seamless experiences"
+        },
+        "member4": {
+          "name": "Customer Success Lead",
+          "role": "Support",
+          "bio": "Ensuring customer satisfaction daily"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Join Us?",
+      "subtitle": "Start shopping now and experience the difference quality and customer service can make",
+      "button1": "Start Shopping",
+      "button2": "Contact Us"
     }
   }
 }
