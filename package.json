@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+  "dev": "vite",
+  "build": "tsc -b && vite build",
+  "build:docker": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview"
+},
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
@@ -44,6 +45,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.12",
     "i18next": "^25.3.0",
+    "i18next-browser-languagedetector": "^8.2.0",
     "lucide-react": "^0.525.0",
     "next-themes": "^0.4.6",
     "react": "^19.1.1",
