@@ -1,31 +1,9 @@
-// 📄 src/routes/AppRoutes.tsx
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import UserRoutes from "./clientRoutes";
+import AdminRoutes from "./adminRoutes";
 
-import { Route, Routes } from 'react-router-dom';
-import Layout from '../components/layout/Layout';
-import Home from '../pages/Home';
-import About from '../pages/About';
-import Shop from '../pages/Shop';
-import ProductDetail from '../pages/ProductDetail';
-import ComparePage from '../pages/ComparePage';
-import WishlistPage from '../pages/WishlistPage';
-import Payment from '../pages/payment';
+const router = createBrowserRouter([UserRoutes, AdminRoutes]);
 
-const AppRoutes = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/shop/product/:id" element={<ProductDetail />} />
-        <Route path="/compare" element={<ComparePage />} />
-        <Route path="/wishlist" element={<WishlistPage />} />
-        <Route path="/payment" element={<Payment />} />
-
-        {/* Add more routes here */}
-      </Route>
-    </Routes>
-  );
-};
-
-export default AppRoutes;
+export default function AppRoutes() {
+  return <RouterProvider router={router} />;
+}

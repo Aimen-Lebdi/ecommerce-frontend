@@ -1,0 +1,1533 @@
+{
+  "home": {
+    "hero": {
+      "slides": {
+        "summerSale": {
+          "title": "Soldes d'Été 2024",
+          "subtitle": "Jusqu'à -70% sur l'Électronique",
+          "description": "Ne manquez pas nos offres exceptionnelles sur smartphones, ordinateurs portables et plus encore !",
+          "cta": "Acheter Maintenant",
+          "badge": "Temps Limitée"
+        },
+        "iphone": {
+          "title": "Nouvel iPhone 15 Pro",
+          "subtitle": "Performance Révolutionnaire",
+          "description": "Découvrez la puissance de la puce A17 Pro avec un design en titane.",
+          "cta": "Précommander",
+          "badge": "Nouveauté"
+        },
+        "gaming": {
+          "title": "Collection Gaming",
+          "subtitle": "Améliorez Votre Setup",
+          "description": "Équipement gaming premium pour une expérience de jeu ultime.",
+          "cta": "Découvrir le Gaming",
+          "badge": "Semaine Gaming"
+        }
+      }
+    },
+    "features": {
+      "freeShipping": {
+        "title": "Livraison Gratuite",
+        "description": "Livraison gratuite pour toutes les commandes de plus de 50$"
+      },
+      "easyReturns": {
+        "title": "Retours Faciles",
+        "description": "Politique de retour sans souci de 30 jours"
+      },
+      "securePayment": {
+        "title": "Paiement Sécurisé",
+        "description": "Vos paiements sont sécurisés et chiffrés"
+      },
+      "support": {
+        "title": "Support 24h/24",
+        "description": "Service client disponible 24h/24 et 7j/7"
+      }
+    },
+    "categories": {
+      "title": "Acheter par Catégorie",
+      "subtitle": "Découvrez notre large gamme de catégories de produits",
+      "smartphones": "Smartphones",
+      "smartphonesCount": "250+ articles",
+      "laptops": "Ordinateurs Portables",
+      "laptopsCount": "180+ articles",
+      "headphones": "Casques Audio",
+      "headphonesCount": "120+ articles",
+      "gaming": "Gaming",
+      "gamingCount": "95+ articles",
+      "cameras": "Appareils Photo",
+      "camerasCount": "85+ articles",
+      "smartHome": "Maison Connectée",
+      "smartHomeCount": "75+ articles"
+    },
+    "products": {
+      "title": "Produits en Vedette",
+      "subtitle": "Nos articles les plus vendus et les plus populaires",
+      "viewAll": "Voir Tout",
+      "badges": {
+        "bestSeller": "Meilleure Vente",
+        "new": "Nouveau",
+        "sale": "Promo",
+        "hotDeal": "Offre Exclusive"
+      },
+      "inStock": "En Stock",
+      "outOfStock": "Rupture de Stock",
+      "addToCart": "Ajouter au Panier"
+    },
+    "testimonials": {
+      "title": "Avis Clients",
+      "subtitle": "Ne nous croyez pas sur parole - Découvrez les témoignages de nos clients satisfaits",
+      "verifiedBuyer": "Acheteur Vérifié",
+      "items": {
+        "sarah": {
+          "text": "Service incroyable et livraison rapide ! La qualité du produit a dépassé mes attentes.",
+          "product": "iPhone 15 Pro"
+        },
+        "mike": {
+          "text": "Prix compétitifs et excellent service client. Je reviendrai sans hésiter !",
+          "product": "Casques Sony"
+        },
+        "emily": {
+          "text": "L'expérience d'achat était fluide et le produit est arrivé exactement comme décrit.",
+          "product": "MacBook Pro"
+        }
+      }
+    },
+    "newsletter": {
+      "title": "Restez Informé",
+      "subtitle": "Abonnez-vous à notre newsletter pour des offres exclusives et les dernières actualités",
+      "placeholder": "Entrez votre adresse e-mail",
+      "button": "S'abonner",
+      "privacyNote": "Pas de spam, désabonnez-vous à tout moment. Nous respectons votre vie privée."
+    },
+    "blog": {
+      "title": "Derniers Articles de Notre Blog",
+      "subtitle": "Restez informé avec nos derniers articles et insights",
+      "viewAll": "Voir Tous les Articles",
+      "readMore": "Lire la Suite",
+      "posts": {
+        "mobileTech": {
+          "title": "Le Futur de la Technologie Mobile en 2024",
+          "excerpt": "Découvrez les dernières tendances et innovations qui façonnent l'industrie des smartphones.",
+          "date": "15 déc. 2024",
+          "readTime": "5 min de lecture",
+          "category": "Technologie"
+        },
+        "gamingSetup": {
+          "title": "Guide Ultime pour les Setups Gaming",
+          "excerpt": "Tout ce que vous devez savoir pour construire la station de jeu parfaite.",
+          "date": "12 déc. 2024",
+          "readTime": "8 min de lecture",
+          "category": "Gaming"
+        },
+        "smartHome": {
+          "title": "Conseils pour l'Automatisation de la Maison Connectée",
+          "excerpt": "Transformez votre maison avec ces idées et produits d'automatisation intelligente.",
+          "date": "10 déc. 2024",
+          "readTime": "6 min de lecture",
+          "category": "Maison Connectée"
+        }
+      }
+    }
+  },
+  "shop": {
+    "loading": "Chargement...",
+    "loadingProducts": "Chargement des produits...",
+    "header": {
+      "title": "Tous les Produits",
+      "subtitle": "Découvrez notre collection complète de produits premium"
+    },
+    "filters": {
+      "title": "Filtres",
+      "categories": "Catégories",
+      "subcategories": "Sous-catégories",
+      "noSubcategories": "Aucune sous-catégorie disponible",
+      "brands": "Marques",
+      "priceRange": "Tranche de Prix",
+      "minPrice": "Prix Minimum",
+      "maxPrice": "Prix Maximum",
+      "applyPriceFilter": "Appliquer le Filtre",
+      "active": "Actif",
+      "specialOffers": "Offres Spéciales",
+      "onSale": "En Promo",
+      "inStockOnly": "En Stock Uniquement",
+      "clearAllFilters": "Effacer Tous les Filtres",
+      "priceLabel": "Prix"
+    },
+    "sort": {
+      "sortBy": "Trier par",
+      "newestFirst": "Plus Récents",
+      "oldestFirst": "Plus Anciens",
+      "priceLowToHigh": "Prix : Croissant",
+      "priceHighToLow": "Prix : Décroissant",
+      "highestRated": "Mieux Notés",
+      "mostPopular": "Plus Populaires",
+      "nameAToZ": "Nom : A à Z",
+      "nameZToA": "Nom : Z à A"
+    },
+    "results": {
+      "showing": "Affichage de",
+      "of": "sur",
+      "results": "résultats"
+    },
+    "product": {
+      "outOfStock": "Rupture de Stock",
+      "inStock": "En Stock ({{quantity}})",
+      "addedToWishlist": "{{productName}} ajouté à la liste de souhaits",
+      "failedToAddToWishlist": "Échec de l'ajout à la liste de souhaits",
+      "reviews": "avis"
+    },
+    "pagination": {
+      "showingPage": "Page",
+      "of": "sur",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "noProducts": {
+      "title": "Aucun produit trouvé",
+      "message": "Essayez d'ajuster vos filtres pour voir plus de résultats",
+      "clearFilters": "Effacer tous les filtres"
+    }
+  },
+  "productDetail": {
+    "loadingProduct": "Chargement du produit...",
+    "productNotFound": "Produit non trouvé",
+    "backToShop": "Retour à la Boutique",
+    "addedToCart": "{{productName}} a été ajouté à votre panier",
+    "failedToAddToCart": "Échec de l'ajout du produit au panier",
+    "addedToWishlist": "{{productName}} ajouté à la liste de souhaits",
+    "failedToAddToWishlist": "Échec de l'ajout à la liste de souhaits",
+    "outOfStock": "Rupture de Stock",
+    "onlyLeft": "Plus que {{quantity}} en stock",
+    "noRating": "Aucune note",
+    "reviews": "avis",
+    "save": "Économisez {{percentage}}%",
+    "selectColor": "Choisir la Couleur",
+    "quantity": "Quantité",
+    "adding": "Ajout en cours...",
+    "addToCart": "Ajouter au Panier",
+    "selectColorButton": "Choisir la Couleur",
+    "pleaseSelectColor": "Veuillez choisir une couleur",
+    "buyNow": "Acheter Maintenant",
+    "sale": "Promo",
+    "relatedProducts": "Produits Associés",
+    "breadcrumbs": {
+      "shop": "Boutique",
+      "category": "Catégorie"
+    },
+    "features": {
+      "freeShipping": "✅ Livraison Gratuite dès 50$",
+      "securePayment": "🔒 Paiement Sécurisé",
+      "returns": "↩ Retours sous 30 jours"
+    },
+    "info": {
+      "category": "Catégorie",
+      "subcategory": "Sous-catégorie",
+      "brand": "Marque",
+      "sku": "Référence",
+      "na": "N/D"
+    },
+    "tabs": {
+      "description": "Description",
+      "specifications": "Spécifications",
+      "reviews": "Avis"
+    },
+    "specs": {
+      "productName": "Nom du Produit",
+      "category": "Catégorie",
+      "subcategory": "Sous-catégorie",
+      "brand": "Marque",
+      "price": "Prix",
+      "discountedPrice": "Prix Remisé",
+      "availability": "Disponibilité",
+      "inStock": "En Stock ({{quantity}})",
+      "sold": "Vendu",
+      "units": "unités"
+    },
+    "reviewsSection": {
+      "noReviews": "Aucun avis pour le moment. Soyez le premier à évaluer ce produit !",
+      "writeReview": "Écrire un Avis"
+    }
+  },
+  "cart": {
+    "cartUpdated": "Panier mis à jour avec succès",
+    "itemRemoved": "Article retiré du panier",
+    "movedToWishlist": "{{productName}} déplacé vers la liste de souhaits",
+    "moveToWishlistFailed": "Échec du déplacement vers la liste de souhaits",
+    "enterPromoCode": "Veuillez saisir un code promo",
+    "couponApplied": "Code promo appliqué avec succès",
+    "loadingCart": "Chargement du panier...",
+    "emptyCart": "Votre panier est vide",
+    "emptyCartDescription": "Il semble que vous n'ayez encore rien ajouté à votre panier.",
+    "continueShopping": "Continuer les Achats",
+    "shoppingCart": "Panier d'Achat",
+    "item": "article",
+    "items": "articles",
+    "save": "Économiser",
+    "remove": "Retirer",
+    "subtotal": "Sous-total",
+    "enterPromoCodePlaceholder": "Saisir le code promo",
+    "apply": "Appliquer",
+    "couponAppliedLabel": "Code promo appliqué",
+    "orderSummary": "Récapitulatif de Commande",
+    "discount": "Réduction",
+    "shipping": "Livraison",
+    "standardShipping": "Standard (5-7 jours)",
+    "expressShipping": "Express (2-3 jours)",
+    "free": "GRATUIT",
+    "tax": "TVA",
+    "total": "Total",
+    "estimatedDelivery": "Livraison estimée",
+    "secureCheckout": "Paiement Sécurisé",
+    "secureEncryption": "Chiffrement SSL 256-bit sécurisé",
+    "multiplePaymentOptions": "Options de paiement multiples",
+    "freeReturns": "Retours gratuits sous 30 jours",
+    "weAccept": "Nous Acceptons"
+  },
+  "checkout": {
+    "cartEmpty": "Votre panier est vide",
+    "orderPlacedSuccess": "Commande passée avec succès !",
+    "fillRequiredFields": "Veuillez remplir tous les champs obligatoires",
+    "cartNotFound": "Panier non trouvé. Veuillez réessayer.",
+    "orderCreationFailed": "Échec de la création de commande",
+    "loadingCheckout": "Chargement du paiement...",
+    "secureCheckout": "Paiement Sécurisé",
+    "orderSummary": "Récapitulatif de commande",
+    "items": "articles",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "total": "Total",
+    "contactInformation": "Informations de Contact",
+    "userName": "Nom d'Utilisateur",
+    "userNamePlaceholder": "Ahmed",
+    "emailAddress": "Adresse E-mail",
+    "emailPlaceholder": "ahmed.benali@example.com",
+    "phoneNumber": "Numéro de Téléphone",
+    "phonePlaceholder": "+213 555 123 456",
+    "phoneRequiredCOD": "Requis pour la coordination de la livraison en Paiement à la Livraison",
+    "shippingAddress": "Adresse de Livraison",
+    "wilaya": "Wilaya",
+    "wilayaPlaceholder": "Alger",
+    "dayra": "Dayra",
+    "dayraPlaceholder": "Alger",
+    "streetAddress": "Adresse",
+    "streetAddressPlaceholder": "123 Rue de la Liberté",
+    "shippingMethod": "Méthode de Livraison",
+    "yalidineExpress": "Livraison Express Yalidine",
+    "businessDays": "2-3 jours ouvrés",
+    "paymentInformation": "Informations de Paiement",
+    "cashOnDelivery": "Paiement à la Livraison",
+    "payOnReceive": "Payez à la réception de votre commande",
+    "creditDebitCard": "Carte de Crédit ou Débit",
+    "securePaymentStripe": "Paiement sécurisé via Stripe",
+    "codDescription": "Payez en espèces à la livraison de votre commande. Assurez-vous d'avoir le montant exact.",
+    "secureCardPayment": "Paiement Carte Sécurisé",
+    "stripeRedirectInfo": "Vous serez redirigé vers la page de paiement sécurisée de Stripe. Vos informations de paiement sont chiffrées et sécurisées.",
+    "sslSecured": "Sécurisé par SSL 256-bit",
+    "moneyBackGuarantee": "Garantie de Remboursement",
+    "freeReturns": "Retours gratuits sous 30 jours",
+    "weAccept": "Nous acceptons",
+    "processing": "Traitement en cours...",
+    "placeOrder": "Passer la Commande",
+    "processingOrder": "Traitement de la Commande...",
+    "termsAgreement": "En passant votre commande, vous acceptez nos Conditions d'Utilisation et notre Politique de Confidentialité"
+  },
+  "orderConfirmation": {
+    "loading": {
+      "message": "Chargement de votre commande..."
+    },
+    "toasts": {
+      "invoiceSuccess": "Facture téléchargée avec succès !",
+      "invoiceError": "Échec du téléchargement de la facture."
+    },
+    "header": {
+      "title": "Merci pour Votre Commande !",
+      "subtitle": "Votre commande est confirmée et en cours de traitement",
+      "orderNumberLabel": "Numéro de Commande",
+      "paymentStatus": "Paiement : {{status}}"
+    },
+    "emailBanner": {
+      "title": "Email de confirmation envoyé",
+      "confirmationSentTo": "Nous avons envoyé un email de confirmation à <strong>{{email}}</strong>"
+    },
+    "codBanner": {
+      "prepareCash": "Veuillez préparer <strong>${{amount}}</strong> en espèces pour le paiement à la livraison."
+    },
+    "items": {
+      "title": "Articles Commandés",
+      "color": "Couleur : {{color}}",
+      "quantity": "Qté : {{qty}}"
+    },
+    "shipping": {
+      "title": "Informations de Livraison",
+      "deliveryAddress": "Adresse de Livraison",
+      "deliveryStatus": "Statut de Livraison",
+      "trackingNumber": "Numéro de Suivi",
+      "deliveryPartner": "Partenaire de Livraison : {{name}}",
+      "timelineTitle": "Chronologie de Commande"
+    },
+    "payment": {
+      "title": "Informations de Paiement",
+      "cod": "Paiement à la Livraison",
+      "cardPayment": "Paiement par Carte",
+      "statusLabel": "Statut : ",
+      "paid": "Payé",
+      "pending": "En Attente",
+      "amountToPay": "Montant à payer à la livraison : ${{amount}}",
+      "paidOn": "Payé le : {{date}}"
+    },
+    "summary": {
+      "title": "Récapitulatif de Commande",
+      "subtotal": "Sous-total",
+      "shipping": "Livraison",
+      "tax": "TVA",
+      "total": "Total",
+      "placedOn": "Commande passée le {{date}}"
+    },
+    "actions": {
+      "title": "Actions Rapides",
+      "trackOrder": "Suivre la Commande",
+      "downloadInvoice": "Télécharger la Facture",
+      "shareOrder": "Partager la Commande",
+      "trackYourOrder": "Suivre Votre Commande",
+      "viewAllOrders": "Voir Toutes les Commandes",
+      "continueShopping": "Continuer les Achats",
+      "shareTitle": "Confirmation de Commande",
+      "shareText": "Commande #{{id}}"
+    },
+    "support": {
+      "title": "Besoin d'Aide ?",
+      "customerSupport": "Service Client",
+      "emailSupport": "Support Email"
+    },
+    "nextSteps": {
+      "title": "Prochaines Étapes",
+      "codConfirmation": "Votre commande sera confirmée par le vendeur dans 1-2 jours ouvrés",
+      "cardConfirmation": "Nous traiterons votre paiement et confirmerons votre commande",
+      "shippingUpdates": "Vous recevrez les mises à jour de livraison par email et SMS",
+      "trackPackage": "Suivez votre colis en utilisant le numéro de commande ci-dessus",
+      "contactUs": "Contactez-nous si vous avez des questions ou des préoccupations"
+    }
+  },
+  "orderTracking": {
+    "loading": "Chargement des informations de suivi...",
+    "trackingNotAvailable": "Informations de suivi non disponibles",
+    "unableToLoad": "Impossible de charger les informations de suivi pour cette commande.",
+    "viewAllOrders": "Voir Toutes les Commandes",
+    "notAvailable": "N/D",
+    "back": "Retour",
+    "trackYourOrder": "Suivre Votre Commande",
+    "orderNumber": "Commande #{{number}}",
+    "trackingNumber": "Suivi : {{number}}",
+    "orderBeingProcessed": "Commande en cours de traitement",
+    "paid": "Payé",
+    "paymentPending": "Paiement en Attente",
+    "delivered": "Livré",
+    "inProgress": "En Cours",
+    "deliveryProgress": "Progression de la Livraison",
+    "orderHistory": "Historique des Commandes",
+    "updatedBy": "Mis à jour par : {{name}}",
+    "deliveryAddress": "Adresse de Livraison",
+    "shippingAddress": "Adresse de Livraison",
+    "contactForDelivery": "Contact pour les informations de livraison",
+    "orderSummary": "Récapitulatif de Commande",
+    "totalAmount": "Montant Total",
+    "paymentStatus": "Statut du Paiement",
+    "pending": "En Attente",
+    "needHelp": "Besoin d'Aide ?",
+    "contactSupportDescription": "Contactez notre équipe de support client si vous avez des questions sur votre commande.",
+    "contactSupport": "Contacter le Support",
+    "viewOrderDetails": "Voir les Détails de la Commande",
+    "statusSteps": {
+      "orderPlaced": "Commande Passée",
+      "confirmed": "Confirmée",
+      "shipped": "Expédiée",
+      "inTransit": "En Transit",
+      "outForDelivery": "En Livraison",
+      "delivered": "Livrée"
+    }
+  },
+  "myAccount": {
+    "loading": "Chargement de votre compte...",
+    "guest": "Invité",
+    "notAvailable": "N/D",
+    "logoutSuccess": "Déconnexion réussie",
+    "removedFromWishlist": "Produit retiré de la liste de souhaits",
+    "removeFailed": "Échec du retrait du produit",
+    "addedToCart": "{{productName}} ajouté au panier",
+    "addToCartFailed": "Échec de l'ajout au panier",
+    "imageSizeError": "La taille de l'image doit être inférieure à 5 Mo",
+    "profileUpdated": "Profil mis à jour avec succès",
+    "updateFailed": "Échec de la mise à jour du profil",
+    "passwordUpdated": "Mot de passe mis à jour avec succès",
+    "passwordUpdateFailed": "Échec de la mise à jour du mot de passe",
+    "mobileMenu": "Menu du Compte",
+    "logout": "Déconnexion",
+    "sidebar": {
+      "overview": "Aperçu",
+      "orders": "Commandes",
+      "wishlist": "Liste de Souhaits",
+      "settings": "Paramètres du Compte",
+      "support": "Aide & Support"
+    },
+    "overview": {
+      "welcome": "Bon retour, {{name}} !",
+      "memberSince": "Membre depuis {{date}}",
+      "totalOrders": "Commandes Totales",
+      "totalSpent": "Dépense Totale",
+      "recentOrders": "Commandes Récentes",
+      "viewAll": "Voir Tout",
+      "orderInfo": "{{date}} • {{items}} articles",
+      "noOrders": "Aucune commande pour le moment"
+    },
+    "orders": {
+      "title": "Historique des Commandes",
+      "filter": "Filtrer les commandes",
+      "allOrders": "Toutes les Commandes",
+      "delivered": "Livrées",
+      "shipped": "Expédiées",
+      "processing": "En Traitement",
+      "orderNumber": "Commande #{{number}}",
+      "placedOn": "Passée le {{date}}",
+      "orderSummary": "{{items}} articles • Total :",
+      "view": "Voir",
+      "track": "Suivre",
+      "noOrders": "Aucune commande pour le moment",
+      "startShopping": "Commencer les Achats"
+    },
+    "wishlist": {
+      "title": "Liste de Souhaits",
+      "itemCount": "{{count}} articles",
+      "add": "Ajouter",
+      "empty": "Votre liste de souhaits est vide",
+      "browseProducts": "Parcourir les Produits",
+      "viewAll": "Voir Tous les Articles de la Liste"
+    },
+    "settings": {
+      "title": "Paramètres du Compte",
+      "personalInfo": "Informations Personnelles",
+      "editInfo": "Modifier les Informations",
+      "profilePicture": "Photo de Profil",
+      "upload": "Télécharger",
+      "remove": "Retirer",
+      "imageRequirements": "JPG, PNG ou GIF. Taille max. 5 Mo.",
+      "fullName": "Nom Complet",
+      "email": "Email",
+      "emailCannotChange": "L'email ne peut pas être modifié",
+      "saveChanges": "Enregistrer les Modifications",
+      "updating": "Mise à jour...",
+      "cancel": "Annuler",
+      "security": "Sécurité",
+      "password": "Mot de Passe",
+      "keepAccountSecure": "Gardez votre compte sécurisé",
+      "change": "Modifier",
+      "currentPassword": "Mot de Passe Actuel",
+      "newPassword": "Nouveau Mot de Passe",
+      "confirmPassword": "Confirmer le Nouveau Mot de Passe",
+      "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
+      "updatePassword": "Mettre à Jour le Mot de Passe"
+    },
+    "support": {
+      "title": "Aide & Support",
+      "phoneSupport": "Support Téléphonique",
+      "phoneHours": "Lun-Ven, 9h-18h",
+      "phoneNumber": "1-800-SUPPORT",
+      "callNow": "Appeler Maintenant",
+      "emailSupport": "Support Email",
+      "emailResponse": "Réponse 24h/24 sous 24h",
+      "emailAddress": "support@store.com",
+      "sendEmail": "Envoyer un Email",
+      "faq": "Questions Fréquentes",
+      "faq1": {
+        "question": "Comment suivre ma commande ?",
+        "answer": "Vous pouvez suivre votre commande en utilisant le numéro de suivi envoyé à votre email."
+      },
+      "faq2": {
+        "question": "Quelle est votre politique de retour ?",
+        "answer": "Nous offrons des retours sous 30 jours pour la plupart des articles dans leur état d'origine."
+      },
+      "faq3": {
+        "question": "Comment changer mon adresse de livraison ?",
+        "answer": "Vous pouvez mettre à jour votre adresse dans la section Carnet d'Adresses."
+      }
+    },
+    "passwordErrors": {
+      "currentRequired": "Le mot de passe actuel est requis",
+      "newRequired": "Le nouveau mot de passe est requis",
+      "minLength": "Le mot de passe doit contenir au moins 6 caractères",
+      "confirmRequired": "La confirmation du mot de passe est requise",
+      "mismatch": "Les mots de passe ne correspondent pas"
+    }
+  },
+  "signUp": {
+    "backToLogin": "Retour à la Connexion",
+    "title": "Créez Votre Compte",
+    "description": "Rejoignez des milliers de clients satisfaits",
+    "continueWithGoogle": "Continuer avec Google",
+    "continueWithFacebook": "Continuer avec Facebook",
+    "orContinueWithEmail": "Ou continuer avec email",
+    "nameLabel": "Nom *",
+    "namePlaceholder": "Ahmed Benali",
+    "emailLabel": "Adresse Email *",
+    "emailPlaceholder": "ahmed.benali@example.com",
+    "passwordLabel": "Mot de Passe *",
+    "passwordPlaceholder": "Créez un mot de passe fort",
+    "confirmPasswordLabel": "Confirmer le Mot de Passe *",
+    "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+    "createAccount": "Créer le Compte",
+    "creatingAccount": "Création du compte...",
+    "passwordsMatch": "Les mots de passe correspondent",
+    "secureInfo": "Vos informations sont sécurisées et chiffrées",
+    "privacyNotice": "Nous respectons votre vie privée et ne partagerons jamais vos informations personnelles avec des tiers.",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "signInHere": "Connectez-vous ici",
+    "googleComingSoon": "Connexion Google bientôt disponible !",
+    "facebookComingSoon": "Connexion Facebook bientôt disponible !",
+    "errors": {
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "Veuillez saisir une adresse email valide",
+      "passwordRequired": "Le mot de passe est requis",
+      "passwordLength": "Le mot de passe doit contenir au moins 6 caractères",
+      "confirmPasswordRequired": "Veuillez confirmer votre mot de passe",
+      "passwordsDontMatch": "Les mots de passe ne correspondent pas"
+    },
+    "passwordStrength": {
+      "veryWeak": "Très Faible",
+      "weak": "Faible",
+      "fair": "Moyen",
+      "good": "Bon",
+      "strong": "Fort"
+    },
+    "passwordRequirements": {
+      "characters": "6+ caractères"
+    }
+  },
+  "signIn": {
+    "backToHome": "Retour à l'Accueil",
+    "title": "Content de Vous Revoir",
+    "description": "Connectez-vous à votre compte pour continuer",
+    "continueWithGoogle": "Continuer avec Google",
+    "continueWithFacebook": "Continuer avec Facebook",
+    "orContinueWithEmail": "Ou continuer avec email",
+    "emailLabel": "Adresse Email",
+    "emailPlaceholder": "ahmed.benali@example.com",
+    "passwordLabel": "Mot de Passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "rememberMe": "Rester connecté",
+    "signInButton": "Se Connecter",
+    "signingIn": "Connexion...",
+    "secureInfo": "Vos informations sont sécurisées et chiffrées",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signUpHere": "Inscrivez-vous ici",
+    "welcomeBack": "Content de vous revoir !",
+    "googleComingSoon": "Connexion Google bientôt disponible !",
+    "facebookComingSoon": "Connexion Facebook bientôt disponible !",
+    "errors": {
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "Veuillez saisir une adresse email valide",
+      "passwordRequired": "Le mot de passe est requis",
+      "passwordLength": "Le mot de passe doit contenir au moins 6 caractères"
+    }
+  },
+  "forgotPassword": {
+    "backToSignIn": "Retour à la Connexion",
+    "title": "Mot de Passe Oublié ?",
+    "description": "Aucun souci ! Entrez votre email et nous vous enverrons un code de réinitialisation.",
+    "emailLabel": "Adresse Email",
+    "emailPlaceholder": "ahmed.benali@example.com",
+    "sendResetCode": "Envoyer le Code",
+    "sendingCode": "Envoi du code...",
+    "rememberPassword": "Vous vous souvenez de votre mot de passe ?",
+    "signInHere": "Connectez-vous ici",
+    "infoMessage": "Nous enverrons un code de vérification à 6 chiffres à cette adresse email. Le code expirera dans 5 minutes.",
+    "errors": {
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "Veuillez saisir une adresse email valide"
+    }
+  },
+  "codeVerification": {
+    "backToForgotPassword": "Retour au Mot de Passe Oublié",
+    "title": "Vérifier le Code de Réinitialisation",
+    "description": "Nous avons envoyé un code de vérification à votre email",
+    "yourEmail": "votre email",
+    "enterCode": "Entrez le code de vérification",
+    "digitAriaLabel": "Chiffre {{number}} du code de vérification",
+    "codeExpires": "Le code expire dans :",
+    "verifyButton": "Vérifier le Code",
+    "verifying": "Vérification...",
+    "didNotReceive": "Vous n'avez pas reçu le code ?",
+    "resendCode": "Renvoyer le Code",
+    "resendIn": "Renvoyer dans {{seconds}}s",
+    "havingTrouble": "Vous rencontrez des difficultés ?",
+    "supportTeam": "équipe de support",
+    "errors": {
+      "incompleteCode": "Veuillez saisir le code de vérification complet",
+      "codeExpired": "Le code de vérification a expiré. Veuillez en demander un nouveau."
+    }
+  },
+  "resetPassword": {
+    "title": "Réinitialiser Votre Mot de Passe",
+    "newPasswordLabel": "Nouveau Mot de Passe",
+    "confirmPasswordLabel": "Confirmer le Mot de Passe",
+    "resetButton": "Réinitialiser le Mot de Passe",
+    "resettingPassword": "Réinitialisation...",
+    "backToSignIn": "Retour à la Connexion",
+    "strengthLabel": "Force :",
+    "passwordsMatch": "Les mots de passe correspondent",
+    "successTitle": "Mot de Passe Réinitialisé avec Succès !",
+    "successDescription": "Votre mot de passe a été réinitialisé avec succès. Redirection vers la connexion...",
+    "successMessage": "Mot de passe réinitialisé avec succès ! Veuillez vous connecter avec votre nouveau mot de passe.",
+    "passwordRequirements": {
+      "characters": "Au moins 6 caractères"
+    },
+    "passwordStrength": {
+      "weak": "Faible",
+      "medium": "Moyen",
+      "strong": "Fort"
+    },
+    "errors": {
+      "passwordRequired": "Le mot de passe est requis",
+      "confirmPasswordRequired": "Veuillez confirmer votre mot de passe",
+      "passwordsDontMatch": "Les mots de passe ne correspondent pas"
+    }
+  },
+  "categories": {
+    "title": "Catégories",
+    "description": "Gérez vos catégories de produits et leurs détails.",
+    "table": {
+      "headers": {
+        "category": "Catégorie",
+        "products": "Produits",
+        "created": "Créé le"
+      }
+    },
+    "messages": {
+      "addSuccess": "Catégorie ajoutée avec succès",
+      "updateSuccess": "Catégorie mise à jour avec succès",
+      "deleteSuccess": "Catégorie supprimée avec succès",
+      "bulkDeleteSuccess": "{{count}} catégorie supprimée avec succès",
+      "bulkDeleteSuccess_plural": "{{count}} catégories supprimées avec succès",
+      "bulkDeleteError": "Échec de la suppression des catégories sélectionnées"
+    }
+  },
+  "subCategories": {
+    "title": "Sous-catégories",
+    "description": "Gérez vos sous-catégories de produits et leurs détails.",
+    "table": {
+      "headers": {
+        "subcategory": "Sous-catégorie",
+        "category": "Catégorie",
+        "products": "Produits",
+        "created": "Créé le"
+      },
+      "unknownCategory": "Inconnue"
+    },
+    "messages": {
+      "addSuccess": "Sous-catégorie ajoutée avec succès",
+      "updateSuccess": "Sous-catégorie mise à jour avec succès",
+      "deleteSuccess": "Sous-catégorie supprimée avec succès",
+      "bulkDeleteSuccess": "{{count}} sous-catégorie supprimée avec succès",
+      "bulkDeleteSuccess_plural": "{{count}} sous-catégories supprimées avec succès",
+      "bulkDeleteError": "Échec de la suppression des sous-catégories sélectionnées"
+    }
+  },
+  "brands": {
+    "title": "Marques",
+    "description": "Gérez vos marques de produits et leurs détails.",
+    "table": {
+      "headers": {
+        "brand": "Marque",
+        "products": "Produits",
+        "created": "Créé le"
+      }
+    },
+    "messages": {
+      "addSuccess": "Marque ajoutée avec succès",
+      "updateSuccess": "Marque mise à jour avec succès",
+      "deleteSuccess": "Marque supprimée avec succès",
+      "bulkDeleteSuccess": "{{count}} marque supprimée avec succès",
+      "bulkDeleteSuccess_plural": "{{count}} marques supprimées avec succès",
+      "bulkDeleteError": "Échec de la suppression des marques sélectionnées"
+    }
+  },
+  "products": {
+    "title": "Produits",
+    "subtitle": "Gérez vos produits et leurs détails.",
+    "sku": "Référence",
+    "notAvailable": "N/D",
+    "columns": {
+      "product": "Produit",
+      "category": "Catégorie",
+      "subcategory": "Sous-catégorie",
+      "brand": "Marque",
+      "price": "Prix",
+      "sold": "Vendu",
+      "stock": "Stock",
+      "created": "Créé le"
+    },
+    "filters": {
+      "price": "Prix",
+      "pricePlaceholder": "Entrez le prix du produit",
+      "stock": "Stock",
+      "stockPlaceholder": "Entrez le stock du produit",
+      "createdDate": "Date de création"
+    },
+    "toasts": {
+      "addSuccess": "Produit ajouté avec succès",
+      "updateSuccess": "Produit mis à jour avec succès",
+      "deleteSuccess": "Produit supprimé avec succès",
+      "bulkDeleteSuccess": "{{count}} {{product}} supprimé avec succès",
+      "bulkDeleteError": "Échec de la suppression des produits sélectionnés"
+    },
+    "productSingular": "produit",
+    "productPlural": "produits"
+  },
+  "orders": {
+    "title": "Commandes",
+    "subtitle": "Gérez les commandes clients et suivez leur statut de livraison.",
+    "orderNumber": "#{{id}}",
+    "columns": {
+      "orderId": "N° Commande",
+      "customer": "Client",
+      "deliveryStatus": "Statut Livraison",
+      "payment": "Paiement",
+      "method": "Méthode",
+      "items": "Articles",
+      "total": "Total",
+      "orderDate": "Date Commande",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "En Attente",
+      "confirmed": "Confirmée",
+      "shipped": "Expédiée",
+      "inTransit": "En Transit",
+      "outForDelivery": "En Livraison",
+      "delivered": "Livrée",
+      "completed": "Terminée",
+      "failed": "Échouée",
+      "returned": "Retournée",
+      "cancelled": "Annulée"
+    },
+    "paymentStatus": {
+      "pending": "En Attente",
+      "authorized": "Autorisé",
+      "confirmed": "Confirmé",
+      "completed": "Complété",
+      "failed": "Échoué",
+      "refunded": "Remboursé",
+      "partiallyRefunded": "Partiellement Remboursé"
+    },
+    "details": {
+      "orderNumber": "Commande #{{id}}",
+      "createdOn": "Créée le {{date}} à {{time}}",
+      "deliveryStatus": "Statut de Livraison",
+      "paymentStatus": "Statut du Paiement",
+      "paymentMethod": "Méthode de Paiement",
+      "trackingNumber": "Numéro de Suivi",
+      "customerInfo": "Informations Client",
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "shippingAddress": "Adresse de Livraison",
+      "orderItems": "Articles Commandés ({{count}})",
+      "color": "Couleur",
+      "quantity": "Quantité",
+      "orderSummary": "Récapitulatif de Commande",
+      "subtotal": "Sous-total",
+      "shipping": "Livraison",
+      "tax": "TVA",
+      "total": "Total",
+      "statusHistory": "Historique des Statuts",
+      "updatedBy": "Mis à jour par",
+      "deliveryTracking": "Suivi de Livraison",
+      "loadingTracking": "Chargement des informations de suivi...",
+      "trackingAvailable": "Informations de suivi disponibles pour : {{number}}"
+    },
+    "actions": {
+      "viewDetails": "Voir les Détails",
+      "confirming": "Confirmation...",
+      "confirmCash": "Confirmer Commande (Espèces)",
+      "confirmCard": "Confirmer Paiement (Carte)",
+      "shipping": "Expédition...",
+      "shipOrder": "Expédier la Commande",
+      "cancelOrder": "Annuler la Commande",
+      "simulating": "Simulation...",
+      "simulateDelivery": "Simuler la Livraison"
+    },
+    "simulation": {
+      "fast": "Rapide",
+      "normal": "Normal",
+      "slow": "Lent",
+      "success": "Succès",
+      "failed": "Échec",
+      "testingNote": "Test uniquement : Simule les mises à jour du statut de livraison"
+    },
+    "cancelDialog": {
+      "title": "Annuler la Commande",
+      "description": "Êtes-vous sûr de vouloir annuler cette commande ? Cette action ne peut pas être annulée.",
+      "reasonLabel": "Raison d'annulation (Optionnel)",
+      "reasonPlaceholder": "Entrez la raison de l'annulation...",
+      "keepOrder": "Non, garder la commande",
+      "confirmCancel": "Oui, annuler la commande"
+    },
+    "filters": {
+      "totalPrice": "Prix Total",
+      "amountPlaceholder": "Entrez le montant",
+      "orderDate": "Date de Commande",
+      "paymentDate": "Date de Paiement",
+      "deliveryDate": "Date de Livraison"
+    },
+    "toasts": {
+      "confirmSuccess": "Commande confirmée avec succès",
+      "confirmCardSuccess": "Paiement par carte confirmé avec succès",
+      "shipSuccess": "Commande expédiée avec succès",
+      "cancelSuccess": "Commande annulée avec succès",
+      "simulationStarted": "Simulation de livraison démarrée (scénario {{scenario}})"
+    }
+  },
+  "users": {
+    "title": "المستخدمين",
+    "subtitle": "إدارة المستخدمين والصلاحيات الخاصة بهم",
+    "columns": {
+      "user": "المستخدم",
+      "role": "الدور",
+      "status": "الحالة",
+      "joined": "تاريخ الانضمام"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "filters": {
+      "createdDate": "تاريخ الإنشاء"
+    },
+    "toasts": {
+      "addSuccess": "تم إضافة المستخدم بنجاح",
+      "updateSuccess": "تم تحديث المستخدم بنجاح",
+      "deleteSuccess": "تم حذف المستخدم بنجاح",
+      "bulkDeleteSuccess": "تم حذف {{count}} {{user}} بنجاح",
+      "bulkDeleteError": "فشل حذف المستخدمين"
+    },
+    "errors": {
+      "missingId": "لم يتم العثور على معرف المستخدم!"
+    },
+    "filterPlaceholder": "تصفية المستخدمين...",
+    "userSingular": "مستخدم",
+    "userPlural": "مستخدمين"
+  },
+  "dashboard": {
+    "time": {
+      "justNow": "الآن",
+      "minutesAgo": "منذ {{minutes}} دقيقة",
+      "hoursAgo": "منذ {{hours}} ساعة",
+      "daysAgo": "منذ {{days}} يوم"
+    },
+    "activityTypes": {
+      "order": "طلب",
+      "user": "مستخدم",
+      "product": "منتج",
+      "category": "فئة",
+      "subcategory": "فئة فرعية",
+      "brand": "علامة تجارية",
+      "review": "تقييم",
+      "coupon": "كوبون",
+      "cart": "سلة"
+    },
+    "columns": {
+      "type": "النوع",
+      "activity": "النشاط",
+      "user": "المستخدم",
+      "status": "الحالة",
+      "amount": "المبلغ",
+      "time": "الوقت"
+    },
+    "filters": {
+      "activityType": "نوع النشاط",
+      "allTypes": "جميع الأنواع",
+      "status": "الحالة",
+      "allStatuses": "جميع الحالات",
+      "timeRange": "الفترة الزمنية",
+      "allTime": "كل الوقت",
+      "lastHour": "آخر ساعة",
+      "last24Hours": "آخر 24 ساعة",
+      "last7Days": "آخر 7 أيام",
+      "last30Days": "آخر 30 يوم",
+      "amount": "المبلغ",
+      "amountPlaceholder": "أدخل المبلغ",
+      "createdDate": "تاريخ الإنشاء"
+    },
+    "statuses": {
+      "success": "نجح",
+      "pending": "قيد الانتظار",
+      "failed": "فشل"
+    },
+    "socket": {
+      "connected": "متصل بالتحديثات المباشرة",
+      "disconnected": "انقطع الاتصال بالتحديثات المباشرة",
+      "error": "حدث خطأ في الاتصال"
+    },
+    "refreshSuccess": "تم تحديث الأنشطة",
+    "refreshing": "جاري التحديث...",
+    "refresh": "تحديث",
+    "recentActivities": {
+      "title": "الأنشطة الحديثة",
+      "subtitle": "أحدث الأنشطة في متجرك"
+    },
+    "status": {
+      "live": "مباشر",
+      "offline": "غير متصل"
+    },
+    "filterPlaceholder": "تصفية حسب نوع النشاط..."
+  },
+  "categoryDialog": {
+    "titles": {
+      "edit": "تعديل الفئة",
+      "add": "إضافة فئة جديدة"
+    },
+    "descriptions": {
+      "edit": "قم بتحديث تفاصيل الفئة أدناه.",
+      "add": "أدخل تفاصيل الفئة أدناه."
+    },
+    "labels": {
+      "categoryName": "اسم الفئة",
+      "uploadImage": "رفع صورة"
+    },
+    "placeholders": {
+      "categoryName": "مثال: إلكترونيات"
+    },
+    "buttons": {
+      "addCategory": "إضافة الفئة",
+      "save": "حفظ",
+      "update": "تحديث",
+      "saving": "جاري الحفظ...",
+      "updating": "جاري التحديث..."
+    },
+    "uploadArea": {
+      "dragDrop": "اسحب وأفلت صورتك هنا أو",
+      "clickToBrowse": "انقر للتصفح",
+      "selected": "المحدد:"
+    },
+    "errors": {
+      "nameRequired": "اسم الفئة مطلوب"
+    }
+  },
+  "subCategoryDialog": {
+    "titles": {
+      "edit": "تعديل الفئة الفرعية",
+      "add": "إضافة فئة فرعية جديدة"
+    },
+    "descriptions": {
+      "edit": "قم بتحديث تفاصيل الفئة الفرعية أدناه.",
+      "add": "اختر فئة رئيسية وأدخل تفاصيل الفئة الفرعية أدناه."
+    },
+    "labels": {
+      "category": "الفئة",
+      "subcategoryName": "اسم الفئة الفرعية",
+      "uploadImage": "رفع صورة"
+    },
+    "placeholders": {
+      "category": "اختر فئة رئيسية",
+      "subcategoryName": "مثال: أجهزة اللابتوب"
+    },
+    "buttons": {
+      "addSubcategory": "إضافة الفئة الفرعية",
+      "save": "حفظ",
+      "update": "تحديث",
+      "saving": "جاري الحفظ...",
+      "updating": "جاري التحديث..."
+    },
+    "uploadArea": {
+      "dragDrop": "اسحب وأفلت صورتك هنا أو",
+      "clickToBrowse": "انقر للتصفح",
+      "selected": "المحدد:"
+    },
+    "errors": {
+      "categoryRequired": "الفئة مطلوبة",
+      "nameRequired": "اسم الفئة الفرعية مطلوب"
+    }
+  },
+  "brandDialog": {
+    "titles": {
+      "edit": "Modifier la Marque",
+      "add": "Ajouter une Marque"
+    },
+    "descriptions": {
+      "edit": "Mettez à jour les détails de la marque ci-dessous.",
+      "add": "Entrez les détails de la marque ci-dessous."
+    },
+    "labels": {
+      "brandName": "Nom de la Marque",
+      "brandLogo": "Logo de la Marque"
+    },
+    "placeholders": {
+      "brandName": "ex: Nike"
+    },
+    "buttons": {
+      "addBrand": "Ajouter la Marque",
+      "save": "Enregistrer",
+      "update": "Mettre à Jour",
+      "saving": "Enregistrement...",
+      "updating": "Mise à jour..."
+    },
+    "uploadArea": {
+      "dragDrop": "Glissez-déposez le logo de la marque ici ou",
+      "clickToBrowse": "cliquez pour parcourir",
+      "formatRecommendation": "Format PNG, JPG ou SVG recommandé",
+      "selected": "Sélectionné :",
+      "altPreview": "Aperçu du Logo"
+    },
+    "errors": {
+      "nameRequired": "Le nom de la marque est requis"
+    }
+  },
+  "productDialog": {
+    "titles": {
+      "edit": "Modifier le Produit",
+      "add": "Ajouter un Produit"
+    },
+    "descriptions": {
+      "edit": "Mettez à jour les détails du produit ci-dessous.",
+      "add": "Entrez les détails du produit ci-dessous."
+    },
+    "labels": {
+      "category": "Catégorie",
+      "subcategory": "Sous-catégorie",
+      "brand": "Marque",
+      "productName": "Nom du Produit",
+      "description": "Description",
+      "price": "Prix ($)",
+      "discountPrice": "Prix Promo ($)",
+      "quantity": "Quantité",
+      "colors": "Couleurs (séparées par des virgules)",
+      "mainImage": "Image Principale du Produit",
+      "additionalImages": "Images Supplémentaires",
+      "optional": "(Optionnel)"
+    },
+    "placeholders": {
+      "loadingCategories": "Chargement des catégories...",
+      "loadingBrands": "Chargement des marques...",
+      "chooseCategory": "Choisir une catégorie",
+      "chooseSubcategory": "Choisir une sous-catégorie (optionnel)",
+      "selectCategoryFirst": "Sélectionnez d'abord une catégorie",
+      "chooseBrand": "Choisir une marque (optionnel)",
+      "productName": "ex: iPhone 15 Pro Max",
+      "description": "Entrez une description détaillée du produit...",
+      "price": "99.99",
+      "discountPrice": "79.99",
+      "quantity": "100",
+      "colors": "ex: Noir, Argent, Or, Gris Sidéral"
+    },
+    "buttons": {
+      "addProduct": "Ajouter le Produit",
+      "saveProduct": "Enregistrer le Produit",
+      "updateProduct": "Mettre à Jour le Produit",
+      "saving": "Enregistrement...",
+      "updating": "Mise à jour..."
+    },
+    "uploadArea": {
+      "dragDropMain": "Glissez-déposez l'image principale du produit ici ou",
+      "dragDropOthers": "Glissez-déposez plusieurs images ici ou",
+      "clickToBrowse": "cliquez pour parcourir",
+      "selected": "Sélectionné :",
+      "selectedImages": "Sélectionné : {{count}} image(s) supplémentaire(s)",
+      "mainPreviewAlt": "Aperçu Principal",
+      "otherPreviewAlt": "Aperçu {{index}}"
+    },
+    "options": {
+      "none": "Aucun",
+      "noSubcategories": "Aucune sous-catégorie disponible"
+    },
+    "helperText": {
+      "noSubcategories": "Cette catégorie n'a pas de sous-catégories disponibles."
+    },
+    "errors": {
+      "categoryRequired": "La catégorie est requise",
+      "nameRequired": "Le nom du produit est requis",
+      "descriptionRequired": "La description est requise",
+      "priceRequired": "Un prix valide est requis",
+      "quantityRequired": "Une quantité valide est requise",
+      "colorsRequired": "Au moins une couleur est requise",
+      "mainImageRequired": "L'image principale est requise"
+    }
+  },
+  "userDialog": {
+    "titles": {
+      "edit": "Modifier l'Utilisateur",
+      "add": "Ajouter un Utilisateur"
+    },
+    "descriptions": {
+      "edit": "Mettez à jour les détails de l'utilisateur ci-dessous.",
+      "add": "Entrez les détails de l'utilisateur ci-dessous."
+    },
+    "labels": {
+      "name": "Nom",
+      "email": "Email",
+      "role": "Rôle",
+      "accountStatus": "Statut du Compte",
+      "uploadUserImage": "Télécharger une photo de profil"
+    },
+    "placeholders": {
+      "name": "ex: Ahmed Benali",
+      "email": "ex: ahmed@example.com",
+      "role": "Choisir un rôle"
+    },
+    "buttons": {
+      "addUser": "Ajouter l'Utilisateur",
+      "save": "Enregistrer",
+      "update": "Mettre à Jour",
+      "saving": "Enregistrement...",
+      "updating": "Mise à jour..."
+    },
+    "roles": {
+      "admin": "Administrateur",
+      "user": "Utilisateur"
+    },
+    "status": {
+      "active": "Le compte utilisateur est actuellement actif",
+      "inactive": "Le compte utilisateur est actuellement inactif"
+    },
+    "uploadArea": {
+      "dragDrop": "Glissez-déposez votre photo de profil ici ou",
+      "clickToBrowse": "cliquez pour parcourir",
+      "selected": "Sélectionné :",
+      "altPreview": "Aperçu"
+    },
+    "errors": {
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "Un email valide est requis",
+      "passwordRequired": "Le mot de passe est requis",
+      "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
+      "passwordsDontMatch": "Les mots de passe ne correspondent pas",
+      "roleRequired": "Le rôle est requis",
+      "imageRequired": "La photo de profil est requise"
+    }
+  },
+  "advancedFilter": {
+    "trigger": "Filtres Avancés",
+    "title": "Filtres Avancés",
+    "clearAll": "Tout Effacer",
+    "numericFilters": "Filtres Numériques",
+    "dateFilters": "Filtres de Date",
+    "addFilter": "Ajouter un Filtre",
+    "filterNumber": "Filtre {{number}}",
+    "column": "Colonne",
+    "operator": "Opérateur",
+    "value": "Valeur",
+    "toValue": "À la valeur",
+    "date": "Date",
+    "toDate": "À la date",
+    "enterValue": "Entrez la valeur",
+    "maxValue": "Valeur maximale",
+    "cancel": "Annuler",
+    "applyFilters": "Appliquer les Filtres ({{count}})",
+    "filterDisplay": {
+      "between": "{{label}} : {{operator}} {{value1}} et {{value2}}",
+      "simple": "{{label}} : {{operator}} {{value}}"
+    }
+  },
+  "dataTable": {
+    "dragHandle": {
+      "srOnly": "Glisser pour réorganiser"
+    },
+    "actions": {
+      "openMenu": "Ouvrir le menu",
+      "viewEdit": "Voir & Modifier",
+      "delete": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "selection": {
+      "selectAll": "Tout sélectionner",
+      "selectRow": "Sélectionner la ligne"
+    },
+    "bulkDelete": {
+      "button": "Supprimer {{count}} ",
+      "buttonShort": "Supprimer ({{count}})",
+      "title": "Confirmer la Suppression Multiple",
+      "description": "Êtes-vous sûr de vouloir supprimer {{count}}  ? Cette action ne peut pas être annulée.",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "loading": "Chargement...",
+    "noResults": "Aucun Résultat Trouvé",
+    "adjustFilters": "Essayez d'ajuster vos critères de recherche ou de filtrage",
+    "noData": "Aucun résultat.",
+    "search": "Rechercher...",
+    "customizeColumns": "Personnaliser les Colonnes",
+    "columns": "Colonnes",
+    "rowsSelected": "{{selected}} sur {{total}} ligne(s) sélectionnée(s).",
+    "rowsPerPage": "Lignes par page",
+    "pageInfo": "Page {{current}} sur {{total}}",
+    "firstPage": "Aller à la première page",
+    "previousPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "lastPage": "Aller à la dernière page"
+  },
+  "sidebar": {
+    "companyName": "Acme Inc.",
+    "nav": {
+      "dashboard": "Tableau de Bord",
+      "categories": "Catégories",
+      "subcategories": "Sous-catégories",
+      "brands": "Marques",
+      "products": "Produits",
+      "orders": "Commandes",
+      "users": "Utilisateurs",
+      "backToStore": "Retour à la Boutique",
+      "getHelp": "Obtenir de l'Aide"
+    }
+  },
+  "chart": {
+    "growthRate": {
+      "title": "Taux de Croissance",
+      "loading": "Chargement des données du graphique...",
+      "totalRevenue": "Revenu total"
+    },
+    "timeRange": {
+      "last3Months": "3 derniers mois",
+      "last30Days": "30 derniers jours",
+      "last7Days": "7 derniers jours",
+      "selectAriaLabel": "Sélectionner une valeur"
+    }
+  },
+  "tables": {
+    "bestOrders": {
+      "title": "Meilleures Commandes",
+      "empty": "Aucune commande pour le moment",
+      "headers": {
+        "orderId": "N° Commande",
+        "customer": "Client",
+        "total": "Total",
+        "date": "Date"
+      }
+    },
+    "topCustomers": {
+      "title": "Meilleurs Clients",
+      "empty": "Aucun client pour le moment",
+      "headers": {
+        "customer": "Client",
+        "orders": "Commandes",
+        "revenue": "Revenu"
+      }
+    },
+    "bestProducts": {
+      "title": "Meilleurs Produits",
+      "empty": "Aucun produit vendu pour le moment",
+      "headers": {
+        "product": "Produit",
+        "unitsSold": "Unités Vendues",
+        "revenue": "Revenu"
+      }
+    },
+    "topBadge": "Top 5"
+  },
+  "cards": {
+    "revenue": {
+      "title": "Revenu Total",
+      "changeText": "{{percentage}}% par rapport au mois dernier"
+    },
+    "customers": {
+      "title": "Nouveaux Clients",
+      "changeText": "{{percentage}}% cette période"
+    },
+    "orders": {
+      "title": "Commandes Totales",
+      "changeText": "{{percentage}}% de flux de commandes ce mois-ci",
+      "steadyFlow": "Flux de commandes stable"
+    },
+    "topProduct": {
+      "title": "Meilleur Produit",
+      "changeText": "{{percentage}}% ce mois-ci",
+      "noSales": "Aucune vente pour le moment"
+    },
+    "noChange": "Aucun changement",
+    "noData": "Aucune donnée"
+  },
+  "header": {
+    "promoText": "Livraison gratuite pour les commandes de plus de 50$ ! Utilisez le code :",
+    "promoCode": "FREESHIP",
+    "logo": "CLICON",
+    "searchPlaceholder": "Rechercher des produits...",
+    "adminBadge": "Admin",
+    "adminPanel": "Panneau d'Administration",
+    "myAccount": "Mon Compte",
+    "orders": "Mes Commandes",
+    "wishlist": "Liste de Souhaits",
+    "signOut": "Déconnexion",
+    "signIn": "Connexion",
+    "register": "S'inscrire",
+    "nav": {
+      "home": "Accueil",
+      "shop": "Boutique",
+      "categories": "Catégories",
+      "deals": "Promotions",
+      "about": "À Propos",
+      "contact": "Contactez-nous"
+    }
+  },
+  "footer": {
+    "trustBadges": {
+      "freeShipping": {
+        "title": "Livraison Gratuite",
+        "description": "Commandes de plus de 50$"
+      },
+      "easyReturns": {
+        "title": "Retours Faciles",
+        "description": "Politique de retour 30 jours"
+      },
+      "securePayment": {
+        "title": "Paiement Sécurisé",
+        "description": "Chiffré SSL"
+      },
+      "support": {
+        "title": "Support 24h/24",
+        "description": "Service client"
+      }
+    },
+    "logo": "CLICON",
+    "companyDescription": "Votre marketplace de confiance pour des produits de qualité à prix avantageux. Achetez en toute confiance et profitez d'un service rapide et fiable.",
+    "address": "123 Rue du Commerce, Ville, État 12345",
+    "phone": "+1 (555) 123-4567",
+    "email": "support@clicon.com",
+    "customerService": {
+      "title": "Service Client",
+      "helpCenter": "Centre d'Aide",
+      "shippingInfo": "Infos Livraison",
+      "returnsExchanges": "Retours & Échanges",
+      "sizeGuide": "Guide des Tailles",
+      "trackOrder": "Suivre Votre Commande",
+      "contactUs": "Contactez-Nous"
+    },
+    "company": {
+      "title": "Entreprise",
+      "aboutUs": "À Propos",
+      "careers": "Carrières",
+      "blog": "Blog",
+      "press": "Presse",
+      "investors": "Investisseurs",
+      "sustainability": "Développement Durable"
+    },
+    "newsletter": {
+      "title": "Restez Connecté",
+      "description": "Abonnez-vous pour recevoir des offres spéciales, des cadeaux gratuits et des mises à jour.",
+      "placeholder": "Entrez votre email",
+      "subscribe": "S'abonner"
+    },
+    "copyright": "© {{year}} Cliqo. Tous droits réservés.",
+    "legal": {
+      "privacyPolicy": "Politique de Confidentialité",
+      "termsOfService": "Conditions d'Utilisation",
+      "cookiePolicy": "Politique des Cookies"
+    },
+    "paymentMethods": {
+      "title": "Nous acceptons :"
+    }
+  },
+  "about": {
+    "hero": {
+      "badge": "Notre Histoire",
+      "title": "Bienvenue dans Notre Voyage",
+      "subtitle": "Découvrez comment nous révolutionnons le commerce électronique avec la qualité, l'innovation et des valeurs mettant le client en premier"
+    },
+    "story": {
+      "title": "Notre Histoire",
+      "paragraph1": "Fondée en 2020, notre voyage a commencé avec une vision simple : rendre les produits de qualité accessibles à tous. Nous avons commencé dans un petit garage et sommes devenus une plateforme de commerce électronique fiable servant des milliers de clients dans le monde.",
+      "paragraph2": "Aujourd'hui, nous nous associons avec les meilleures marques et fournisseurs pour vous offrir une sélection incroyable de produits dans plusieurs catégories. Notre engagement envers l'excellence nous a établis comme leader du secteur.",
+      "paragraph3": "Nous croyons à la transparence, à la fiabilité et à mettre nos clients en premier. Chaque produit, chaque interaction et chaque expérience est conçu en pensant à vous.",
+      "cta": "En Savoir Plus"
+    },
+    "stats": {
+      "title": "Par Les Chiffres",
+      "customers": {
+        "number": "50K+",
+        "label": "Clients Satisfaits"
+      },
+      "products": {
+        "number": "10K+",
+        "label": "Produits"
+      },
+      "orders": {
+        "number": "100K+",
+        "label": "Commandes Livrées"
+      },
+      "countries": {
+        "number": "25+",
+        "label": "Pays"
+      }
+    },
+    "values": {
+      "title": "Nos Valeurs Fondamentales",
+      "subtitle": "Ces principes guident chaque décision que nous prenons et chaque interaction avec nos clients",
+      "quality": {
+        "title": "La Qualité D'Abord",
+        "description": "Nous nous assurons que chaque produit répond à nos normes de qualité strictes"
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "Évolution constante pour vous apporter la dernière technologie"
+      },
+      "community": {
+        "title": "Communauté",
+        "description": "Créer une communauté prospère de clients satisfaits"
+      },
+      "sustainability": {
+        "title": "Durabilité",
+        "description": "Engagés envers les pratiques écologiques et la responsabilité mondiale"
+      }
+    },
+    "whyChooseUs": {
+      "title": "Pourquoi Nous Choisir",
+      "subtitle": "Ce qui nous distingue de la concurrence",
+      "reason1": {
+        "title": "Livraison Rapide et Fiable",
+        "description": "Nous garantissons une livraison ponctuelle avec suivi en temps réel pour toutes les commandes"
+      },
+      "reason2": {
+        "title": "Shopping Sécurisé",
+        "description": "Vos données sont protégées par le chiffrement de qualité industrielle et les mesures de sécurité"
+      },
+      "reason3": {
+        "title": "Retours Faciles",
+        "description": "Politique de retour de 30 jours sans questions posées - nous voulons que vous soyez heureux"
+      },
+      "reason4": {
+        "title": "Client D'Abord",
+        "description": "Support client 24/7 prêt à vous aider pour toute question ou préoccupation"
+      }
+    },
+    "team": {
+      "title": "Rencontrez Notre Équipe",
+      "subtitle": "Des individus talentueux passionnés par la livraison de l'excellence",
+      "members": {
+        "member1": {
+          "name": "PDG & Fondateur",
+          "role": "Opérations",
+          "bio": "Diriger la vision avec plus de 15 ans d'expertise"
+        },
+        "member2": {
+          "name": "Directeur Marketing",
+          "role": "Stratégie de Croissance",
+          "bio": "Construire des relations clients significatives"
+        },
+        "member3": {
+          "name": "Chef Technologie",
+          "role": "Développement Produit",
+          "bio": "Innover pour des expériences transparentes"
+        },
+        "member4": {
+          "name": "Chef du Succès Client",
+          "role": "Support",
+          "bio": "Assurer la satisfaction des clients quotidiennement"
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à Nous Rejoindre?",
+      "subtitle": "Commencez à faire du shopping maintenant et découvrez la différence que la qualité et le service client peuvent faire",
+      "button1": "Commencer les Achats",
+      "button2": "Nous Contacter"
+    }
+  }
+}
