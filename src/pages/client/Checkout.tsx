@@ -73,6 +73,7 @@ const Checkout = () => {
     email: user?.email || "",
     userName: user?.name || "",
   });
+  
 
   const [shippingAddress, setShippingAddress] = useState({
     details: "",
