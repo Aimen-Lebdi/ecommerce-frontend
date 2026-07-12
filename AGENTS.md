@@ -36,11 +36,5 @@ Testing & CI
 - Unit tests: `vitest` + `@testing-library/react` (see `devDependencies` in [package.json](package.json)).
 - End-to-end tests: repository includes `cypress` as a devDependency.
 
-Where agents should avoid assumptions
-- Back-end API endpoints and credentials are not present here; ask for environment details or a mock server before running integration work.
+If anything here is unclear, ask for details before making behavioral changes.
 
-Links
-- Primary docs: [README.md](README.md)
-
-Suggested follow-ups
-- Add focused agent prompts for: code generation in `src/features/`, UI component editing under `src/components/ui/`, and i18n updates under `src/locales/`.
