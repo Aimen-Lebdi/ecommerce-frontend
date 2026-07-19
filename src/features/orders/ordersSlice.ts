@@ -31,7 +31,7 @@ export interface Order {
     name: string;
     email: string;
     phone?: string;
-    profileImg?: string;
+    image?: string;
   };
   cartItems: {
     _id: string;
