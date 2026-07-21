@@ -694,7 +694,7 @@ if (otherImages.length > 0) {
               <p className="text-sm text-red-600">{errors.price}</p>
             )}
           </div>
-          <div className="grid gap-2">
+          {/* <div className="grid gap-2">
             <Label>
               {t('productDialog.labels.discountPrice')}{" "}
               <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
@@ -707,7 +707,7 @@ if (otherImages.length > 0) {
               step="0.01"
               min="0"
             />
-          </div>
+          </div> */}
           <div className="grid gap-2">
             <Label>{t('productDialog.labels.quantity')}</Label>
             <Input
