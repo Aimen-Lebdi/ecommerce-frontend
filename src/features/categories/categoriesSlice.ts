@@ -262,6 +262,8 @@ const categoriesSlice = createSlice({
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
+        state.categories = [];
+        state.pagination = null;
       })
       // Create category
       .addCase(createCategory.pending, (state) => {

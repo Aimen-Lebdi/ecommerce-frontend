@@ -260,6 +260,8 @@ const brandsSlice = createSlice({
       .addCase(fetchBrands.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
+        state.brands = [];
+        state.pagination = null;
       })
       // Create brand
       .addCase(createBrand.pending, (state) => {

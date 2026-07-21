@@ -270,6 +270,8 @@ const subCategoriesSlice = createSlice({
       .addCase(fetchSubCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
+        state.subcategories = [];
+        state.pagination = null;
       })
       // Create subcategory
       .addCase(createSubCategory.pending, (state) => {

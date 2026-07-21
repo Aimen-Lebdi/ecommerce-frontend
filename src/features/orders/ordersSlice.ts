@@ -437,6 +437,8 @@ const ordersSlice = createSlice({
       .addCase(fetchOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
+        state.orders = [];
+        state.pagination = null;
       })
       // Fetch My orders
       .addCase(fetchMyOrders.pending, (state, action) => {

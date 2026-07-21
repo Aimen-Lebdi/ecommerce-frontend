@@ -418,6 +418,8 @@ const usersSlice = createSlice({
       .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
+        state.users = [];
+        state.pagination = null;
       })
       // Create user
       .addCase(createUser.pending, (state) => {

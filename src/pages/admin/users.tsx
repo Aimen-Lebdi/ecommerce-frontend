@@ -153,7 +153,10 @@ export default function Users() {
   // Handle errors
   React.useEffect(() => {
     if (error) {
-      toast.error(error);
+      const isNoResults = /there are no .+ to get/i.test(error);
+      if (!isNoResults) {
+        toast.error(error);
+      }
       dispatch(clearError());
     }
   }, [error, dispatch]);

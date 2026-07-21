@@ -398,6 +398,8 @@ const productsSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
+        state.products = [];
+        state.pagination = null;
       })
       // Fetch single product
       .addCase(fetchProductById.pending, (state) => {

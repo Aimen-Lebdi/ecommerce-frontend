@@ -600,6 +600,13 @@ export function DataTable<TData extends BaseEntity>({
     }
   );
 
+  const hasActiveSearchOrFilter = React.useMemo(() => {
+    if (serverSide) {
+      return !!currentQueryParams?.keyword;
+    }
+    return !!globalFilter || columnFilters.length > 0;
+  }, [serverSide, currentQueryParams, globalFilter, columnFilters]);
+
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize,
@@ -1053,19 +1060,14 @@ export function DataTable<TData extends BaseEntity>({
               {t('dataTable.loading')}
             </TableCell>
           </TableRow>
-        ) : error || table.getRowModel().rows?.length === 0 ? (
+        ) : table.getRowModel().rows?.length === 0 ? (
           <TableRow>
             <TableCell
               colSpan={finalColumns.length}
               className="h-24 text-center"
             >
-              {error ? (
-                <div className="text-muted-foreground">
-                  <p className="font-medium">{t('dataTable.noResults')}</p>
-                  <p className="text-sm mt-1">
-                    {t('dataTable.adjustFilters')}
-                  </p>
-                </div>
+              {error || hasActiveSearchOrFilter ? (
+                t('dataTable.noResults')
               ) : (
                 t('dataTable.noData')
               )}
