@@ -91,7 +91,7 @@ interface ProductDialogProps {
     category?: string;
     subCategory?: string;
     brand?: string;
-  }) => void;
+  }) => Promise<void>;
   isSubmitting?: boolean;
 }
 
@@ -145,6 +145,7 @@ export function ProductDialog({
   const [dragActiveOthers, setDragActiveOthers] = React.useState(false);
 
   const [errors, setErrors] = React.useState<Errors>({});
+  const [internalSubmitting, setInternalSubmitting] = React.useState(false);
 
   // Dropdown data state
   const [categories, setCategories] = React.useState<Category[]>([]);
@@ -307,7 +308,7 @@ export function ProductDialog({
   };
 
   // Save Handler
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return;
 
     const productData: any = {};
@@ -392,20 +393,23 @@ if (otherImages.length > 0) {
 }
     }
 
-    console.log(
-      `${mode === "edit" ? "Updating" : "Saving new"} product:`,
-      productData
-    );
-    console.log("Changed fields only:", Object.keys(productData));
+    setInternalSubmitting(true);
 
-    onSubmit?.(productData);
+    try {
+      await onSubmit?.(productData);
 
-    if (mode === "add") {
-      // For add mode: reset form but keep dialog open
-      resetForm();
-    } else {
-      // For edit mode: close dialog
-      setOpen(false);
+      if (mode === "add") {
+        // For add mode: reset form but keep dialog open
+        resetForm();
+      } else {
+        // For edit mode: close dialog only after successful update
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error("Save failed:", error);
+      // Dialog stays open on error so user can retry
+    } finally {
+      setInternalSubmitting(false);
     }
   };
 
@@ -918,16 +922,22 @@ if (otherImages.length > 0) {
       </div>
 
       <DialogFooter>
-        <Button onClick={handleSave} disabled={isSubmitting}>
-          <IconPhoto className="mr-2 h-4 w-4" />
-          {isSubmitting
-            ? mode === "edit"
-              ? t('productDialog.buttons.updating')
-              : t('productDialog.buttons.saving')
-            : mode === "edit"
-            ? t('productDialog.buttons.updateProduct')
-            : t('productDialog.buttons.saveProduct')}
-        </Button>
+        {(() => {
+          const combinedSubmitting = isSubmitting || internalSubmitting;
+          return (
+            <Button onClick={handleSave} disabled={combinedSubmitting}>
+              <IconPhoto className="mr-2 h-4 w-4" />
+              {combinedSubmitting
+                ? mode === "edit"
+                  ? t('productDialog.buttons.updating')
+                  : t('productDialog.buttons.saving')
+                : mode === "edit"
+                ? t('productDialog.buttons.updateProduct')
+                : t('productDialog.buttons.saveProduct')}
+            </Button>
+          );
+        })()}
+        {/* </Button> */}
       </DialogFooter>
     </DialogContent>
   );
@@ -976,7 +986,7 @@ export function createEditProductDialog(
     category?: string;
     subCategory?: string;
     brand?: string;
-  }) => void,
+  }) => Promise<void>,
   isSubmitting: boolean = false
 ) {
   return (

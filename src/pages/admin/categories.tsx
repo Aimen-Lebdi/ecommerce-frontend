@@ -184,6 +184,7 @@ export default function Categories() {
     } catch (error) {
       console.error("Failed to update category:", error);
       // Error toast is handled by the error useEffect above
+      throw error; // Re-throw so the dialog knows the update failed and stays open
     }
   };
 
@@ -246,7 +247,7 @@ export default function Categories() {
             editDialogComponent={(rowData: Category) =>
               createEditCategoryDialog(
                 rowData,
-                (updatedData) => {
+                async (updatedData) => {
                   // Handle the category update by extracting ID and calling update handler
                   const id = rowData._id;
                   const {
@@ -255,7 +256,7 @@ export default function Categories() {
                     productCount,
                     ...categoryUpdateData
                   } = updatedData;
-                  handleUpdateCategory(id, categoryUpdateData);
+                  await handleUpdateCategory(id, categoryUpdateData);
                 },
                 isUpdating // Pass the loading state
               )

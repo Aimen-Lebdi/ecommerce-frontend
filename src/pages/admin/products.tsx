@@ -283,6 +283,7 @@ export default function Products() {
     } catch (error) {
       console.error("Failed to update product:", error);
       // Error toast is handled by the error useEffect above
+      throw error; // Re-throw so the dialog knows the update failed and stays open
     }
   };
 
@@ -342,7 +343,7 @@ export default function Products() {
             editDialogComponent={(rowData: Product) =>
               createEditProductDialog(
                 rowData,
-                (updatedData) => {
+                async(updatedData) => {
                   const id = rowData._id;
                   const {
                     _id,
@@ -354,7 +355,7 @@ export default function Products() {
                     ratingsQuantity,
                     ...productUpdateData
                   } = updatedData;
-                  handleUpdateProduct(id, productUpdateData);
+                  await handleUpdateProduct(id, productUpdateData);
                 },
                 isUpdating
               )

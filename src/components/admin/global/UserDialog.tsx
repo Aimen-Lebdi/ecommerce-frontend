@@ -60,7 +60,7 @@ interface UserDialogProps {
     role?: "admin" | "user";
     active?: boolean;
     image?: File | null;
-  }) => void;
+  }) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -96,6 +96,7 @@ export function UserDialog({
   const [dragActive, setDragActive] = React.useState(false);
 
   const [errors, setErrors] = React.useState<Errors>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -208,28 +209,32 @@ export function UserDialog({
     return payload;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return;
 
     const userData = prepareUpdatePayload();
 
     if (mode === "edit" && Object.keys(userData).length === 0) {
-      console.log("No changes detected");
       setOpen(false);
       return;
     }
 
-    console.log(
-      `${mode === "edit" ? "Updating" : "Saving new"} user:`,
-      userData
-    );
+    setIsSubmitting(true);
 
-    onSave?.(userData);
+    try {
+      await onSave?.(userData);
 
-    if (mode === "add") {
-      resetForm();
-    } else {
-      setOpen(false);
+      if (mode === "add") {
+        resetForm();
+      } else {
+        // For edit mode: close dialog only after successful update
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error("Save failed:", error);
+      // Dialog stays open on error so user can retry
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -264,7 +269,10 @@ export function UserDialog({
     setOpen(newOpen);
   };
 
-  const saveButtonContent = isLoading
+  // Combined loading state: external isLoading OR internal isSubmitting
+  const isDisabled = isLoading || isSubmitting;
+
+  const saveButtonContent = isDisabled
     ? mode === "edit"
       ? t('userDialog.buttons.updating')
       : t('userDialog.buttons.saving')
@@ -449,7 +457,7 @@ export function UserDialog({
       </div>
 
       <DialogFooter>
-        <Button onClick={handleSave} disabled={isLoading}>
+        <Button onClick={handleSave} disabled={isDisabled}>
           <IconUser className="mr-2 h-4 w-4" />
           {saveButtonContent}
         </Button>
@@ -481,20 +489,19 @@ export function UserDialog({
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditUserDialog(
   rowData: User,
-  onSave: (updatedData: { _id: string; [key: string]: any }) => void,
+  onSave: (updatedData: { _id: string; [key: string]: any }) => Promise<void>,
   isLoading: boolean = false
 ) {
   return (
     <UserDialog
       mode="edit"
       existingData={rowData}
-      onSave={(userData) => {
+      onSave={async (userData) => {
         const updatePayload = {
           _id: rowData._id,
           ...userData,
         };
-        console.log("Edit dialog sending payload:", updatePayload);
-        onSave(updatePayload);
+        await onSave(updatePayload);
       }}
       isLoading={isLoading}
       onOpenChange={() => {}}

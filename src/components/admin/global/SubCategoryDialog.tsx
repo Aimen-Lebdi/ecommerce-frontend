@@ -52,7 +52,7 @@ interface SubCategoryDialogProps {
   existingData?: SubCategory;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSave?: (data: { name?: string; category?: string; image?: File | null }) => void;
+  onSave?: (data: { name?: string; category?: string; image?: File | null }) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -78,6 +78,7 @@ export function SubCategoryDialog({
   const [imageRemoved, setImageRemoved] = React.useState(false);
   const [dragActive, setDragActive] = React.useState(false);
   const [errors, setErrors] = React.useState<Errors>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Use controlled or internal open state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -162,7 +163,7 @@ if (image instanceof File) {
     return payload;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return;
 
     // Get only changed fields
@@ -170,24 +171,27 @@ if (image instanceof File) {
     
     // Don't proceed if nothing changed in edit mode
     if (mode === "edit" && Object.keys(subCategoryData).length === 0) {
-      console.log("No changes detected");
       setOpen(false);
       return;
     }
 
-    console.log(
-      `${mode === "edit" ? "Updating" : "Saving new"} subcategory:`,
-      subCategoryData
-    );
+    setIsSubmitting(true);
 
-    onSave?.(subCategoryData);
+    try {
+      await onSave?.(subCategoryData);
 
-    if (mode === "add") {
-      // For add mode: reset form but keep dialog open
-      resetForm();
-    } else {
-      // For edit mode: close dialog
-      setOpen(false);
+      if (mode === "add") {
+        // For add mode: reset form but keep dialog open
+        resetForm();
+      } else {
+        // For edit mode: close dialog only after successful update
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error("Save failed:", error);
+      // Dialog stays open on error so user can retry
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -220,8 +224,11 @@ if (image instanceof File) {
     setOpen(newOpen);
   };
 
+  // Combined loading state: external isLoading OR internal isSubmitting
+  const isDisabled = isLoading || isSubmitting;
+
   // Update the save button to show loading state
-  const saveButtonContent = isLoading ? (
+  const saveButtonContent = isDisabled ? (
     mode === "edit" ? t('subCategoryDialog.buttons.updating') : t('subCategoryDialog.buttons.saving')
   ) : (
     mode === "edit" ? t('subCategoryDialog.buttons.update') : t('subCategoryDialog.buttons.save')
@@ -372,7 +379,7 @@ if (image instanceof File) {
       </div>
 
       <DialogFooter>
-        <Button onClick={handleSave} disabled={isLoading}>
+        <Button onClick={handleSave} disabled={isDisabled}>
           {saveButtonContent}
         </Button>
       </DialogFooter>
@@ -411,7 +418,7 @@ export function AddSubCategoryDialog() {
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditSubCategoryDialog(
   rowData: SubCategory,
-  onSave: (updatedData: { name?: string; category?: string; image?: File | null }) => void,
+  onSave: (updatedData: { name?: string; category?: string; image?: File | null }) => Promise<void>,
   isLoading: boolean = false
 ) {
   return (

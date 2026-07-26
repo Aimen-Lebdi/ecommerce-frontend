@@ -209,6 +209,7 @@ export default function Users() {
     } catch (error) {
       console.error("Failed to update user:", error);
       // Error toast is handled by the error useEffect above
+      throw error; // Re-throw so the dialog knows the update failed and stays open
     }
   };
 
@@ -271,7 +272,7 @@ export default function Users() {
             editDialogComponent={(rowData: User) =>
               createEditUserDialog(
                 rowData,
-                (updatedData) => {
+                async (updatedData) => {
                   // Handle the user update by extracting ID and calling update handler
                   const id = updatedData._id || rowData._id; // Fallback to rowData._id if needed
                   // Remove the _id from the update data since it's not needed in the payload
@@ -291,7 +292,7 @@ export default function Users() {
                     return;
                   }
 
-                  handleUpdateUser(id, userUpdateData);
+                  await handleUpdateUser(id, userUpdateData);
                 },
                 isUpdating // Pass the loading state
               )

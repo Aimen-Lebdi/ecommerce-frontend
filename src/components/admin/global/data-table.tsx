@@ -190,31 +190,16 @@ function DragHandle({ id }: { id: number | string }) {
 // Separate component for Actions Cell
 function ActionsCellComponent<TData extends BaseEntity>({
   row,
-  editDialogComponent,
-  onRowUpdate,
+  onEditClick,
   onRowDelete,
   isDeleting,
 }: {
   row: Row<TData>;
-  editDialogComponent?: (
-    rowData: TData,
-    onSave: (updatedData: TData) => void
-  ) => React.ReactNode;
-  onRowUpdate?: (updatedRow: TData) => void;
+  onEditClick: (rowData: TData) => void;
   onRowDelete?: (id: string) => void;
   isDeleting?: boolean;
 }) {
   const { t } = useTranslation();
-  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
-
-  const handleEditSave = (updatedData: TData) => {
-    onRowUpdate?.(updatedData);
-    setEditDialogOpen(false);
-  };
-
-  const handleEditClick = () => {
-    setEditDialogOpen(true);
-  };
 
   const handleDeleteClick = () => {
     if (onRowDelete && (row.original._id || row.original.id)) {
@@ -224,57 +209,37 @@ function ActionsCellComponent<TData extends BaseEntity>({
   };
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">{t('dataTable.actions.openMenu')}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem onClick={handleEditClick}>
-            {t('dataTable.actions.viewEdit')}
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={handleDeleteClick}
-            disabled={isDeleting}
-          >
-            {isDeleting ? t('dataTable.actions.deleting') : t('dataTable.actions.delete')}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {editDialogComponent &&
-        editDialogOpen &&
-        React.cloneElement(
-          editDialogComponent(
-            row.original,
-            handleEditSave
-          ) as React.ReactElement,
-          {
-            open: editDialogOpen,
-            onOpenChange: setEditDialogOpen,
-          }
-        )}
-    </>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+          size="icon"
+        >
+          <IconDotsVertical />
+          <span className="sr-only">{t('dataTable.actions.openMenu')}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-32">
+        <DropdownMenuItem onClick={() => onEditClick(row.original)}>
+          {t('dataTable.actions.viewEdit')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={handleDeleteClick}
+          disabled={isDeleting}
+        >
+          {isDeleting ? t('dataTable.actions.deleting') : t('dataTable.actions.delete')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
 // Enhanced actions column component with Edit functionality
 export function ActionsColumn<TData extends BaseEntity>(
-  editDialogComponent?: (
-    rowData: TData,
-    onSave: (updatedData: TData) => void
-  ) => React.ReactNode,
-  onRowUpdate?: (updatedRow: TData) => void,
+  onEditClick: (rowData: TData) => void,
   onRowDelete?: (id: string) => void,
   isDeleting?: boolean
 ) {
@@ -283,8 +248,7 @@ export function ActionsColumn<TData extends BaseEntity>(
     cell: ({ row }: { row: Row<TData> }) => (
       <ActionsCellComponent
         row={row}
-        editDialogComponent={editDialogComponent}
-        onRowUpdate={onRowUpdate}
+        onEditClick={onEditClick}
         onRowDelete={onRowDelete}
         isDeleting={isDeleting}
       />
@@ -586,6 +550,7 @@ export function DataTable<TData extends BaseEntity>({
   };
 
   const [rowSelection, setRowSelection] = React.useState({});
+  const [editingRow, setEditingRow] = React.useState<TData | null>(null);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -877,6 +842,13 @@ export function DataTable<TData extends BaseEntity>({
     [onBulkDelete]
   );
 
+  const handleEditSave = React.useCallback(
+    (updatedData: TData) => {
+      handleRowUpdate(updatedData);
+    },
+    [handleRowUpdate]
+  );
+
   const finalColumns = React.useMemo(() => {
   const cols: ColumnDef<TData>[] = [];
 
@@ -895,8 +867,7 @@ export function DataTable<TData extends BaseEntity>({
   if (!hasActionsColumn) {
     cols.push(
       ActionsColumn<TData>(
-        editDialogComponent,
-        handleRowUpdate,
+        setEditingRow,
         onRowDelete,
         isDeleting
       )
@@ -909,8 +880,6 @@ export function DataTable<TData extends BaseEntity>({
   enableDragAndDrop,
   enableRowSelection,
   serverSide,
-  editDialogComponent,
-  handleRowUpdate,
   onRowDelete,
   isDeleting,
 ]);
@@ -1101,236 +1070,250 @@ export function DataTable<TData extends BaseEntity>({
   );
 
   return (
-    <Tabs
-      defaultValue="outline"
-      className="w-full flex-col justify-start gap-6"
-    >
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <div className="flex items-center gap-2 flex-wrap">
-          {enableGlobalFilter && (
-            <Input
-              placeholder={t('dataTable.search')}
-              value={globalFilter}
-              onChange={(e) => handleGlobalFilterChange(e.target.value)}
-              className="max-w-sm"
-            />
-          )}
-
-          {enableColumnFilter && (
-            <Input
-              placeholder={filterPlaceholder}
-              value={
-                (table.getColumn(filterColumn)?.getFilterValue() as string) ??
-                ""
-              }
-              onChange={(e) =>
-                table.getColumn(filterColumn)?.setFilterValue(e.target.value)
-              }
-              className="max-w-sm"
-            />
-          )}
-
-          {enableAdvancedFilter && advancedFilterConfig && (
-            <AdvancedFilter
-              config={advancedFilterConfig}
-              onFiltersChange={handleAdvancedFiltersChange}
-              initialFilters={advancedFilters}
-            />
-          )}
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <IconLayoutColumns />
-                <span className="hidden lg:inline">{t('dataTable.customizeColumns')}</span>
-                <span className="lg:hidden">{t('dataTable.columns')}</span>
-                <IconChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {table
-                .getAllColumns()
-                .filter(
-                  (column) =>
-                    typeof column.accessorFn !== "undefined" &&
-                    column.getCanHide()
-                )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {dialogComponent}
-        </div>
-      </div>
-
-      <TabsContent
-        value="outline"
-        className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+    <>
+      <Tabs
+        defaultValue="outline"
+        className="w-full flex-col justify-start gap-6"
       >
-        <div className="overflow-hidden rounded-lg border">
-          {enableDragAndDrop && !serverSide ? (
-            <DndContext
-              collisionDetection={closestCenter}
-              modifiers={[restrictToVerticalAxis]}
-              onDragEnd={handleDragEnd}
-              sensors={sensors}
-              id={sortableId}
-            >
-              <TableContent />
-            </DndContext>
-          ) : (
-            <TableContent />
-          )}
-        </div>
+        <div className="flex items-center justify-between px-4 lg:px-6">
+          <div className="flex items-center gap-2 flex-wrap">
+            {enableGlobalFilter && (
+              <Input
+                placeholder={t('dataTable.search')}
+                value={globalFilter}
+                onChange={(e) => handleGlobalFilterChange(e.target.value)}
+                className="max-w-sm"
+              />
+            )}
 
-        <div className="flex items-center justify-between px-4">
-          {enableRowSelection && onBulkDelete && (
-            <BulkDeleteButton
-              selectedRows={selectedRows}
-              onBulkDelete={handleBulkDelete}
-              isBulkDeleting={isBulkDeleting}
-            />
-          )}
+            {enableColumnFilter && (
+              <Input
+                placeholder={filterPlaceholder}
+                value={
+                  (table.getColumn(filterColumn)?.getFilterValue() as string) ??
+                  ""
+                }
+                onChange={(e) =>
+                  table.getColumn(filterColumn)?.setFilterValue(e.target.value)
+                }
+                className="max-w-sm"
+              />
+            )}
 
-          {enableRowSelection && (
-            <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-              {t('dataTable.rowsSelected', {
-                selected: table.getFilteredSelectedRowModel().rows.length,
-                total: table.getFilteredRowModel().rows.length,
-              })}
-            </div>
-          )}
+            {enableAdvancedFilter && advancedFilterConfig && (
+              <AdvancedFilter
+                config={advancedFilterConfig}
+                onFiltersChange={handleAdvancedFiltersChange}
+                initialFilters={advancedFilters}
+              />
+            )}
 
-          <div className="flex w-full items-center gap-8 lg:w-fit">
-            <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                {t('dataTable.rowsPerPage')}
-              </Label>
-              <Select
-                value={`${tablePagination.pageSize}`}
-                onValueChange={(value) => {
-                  const newPageSize = Number(value);
-                  if (serverSide) {
-                    updateServerQueryParams({
-                      limit: newPageSize,
-                      page: 1,
-                    });
-                  } else {
-                    table.setPageSize(newPageSize);
-                  }
-                }}
-              >
-                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                  <SelectValue placeholder={tablePagination.pageSize} />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex w-fit items-center justify-center text-sm font-medium">
-              {t('dataTable.pageInfo', {
-                current: paginationInfo.currentPage,
-                total: paginationInfo.totalPages,
-              })}
-            </div>
-            <div className="ml-auto flex items-center gap-2 lg:ml-0">
-              <Button
-                variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => {
-                  if (serverSide) {
-                    updateServerQueryParams({ page: 1 });
-                  } else {
-                    table.setPageIndex(0);
-                  }
-                }}
-                disabled={!paginationInfo.canPreviousPage}
-              >
-                <span className="sr-only">{t('dataTable.firstPage')}</span>
-                <IconChevronsLeft />
-              </Button>
-              <Button
-                variant="outline"
-                className="size-8"
-                size="icon"
-                onClick={() => {
-                  if (serverSide) {
-                    updateServerQueryParams({
-                      page: Math.max(
-                        1,
-                        (serverPagination?.currentPage || 1) - 1
-                      ),
-                    });
-                  } else {
-                    table.previousPage();
-                  }
-                }}
-                disabled={!paginationInfo.canPreviousPage}
-              >
-                <span className="sr-only">{t('dataTable.previousPage')}</span>
-                <IconChevronLeft />
-              </Button>
-              <Button
-                variant="outline"
-                className="size-8"
-                size="icon"
-                onClick={() => {
-                  if (serverSide) {
-                    updateServerQueryParams({
-                      page: Math.min(
-                        serverPagination?.numberOfPages || 1,
-                        (serverPagination?.currentPage || 1) + 1
-                      ),
-                    });
-                  } else {
-                    table.nextPage();
-                  }
-                }}
-                disabled={!paginationInfo.canNextPage}
-              >
-                <span className="sr-only">{t('dataTable.nextPage')}</span>
-                <IconChevronRight />
-              </Button>
-              <Button
-                variant="outline"
-                className="hidden size-8 lg:flex"
-                size="icon"
-                onClick={() => {
-                  if (serverSide) {
-                    updateServerQueryParams({
-                      page: serverPagination?.numberOfPages || 1,
-                    });
-                  } else {
-                    table.setPageIndex(table.getPageCount() - 1);
-                  }
-                }}
-                disabled={!paginationInfo.canNextPage}
-              >
-                <span className="sr-only">{t('dataTable.lastPage')}</span>
-                <IconChevronsRight />
-              </Button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <IconLayoutColumns />
+                  <span className="hidden lg:inline">{t('dataTable.customizeColumns')}</span>
+                  <span className="lg:hidden">{t('dataTable.columns')}</span>
+                  <IconChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {table
+                  .getAllColumns()
+                  .filter(
+                    (column) =>
+                      typeof column.accessorFn !== "undefined" &&
+                      column.getCanHide()
+                  )
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {dialogComponent}
           </div>
         </div>
-      </TabsContent>
-    </Tabs>
+
+        <TabsContent
+          value="outline"
+          className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+        >
+          <div className="overflow-hidden rounded-lg border">
+            {enableDragAndDrop && !serverSide ? (
+              <DndContext
+                collisionDetection={closestCenter}
+                modifiers={[restrictToVerticalAxis]}
+                onDragEnd={handleDragEnd}
+                sensors={sensors}
+                id={sortableId}
+              >
+                <TableContent />
+              </DndContext>
+            ) : (
+              <TableContent />
+            )}
+          </div>
+
+          <div className="flex items-center justify-between px-4">
+            {enableRowSelection && onBulkDelete && (
+              <BulkDeleteButton
+                selectedRows={selectedRows}
+                onBulkDelete={handleBulkDelete}
+                isBulkDeleting={isBulkDeleting}
+              />
+            )}
+
+            {enableRowSelection && (
+              <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+                {t('dataTable.rowsSelected', {
+                  selected: table.getFilteredSelectedRowModel().rows.length,
+                  total: table.getFilteredRowModel().rows.length,
+                })}
+              </div>
+            )}
+
+            <div className="flex w-full items-center gap-8 lg:w-fit">
+              <div className="hidden items-center gap-2 lg:flex">
+                <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                  {t('dataTable.rowsPerPage')}
+                </Label>
+                <Select
+                  value={`${tablePagination.pageSize}`}
+                  onValueChange={(value) => {
+                    const newPageSize = Number(value);
+                    if (serverSide) {
+                      updateServerQueryParams({
+                        limit: newPageSize,
+                        page: 1,
+                      });
+                    } else {
+                      table.setPageSize(newPageSize);
+                    }
+                  }}
+                >
+                  <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                    <SelectValue placeholder={tablePagination.pageSize} />
+                  </SelectTrigger>
+                  <SelectContent side="top">
+                    {[10, 20, 30, 40, 50].map((pageSize) => (
+                      <SelectItem key={pageSize} value={`${pageSize}`}>
+                        {pageSize}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex w-fit items-center justify-center text-sm font-medium">
+                {t('dataTable.pageInfo', {
+                  current: paginationInfo.currentPage,
+                  total: paginationInfo.totalPages,
+                })}
+              </div>
+              <div className="ml-auto flex items-center gap-2 lg:ml-0">
+                <Button
+                  variant="outline"
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() => {
+                    if (serverSide) {
+                      updateServerQueryParams({ page: 1 });
+                    } else {
+                      table.setPageIndex(0);
+                    }
+                  }}
+                  disabled={!paginationInfo.canPreviousPage}
+                >
+                  <span className="sr-only">{t('dataTable.firstPage')}</span>
+                  <IconChevronsLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="size-8"
+                  size="icon"
+                  onClick={() => {
+                    if (serverSide) {
+                      updateServerQueryParams({
+                        page: Math.max(
+                          1,
+                          (serverPagination?.currentPage || 1) - 1
+                        ),
+                      });
+                    } else {
+                      table.previousPage();
+                    }
+                  }}
+                  disabled={!paginationInfo.canPreviousPage}
+                >
+                  <span className="sr-only">{t('dataTable.previousPage')}</span>
+                  <IconChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="size-8"
+                  size="icon"
+                  onClick={() => {
+                    if (serverSide) {
+                      updateServerQueryParams({
+                        page: Math.min(
+                          serverPagination?.numberOfPages || 1,
+                          (serverPagination?.currentPage || 1) + 1
+                        ),
+                      });
+                    } else {
+                      table.nextPage();
+                    }
+                  }}
+                  disabled={!paginationInfo.canNextPage}
+                >
+                  <span className="sr-only">{t('dataTable.nextPage')}</span>
+                  <IconChevronRight />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="hidden size-8 lg:flex"
+                  size="icon"
+                  onClick={() => {
+                    if (serverSide) {
+                      updateServerQueryParams({
+                        page: serverPagination?.numberOfPages || 1,
+                      });
+                    } else {
+                      table.setPageIndex(table.getPageCount() - 1);
+                    }
+                  }}
+                  disabled={!paginationInfo.canNextPage}
+                >
+                  <span className="sr-only">{t('dataTable.lastPage')}</span>
+                  <IconChevronsRight />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {editDialogComponent &&
+        editingRow &&
+        React.cloneElement(
+          editDialogComponent(editingRow, handleEditSave) as React.ReactElement,
+          {
+            open: true,
+            onOpenChange: (isOpen: boolean) => {
+              if (!isOpen) setEditingRow(null);
+            },
+          }
+        )}
+    </>
   );
 }

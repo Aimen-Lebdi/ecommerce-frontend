@@ -210,6 +210,7 @@ export default function SubCategories() {
     } catch (error) {
       console.error("Failed to update subcategory:", error);
       // Error toast is handled by the error useEffect above
+      throw error; // Re-throw so the dialog knows the update failed and stays open
     }
   };
 
@@ -272,7 +273,7 @@ export default function SubCategories() {
             editDialogComponent={(rowData: SubCategory) =>
               createEditSubCategoryDialog(
                 rowData,
-                (updatedData) => {
+                async (updatedData) => {
                   // Handle the subcategory update by extracting ID and calling update handler
                   const id = rowData._id;
                   const {
@@ -281,7 +282,7 @@ export default function SubCategories() {
                     productCount,
                     ...subCategoryUpdateData
                   } = updatedData;
-                  handleUpdateSubCategory(id, subCategoryUpdateData);
+                  await handleUpdateSubCategory(id, subCategoryUpdateData);
                 },
                 isUpdating // Pass the loading state
               )
