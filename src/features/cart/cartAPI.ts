@@ -67,11 +67,3 @@ export const updateCartItemQuantityAPI = async (
   });
   return response.data;
 };
-
-// Apply coupon
-export const applyCouponAPI = async (couponCode: string) => {
-  const response = await axiosInstance.put("/api/cart/applyCoupon", {
-    coupon: couponCode,
-  });
-  return response.data;
-};

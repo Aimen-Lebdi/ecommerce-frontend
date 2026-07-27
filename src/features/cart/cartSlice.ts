@@ -10,7 +10,6 @@ import {
   removeCartItemAPI,
   clearCartAPI,
   updateCartItemQuantityAPI,
-  applyCouponAPI,
   type CartItem,
   type CartResponse,
 } from "./cartAPI";
