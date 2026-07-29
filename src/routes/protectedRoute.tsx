@@ -27,11 +27,10 @@ export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
   useEffect(() => {
     const checkAuth = async () => {
       const storedAccessToken = localStorage.getItem("accessToken");
-      const storedRefreshToken = localStorage.getItem("refreshToken");
       const storedUser = localStorage.getItem("user");
       
       console.log('ProtectedRoute - Initial check:', {
-        hasStoredTokens: !!storedAccessToken && !!storedRefreshToken,
+        hasStoredTokens: !!storedAccessToken && !!storedUser,
         isAuthenticated,
         tokenExpired,
         hasAttemptedRefresh: hasAttemptedRefresh.current,
@@ -40,11 +39,10 @@ export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
       
       // Only attempt refresh if:
       // 1. We haven't tried yet
-      // 2. We have stored tokens
+      // 2. We have stored user (accessToken may be expired)
       // 3. Either not authenticated OR token expired OR no access token in state
       if (
         !hasAttemptedRefresh.current && 
-        storedRefreshToken && 
         storedUser &&
         (!isAuthenticated || tokenExpired || !accessToken)
       ) {

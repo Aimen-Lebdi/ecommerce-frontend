@@ -49,6 +49,8 @@ const Cart = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+
   const {
     cartItems,
     numOfCartItems,
@@ -64,10 +66,12 @@ const Cart = () => {
   const [promoCode, setPromoCode] = useState("");
   // const [shippingMethod, setShippingMethod] = useState("standard");
 
-  // Fetch cart on component mount
+  // Fetch cart on component mount (only if authenticated)
   useEffect(() => {
-    dispatch(fetchCart());
-  }, [dispatch]);
+    if (isAuthenticated) {
+      dispatch(fetchCart());
+    }
+  }, [dispatch, isAuthenticated]);
 
   // Show error toast
   useEffect(() => {

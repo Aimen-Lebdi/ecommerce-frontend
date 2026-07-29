@@ -60,7 +60,6 @@ interface AuthState {
 // Function to clear auth data
 const clearAuthStorage = () => {
   localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
 };
 
@@ -68,14 +67,13 @@ const clearAuthStorage = () => {
 const getInitialState = (): AuthState => {
   try {
     const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
     const user = localStorage.getItem("user");
 
-    if (accessToken && refreshToken && user) {
+    if (accessToken && user) {
       return {
         user: JSON.parse(user),
         accessToken,
-        refreshToken,
+        refreshToken: null,
         isAuthenticated: true,
         loading: false,
         error: null,
@@ -126,15 +124,13 @@ export const syncAuthState = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const accessToken = localStorage.getItem("accessToken");
-      const refreshToken = localStorage.getItem("refreshToken");
       const userStr = localStorage.getItem("user");
       
-      if (accessToken && refreshToken && userStr) {
+      if (accessToken && userStr) {
         const user = JSON.parse(userStr);
         return {
           user,
           accessToken,
-          refreshToken,
           isAuthenticated: true,
           tokenExpired: false
         };
@@ -143,7 +139,6 @@ export const syncAuthState = createAsyncThunk(
       return {
         user: null,
         accessToken: null,
-        refreshToken: null,
         isAuthenticated: false,
         tokenExpired: false
       };
@@ -160,12 +155,7 @@ export const refreshToken = createAsyncThunk<
   { rejectValue: string }
 >("auth/refreshToken", async (_, { rejectWithValue }) => {
   try {
-    const storedRefreshToken = localStorage.getItem("refreshToken");
-    if (!storedRefreshToken) {
-      throw new Error("No refresh token found");
-    }
-
-    const response = await refreshTokenAPI(storedRefreshToken);
+    const response = await refreshTokenAPI();
     return response;
   } catch (error: any) {
     clearAuthStorage();
@@ -184,7 +174,6 @@ export const signIn = createAsyncThunk<
 
     // Store tokens and user
     localStorage.setItem("accessToken", response.accessToken);
-    localStorage.setItem("refreshToken", response.refreshToken);
     localStorage.setItem("user", JSON.stringify(response.data));
 
     return response;
@@ -206,7 +195,6 @@ export const signUp = createAsyncThunk<
 
     // Store tokens and user
     localStorage.setItem("accessToken", response.accessToken);
-    localStorage.setItem("refreshToken", response.refreshToken);
     localStorage.setItem("user", JSON.stringify(response.data));
 
     return response;
@@ -267,9 +255,8 @@ export const resetPassword = createAsyncThunk<
   try {
     const response = await resetPasswordAPI(resetPasswordData);
 
-    // Store new tokens after password reset
+    // Store new access token after password reset
     localStorage.setItem("accessToken", response.accessToken);
-    localStorage.setItem("refreshToken", response.refreshToken);
 
     return response;
   } catch (err: any) {
@@ -308,7 +295,6 @@ const authSlice = createSlice({
     signOut: (state) => {
       state.user = null;
       state.accessToken = null;
-      state.refreshToken = null;
       state.isAuthenticated = false;
       state.error = null;
       state.tokenExpired = false;
@@ -322,7 +308,6 @@ const authSlice = createSlice({
     handleTokenExpiration: (state) => {
       state.user = null;
       state.accessToken = null;
-      state.refreshToken = null;
       state.isAuthenticated = false;
       state.error = "Session expired. Please sign in again.";
       state.tokenExpired = true;
@@ -337,17 +322,14 @@ const authSlice = createSlice({
       action: PayloadAction<{
         user: User;
         accessToken: string;
-        refreshToken: string;
       }>
     ) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
       state.tokenExpired = false;
 
       localStorage.setItem("accessToken", action.payload.accessToken);
-      localStorage.setItem("refreshToken", action.payload.refreshToken);
       localStorage.setItem("user", JSON.stringify(action.payload.user));
     },
     clearPasswordResetState: (state) => {
@@ -371,7 +353,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken;
         state.isAuthenticated = action.payload.isAuthenticated;
         state.tokenExpired = action.payload.tokenExpired;
       })
@@ -380,7 +361,6 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.accessToken = null;
-        state.refreshToken = null;
       })
       // Sign in
       .addCase(signIn.pending, (state) => {
@@ -396,7 +376,6 @@ const authSlice = createSlice({
           state.loading = false;
           state.user = action.payload.data;
           state.accessToken = action.payload.accessToken;
-          state.refreshToken = action.payload.refreshToken;
           state.isAuthenticated = true;
           state.error = null;
           state.tokenExpired = false;
@@ -409,7 +388,6 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.accessToken = null;
-        state.refreshToken = null;
         state.tokenExpired = false;
       })
       // Sign up
@@ -425,7 +403,6 @@ const authSlice = createSlice({
           state.loading = false;
           state.user = action.payload.data;
           state.accessToken = action.payload.accessToken;
-          state.refreshToken = action.payload.refreshToken;
           state.isAuthenticated = true;
           state.error = null;
           state.tokenExpired = false;
@@ -438,7 +415,6 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.accessToken = null;
-        state.refreshToken = null;
       })
       // Refresh token
       .addCase(refreshToken.pending, (state) => {
@@ -450,13 +426,11 @@ const authSlice = createSlice({
         (state, action: PayloadAction<RefreshTokenResponse>) => {
           state.isRefreshing = false;
           state.accessToken = action.payload.accessToken;
-          state.refreshToken = action.payload.refreshToken;
           state.tokenExpired = false;
           state.isAuthenticated = true; // IMPORTANT: Set authenticated to true
           state.error = null;
 
           localStorage.setItem("accessToken", action.payload.accessToken);
-          localStorage.setItem("refreshToken", action.payload.refreshToken);
           
           console.log('Tokens refreshed successfully');
         }
@@ -465,7 +439,6 @@ const authSlice = createSlice({
         state.isRefreshing = false;
         state.user = null;
         state.accessToken = null;
-        state.refreshToken = null;
         state.isAuthenticated = false;
         state.error = action.payload || "Failed to refresh token";
         state.tokenExpired = true;
@@ -525,7 +498,6 @@ const authSlice = createSlice({
           state.resetPasswordSuccess = true;
           state.error = null;
           state.accessToken = action.payload.accessToken;
-          state.refreshToken = action.payload.refreshToken;
           state.isAuthenticated = true;
         }
       )
@@ -538,7 +510,6 @@ const authSlice = createSlice({
       .addCase(logOut.fulfilled, (state) => {
         state.user = null;
         state.accessToken = null;
-        state.refreshToken = null;
         state.isAuthenticated = false;
         state.error = null;
         state.tokenExpired = false;
@@ -546,6 +517,16 @@ const authSlice = createSlice({
         state.verifyResetCodeSuccess = false;
         state.resetPasswordSuccess = false;
         state.resetEmail = null;
+
+        clearAuthStorage();
+      })
+      .addCase(logOut.rejected, (state) => {
+        // Even if the API call fails, clear local auth state
+        state.user = null;
+        state.accessToken = null;
+        state.isAuthenticated = false;
+        state.error = null;
+        state.tokenExpired = false;
 
         clearAuthStorage();
       });

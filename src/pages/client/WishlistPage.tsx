@@ -31,12 +31,16 @@ const WishlistPage = () => {
 
   const { isAddingToCart } = useAppSelector((state) => state.cart);
 
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+
   const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
 
-  // Fetch wishlist on component mount
+  // Fetch wishlist on component mount (only if authenticated)
   useEffect(() => {
-    dispatch(fetchWishlist());
-  }, [dispatch]);
+    if (isAuthenticated) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, isAuthenticated]);
 
   // Show error toast
   useEffect(() => {

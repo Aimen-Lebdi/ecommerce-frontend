@@ -49,6 +49,8 @@ const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+
   // Redux state
   const {
     cartItems,
@@ -88,10 +90,12 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false);
 
-  // Fetch cart on mount
+  // Fetch cart on mount (only if authenticated)
   useEffect(() => {
-    dispatch(fetchCart());
-  }, [dispatch]);
+    if (isAuthenticated) {
+      dispatch(fetchCart());
+    }
+  }, [dispatch, isAuthenticated]);
 
   // Redirect if cart is empty
   useEffect(() => {

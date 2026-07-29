@@ -168,13 +168,24 @@ export function Header() {
             <ModeToggle className="hidden sm:flex" />
 
             {/* Shopping Cart */}
-            <Button variant="ghost" size="sm" className="relative">
-              <Link to="/cart">
-                <ShoppingCart className="h-5 w-5" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  navigate('/sign-in', { state: { from: { pathname: '/cart' } } });
+                } else {
+                  navigate('/cart');
+                }
+              }}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {isAuthenticated && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
                   2
                 </Badge>
-              </Link>
+              )}
             </Button>
 
             {/* User Account */}
@@ -319,7 +330,7 @@ export function Header() {
                     >
                       {t("header.nav.about")}
                     </Link>
-                    <Link to="/my-account?tab=support" className="block py-2 text-md font-medium">
+                    <Link to="/contact" className="block py-2 text-md font-medium">
                       {t("header.nav.contact")}
                     </Link>
                   </div>
@@ -368,7 +379,7 @@ export function Header() {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/my-account?tab=support" className="px-4 py-3 text-md font-medium">
+                <Link to="/contact" className="px-4 py-3 text-md font-medium">
                   {t("header.nav.contact")}
                 </Link>
               </NavigationMenuItem>

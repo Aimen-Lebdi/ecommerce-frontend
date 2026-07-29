@@ -1,7 +1,9 @@
 import UserLayout from "../layouts/clientLayout";
+import ProtectedRoute from "./protectedRoute";
 
 import Home from "../pages/client/Home";
 import About from "../pages/client/About";
+import ContactUs from "../pages/client/ContactUs";
 import ShopPage from "../pages/client/Shop";
 import ProductDetails from "../pages/client/ProductDetail";
 import Cart from "../pages/client/Cart";
@@ -20,21 +22,30 @@ const UserRoutes = {
   path: "/",
   element: <UserLayout />,
   children: [
+    // Public routes
     { index: true, element: <Home /> },
     { path: "about", element: <About /> },
+    { path: "contact", element: <ContactUs /> },
     { path: "shop", element: <ShopPage /> },
     { path: "product/:id", element: <ProductDetails /> },
-    { path: "wishlist", element: <WishlistPage /> },
-    { path: "cart", element: <Cart /> },
-    { path: "/checkout", element: <Checkout /> },
-    { path: "/order-confirmation/:id", element: <OrderConfirmationPage /> },
-    { path: "/orders/:id/tracking", element: <OrderTracking /> },
-    { path: "my-account", element: <MyAccountDashboard /> },
     { path: "sign-up", element: <SignUpPage /> },
     { path: "sign-in", element: <SignInPage /> },
     { path: "forgot-password", element: <ForgotPasswordPage /> },
     { path: "verify-reset-code", element: <CodeVerificationPage /> },
     { path: "reset-password", element: <ResetPasswordPage /> },
+
+    // Protected routes (require authentication)
+    {
+      element: <ProtectedRoute role="user" />,
+      children: [
+        { path: "wishlist", element: <WishlistPage /> },
+        { path: "cart", element: <Cart /> },
+        { path: "/checkout", element: <Checkout /> },
+        { path: "/order-confirmation/:id", element: <OrderConfirmationPage /> },
+        { path: "/orders/:id/tracking", element: <OrderTracking /> },
+        { path: "my-account", element: <MyAccountDashboard /> },
+      ],
+    },
   ],
 };
 

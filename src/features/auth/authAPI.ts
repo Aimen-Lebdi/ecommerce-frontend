@@ -24,12 +24,10 @@ export interface AuthResponse {
     updatedAt?: string;
   };
   accessToken: string;
-  refreshToken: string;
 }
 
 export interface RefreshTokenResponse {
   accessToken: string;
-  refreshToken: string;
 }
 
 export interface ForgotPasswordData {
@@ -56,7 +54,6 @@ export interface ResetPasswordData {
 
 export interface ResetPasswordResponse {
   accessToken: string;
-  refreshToken: string;
 }
 
 // Sign in API call
@@ -76,12 +73,8 @@ export const signUpAPI = async (
 };
 
 // Refresh access token API call
-export const refreshTokenAPI = async (
-  refreshToken: string
-): Promise<RefreshTokenResponse> => {
-  const response = await axiosInstance.post("/api/auth/refresh", {
-    refreshToken,
-  });
+export const refreshTokenAPI = async (): Promise<RefreshTokenResponse> => {
+  const response = await axiosInstance.post("/api/auth/refresh");
   return response.data;
 };
 

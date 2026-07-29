@@ -372,7 +372,7 @@ const CTASection = () => {
             </Link>
           </button>
           <button className="bg-transparent text-primary-foreground border border-primary-foreground hover:bg-primary-foreground/10 px-8 py-3 rounded-lg font-medium transition-colors">
-            <Link to="/my-account?tab=support">
+            <Link to="/contact">
             {t("about.cta.button2")}
             </Link>
           </button>

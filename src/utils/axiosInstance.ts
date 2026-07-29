@@ -68,32 +68,19 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshTokenValue = localStorage.getItem("refreshToken");
-
-        if (!refreshTokenValue) {
-          // No refresh token available, clear auth and trigger expiration event
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          localStorage.removeItem("user");
-          window.dispatchEvent(new Event('tokenExpired'));
-          processQueue(error, null);
-          return Promise.reject(error);
-        }
-
-        // Attempt to refresh the token
+        // Attempt to refresh the token (cookie sent automatically via withCredentials)
         const response = await axios.post(
           `${import.meta.env.VITE_BASE_URL || "http://localhost:5000"}/api/auth/refresh`,
-          { refreshToken: refreshTokenValue },
+          {},
           {
             withCredentials: true,
           }
         );
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const { accessToken } = response.data;
 
-        // Update tokens in localStorage
+        // Update access token in localStorage
         localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
 
         // Add new token to the failed request and retry it
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -103,7 +90,6 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         // Refresh failed, clear auth and trigger expiration event
         localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
         window.dispatchEvent(new Event('tokenExpired'));
         processQueue(refreshError as AxiosError, null);

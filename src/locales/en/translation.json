@@ -1529,5 +1529,29 @@
       "button1": "Start Shopping",
       "button2": "Contact Us"
     }
+  },
+  "contact": {
+    "hero": {
+      "badge": "Get in Touch",
+      "title": "We'd Love to Hear From You",
+      "subtitle": "Have a question, concern, or just want to say hello? We're here to help."
+    },
+    "info": {
+      "title": "Contact Information",
+      "subtitle": "We're here to help you with any questions or concerns",
+      "phone": "Phone",
+      "phoneValue": "+1 (555) 123-4567",
+      "phoneHours": "Mon-Fri, 9AM-6PM",
+      "email": "Email",
+      "emailValue": "support@clicon.com",
+      "emailResponse": "We'll respond within 24 hours",
+      "address": "Address",
+      "addressValue": "123 Commerce St",
+      "addressDetail": "City, State 12345"
+    },
+    "supportInfo": {
+      "title": "Need Help?",
+      "description": "Our support team is available 24/7 to assist you with any questions or concerns."
+    }
   }
 }

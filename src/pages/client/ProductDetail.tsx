@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import {
@@ -34,6 +34,7 @@ import { toast } from "sonner";
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
@@ -43,6 +44,8 @@ const ProductDetails = () => {
     productError,
     products,
   } = useAppSelector((state) => state.products);
+
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -81,6 +84,10 @@ const ProductDetails = () => {
 
   // Handle add to cart
   const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      navigate('/sign-in', { state: { from: location } });
+      return;
+    }
     if (!product || !selectedColor) return;
     setIsAddingToCart(true);
 
