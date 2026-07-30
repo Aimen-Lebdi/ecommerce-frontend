@@ -488,7 +488,7 @@
       "processing": "En Traitement",
       "orderNumber": "Commande #{{number}}",
       "placedOn": "Passée le {{date}}",
-      "orderSummary": "{{items}} articles • Total :",
+      "orderSummary": "{{items}} articles • Total : {{total}}",
       "view": "Voir",
       "track": "Suivre",
       "noOrders": "Aucune commande pour le moment",
@@ -888,27 +888,27 @@
     }
   },
   "users": {
-    "title": "المستخدمين",
-    "subtitle": "إدارة المستخدمين والصلاحيات الخاصة بهم",
+    "title": "Utilisateurs",
+    "subtitle": "Gérer les utilisateurs et leurs permissions",
     "columns": {
-      "user": "المستخدم",
-      "role": "الدور",
-      "status": "الحالة",
-      "joined": "تاريخ الانضمام"
+      "user": "Utilisateur",
+      "role": "Rôle",
+      "status": "Statut",
+      "joined": "Date d'inscription"
     },
     "status": {
-      "active": "نشط",
-      "inactive": "غير نشط"
+      "active": "Actif",
+      "inactive": "Inactif"
     },
     "filters": {
-      "createdDate": "تاريخ الإنشاء"
+      "createdDate": "Date de création"
     },
     "toasts": {
-      "addSuccess": "تم إضافة المستخدم بنجاح",
-      "updateSuccess": "تم تحديث المستخدم بنجاح",
-      "deleteSuccess": "تم حذف المستخدم بنجاح",
-      "bulkDeleteSuccess": "تم حذف {{count}} {{user}} بنجاح",
-      "bulkDeleteError": "فشل حذف المستخدمين"
+      "addSuccess": "Utilisateur ajouté avec succès",
+      "updateSuccess": "Utilisateur mis à jour avec succès",
+      "deleteSuccess": "Utilisateur supprimé avec succès",
+      "bulkDeleteSuccess": "{{count}} {{user}} supprimé(s) avec succès",
+      "bulkDeleteError": "Échec de la suppression des utilisateurs"
     },
     "errors": {
       "missingId": "Aucun ID utilisateur trouvé !"
@@ -940,133 +940,133 @@
   },
   "dashboard": {
     "time": {
-      "justNow": "الآن",
-      "minutesAgo": "منذ {{minutes}} دقيقة",
-      "hoursAgo": "منذ {{hours}} ساعة",
-      "daysAgo": "منذ {{days}} يوم"
+      "justNow": "À l'instant",
+      "minutesAgo": "Il y a {{minutes}} min",
+      "hoursAgo": "Il y a {{hours}} h",
+      "daysAgo": "Il y a {{days}} j"
     },
     "activityTypes": {
-      "order": "طلب",
-      "user": "مستخدم",
-      "product": "منتج",
-      "category": "فئة",
-      "subcategory": "فئة فرعية",
-      "brand": "علامة تجارية",
-      "review": "تقييم",
-      "coupon": "كوبون",
-      "cart": "سلة"
+      "order": "Commande",
+      "user": "Utilisateur",
+      "product": "Produit",
+      "category": "Catégorie",
+      "subcategory": "Sous-catégorie",
+      "brand": "Marque",
+      "review": "Avis",
+      "coupon": "Code promo",
+      "cart": "Panier"
     },
     "columns": {
-      "type": "النوع",
-      "activity": "النشاط",
-      "user": "المستخدم",
-      "status": "الحالة",
-      "amount": "المبلغ",
-      "time": "الوقت"
+      "type": "Type",
+      "activity": "Activité",
+      "user": "Utilisateur",
+      "status": "Statut",
+      "amount": "Montant",
+      "time": "Heure"
     },
     "filters": {
-      "activityType": "نوع النشاط",
-      "allTypes": "جميع الأنواع",
-      "status": "الحالة",
-      "allStatuses": "جميع الحالات",
-      "timeRange": "الفترة الزمنية",
-      "allTime": "كل الوقت",
-      "lastHour": "آخر ساعة",
-      "last24Hours": "آخر 24 ساعة",
-      "last7Days": "آخر 7 أيام",
-      "last30Days": "آخر 30 يوم",
-      "amount": "المبلغ",
-      "amountPlaceholder": "أدخل المبلغ",
-      "createdDate": "تاريخ الإنشاء"
+      "activityType": "Type d'activité",
+      "allTypes": "Tous les types",
+      "status": "Statut",
+      "allStatuses": "Tous les statuts",
+      "timeRange": "Période",
+      "allTime": "Tout le temps",
+      "lastHour": "Dernière heure",
+      "last24Hours": "Dernières 24 h",
+      "last7Days": "7 derniers jours",
+      "last30Days": "30 derniers jours",
+      "amount": "Montant",
+      "amountPlaceholder": "Entrez le montant",
+      "createdDate": "Date de création"
     },
     "statuses": {
-      "success": "نجح",
-      "pending": "قيد الانتظار",
-      "failed": "فشل"
+      "success": "Réussi",
+      "pending": "En attente",
+      "failed": "Échoué"
     },
     "socket": {
-      "connected": "متصل بالتحديثات المباشرة",
-      "disconnected": "انقطع الاتصال بالتحديثات المباشرة",
-      "error": "حدث خطأ في الاتصال"
+      "connected": "Connecté aux mises à jour en direct",
+      "disconnected": "Déconnecté des mises à jour en direct",
+      "error": "Erreur de connexion"
     },
-    "refreshSuccess": "تم تحديث الأنشطة",
-    "refreshing": "جاري التحديث...",
-    "refresh": "تحديث",
+    "refreshSuccess": "Activités mises à jour",
+    "refreshing": "Mise à jour...",
+    "refresh": "Rafraîchir",
     "recentActivities": {
-      "title": "الأنشطة الحديثة",
-      "subtitle": "أحدث الأنشطة في متجرك"
+      "title": "Activités récentes",
+      "subtitle": "Les dernières activités de votre boutique"
     },
     "status": {
-      "live": "مباشر",
-      "offline": "غير متصل"
+      "live": "En direct",
+      "offline": "Hors ligne"
     },
-    "filterPlaceholder": "تصفية حسب نوع النشاط..."
+    "filterPlaceholder": "Filtrer par type d'activité..."
   },
   "categoryDialog": {
     "titles": {
-      "edit": "تعديل الفئة",
-      "add": "إضافة فئة جديدة"
+      "edit": "Modifier la Catégorie",
+      "add": "Ajouter une Catégorie"
     },
     "descriptions": {
-      "edit": "قم بتحديث تفاصيل الفئة أدناه.",
-      "add": "أدخل تفاصيل الفئة أدناه."
+      "edit": "Mettez à jour les détails de la catégorie ci-dessous.",
+      "add": "Entrez les détails de la catégorie ci-dessous."
     },
     "labels": {
-      "categoryName": "اسم الفئة",
-      "uploadImage": "رفع صورة"
+      "categoryName": "Nom de la Catégorie",
+      "uploadImage": "Télécharger une image"
     },
     "placeholders": {
-      "categoryName": "مثال: إلكترونيات"
+      "categoryName": "ex: Électronique"
     },
     "buttons": {
-      "addCategory": "إضافة الفئة",
-      "save": "حفظ",
-      "update": "تحديث",
-      "saving": "جاري الحفظ...",
-      "updating": "جاري التحديث..."
+      "addCategory": "Ajouter la Catégorie",
+      "save": "Enregistrer",
+      "update": "Mettre à Jour",
+      "saving": "Enregistrement...",
+      "updating": "Mise à jour..."
     },
     "uploadArea": {
-      "dragDrop": "اسحب وأفلت صورتك هنا أو",
-      "clickToBrowse": "انقر للتصفح",
-      "selected": "المحدد:"
+      "dragDrop": "Glissez-déposez votre image ici ou",
+      "clickToBrowse": "cliquez pour parcourir",
+      "selected": "Sélectionné :"
     },
     "errors": {
-      "nameRequired": "اسم الفئة مطلوب"
+      "nameRequired": "Le nom de la catégorie est requis"
     }
   },
   "subCategoryDialog": {
     "titles": {
-      "edit": "تعديل الفئة الفرعية",
-      "add": "إضافة فئة فرعية جديدة"
+      "edit": "Modifier la Sous-catégorie",
+      "add": "Ajouter une Sous-catégorie"
     },
     "descriptions": {
-      "edit": "قم بتحديث تفاصيل الفئة الفرعية أدناه.",
-      "add": "اختر فئة رئيسية وأدخل تفاصيل الفئة الفرعية أدناه."
+      "edit": "Mettez à jour les détails de la sous-catégorie ci-dessous.",
+      "add": "Choisissez une catégorie principale et entrez les détails de la sous-catégorie ci-dessous."
     },
     "labels": {
-      "category": "الفئة",
-      "subcategoryName": "اسم الفئة الفرعية",
-      "uploadImage": "رفع صورة"
+      "category": "Catégorie",
+      "subcategoryName": "Nom de la Sous-catégorie",
+      "uploadImage": "Télécharger une image"
     },
     "placeholders": {
-      "category": "اختر فئة رئيسية",
-      "subcategoryName": "مثال: أجهزة اللابتوب"
+      "category": "Choisir une catégorie principale",
+      "subcategoryName": "ex: Ordinateurs Portables"
     },
     "buttons": {
-      "addSubcategory": "إضافة الفئة الفرعية",
-      "save": "حفظ",
-      "update": "تحديث",
-      "saving": "جاري الحفظ...",
-      "updating": "جاري التحديث..."
+      "addSubcategory": "Ajouter la Sous-catégorie",
+      "save": "Enregistrer",
+      "update": "Mettre à Jour",
+      "saving": "Enregistrement...",
+      "updating": "Mise à jour..."
     },
     "uploadArea": {
-      "dragDrop": "اسحب وأفلت صورتك هنا أو",
-      "clickToBrowse": "انقر للتصفح",
-      "selected": "المحدد:"
+      "dragDrop": "Glissez-déposez votre image ici ou",
+      "clickToBrowse": "cliquez pour parcourir",
+      "selected": "Sélectionné :"
     },
     "errors": {
-      "categoryRequired": "الفئة مطلوبة",
-      "nameRequired": "اسم الفئة الفرعية مطلوب"
+      "categoryRequired": "La catégorie est requise",
+      "nameRequired": "Le nom de la sous-catégorie est requis"
     }
   },
   "brandDialog": {

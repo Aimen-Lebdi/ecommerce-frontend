@@ -288,7 +288,7 @@ export default function Users() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-semibold">{t('users.title')}</h1>
             <p className="text-muted-foreground">
-              {t('users.description')}
+              {t('users.subtitle')}
             </p>
           </div>
 

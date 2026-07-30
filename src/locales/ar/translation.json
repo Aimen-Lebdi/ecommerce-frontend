@@ -488,7 +488,7 @@
       "processing": "قيد المعالجة",
       "orderNumber": "الطلب #{{number}}",
       "placedOn": "تم الطلب في {{date}}",
-      "orderSummary": "{{items}} عناصر • الإجمالي:",
+      "orderSummary": "{{items}} عناصر • الإجمالي: {{total}}",
       "view": "عرض",
       "track": "تتبع",
       "noOrders": "لا توجد طلبات بعد",
