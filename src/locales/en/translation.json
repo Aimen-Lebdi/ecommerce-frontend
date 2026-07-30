@@ -913,6 +913,27 @@
     "errors": {
       "missingId": "No user ID found!"
     },
+    "actions": {
+      "ban": "Ban",
+      "unban": "Unban",
+      "banSelected": "Ban Selected ({{count}})",
+      "unbanSelected": "Unban Selected ({{count}})",
+      "banUnbanSelected": "Ban/Unban Selected ({{count}})"
+    },
+    "messages": {
+      "addSuccess": "User added successfully",
+      "updateSuccess": "User updated successfully",
+      "missingIdError": "No user ID found!",
+      "banSuccess": "User banned successfully",
+      "unbanSuccess": "User unbanned successfully",
+      "bulkBanSuccess": "{{count}} user(s) banned successfully",
+      "bulkUnbanSuccess": "{{count}} user(s) unbanned successfully",
+      "bulkBanError": "Failed to ban users",
+      "bulkUnbanError": "Failed to unban users",
+      "cannotBanAdmin": "Cannot ban admin users",
+      "noUsersBanned": "No users could be banned — admins cannot be banned",
+      "noUsersUnbanned": "No users could be unbanned — they may not be banned"
+    },
     "filterPlaceholder": "Filter users...",
     "userSingular": "user",
     "userPlural": "users"
@@ -1235,7 +1256,11 @@
       "openMenu": "Open menu",
       "viewEdit": "View & Edit",
       "delete": "Delete",
-      "deleting": "Deleting..."
+      "deleting": "Deleting...",
+      "ban": "Ban",
+      "unban": "Unban",
+      "banning": "Banning...",
+      "unbanning": "Unbanning..."
     },
     "selection": {
       "selectAll": "Select all",
@@ -1249,6 +1274,23 @@
       "cancel": "Cancel",
       "delete": "Delete",
       "deleting": "Deleting..."
+    },
+    "bulkBan": {
+      "title": "Confirm Ban",
+      "description": "Are you sure you want to ban {{count}} user(s)?",
+      "cancel": "Cancel",
+      "ban": "Ban",
+      "banning": "Banning...",
+      "button": "Ban Selected ({{count}})",
+      "banUnbanButton": "Ban/Unban Selected ({{count}})"
+    },
+    "bulkUnban": {
+      "title": "Confirm Unban",
+      "description": "Are you sure you want to unban {{count}} user(s)?",
+      "cancel": "Cancel",
+      "unban": "Unban",
+      "unbanning": "Unbanning...",
+      "button": "Unban Selected ({{count}})"
     },
     "loading": "Loading...",
     "noResults": "No Results Found",

@@ -913,6 +913,27 @@
     "errors": {
       "missingId": "لم يتم العثور على معرف المستخدم!"
     },
+    "actions": {
+      "ban": "حظر",
+      "unban": "إلغاء الحظر",
+      "banSelected": "حظر المحدد ({{count}})",
+      "unbanSelected": "إلغاء حظر المحدد ({{count}})",
+      "banUnbanSelected": "حظر/إلغاء حظر المحدد ({{count}})"
+    },
+    "messages": {
+      "addSuccess": "تم إضافة المستخدم بنجاح",
+      "updateSuccess": "تم تحديث المستخدم بنجاح",
+      "missingIdError": "لم يتم العثور على معرف المستخدم!",
+      "banSuccess": "تم حظر المستخدم بنجاح",
+      "unbanSuccess": "تم إلغاء حظر المستخدم بنجاح",
+      "bulkBanSuccess": "تم حظر {{count}} مستخدم(ين) بنجاح",
+      "bulkUnbanSuccess": "تم إلغاء حظر {{count}} مستخدم(ين) بنجاح",
+      "bulkBanError": "فشل حظر المستخدمين",
+      "bulkUnbanError": "فشل إلغاء حظر المستخدمين",
+      "cannotBanAdmin": "لا يمكن حظر المستخدمين المسؤولين",
+      "noUsersBanned": "لا يمكن حظر أي مستخدم — لا يمكن حظر المسؤولين",
+      "noUsersUnbanned": "لا يمكن إلغاء حظر أي مستخدم — قد لا يكونوا محظورين"
+    },
     "filterPlaceholder": "تصفية المستخدمين...",
     "userSingular": "مستخدم",
     "userPlural": "مستخدمين"
@@ -1235,7 +1256,11 @@
       "openMenu": "فتح القائمة",
       "viewEdit": "عرض وتعديل",
       "delete": "حذف",
-      "deleting": "جاري الحذف..."
+      "deleting": "جاري الحذف...",
+      "ban": "حظر",
+      "unban": "إلغاء الحظر",
+      "banning": "جاري الحظر...",
+      "unbanning": "جاري إلغاء الحظر..."
     },
     "selection": {
       "selectAll": "تحديد الكل",
@@ -1249,6 +1274,23 @@
       "cancel": "إلغاء",
       "delete": "حذف",
       "deleting": "جاري الحذف..."
+    },
+    "bulkBan": {
+      "title": "تأكيد الحظر",
+      "description": "هل أنت متأكد من رغبتك في حظر {{count}} مستخدم(ين)؟",
+      "cancel": "إلغاء",
+      "ban": "حظر",
+      "banning": "جاري الحظر...",
+      "button": "حظر المحدد ({{count}})",
+      "banUnbanButton": "حظر/إلغاء حظر المحدد ({{count}})"
+    },
+    "bulkUnban": {
+      "title": "تأكيد إلغاء الحظر",
+      "description": "هل أنت متأكد من رغبتك في إلغاء حظر {{count}} مستخدم(ين)؟",
+      "cancel": "إلغاء",
+      "unban": "إلغاء الحظر",
+      "unbanning": "جاري إلغاء الحظر...",
+      "button": "إلغاء حظر المحدد ({{count}})"
     },
     "loading": "جاري التحميل...",
     "noResults": "لم يتم العثور على نتائج",

@@ -30,7 +30,6 @@ export interface UpdateUserData {
   name?: string;
   email?: string;
   role?: "admin" | "user";
-  active?: boolean; // NEW: Allow updating active status
   image?: File | null;
 }
 
@@ -90,32 +89,34 @@ export const updateUserAPI = async (id: string, userData: FormData) => {
   return response.data.data;
 };
 
-// Delete user
-export const deleteUserAPI = async (id: string) => {
-  const response = await axiosInstance.delete(`/api/users/${id}`);
+// Unban single user
+export const unbanUserAPI = async (id: string) => {
+  const response = await axiosInstance.put(`/api/users/${id}/unban`);
   return response.data;
 };
 
-// Bulk delete API
-export const deleteManyUsersAPI = async (ids: string[]) => {
-  const response = await axiosInstance.post("/api/users/bulk-delete", {
+// Unban multiple users
+export const unbanManyUsersAPI = async (ids: string[]) => {
+  const response = await axiosInstance.post("/api/users/bulk-unban", {
     ids,
   });
   return response.data;
 };
-// NEW: Activate single user
-export const activateUserAPI = async (id: string) => {
-  const response = await axiosInstance.put(`/api/users/${id}/activate`);
+
+// Ban single user
+export const banUserAPI = async (id: string) => {
+  const response = await axiosInstance.put(`/api/users/${id}/ban`);
   return response.data;
 };
 
-// NEW: Activate multiple users
-export const activateManyUsersAPI = async (ids: string[]) => {
-  const response = await axiosInstance.post("/api/users/bulk-activate", {
+// Ban multiple users
+export const banManyUsersAPI = async (ids: string[]) => {
+  const response = await axiosInstance.post("/api/users/bulk-ban", {
     ids,
   });
   return response.data;
 };
+
 // Update user password
 export const updateUserPasswordAPI = async (
   id: string,

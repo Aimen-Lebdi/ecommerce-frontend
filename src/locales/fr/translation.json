@@ -911,11 +911,32 @@
       "bulkDeleteError": "فشل حذف المستخدمين"
     },
     "errors": {
-      "missingId": "لم يتم العثور على معرف المستخدم!"
+      "missingId": "Aucun ID utilisateur trouvé !"
     },
-    "filterPlaceholder": "تصفية المستخدمين...",
-    "userSingular": "مستخدم",
-    "userPlural": "مستخدمين"
+    "actions": {
+      "ban": "Bannir",
+      "unban": "Débannir",
+      "banSelected": "Bannir sélectionnés ({{count}})",
+      "unbanSelected": "Débannir sélectionnés ({{count}})",
+      "banUnbanSelected": "Bannir/Débannir sélectionnés ({{count}})"
+    },
+    "messages": {
+      "addSuccess": "Utilisateur ajouté avec succès",
+      "updateSuccess": "Utilisateur mis à jour avec succès",
+      "missingIdError": "Aucun ID utilisateur trouvé !",
+      "banSuccess": "Utilisateur banni avec succès",
+      "unbanSuccess": "Utilisateur débanni avec succès",
+      "bulkBanSuccess": "{{count}} utilisateur(s) banni(s) avec succès",
+      "bulkUnbanSuccess": "{{count}} utilisateur(s) débanni(s) avec succès",
+      "bulkBanError": "Échec du bannissement des utilisateurs",
+      "bulkUnbanError": "Échec du débannissement des utilisateurs",
+      "cannotBanAdmin": "Impossible de bannir les administrateurs",
+      "noUsersBanned": "Aucun utilisateur n'a pu être banni — les administrateurs ne peuvent pas être bannis",
+      "noUsersUnbanned": "Aucun utilisateur n'a pu être débanni — ils ne sont peut-être pas bannis"
+    },
+    "filterPlaceholder": "Filtrer les utilisateurs...",
+    "userSingular": "utilisateur",
+    "userPlural": "utilisateurs"
   },
   "dashboard": {
     "time": {
@@ -1235,7 +1256,11 @@
       "openMenu": "Ouvrir le menu",
       "viewEdit": "Voir & Modifier",
       "delete": "Supprimer",
-      "deleting": "Suppression..."
+      "deleting": "Suppression...",
+      "ban": "Bannir",
+      "unban": "Débannir",
+      "banning": "Bannissement...",
+      "unbanning": "Débannissement..."
     },
     "selection": {
       "selectAll": "Tout sélectionner",
@@ -1249,6 +1274,23 @@
       "cancel": "Annuler",
       "delete": "Supprimer",
       "deleting": "Suppression..."
+    },
+    "bulkBan": {
+      "title": "Confirmer le Bannissement",
+      "description": "Êtes-vous sûr de vouloir bannir {{count}} utilisateur(s) ?",
+      "cancel": "Annuler",
+      "ban": "Bannir",
+      "banning": "Bannissement...",
+      "button": "Bannir sélectionnés ({{count}})",
+      "banUnbanButton": "Bannir/Débannir sélectionnés ({{count}})"
+    },
+    "bulkUnban": {
+      "title": "Confirmer le Débannissement",
+      "description": "Êtes-vous sûr de vouloir débannir {{count}} utilisateur(s) ?",
+      "cancel": "Annuler",
+      "unban": "Débannir",
+      "unbanning": "Débannissement...",
+      "button": "Débannir sélectionnés ({{count}})"
     },
     "loading": "Chargement...",
     "noResults": "Aucun Résultat Trouvé",

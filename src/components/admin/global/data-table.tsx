@@ -32,6 +32,7 @@ import {
   IconGripVertical,
   IconLayoutColumns,
   IconTrash,
+  IconBan,
 } from "@tabler/icons-react";
 import {
   type ColumnDef,
@@ -153,6 +154,14 @@ export interface DataTableProps<TData extends BaseEntity> {
   isDeleting?: boolean;
   onBulkDelete?: (ids: string[]) => void;
   isBulkDeleting?: boolean;
+  onRowBan?: (id: string) => void;
+  onRowUnban?: (id: string) => void;
+  isBanning?: boolean;
+  isUnbanning?: boolean;
+  onBulkBan?: (ids: string[]) => void;
+  onBulkUnban?: (ids: string[]) => void;
+  isBulkBanning?: boolean;
+  isBulkUnbanning?: boolean;
   enableDragAndDrop?: boolean;
   enableRowSelection?: boolean;
   enableGlobalFilter?: boolean;
@@ -193,11 +202,19 @@ function ActionsCellComponent<TData extends BaseEntity>({
   onEditClick,
   onRowDelete,
   isDeleting,
+  onRowBan,
+  onRowUnban,
+  isBanning,
+  isUnbanning,
 }: {
   row: Row<TData>;
   onEditClick: (rowData: TData) => void;
   onRowDelete?: (id: string) => void;
   isDeleting?: boolean;
+  onRowBan?: (id: string) => void;
+  onRowUnban?: (id: string) => void;
+  isBanning?: boolean;
+  isUnbanning?: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -207,6 +224,22 @@ function ActionsCellComponent<TData extends BaseEntity>({
       onRowDelete(id.toString());
     }
   };
+
+  const handleBanClick = () => {
+    if (onRowBan && (row.original._id || row.original.id)) {
+      const id = row.original._id || row.original.id;
+      onRowBan(id.toString());
+    }
+  };
+
+  const handleUnbanClick = () => {
+    if (onRowUnban && (row.original._id || row.original.id)) {
+      const id = row.original._id || row.original.id;
+      onRowUnban(id.toString());
+    }
+  };
+
+  const isActive = row.original.active === true;
 
   return (
     <DropdownMenu>
@@ -224,14 +257,39 @@ function ActionsCellComponent<TData extends BaseEntity>({
         <DropdownMenuItem onClick={() => onEditClick(row.original)}>
           {t('dataTable.actions.viewEdit')}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={handleDeleteClick}
-          disabled={isDeleting}
-        >
-          {isDeleting ? t('dataTable.actions.deleting') : t('dataTable.actions.delete')}
-        </DropdownMenuItem>
+        {onRowDelete && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={handleDeleteClick}
+              disabled={isDeleting}
+            >
+              {isDeleting ? t('dataTable.actions.deleting') : t('dataTable.actions.delete')}
+            </DropdownMenuItem>
+          </>
+        )}
+        {(onRowBan || onRowUnban) && (
+          <>
+            <DropdownMenuSeparator />
+            {isActive ? (
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={handleBanClick}
+                disabled={isBanning}
+              >
+                {isBanning ? t('dataTable.actions.banning') : t('dataTable.actions.ban')}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem
+                onClick={handleUnbanClick}
+                disabled={isUnbanning}
+              >
+                {isUnbanning ? t('dataTable.actions.unbanning') : t('dataTable.actions.unban')}
+              </DropdownMenuItem>
+            )}
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -241,7 +299,11 @@ function ActionsCellComponent<TData extends BaseEntity>({
 export function ActionsColumn<TData extends BaseEntity>(
   onEditClick: (rowData: TData) => void,
   onRowDelete?: (id: string) => void,
-  isDeleting?: boolean
+  isDeleting?: boolean,
+  onRowBan?: (id: string) => void,
+  onRowUnban?: (id: string) => void,
+  isBanning?: boolean,
+  isUnbanning?: boolean
 ) {
   return {
     id: "actions",
@@ -251,6 +313,10 @@ export function ActionsColumn<TData extends BaseEntity>(
         onEditClick={onEditClick}
         onRowDelete={onRowDelete}
         isDeleting={isDeleting}
+        onRowBan={onRowBan}
+        onRowUnban={onRowUnban}
+        isBanning={isBanning}
+        isUnbanning={isUnbanning}
       />
     ),
   } as ColumnDef<TData>;
@@ -309,6 +375,164 @@ export function SelectionColumn<TData extends BaseEntity>() {
     enableSorting: false,
     enableHiding: false,
   } as ColumnDef<TData>;
+}
+
+// Bulk Ban/Unban Button Component
+function BulkBanButton<TData extends BaseEntity>({
+  selectedRows,
+  onBulkBan,
+  onBulkUnban,
+  isBulkBanning,
+  isBulkUnbanning,
+}: {
+  selectedRows: Row<TData>[];
+  onBulkBan?: (ids: string[]) => void;
+  onBulkUnban?: (ids: string[]) => void;
+  isBulkBanning?: boolean;
+  isBulkUnbanning?: boolean;
+}) {
+  const { t } = useTranslation();
+  const selectedCount = selectedRows.length;
+
+  const { allActive, allBanned } = React.useMemo(() => {
+    let activeCount = 0;
+    let bannedCount = 0;
+    selectedRows.forEach((row) => {
+      if (row.original.active === true) {
+        activeCount++;
+      } else {
+        bannedCount++;
+      }
+    });
+    return {
+      allActive: activeCount === selectedCount,
+      allBanned: bannedCount === selectedCount,
+    };
+  }, [selectedRows, selectedCount]);
+
+  const isBanAction = allActive;
+  const isMixed = !allActive && !allBanned;
+
+  const handleBulkAction = () => {
+    if (selectedCount === 0) return;
+
+    const ids = selectedRows
+      .map((row) => {
+        const id = row.original._id || row.original.id;
+        return id ? id.toString() : "";
+      })
+      .filter(Boolean);
+
+    if (isBanAction && onBulkBan) {
+      onBulkBan(ids);
+    } else if (!isBanAction && !isMixed && onBulkUnban) {
+      onBulkUnban(ids);
+    } else if (isMixed) {
+      // For mixed selection, call both
+      const activeIds = selectedRows
+        .filter((row) => row.original.active === true)
+        .map((row) => {
+          const id = row.original._id || row.original.id;
+          return id ? id.toString() : "";
+        })
+        .filter(Boolean);
+      const bannedIds = selectedRows
+        .filter((row) => row.original.active !== true)
+        .map((row) => {
+          const id = row.original._id || row.original.id;
+          return id ? id.toString() : "";
+        })
+        .filter(Boolean);
+
+      if (activeIds.length > 0 && onBulkBan) {
+        onBulkBan(activeIds);
+      }
+      if (bannedIds.length > 0 && onBulkUnban) {
+        onBulkUnban(bannedIds);
+      }
+    }
+  };
+
+  const isLoading = isBulkBanning || isBulkUnbanning;
+
+  if (selectedCount === 0) return null;
+
+  const getButtonLabel = () => {
+    if (isBanAction) {
+      return t('dataTable.bulkBan.button', { count: selectedCount });
+    }
+    if (allBanned) {
+      return t('dataTable.bulkUnban.button', { count: selectedCount });
+    }
+    return t('dataTable.bulkBan.banUnbanButton', { count: selectedCount });
+  };
+
+  const getDialogTitle = () => {
+    if (isBanAction) {
+      return t('dataTable.bulkBan.title');
+    }
+    if (allBanned) {
+      return t('dataTable.bulkUnban.title');
+    }
+    return t('dataTable.bulkBan.title');
+  };
+
+  const getDialogDescription = () => {
+    if (isBanAction) {
+      return t('dataTable.bulkBan.description', { count: selectedCount });
+    }
+    if (allBanned) {
+      return t('dataTable.bulkUnban.description', { count: selectedCount });
+    }
+    return t('dataTable.bulkBan.description', { count: selectedCount });
+  };
+
+  const getConfirmLabel = () => {
+    if (isLoading) {
+      if (isBulkBanning) return t('dataTable.bulkBan.banning');
+      if (isBulkUnbanning) return t('dataTable.bulkUnban.unbanning');
+    }
+    if (isBanAction) return t('dataTable.bulkBan.ban');
+    if (allBanned) return t('dataTable.bulkUnban.unban');
+    return t('dataTable.bulkBan.ban');
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant={isBanAction || isMixed ? "destructive" : "default"}
+          size="sm"
+          disabled={isLoading}
+          className="gap-2 mr-3"
+        >
+          <IconBan className="h-4 w-4" />
+          <span className="hidden sm:inline">
+            {getButtonLabel()}
+          </span>
+          <span className="sm:hidden">{getButtonLabel()}</span>
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{getDialogTitle()}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {getDialogDescription()}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t('dataTable.bulkBan.cancel')}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleBulkAction}
+            disabled={isLoading}
+            className={isBanAction || isMixed ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+          >
+            {getConfirmLabel()}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
 
 // Bulk Delete Button Component
@@ -525,6 +749,14 @@ export function DataTable<TData extends BaseEntity>({
   isDeleting,
   onBulkDelete,
   isBulkDeleting,
+  onRowBan,
+  onRowUnban,
+  isBanning,
+  isUnbanning,
+  onBulkBan,
+  onBulkUnban,
+  isBulkBanning,
+  isBulkUnbanning,
   enableDragAndDrop = true,
   enableRowSelection = true,
   enableGlobalFilter = true,
@@ -842,6 +1074,26 @@ export function DataTable<TData extends BaseEntity>({
     [onBulkDelete]
   );
 
+  const handleBulkBan = React.useCallback(
+    (ids: string[]) => {
+      if (onBulkBan) {
+        onBulkBan(ids);
+        setRowSelection({});
+      }
+    },
+    [onBulkBan]
+  );
+
+  const handleBulkUnban = React.useCallback(
+    (ids: string[]) => {
+      if (onBulkUnban) {
+        onBulkUnban(ids);
+        setRowSelection({});
+      }
+    },
+    [onBulkUnban]
+  );
+
   const handleEditSave = React.useCallback(
     (updatedData: TData) => {
       handleRowUpdate(updatedData);
@@ -869,7 +1121,11 @@ export function DataTable<TData extends BaseEntity>({
       ActionsColumn<TData>(
         setEditingRow,
         onRowDelete,
-        isDeleting
+        isDeleting,
+        onRowBan,
+        onRowUnban,
+        isBanning,
+        isUnbanning
       )
     );
   }
@@ -882,6 +1138,10 @@ export function DataTable<TData extends BaseEntity>({
   serverSide,
   onRowDelete,
   isDeleting,
+  onRowBan,
+  onRowUnban,
+  isBanning,
+  isUnbanning,
 ]);
 
   const tableData = serverSide ? initialData : filteredData;
@@ -1167,6 +1427,16 @@ export function DataTable<TData extends BaseEntity>({
           </div>
 
           <div className="flex items-center justify-between px-4">
+            {enableRowSelection && (onBulkBan || onBulkUnban) && (
+              <BulkBanButton
+                selectedRows={selectedRows}
+                onBulkBan={handleBulkBan}
+                onBulkUnban={handleBulkUnban}
+                isBulkBanning={isBulkBanning}
+                isBulkUnbanning={isBulkUnbanning}
+              />
+            )}
+
             {enableRowSelection && onBulkDelete && (
               <BulkDeleteButton
                 selectedRows={selectedRows}

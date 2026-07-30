@@ -9,15 +9,15 @@ import {
   fetchUsersAPI,
   createUserAPI,
   updateUserAPI,
-  deleteUserAPI,
-  deleteManyUsersAPI,
   updateUserPasswordAPI,
   type UsersQueryParams,
   type UsersResponse,
   updateLoggedUserPasswordAPI,
   updateLoggedUserDataAPI,
-  activateManyUsersAPI,
-  activateUserAPI,
+  banUserAPI,
+  banManyUsersAPI,
+  unbanUserAPI,
+  unbanManyUsersAPI,
 } from "./usersAPI";
 
 // Define the User type to match backend response
@@ -46,7 +46,6 @@ export interface UpdateUserData {
   name?: string;
   email?: string;
   role?: "admin" | "user";
-  active?: boolean; // NEW: Allow updating active status
   image?: File | null;
 }
 
@@ -75,8 +74,10 @@ interface UsersState {
   error: string | null;
   isCreating: boolean;
   isUpdating: boolean;
-  isDeleting: boolean;
-  isDeletingMany: boolean;
+  isBanning: boolean;
+  isUnbanning: boolean;
+  isBulkBanning: boolean;
+  isBulkUnbanning: boolean;
   isUpdatingPassword: boolean;
   currentQueryParams: UsersQueryParams;
   isUpdatingLoggedUser: boolean;
@@ -103,8 +104,10 @@ const initialState: UsersState = {
   error: null,
   isCreating: false,
   isUpdating: false,
-  isDeleting: false,
-  isDeletingMany: false,
+  isBanning: false,
+  isUnbanning: false,
+  isBulkBanning: false,
+  isBulkUnbanning: false,
   isUpdatingPassword: false,
   currentQueryParams: {},
   isUpdatingLoggedUser: false,
@@ -203,9 +206,6 @@ export const updateUser = createAsyncThunk<
       if (userData.role !== undefined) {
         formData.append("role", userData.role);
       }
-      if (userData.active !== undefined) {
-        formData.append("active", userData.active.toString());
-      }
       if (userData.image !== undefined) {
         if (userData.image === null) {
           // Send empty string or a flag to indicate image removal
@@ -245,59 +245,16 @@ export const updateUserPassword = createAsyncThunk<
   }
 );
 
-// Async thunk to delete user
-export const deleteUser = createAsyncThunk<
+// Async thunk to ban single user
+export const banUser = createAsyncThunk<
   string,
   string,
   { rejectValue: string; state: { users: UsersState } }
 >(
-  "users/deleteUser",
+  "users/banUser",
   async (id, { rejectWithValue, getState, dispatch }) => {
     try {
-      await deleteUserAPI(id);
-
-      // Refetch users to maintain pagination integrity
-      const state = getState();
-      dispatch(fetchUsers(state.users.currentQueryParams));
-
-      return id;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
-  }
-);
-
-// Async thunk for bulk delete
-export const deleteManyUsers = createAsyncThunk<
-  string[],
-  string[],
-  { rejectValue: string; state: { users: UsersState } }
->(
-  "users/deleteManyUsers",
-  async (ids, { rejectWithValue, getState, dispatch }) => {
-    try {
-      await deleteManyUsersAPI(ids);
-
-      // Refetch users to maintain pagination integrity
-      const state = getState();
-      dispatch(fetchUsers(state.users.currentQueryParams));
-
-      return ids;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
-  }
-);
-// NEW: Async thunk to activate single user
-export const activateUser = createAsyncThunk<
-  string,
-  string,
-  { rejectValue: string; state: { users: UsersState } }
->(
-  "users/activateUser",
-  async (id, { rejectWithValue, getState, dispatch }) => {
-    try {
-      await activateUserAPI(id);
+      await banUserAPI(id);
 
       const state = getState();
       dispatch(fetchUsers(state.users.currentQueryParams));
@@ -309,26 +266,86 @@ export const activateUser = createAsyncThunk<
   }
 );
 
-// NEW: Async thunk for bulk activate
-export const activateManyUsers = createAsyncThunk<
-  string[],
+// Define return types for bulk operations
+export interface BulkBanResult {
+  bannedCount: number;
+  skippedUsers: Array<{ id: string; name: string; reason: string }>;
+}
+
+export interface BulkUnbanResult {
+  unbannedCount: number;
+  skippedUsers: Array<{ id: string; name: string; reason: string }>;
+}
+
+// Async thunk for bulk ban
+export const banManyUsers = createAsyncThunk<
+  BulkBanResult,
   string[],
   { rejectValue: string; state: { users: UsersState } }
 >(
-  "users/activateManyUsers",
+  "users/banManyUsers",
   async (ids, { rejectWithValue, getState, dispatch }) => {
     try {
-      await activateManyUsersAPI(ids);
+      const response = await banManyUsersAPI(ids);
 
       const state = getState();
       dispatch(fetchUsers(state.users.currentQueryParams));
 
-      return ids;
+      return {
+        bannedCount: response.data.bannedCount,
+        skippedUsers: response.data.skippedUsers,
+      };
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
+
+// Async thunk to unban single user
+export const unbanUser = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string; state: { users: UsersState } }
+>(
+  "users/unbanUser",
+  async (id, { rejectWithValue, getState, dispatch }) => {
+    try {
+      await unbanUserAPI(id);
+
+      const state = getState();
+      dispatch(fetchUsers(state.users.currentQueryParams));
+
+      return id;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
+// Async thunk for bulk unban
+export const unbanManyUsers = createAsyncThunk<
+  BulkUnbanResult,
+  string[],
+  { rejectValue: string; state: { users: UsersState } }
+>(
+  "users/unbanManyUsers",
+  async (ids, { rejectWithValue, getState, dispatch }) => {
+    try {
+      const response = await unbanManyUsersAPI(ids);
+
+      const state = getState();
+      dispatch(fetchUsers(state.users.currentQueryParams));
+
+      return {
+        unbannedCount: response.data.unbannedCount,
+        skippedUsers: response.data.skippedUsers,
+      };
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 // Add these thunks
 export const updateLoggedUserData = createAsyncThunk<
   User,
@@ -459,31 +476,57 @@ const usersSlice = createSlice({
         state.isUpdatingPassword = false;
         state.error = action.payload || "Failed to update password";
       })
-      // Delete user
-      .addCase(deleteUser.pending, (state) => {
-        state.isDeleting = true;
+      // Ban user
+      .addCase(banUser.pending, (state) => {
+        state.isBanning = true;
         state.error = null;
       })
-      .addCase(deleteUser.fulfilled, (state) => {
-        state.isDeleting = false;
+      .addCase(banUser.fulfilled, (state) => {
+        state.isBanning = false;
         // Don't modify users array here since we refetch
       })
-      .addCase(deleteUser.rejected, (state, action) => {
-        state.isDeleting = false;
-        state.error = action.payload || "Failed to delete user";
+      .addCase(banUser.rejected, (state, action) => {
+        state.isBanning = false;
+        state.error = action.payload || "Failed to ban user";
       })
-      // Bulk delete users
-      .addCase(deleteManyUsers.pending, (state) => {
-        state.isDeletingMany = true;
+      // Bulk ban users
+      .addCase(banManyUsers.pending, (state) => {
+        state.isBulkBanning = true;
         state.error = null;
       })
-      .addCase(deleteManyUsers.fulfilled, (state) => {
-        state.isDeletingMany = false;
+      .addCase(banManyUsers.fulfilled, (state) => {
+        state.isBulkBanning = false;
         // Don't modify users array here since we refetch
       })
-      .addCase(deleteManyUsers.rejected, (state, action) => {
-        state.isDeletingMany = false;
-        state.error = action.payload || "Failed to delete users";
+      .addCase(banManyUsers.rejected, (state, action) => {
+        state.isBulkBanning = false;
+        state.error = action.payload || "Failed to ban users";
+      })
+      // Unban user
+      .addCase(unbanUser.pending, (state) => {
+        state.isUnbanning = true;
+        state.error = null;
+      })
+      .addCase(unbanUser.fulfilled, (state) => {
+        state.isUnbanning = false;
+        // Don't modify users array here since we refetch
+      })
+      .addCase(unbanUser.rejected, (state, action) => {
+        state.isUnbanning = false;
+        state.error = action.payload || "Failed to unban user";
+      })
+      // Bulk unban users
+      .addCase(unbanManyUsers.pending, (state) => {
+        state.isBulkUnbanning = true;
+        state.error = null;
+      })
+      .addCase(unbanManyUsers.fulfilled, (state) => {
+        state.isBulkUnbanning = false;
+        // Don't modify users array here since we refetch
+      })
+      .addCase(unbanManyUsers.rejected, (state, action) => {
+        state.isBulkUnbanning = false;
+        state.error = action.payload || "Failed to unban users";
       })
       // Add these to extraReducers
 .addCase(updateLoggedUserData.pending, (state) => {

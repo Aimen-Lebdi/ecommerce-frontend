@@ -21,8 +21,10 @@ import {
   fetchUsers,
   createUser,
   updateUser,
-  deleteUser,
-  deleteManyUsers,
+  banUser,
+  banManyUsers,
+  unbanUser,
+  unbanManyUsers,
   clearError,
   setQueryParams,
   type CreateUserData,
@@ -132,8 +134,10 @@ export default function Users() {
     error,
     isCreating,
     isUpdating,
-    isDeleting,
-    isDeletingMany,
+    isBanning,
+    isUnbanning,
+    isBulkBanning,
+    isBulkUnbanning,
     currentQueryParams,
   } = useAppSelector((state) => state.users);
 
@@ -213,30 +217,67 @@ export default function Users() {
     }
   };
 
-  // Handle single user delete
-  const handleDeleteUser = async (id: string) => {
+  // Handle single user ban
+  const handleBanUser = async (id: string) => {
     try {
-      await dispatch(deleteUser(id)).unwrap();
-      toast.success(t('users.messages.deleteSuccess'));
-      // Note: deleteUser thunk automatically refetches data
-    } catch (error) {
-      console.error("Failed to delete user:", error);
-      // Error toast is handled by the error useEffect above
+      await dispatch(banUser(id)).unwrap();
+      toast.success(t('users.messages.banSuccess'));
+    } catch (error: any) {
+      const errorMessage =
+        error?.message || typeof error === "string"
+          ? error
+          : t('users.messages.bulkBanError');
+      toast.error(errorMessage);
+      console.error("Failed to ban user:", error);
     }
   };
 
-  // Handle bulk user delete
-  const handleBulkDeleteUsers = async (ids: string[]) => {
+  // Handle single user unban
+  const handleUnbanUser = async (id: string) => {
     try {
-      await dispatch(deleteManyUsers(ids)).unwrap();
-      toast.success(
-        t('users.messages.bulkDeleteSuccess', { count: ids.length })
-      );
-      // Note: deleteManyUsers thunk automatically refetches data
+      await dispatch(unbanUser(id)).unwrap();
+      toast.success(t('users.messages.unbanSuccess'));
+    } catch (error: any) {
+      const errorMessage =
+        error?.message || typeof error === "string"
+          ? error
+          : t('users.messages.bulkUnbanError');
+      toast.error(errorMessage);
+      console.error("Failed to unban user:", error);
+    }
+  };
+
+  // Handle bulk ban users
+  const handleBulkBanUsers = async (ids: string[]) => {
+    try {
+      const result = await dispatch(banManyUsers(ids)).unwrap();
+      if (result.bannedCount === 0) {
+        toast.error(t('users.messages.noUsersBanned'));
+      } else {
+        toast.success(
+          t('users.messages.bulkBanSuccess', { count: result.bannedCount })
+        );
+      }
     } catch (error) {
-      console.error("Failed to delete users:", error);
-      // Error toast is handled by the error useEffect above, but we show a specific message for bulk delete
-      toast.error(t('users.messages.bulkDeleteError'));
+      console.error("Failed to ban users:", error);
+      toast.error(t('users.messages.bulkBanError'));
+    }
+  };
+
+  // Handle bulk unban users
+  const handleBulkUnbanUsers = async (ids: string[]) => {
+    try {
+      const result = await dispatch(unbanManyUsers(ids)).unwrap();
+      if (result.unbannedCount === 0) {
+        toast.error(t('users.messages.noUsersUnbanned'));
+      } else {
+        toast.success(
+          t('users.messages.bulkUnbanSuccess', { count: result.unbannedCount })
+        );
+      }
+    } catch (error) {
+      console.error("Failed to unban users:", error);
+      toast.error(t('users.messages.bulkUnbanError'));
     }
   };
 
@@ -298,10 +339,14 @@ export default function Users() {
               )
             }
             // Row action handlers
-            onRowDelete={handleDeleteUser}
-            isDeleting={isDeleting}
-            onBulkDelete={handleBulkDeleteUsers}
-            isBulkDeleting={isDeletingMany}
+            onRowBan={handleBanUser}
+            onRowUnban={handleUnbanUser}
+            isBanning={isBanning}
+            isUnbanning={isUnbanning}
+            onBulkBan={handleBulkBanUsers}
+            onBulkUnban={handleBulkUnbanUsers}
+            isBulkBanning={isBulkBanning}
+            isBulkUnbanning={isBulkUnbanning}
             // Table features configuration
             enableRowSelection={true}
             enableGlobalFilter={true}

@@ -26,7 +26,6 @@ import {
   SelectContent,
   SelectItem,
 } from "../../ui/select";
-import { Switch } from "../../ui/switch";
 
 type Errors = {
   name?: string;
@@ -58,7 +57,6 @@ interface UserDialogProps {
     email?: string;
     password?: string;
     role?: "admin" | "user";
-    active?: boolean;
     image?: File | null;
   }) => Promise<void>;
   isLoading?: boolean;
@@ -79,15 +77,14 @@ export function UserDialog({
   const [name, setName] = React.useState("");
   const [originalName, setOriginalName] = React.useState("");
   const [email, setEmail] = React.useState("");
-  // const [originalEmail, setOriginalEmail] = React.useState("");
+  const [originalEmail, setOriginalEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [role, setRole] = React.useState<"admin" | "user">("user");
   const [originalRole, setOriginalRole] = React.useState<"admin" | "user">(
     "user"
   );
-  const [active, setActive] = React.useState(true);
-  const [originalActive, setOriginalActive] = React.useState(true);
+  // active/ban status removed (no longer in edit dialog)
 
   // Image
   const [image, setImage] = React.useState<File | null>(null);
@@ -106,11 +103,9 @@ export function UserDialog({
       setName(existingData.name || "");
       setOriginalName(existingData.name || "");
       setEmail(existingData.email || "");
-      // setOriginalEmail(existingData.email || "");
+      setOriginalEmail(existingData.email || "");
       setRole(existingData.role || "user");
       setOriginalRole(existingData.role || "user");
-      setActive(existingData.active ?? true);
-      setOriginalActive(existingData.active ?? true);
       if (existingData.image) {
         setPreview(existingData.image);
       }
@@ -150,14 +145,12 @@ export function UserDialog({
   const resetForm = () => {
     setName("");
     setOriginalName("");
-    // setEmail("");
-    // setOriginalEmail("");
+    setEmail("");
+    setOriginalEmail("");
     setPassword("");
     setConfirmPassword("");
     setRole("user");
     setOriginalRole("user");
-    setActive(true);
-    setOriginalActive(true);
     setImage(null);
     setPreview(null);
     setImageRemoved(false);
@@ -171,7 +164,6 @@ export function UserDialog({
       email?: string;
       password?: string;
       role?: "admin" | "user";
-      active?: boolean;
       image?: File | null;
     } = {};
 
@@ -180,7 +172,6 @@ export function UserDialog({
       payload.email = email;
       payload.password = password;
       payload.role = role;
-      payload.active = active;
       if (image) payload.image = image;
     } else {
       // Edit mode - only include changed fields
@@ -195,9 +186,6 @@ export function UserDialog({
       }
       if (role !== originalRole) {
         payload.role = role;
-      }
-      if (active !== originalActive) {
-        payload.active = active;
       }
       if (image instanceof File) {
         payload.image = image;
@@ -322,12 +310,13 @@ export function UserDialog({
             type="email"
             placeholder={t('userDialog.placeholders.email')}
             value={email}
-            // onChange={(e) => {
-            //   setEmail(e.target.value);
-            //   if (e.target.value.trim()) {
-            //     setErrors((prev) => ({ ...prev, email: undefined }));
-            //   }
-            // }}
+            readOnly={mode === "edit"}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (e.target.value.trim()) {
+                setErrors((prev) => ({ ...prev, email: undefined }));
+              }
+            }}
             className={errors.email ? "border-red-500" : ""}
           />
           {errors.email && (
@@ -357,25 +346,6 @@ export function UserDialog({
             <p className="text-sm text-red-600 mt-1">{errors.role}</p>
           )}
         </div>
-
-        {/* Active Status - Only show in edit mode */}
-        {mode === "edit" && (
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <Label htmlFor="active-status">{t('userDialog.labels.accountStatus')}</Label>
-              <p className="text-sm text-muted-foreground">
-                {active
-                  ? t('userDialog.status.active')
-                  : t('userDialog.status.inactive')}
-              </p>
-            </div>
-            <Switch
-              id="active-status"
-              checked={active}
-              onCheckedChange={setActive}
-            />
-          </div>
-        )}
 
         {/* User Image Upload */}
         <div className="grid gap-2">
