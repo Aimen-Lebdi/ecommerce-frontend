@@ -1185,6 +1185,8 @@
     "labels": {
       "name": "Nom",
       "email": "Email",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
       "role": "Rôle",
       "accountStatus": "Statut du Compte",
       "uploadUserImage": "Télécharger une photo de profil"
@@ -1192,6 +1194,8 @@
     "placeholders": {
       "name": "ex: Ahmed Benali",
       "email": "ex: ahmed@example.com",
+      "password": "Entrez un mot de passe (6 caractères min)",
+      "confirmPassword": "Confirmez le mot de passe",
       "role": "Choisir un rôle"
     },
     "buttons": {

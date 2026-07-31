@@ -214,6 +214,8 @@ export function UserDialog({
 
       if (mode === "add") {
         resetForm();
+        // Close the dialog after a successful create
+        setOpen(false);
       } else {
         // For edit mode: close dialog only after successful update
         setOpen(false);
@@ -323,6 +325,55 @@ export function UserDialog({
             <p className="text-sm text-red-600 mt-1">{errors.email}</p>
           )}
         </div>
+
+        {/* Password (add mode only) */}
+        {mode === "add" && (
+          <>
+            <div className="grid gap-2">
+              <Label htmlFor="password">{t('userDialog.labels.password')}</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder={t('userDialog.placeholders.password')}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (e.target.value) {
+                    setErrors((prev) => ({ ...prev, password: undefined }));
+                  }
+                }}
+                className={errors.password ? "border-red-500" : ""}
+              />
+              {errors.password && (
+                <p className="text-sm text-red-600 mt-1">{errors.password}</p>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">
+                {t('userDialog.labels.confirmPassword')}
+              </Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder={t('userDialog.placeholders.confirmPassword')}
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (e.target.value === password) {
+                    setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+                  }
+                }}
+                className={errors.confirmPassword ? "border-red-500" : ""}
+              />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-600 mt-1">
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Role */}
         <div className="grid gap-2">

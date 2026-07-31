@@ -1185,6 +1185,8 @@
     "labels": {
       "name": "Name",
       "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
       "role": "Role",
       "accountStatus": "Account Status",
       "uploadUserImage": "Upload user image"
@@ -1192,6 +1194,8 @@
     "placeholders": {
       "name": "e.g., John Doe",
       "email": "e.g., john@example.com",
+      "password": "Enter a password (min 6 characters)",
+      "confirmPassword": "Re-enter your password",
       "role": "Choose role"
     },
     "buttons": {
