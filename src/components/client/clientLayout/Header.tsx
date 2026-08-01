@@ -42,6 +42,7 @@ export function Header() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const numOfCartItems = useAppSelector((state) => state.cart.numOfCartItems);
 
   // Check if user is admin
   const isAdmin = user?.role === "admin";
@@ -181,9 +182,9 @@ export function Header() {
               }}
             >
               <ShoppingCart className="h-5 w-5" />
-              {isAuthenticated && (
+              {isAuthenticated && numOfCartItems > 0 && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
-                  2
+                  {numOfCartItems}
                 </Badge>
               )}
             </Button>

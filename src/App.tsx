@@ -1,31 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ThemeProvider } from "./components/theme-provider";
 import AppRoutes from "./routes/AppRoutes";
 import SocketProvider from "./socket/useSocket";
 import { useEffect } from "react";
-import { useAppDispatch } from "./app/hooks";
-import { setAuthData } from "./features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "./app/hooks";
+import { fetchCart, resetCart } from "./features/cart/cartSlice";
 import { Toaster } from "sonner";
 
 const App = () => {
   const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
-    // Check if user is already logged in on app start
-    const token = localStorage.getItem("token");
-    const user = localStorage.getItem("user");
-
-    if (token && user) {
-      try {
-        const parsedUser = JSON.parse(user);
-        dispatch(setAuthData({ user: parsedUser, token }));
-      } catch (error) {
-        // If parsing fails, clear invalid data
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-      }
+    // Keep the cart in sync with auth state:
+    // - authenticated: fetch the user's cart so the header badge is fresh on every page
+    // - logged out / token expired: reset local cart state (no API call)
+    if (isAuthenticated) {
+      dispatch(fetchCart());
+    } else {
+      dispatch(resetCart());
     }
-  }, [dispatch]);
+  }, [isAuthenticated, dispatch]);
 
   return (
     <SocketProvider>
