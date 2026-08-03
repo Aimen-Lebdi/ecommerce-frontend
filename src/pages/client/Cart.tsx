@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import {
@@ -12,7 +12,6 @@ import {
   Lock,
   Truck,
   ArrowLeft,
-  Tag,
   Shield,
   CreditCard,
   Loader2,
@@ -24,7 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 // import {
@@ -39,7 +37,6 @@ import {
   fetchCart,
   removeCartItem,
   updateCartItemQuantity,
-  applyCoupon,
   clearError,
 } from "../../features/cart/cartSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
@@ -55,15 +52,12 @@ const Cart = () => {
     cartItems,
     numOfCartItems,
     totalCartPrice,
-    totalPriceAfterDiscount,
     loading,
     error,
     isRemoving,
     isUpdating,
-    appliedCoupon,
   } = useAppSelector((state) => state.cart);
 
-  const [promoCode, setPromoCode] = useState("");
   // const [shippingMethod, setShippingMethod] = useState("standard");
 
   // Fetch cart on component mount (only if authenticated)
@@ -83,11 +77,10 @@ const Cart = () => {
 
   // Calculate totals
   const subtotal = totalCartPrice;
-  const promoDiscount = appliedCoupon ? appliedCoupon.discount : 0;
-  const shippingCost =500;
-  const taxRate = 0; 
-  const taxAmount = (subtotal - promoDiscount) * taxRate;
-  const total = subtotal - promoDiscount + shippingCost + taxAmount;
+  const shippingCost = 500;
+  const taxRate = 0;
+  const taxAmount = subtotal * taxRate;
+  const total = subtotal + shippingCost + taxAmount;
 
   const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -122,21 +115,6 @@ const Cart = () => {
       toast.success(t('cart.movedToWishlist', { productName }));
     } catch (err: any) {
       toast.error(err || t('cart.moveToWishlistFailed'));
-    }
-  };
-
-  const applyPromoCode = async () => {
-    if (!promoCode.trim()) {
-      toast.error(t('cart.enterPromoCode'));
-      return;
-    }
-
-    try {
-      await dispatch(applyCoupon(promoCode)).unwrap();
-      toast.success(t('cart.couponApplied'));
-      setPromoCode("");
-    } catch (err) {
-      // Error handled by slice
     }
   };
 
@@ -321,47 +299,6 @@ const Cart = () => {
               </CardContent>
             </Card>
           ))}
-
-          {/* Promo Code Section */}
-          <Card className="mt-6">
-            <CardContent className="p-4 md:p-6">
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="flex-1">
-                  <Input
-                    placeholder={t('cart.enterPromoCodePlaceholder')}
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    className="w-full"
-                    disabled={loading}
-                  />
-                </div>
-                <Button
-                  onClick={applyPromoCode}
-                  variant="outline"
-                  disabled={loading || !promoCode.trim()}
-                >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Tag className="h-4 w-4 mr-2" />
-                  )}
-                  {t('cart.apply')}
-                </Button>
-              </div>
-              {totalPriceAfterDiscount && appliedCoupon && (
-                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-green-800">
-                      {t('cart.couponAppliedLabel')}: {appliedCoupon.code}
-                    </span>
-                    <span className="text-sm font-semibold text-green-800">
-                      {appliedCoupon.discount.toFixed(2)} DA
-                    </span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
 
         {/* Order Summary - Right Column */}
@@ -376,13 +313,6 @@ const Cart = () => {
                 <span>{t('cart.subtotal')}</span>
                 <span>{subtotal.toFixed(2)} DA</span>
               </div>
-
-              {totalPriceAfterDiscount && appliedCoupon && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>{t('cart.discount')}</span>
-                  <span>{appliedCoupon.discount.toFixed(2)} DA</span>
-                </div>
-              )}
 
               {/* Shipping Options */}
               {/* <div className="space-y-2">

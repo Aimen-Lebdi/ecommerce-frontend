@@ -26,10 +26,6 @@ interface CartState {
   isAddingToCart: boolean;
   isUpdating: boolean;
   isRemoving: boolean;
-  appliedCoupon: {
-    code: string;
-    discount: number;
-  } | null;
 }
 export interface CartIdInfo {
   cartId: string;
@@ -47,7 +43,6 @@ const initialState: CartState = {
   isAddingToCart: false,
   isUpdating: false,
   isRemoving: false,
-  appliedCoupon: null,
 };
 
 // Async thunk to add product to cart
@@ -159,24 +154,6 @@ export const updateCartItemQuantity = createAsyncThunk<
   }
 );
 
-// Async thunk to apply coupon
-export const applyCoupon = createAsyncThunk<
-  CartResponse,
-  string,
-  { rejectValue: string }
->("cart/applyCoupon", async (couponCode, { rejectWithValue, dispatch }) => {
-  try {
-    const data = await applyCouponAPI(couponCode);
-    // Fetch updated cart after applying coupon
-    dispatch(fetchCart());
-    return data;
-  } catch (err: any) {
-    return rejectWithValue(
-      err.response?.data?.message || err.message || "Invalid or expired coupon"
-    );
-  }
-});
-
 // Cart slice
 const cartSlice = createSlice({
   name: "cart",
@@ -185,16 +162,12 @@ const cartSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    clearAppliedCoupon: (state) => {
-      state.appliedCoupon = null;
-    },
     resetCart: (state) => {
       state.cartId = null;
       state.cartItems = [];
       state.numOfCartItems = 0;
       state.totalCartPrice = 0;
       state.totalPriceAfterDiscount = undefined;
-      state.appliedCoupon = null;
     },
   },
   extraReducers: (builder) => {
@@ -255,7 +228,6 @@ const cartSlice = createSlice({
         state.numOfCartItems = 0;
         state.totalCartPrice = 0;
         state.totalPriceAfterDiscount = undefined;
-        state.appliedCoupon = null;
       })
       .addCase(clearCart.rejected, (state, action) => {
         state.loading = false;
@@ -273,31 +245,10 @@ const cartSlice = createSlice({
         state.isUpdating = false;
         state.error = action.payload || "Failed to update quantity";
       })
-      // Apply coupon
-      .addCase(applyCoupon.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(applyCoupon.fulfilled, (state, action) => {
-        state.loading = false;
-        // Update applied coupon info if needed
-        if (action.payload.data.totalPriceAfterDiscount) {
-          state.appliedCoupon = {
-            code: action.meta.arg,
-            discount:
-              state.totalCartPrice -
-              action.payload.data.totalPriceAfterDiscount,
-          };
-        }
-      })
-      .addCase(applyCoupon.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to apply coupon";
-      });
   },
 });
 
-export const { clearError, clearAppliedCoupon, resetCart } = cartSlice.actions;
+export const { clearError, resetCart } = cartSlice.actions;
 
 export default cartSlice.reducer;
 
