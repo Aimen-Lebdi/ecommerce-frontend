@@ -425,11 +425,6 @@ const FeaturedProductsSection = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {products?.slice(0, 4).map((product, index) => {
-          const discountPrice = product.priceAfterDiscount || product.price;
-          const hasDiscount =
-            product.priceAfterDiscount &&
-            product.priceAfterDiscount < product.price;
-
           // Determine badge based on index and product properties
           let badge = "home.products.badges.bestSeller";
           let badgeVariant = "secondary";
@@ -437,9 +432,6 @@ const FeaturedProductsSection = () => {
           if (index === 0) {
             badge = "home.products.badges.bestSeller";
             badgeVariant = "secondary";
-          } else if (hasDiscount) {
-            badge = "home.products.badges.sale";
-            badgeVariant = "destructive";
           } else if (product.quantity > 50) {
             badge = "home.products.badges.hotDeal";
             badgeVariant = "default";
@@ -501,32 +493,10 @@ const FeaturedProductsSection = () => {
                   <h3 className="font-semibold text-lg mb-2 line-clamp-2 flex-1">
                     {product.name}
                   </h3>
-                  <div className="flex items-center mb-2">
-                    <div className="flex items-center mr-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < Math.floor(product.rating || 0)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      ({product.ratingsQuantity})
-                    </span>
-                  </div>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-xl font-bold">
-                      {discountPrice} DA
+                      {product.price} DA
                     </span>
-                    {hasDiscount && (
-                      <span className="text-sm text-muted-foreground line-through">
-                        {product.price} DA
-                      </span>
-                    )}
                   </div>
                   <div className="flex items-center justify-between mt-auto">
                     <span

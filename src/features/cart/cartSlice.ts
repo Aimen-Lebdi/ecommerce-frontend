@@ -20,7 +20,6 @@ interface CartState {
   cartItems: CartItem[];
   numOfCartItems: number;
   totalCartPrice: number;
-  totalPriceAfterDiscount?: number;
   loading: boolean;
   error: string | null;
   isAddingToCart: boolean;
@@ -37,7 +36,6 @@ const initialState: CartState = {
   cartItems: [],
   numOfCartItems: 0,
   totalCartPrice: 0,
-  totalPriceAfterDiscount: undefined,
   loading: false,
   error: null,
   isAddingToCart: false,
@@ -167,7 +165,6 @@ const cartSlice = createSlice({
       state.cartItems = [];
       state.numOfCartItems = 0;
       state.totalCartPrice = 0;
-      state.totalPriceAfterDiscount = undefined;
     },
   },
   extraReducers: (builder) => {
@@ -196,8 +193,6 @@ const cartSlice = createSlice({
           state.cartItems = action.payload.data.cartItems || [];
           state.numOfCartItems = action.payload.numOfCartItems || 0;
           state.totalCartPrice = action.payload.data.totalCartPrice || 0;
-          state.totalPriceAfterDiscount =
-            action.payload.data.totalPriceAfterDiscount;
           state.cartId = action.payload.data._id; // Store cart ID
         }
       )
@@ -227,7 +222,6 @@ const cartSlice = createSlice({
         state.cartItems = [];
         state.numOfCartItems = 0;
         state.totalCartPrice = 0;
-        state.totalPriceAfterDiscount = undefined;
       })
       .addCase(clearCart.rejected, (state, action) => {
         state.loading = false;

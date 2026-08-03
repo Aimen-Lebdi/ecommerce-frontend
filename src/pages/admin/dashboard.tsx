@@ -56,8 +56,6 @@ export default function Dashboard() {
       category: { variant: "secondary" as const, label: t('dashboard.activityTypes.category') },
       subcategory: { variant: "secondary" as const, label: t('dashboard.activityTypes.subcategory') },
       brand: { variant: "default" as const, label: t('dashboard.activityTypes.brand') },
-      review: { variant: "secondary" as const, label: t('dashboard.activityTypes.review') },
-      coupon: { variant: "default" as const, label: t('dashboard.activityTypes.coupon') },
       cart: { variant: "secondary" as const, label: t('dashboard.activityTypes.cart') },
     };
 
@@ -188,8 +186,6 @@ export default function Dashboard() {
           { value: "category", label: t('dashboard.activityTypes.category') },
           { value: "subcategory", label: t('dashboard.activityTypes.subcategory') },
           { value: "brand", label: t('dashboard.activityTypes.brand') },
-          { value: "review", label: t('dashboard.activityTypes.review') },
-          { value: "coupon", label: t('dashboard.activityTypes.coupon') },
           { value: "cart", label: t('dashboard.activityTypes.cart') },
         ],
       },

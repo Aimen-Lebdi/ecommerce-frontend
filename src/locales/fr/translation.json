@@ -66,7 +66,6 @@
       "badges": {
         "bestSeller": "Meilleure Vente",
         "new": "Nouveau",
-        "sale": "Promo",
         "hotDeal": "Offre Exclusive"
       },
       "inStock": "En Stock",
@@ -148,7 +147,6 @@
       "applyPriceFilter": "Appliquer le Filtre",
       "active": "Actif",
       "specialOffers": "Offres Spéciales",
-      "onSale": "En Promo",
       "inStockOnly": "En Stock Uniquement",
       "clearAllFilters": "Effacer Tous les Filtres",
       "priceLabel": "Prix"
@@ -159,7 +157,6 @@
       "oldestFirst": "Plus Anciens",
       "priceLowToHigh": "Prix : Croissant",
       "priceHighToLow": "Prix : Décroissant",
-      "highestRated": "Mieux Notés",
       "mostPopular": "Plus Populaires",
       "nameAToZ": "Nom : A à Z",
       "nameZToA": "Nom : Z à A"
@@ -173,8 +170,7 @@
       "outOfStock": "Rupture de Stock",
       "inStock": "En Stock ({{quantity}})",
       "addedToWishlist": "{{productName}} ajouté à la liste de souhaits",
-      "failedToAddToWishlist": "Échec de l'ajout à la liste de souhaits",
-      "reviews": "avis"
+      "failedToAddToWishlist": "Échec de l'ajout à la liste de souhaits"
     },
     "pagination": {
       "showingPage": "Page",
@@ -198,9 +194,6 @@
     "failedToAddToWishlist": "Échec de l'ajout à la liste de souhaits",
     "outOfStock": "Rupture de Stock",
     "onlyLeft": "Plus que {{quantity}} en stock",
-    "noRating": "Aucune note",
-    "reviews": "avis",
-    "save": "Économisez {{percentage}}%",
     "selectColor": "Choisir la Couleur",
     "quantity": "Quantité",
     "adding": "Ajout en cours...",
@@ -208,7 +201,6 @@
     "selectColorButton": "Choisir la Couleur",
     "pleaseSelectColor": "Veuillez choisir une couleur",
     "buyNow": "Acheter Maintenant",
-    "sale": "Promo",
     "relatedProducts": "Produits Associés",
     "breadcrumbs": {
       "shop": "Boutique",
@@ -228,8 +220,7 @@
     },
     "tabs": {
       "description": "Description",
-      "specifications": "Spécifications",
-      "reviews": "Avis"
+      "specifications": "Spécifications"
     },
     "specs": {
       "productName": "Nom du Produit",
@@ -237,15 +228,10 @@
       "subcategory": "Sous-catégorie",
       "brand": "Marque",
       "price": "Prix",
-      "discountedPrice": "Prix Remisé",
       "availability": "Disponibilité",
       "inStock": "En Stock ({{quantity}})",
       "sold": "Vendu",
       "units": "unités"
-    },
-    "reviewsSection": {
-      "noReviews": "Aucun avis pour le moment. Soyez le premier à évaluer ce produit !",
-      "writeReview": "Écrire un Avis"
     }
   },
   "cart": {
@@ -253,8 +239,6 @@
     "itemRemoved": "Article retiré du panier",
     "movedToWishlist": "{{productName}} déplacé vers la liste de souhaits",
     "moveToWishlistFailed": "Échec du déplacement vers la liste de souhaits",
-    "enterPromoCode": "Veuillez saisir un code promo",
-    "couponApplied": "Code promo appliqué avec succès",
     "loadingCart": "Chargement du panier...",
     "emptyCart": "Votre panier est vide",
     "emptyCartDescription": "Il semble que vous n'ayez encore rien ajouté à votre panier.",
@@ -265,11 +249,7 @@
     "save": "Économiser",
     "remove": "Retirer",
     "subtotal": "Sous-total",
-    "enterPromoCodePlaceholder": "Saisir le code promo",
-    "apply": "Appliquer",
-    "couponAppliedLabel": "Code promo appliqué",
     "orderSummary": "Récapitulatif de Commande",
-    "discount": "Réduction",
     "shipping": "Livraison",
     "standardShipping": "Standard (5-7 jours)",
     "expressShipping": "Express (2-3 jours)",
@@ -952,8 +932,6 @@
       "category": "Catégorie",
       "subcategory": "Sous-catégorie",
       "brand": "Marque",
-      "review": "Avis",
-      "coupon": "Code promo",
       "cart": "Panier"
     },
     "columns": {
@@ -1119,7 +1097,6 @@
       "productName": "Nom du Produit",
       "description": "Description",
       "price": "Prix ($)",
-      "discountPrice": "Prix Promo ($)",
       "quantity": "Quantité",
       "colors": "Couleurs (séparées par des virgules)",
       "mainImage": "Image Principale du Produit",
@@ -1136,7 +1113,6 @@
       "productName": "ex: iPhone 15 Pro Max",
       "description": "Entrez une description détaillée du produit...",
       "price": "99.99",
-      "discountPrice": "79.99",
       "quantity": "100",
       "colors": "ex: Noir, Argent, Or, Gris Sidéral"
     },
@@ -1392,8 +1368,6 @@
     "noData": "Aucune donnée"
   },
   "header": {
-    "promoText": "Livraison gratuite pour les commandes de plus de 50$ ! Utilisez le code :",
-    "promoCode": "FREESHIP",
     "logo": "CLICON",
     "searchPlaceholder": "Rechercher des produits...",
     "adminBadge": "Admin",

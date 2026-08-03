@@ -66,7 +66,6 @@
       "badges": {
         "bestSeller": "الأكثر مبيعاً",
         "new": "جديد",
-        "sale": "تخفيض",
         "hotDeal": "عرض حصري"
       },
       "inStock": "متوفر",
@@ -148,7 +147,6 @@
       "applyPriceFilter": "تطبيق فلتر السعر",
       "active": "نشط",
       "specialOffers": "عروض خاصة",
-      "onSale": "في عرض",
       "inStockOnly": "المتوفر فقط",
       "clearAllFilters": "مسح كل الفلاتر",
       "priceLabel": "السعر"
@@ -159,7 +157,6 @@
       "oldestFirst": "الأقدم أولاً",
       "priceLowToHigh": "السعر: من الأقل إلى الأعلى",
       "priceHighToLow": "السعر: من الأعلى إلى الأقل",
-      "highestRated": "الأعلى تقييماً",
       "mostPopular": "الأكثر شيوعاً",
       "nameAToZ": "الاسم: من أ إلى ي",
       "nameZToA": "الاسم: من ي إلى أ"
@@ -173,8 +170,7 @@
       "outOfStock": "غير متوفر",
       "inStock": "متوفر ({{quantity}})",
       "addedToWishlist": "تمت إضافة {{productName}} إلى قائمة الرغبات",
-      "failedToAddToWishlist": "فشل الإضافة إلى قائمة الرغبات",
-      "reviews": "تقييم"
+      "failedToAddToWishlist": "فشل الإضافة إلى قائمة الرغبات"
     },
     "pagination": {
       "showingPage": "عرض صفحة",
@@ -198,9 +194,6 @@
     "failedToAddToWishlist": "فشل الإضافة إلى قائمة الرغبات",
     "outOfStock": "غير متوفر",
     "onlyLeft": "بقي {{quantity}} فقط",
-    "noRating": "لا توجد تقييمات",
-    "reviews": "تقييم",
-    "save": "وفر {{percentage}}%",
     "selectColor": "اختر اللون",
     "quantity": "الكمية",
     "adding": "جاري الإضافة...",
@@ -208,7 +201,6 @@
     "selectColorButton": "اختر اللون",
     "pleaseSelectColor": "الرجاء اختيار اللون",
     "buyNow": "اشتري الآن",
-    "sale": "تخفيض",
     "relatedProducts": "منتجات ذات صلة",
     "breadcrumbs": {
       "shop": "المتجر",
@@ -228,8 +220,7 @@
     },
     "tabs": {
       "description": "الوصف",
-      "specifications": "المواصفات",
-      "reviews": "التقييمات"
+      "specifications": "المواصفات"
     },
     "specs": {
       "productName": "اسم المنتج",
@@ -237,15 +228,10 @@
       "subcategory": "الفئة الفرعية",
       "brand": "العلامة التجارية",
       "price": "السعر",
-      "discountedPrice": "السعر بعد الخصم",
       "availability": "التوفر",
       "inStock": "متوفر ({{quantity}})",
       "sold": "مباع",
       "units": "وحدة"
-    },
-    "reviewsSection": {
-      "noReviews": "لا توجد تقييمات بعد. كن أول من يقيم هذا المنتج!",
-      "writeReview": "اكتب تقييماً"
     }
   },
   "cart": {
@@ -253,8 +239,6 @@
     "itemRemoved": "تم إزالة العنصر من السلة",
     "movedToWishlist": "تم نقل {{productName}} إلى قائمة الرغبات",
     "moveToWishlistFailed": "فشل النقل إلى قائمة الرغبات",
-    "enterPromoCode": "الرجاء إدخال كود الخصم",
-    "couponApplied": "تم تطبيق الكوبون بنجاح",
     "loadingCart": "جاري تحميل السلة...",
     "emptyCart": "سلة التسوق فارغة",
     "emptyCartDescription": "يبدو أنك لم تقم بإضافة أي منتجات إلى سلة التسوق بعد.",
@@ -265,11 +249,7 @@
     "save": "وفر",
     "remove": "إزالة",
     "subtotal": "المجموع الجزئي",
-    "enterPromoCodePlaceholder": "أدخل كود الخصم",
-    "apply": "تطبيق",
-    "couponAppliedLabel": "تم تطبيق الكوبون",
     "orderSummary": "ملخص الطلب",
-    "discount": "الخصم",
     "shipping": "الشحن",
     "standardShipping": "قياسي (5-7 أيام)",
     "expressShipping": "سريع (2-3 أيام)",
@@ -952,8 +932,6 @@
       "category": "فئة",
       "subcategory": "فئة فرعية",
       "brand": "علامة تجارية",
-      "review": "تقييم",
-      "coupon": "كوبون",
       "cart": "سلة"
     },
     "columns": {
@@ -1119,7 +1097,6 @@
       "productName": "اسم المنتج",
       "description": "الوصف",
       "price": "السعر ($)",
-      "discountPrice": "سعر الخصم ($)",
       "quantity": "الكمية",
       "colors": "الألوان (مفصولة بفواصل)",
       "mainImage": "الصورة الرئيسية للمنتج",
@@ -1136,7 +1113,6 @@
       "productName": "مثال: آيفون 15 برو ماكس",
       "description": "أدخل وصف تفصيلي للمنتج...",
       "price": "99.99",
-      "discountPrice": "79.99",
       "quantity": "100",
       "colors": "مثال: أسود، فضي، ذهبي، رمادي فضائي"
     },
@@ -1392,8 +1368,6 @@
     "noData": "لا توجد بيانات"
   },
   "header": {
-    "promoText": "شحن مجاني للطلبات فوق 50 دولار! استخدم الكود:",
-    "promoCode": "FREESHIP",
     "logo": "CLICON",
     "searchPlaceholder": "ابحث عن المنتجات...",
     "adminBadge": "مدير",

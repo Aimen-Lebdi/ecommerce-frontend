@@ -50,7 +50,6 @@ interface Product {
   slug: string;
   description: string;
   price: number;
-  priceAfterDiscount?: number;
   mainImage: string;
   images?: string[];
   colors?: string[];
@@ -68,8 +67,6 @@ interface Product {
     _id: string;
     name: string;
   };
-  rating?: number;
-  ratingsQuantity: number;
   createdAt: string;
   updatedAt?: string;
 }
@@ -83,7 +80,6 @@ interface ProductDialogProps {
     name?: string;
     description?: string;
     price?: number;
-    priceAfterDiscount?: number;
     mainImage?: File;
     images?: File[];
     colors?: string[];
@@ -130,7 +126,6 @@ export function ProductDialog({
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [price, setPrice] = React.useState("");
-  const [priceAfterDiscount, setPriceAfterDiscount] = React.useState("");
   const [quantity, setQuantity] = React.useState("");
   const [colors, setColors] = React.useState("");
 
@@ -158,7 +153,6 @@ export function ProductDialog({
     name: string;
     description: string;
     price: string;
-    priceAfterDiscount: string;
     quantity: string;
     colors: string;
     category: string;
@@ -210,8 +204,6 @@ export function ProductDialog({
       const initialName = existingData.name || "";
       const initialDescription = existingData.description || "";
       const initialPrice = existingData.price?.toString() || "";
-      const initialPriceAfterDiscount =
-        existingData.priceAfterDiscount?.toString() || "";
       const initialQuantity = existingData.quantity?.toString() || "";
       const initialColors = existingData.colors?.join(", ") || "";
       const initialCategory = existingData.category?._id || "";
@@ -222,7 +214,6 @@ export function ProductDialog({
       setName(initialName);
       setDescription(initialDescription);
       setPrice(initialPrice);
-      setPriceAfterDiscount(initialPriceAfterDiscount);
       setQuantity(initialQuantity);
       setColors(initialColors);
       setCategory(initialCategory);
@@ -234,7 +225,6 @@ export function ProductDialog({
         name: initialName,
         description: initialDescription,
         price: initialPrice,
-        priceAfterDiscount: initialPriceAfterDiscount,
         quantity: initialQuantity,
         colors: initialColors,
         category: initialCategory,
@@ -266,7 +256,6 @@ export function ProductDialog({
     setName("");
     setDescription("");
     setPrice("");
-    setPriceAfterDiscount("");
     setQuantity("");
     setColors("");
     setMainImage(null);
@@ -300,7 +289,7 @@ export function ProductDialog({
 
   // Check if a field has changed (for edit mode)
   const hasFieldChanged = (
-    fieldName: keyof typeof originalValues,
+    fieldName: keyof NonNullable<typeof originalValues>,
     currentValue: string
   ) => {
     if (mode === "add" || !originalValues) return true;
@@ -318,8 +307,6 @@ export function ProductDialog({
       productData.name = name;
       productData.description = description;
       productData.price = Number(price);
-      if (priceAfterDiscount)
-        productData.priceAfterDiscount = Number(priceAfterDiscount);
       productData.quantity = Number(quantity);
       productData.colors = colors
         .split(",")
@@ -340,14 +327,6 @@ export function ProductDialog({
       }
       if (hasFieldChanged("price", price)) {
         productData.price = Number(price);
-      }
-      if (hasFieldChanged("priceAfterDiscount", priceAfterDiscount)) {
-        if (priceAfterDiscount) {
-          productData.priceAfterDiscount = Number(priceAfterDiscount);
-        } else {
-          // Handle case where discount price is being removed
-          productData.priceAfterDiscount = undefined;
-        }
       }
       if (hasFieldChanged("quantity", quantity)) {
         productData.quantity = Number(quantity);
@@ -698,20 +677,6 @@ if (otherImages.length > 0) {
               <p className="text-sm text-red-600">{errors.price}</p>
             )}
           </div>
-          {/* <div className="grid gap-2">
-            <Label>
-              {t('productDialog.labels.discountPrice')}{" "}
-              <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
-            </Label>
-            <Input
-              type="number"
-              placeholder={t('productDialog.placeholders.discountPrice')}
-              value={priceAfterDiscount}
-              onChange={(e) => setPriceAfterDiscount(e.target.value)}
-              step="0.01"
-              min="0"
-            />
-          </div> */}
           <div className="grid gap-2">
             <Label>{t('productDialog.labels.quantity')}</Label>
             <Input
@@ -978,7 +943,6 @@ export function createEditProductDialog(
     name?: string;
     description?: string;
     price?: number;
-    priceAfterDiscount?: number;
     mainImage?: File;
     images?: File[];
     colors?: string[];

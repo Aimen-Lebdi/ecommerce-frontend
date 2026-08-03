@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import {
-  Star,
   ShoppingCart,
   Heart,
   Loader2,
@@ -156,16 +155,6 @@ const ProductDetails = () => {
     );
   }
 
-  // Calculate discount percentage
-  const discountPercentage = product.priceAfterDiscount
-    ? Math.round(
-        ((product.price - product.priceAfterDiscount) / product.price) * 100
-      )
-    : 0;
-
-  // Display price (use discounted price if available)
-  const displayPrice = product.priceAfterDiscount || product.price;
-
   // Check if product is in stock
   const inStock = product.quantity > 0;
 
@@ -250,41 +239,11 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          {/* Rating */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3 w-3 md:h-4 md:w-4 ${
-                    i < Math.floor(product.rating || 0)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-xs md:text-sm text-muted-foreground">
-              {product.rating?.toFixed(1) || t('productDetail.noRating')} (
-              {product.ratingsQuantity || 0} {t('productDetail.reviews')})
-            </span>
-          </div>
-
           {/* Price */}
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-2xl md:text-3xl font-bold">
-              {displayPrice.toFixed(2)} DA
+              {product.price.toFixed(2)} DA
             </span>
-            {product.priceAfterDiscount && (
-              <>
-                <span className="line-through text-muted-foreground text-base md:text-lg">
-                  {product.price.toFixed(2)} DA
-                </span>
-                <Badge variant="destructive" className="text-xs md:text-sm">
-                  {t('productDetail.save', { percentage: discountPercentage })}
-                </Badge>
-              </>
-            )}
           </div>
 
           {/* Colors - if available */}
@@ -501,16 +460,6 @@ const ProductDetails = () => {
                       {product.price.toFixed(2)} DA
                     </span>
                   </div>
-                  {product.priceAfterDiscount && (
-                    <div className="flex justify-between border-b pb-2">
-                      <span className="text-sm text-muted-foreground">
-                        {t('productDetail.specs.discountedPrice')}:
-                      </span>
-                      <span className="text-sm font-medium text-green-600">
-                        {product.priceAfterDiscount.toFixed(2)} DA
-                      </span>
-                    </div>
-                  )}
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">
                       {t('productDetail.specs.availability')}:
@@ -559,27 +508,14 @@ const ProductDetails = () => {
                             "/placeholder.png";
                         }}
                       />
-                      {rp.priceAfterDiscount && (
-                        <Badge
-                          variant="destructive"
-                          className="absolute top-2 right-2 text-xs"
-                        >
-                          {t('productDetail.sale')}
-                        </Badge>
-                      )}
                     </div>
                     <p className="text-xs md:text-sm font-medium line-clamp-2 mb-1">
                       {rp.name}
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm md:text-base font-bold">
-                        {(rp.priceAfterDiscount || rp.price).toFixed(2)} DA
+                        {rp.price.toFixed(2)} DA
                       </span>
-                      {rp.priceAfterDiscount && (
-                        <span className="text-xs text-muted-foreground line-through">
-                          DA{rp.price.toFixed(2)}
-                        </span>
-                      )}
                     </div>
                   </Link>
                 </CardContent>

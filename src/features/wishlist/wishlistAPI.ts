@@ -6,12 +6,9 @@ export interface WishlistProduct {
   name: string;
   mainImage: string;
   price: number;
-  priceAfterDiscount?: number;
   quantity: number;
   brand?: { name: string };
   category?: { name: string };
-  rating?: number;
-  ratingsQuantity?: number;
   colors?: string[];
 }
 

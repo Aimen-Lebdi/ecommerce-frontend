@@ -33,7 +33,6 @@ export interface Product {
   slug: string;
   description: string;
   price: number;
-  priceAfterDiscount?: number;
   mainImage: string;
   images?: string[];
   colors?: string[];
@@ -51,8 +50,6 @@ export interface Product {
     _id: string;
     name: string;
   };
-  rating?: number;
-  ratingsQuantity: number;
   createdAt: string;
   updatedAt?: string;
 }
@@ -236,7 +233,6 @@ export default function Products() {
     name: string;
     description: string;
     price: number;
-    priceAfterDiscount?: number;
     mainImage?: File;
     images?: File[];
     colors?: string[];
@@ -264,7 +260,6 @@ export default function Products() {
       name?: string;
       description?: string;
       price?: number;
-      priceAfterDiscount?: number;
       mainImage?: File;
       images?: File[];
       colors?: string[];
@@ -351,8 +346,6 @@ export default function Products() {
                     createdAt,
                     updatedAt,
                     sold,
-                    rating,
-                    ratingsQuantity,
                     ...productUpdateData
                   } = updatedData;
                   await handleUpdateProduct(id, productUpdateData);

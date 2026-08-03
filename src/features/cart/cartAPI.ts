@@ -22,7 +22,6 @@ export interface CartResponse {
     _id: string;
     cartItems: CartItem[];
     totalCartPrice: number;
-    totalPriceAfterDiscount?: number;
     user: string;
     createdAt: string;
     updatedAt: string;

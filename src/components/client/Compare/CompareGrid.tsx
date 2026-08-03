@@ -2,7 +2,6 @@
 // type Product = {
 //   title: string;
 //   image: string;
-//   customer_feedback: string;
 //   price: string;
 //   sold_by: string;
 //   brand: string;
@@ -12,7 +11,6 @@
 //   weight: string;
 // };
 // const headers: { label: string; key: keyof Product }[] = [
-//   { label: "Customer feedback", key: "customer_feedback" },
 //   { label: "Price", key: "price" },
 //   { label: "Sold by", key: "sold_by" },
 //   { label: "Brand", key: "brand" },
@@ -26,7 +24,6 @@
 //   {
 //     title: "Gamdias ARES M2 Gaming Keyboard, Mouse and Mouse Mat Combo",
 //     image: "/images/gamdias.png",
-//     customer_feedback: "⭐⭐⭐⭐☆ (17,846)",
 //     price: "$899.00",
 //     sold_by: "Clicon",
 //     brand: "StarTech",
@@ -38,7 +35,6 @@
 //   {
 //     title: 'Apple iMac 24" 4K Retina Display M1 8-Core CPU, 256GB SSD',
 //     image: "/images/imac.png",
-//     customer_feedback: "⭐⭐⭐⭐⭐ (873,971)",
 //     price: "$1,699.00",
 //     sold_by: "Apple",
 //     brand: "Apple",
@@ -50,7 +46,6 @@
 //   // {
 //   //   title: "Samsung Galaxy S21 FE 5G Cell Phone, 128GB, 120Hz Display",
 //   //   image: "/images/s21fe.png",
-//   //   customer_feedback: "⭐⭐⭐⭐☆ (86,945)",
 //   //   price: "$699.99",
 //   //   sold_by: "Clicon",
 //   //   brand: "Samsung",
@@ -125,7 +120,6 @@ import CompareCard from "./CompareCard";
 type Product = {
   title: string;
   image: string;
-  customer_feedback: string;
   price: string;
   sold_by: string;
   brand: string;
@@ -136,7 +130,6 @@ type Product = {
 };
 
 const headers: { label: string; key: keyof Product }[] = [
-  { label: "Customer feedback", key: "customer_feedback" },
   { label: "Price", key: "price" },
   { label: "Sold by", key: "sold_by" },
   { label: "Brand", key: "brand" },
@@ -150,7 +143,6 @@ const products: Product[] = [
   {
     title: "Gamdias ARES M2 Gaming Keyboard, Mouse and Mouse Mat Combo",
     image: "/images/gamdias.png",
-    customer_feedback: "⭐⭐⭐⭐☆ (17,846)",
     price: "$899.00",
     sold_by: "Clicon",
     brand: "StarTech",
@@ -162,7 +154,6 @@ const products: Product[] = [
   {
     title: 'Apple iMac 24" 4K Retina Display M1 8-Core CPU, 256GB SSD',
     image: "/images/imac.png",
-    customer_feedback: "⭐⭐⭐⭐⭐ (873,971)",
     price: "$1,699.00",
     sold_by: "Apple",
     brand: "Apple",

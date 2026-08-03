@@ -55,7 +55,6 @@ const Checkout = () => {
   const {
     cartItems,
     totalCartPrice,
-    totalPriceAfterDiscount,
     loading: cartLoading,
     cartId,
   } = useAppSelector((state) => state.cart);
@@ -130,7 +129,7 @@ const Checkout = () => {
   }, [orderError, dispatch]);
 
   // Calculate totals
-  const subtotal = totalPriceAfterDiscount || totalCartPrice;
+  const subtotal = totalCartPrice;
   const shippingCost = 500;
   const total = subtotal + shippingCost;
 

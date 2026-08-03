@@ -23,7 +23,6 @@ export interface Product {
   slug: string;
   description: string;
   price: number;
-  priceAfterDiscount?: number;
   mainImage: string;
   images?: string[];
   colors?: string[];
@@ -41,9 +40,6 @@ export interface Product {
     _id: string;
     name: string;
   } | null;
-  rating?: number;
-  ratingsQuantity: number;
-  reviews?: any[];
   createdAt: string;
   updatedAt?: string;
 }
@@ -53,7 +49,6 @@ export interface CreateProductData {
   name: string;
   description: string;
   price: number;
-  priceAfterDiscount?: number;
   mainImage?: File;
   images?: File[];
   colors?: string[];
@@ -68,7 +63,6 @@ export interface UpdateProductData {
   name?: string;
   description?: string;
   price?: number;
-  priceAfterDiscount?: number;
   mainImage?: File;
   images?: File[];
   colors?: string[];
@@ -183,12 +177,6 @@ export const createProduct = createAsyncThunk<
       formData.append("name", productData.name);
       formData.append("description", productData.description);
       formData.append("price", productData.price.toString());
-      if (productData.priceAfterDiscount) {
-        formData.append(
-          "priceAfterDiscount",
-          productData.priceAfterDiscount.toString()
-        );
-      }
       formData.append("quantity", productData.quantity.toString());
       formData.append("category", productData.category);
 
@@ -245,12 +233,6 @@ export const updateProduct = createAsyncThunk<
       }
       if (productData.price !== undefined) {
         formData.append("price", productData.price.toString());
-      }
-      if (productData.priceAfterDiscount !== undefined) {
-        formData.append(
-          "priceAfterDiscount",
-          productData.priceAfterDiscount.toString()
-        );
       }
       if (productData.quantity !== undefined) {
         formData.append("quantity", productData.quantity.toString());

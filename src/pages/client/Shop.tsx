@@ -6,7 +6,6 @@ import { useSearchParams } from "react-router-dom";
 import {
   Grid3X3,
   List,
-  Star,
   Heart,
   ShoppingCart,
   Eye,
@@ -274,18 +273,6 @@ const FiltersPanel = memo(
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="on-sale"
-                checked={filters.onSale}
-                onCheckedChange={(checked) =>
-                  onFiltersChange({ ...filters, onSale: checked, page: 1 })
-                }
-              />
-              <Label htmlFor="on-sale" className="text-sm font-normal">
-                {t("shop.filters.onSale")}
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
                 id="in-stock"
                 checked={filters.inStock}
                 onCheckedChange={(checked) =>
@@ -322,7 +309,6 @@ const ShopPage = () => {
     { value: "-createdAt", label: t("shop.sort.oldestFirst") },
     { value: "price", label: t("shop.sort.priceLowToHigh") },
     { value: "-price", label: t("shop.sort.priceHighToLow") },
-    { value: "-rating", label: t("shop.sort.highestRated") },
     { value: "-sold", label: t("shop.sort.mostPopular") },
     { value: "name", label: t("shop.sort.nameAToZ") },
     { value: "-name", label: t("shop.sort.nameZToA") },
@@ -356,7 +342,6 @@ const ShopPage = () => {
     minPrice: "",
     maxPrice: "",
     inStock: false,
-    onSale: false,
     keyword: "",
   });
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -428,10 +413,6 @@ const ShopPage = () => {
       queryParams["quantity[gt]"] = 0;
     }
 
-    if (filters.onSale) {
-      queryParams.priceAfterDiscount = "exists";
-    }
-
     dispatch(fetchProducts(queryParams));
   }, [
     filters,
@@ -449,7 +430,6 @@ const ShopPage = () => {
     if (selectedBrands.length > 0) count++;
     if (filters.minPrice || filters.maxPrice) count++;
     if (filters.inStock) count++;
-    if (filters.onSale) count++;
     if (filters.keyword) count++;
     setActiveFilters(count);
   }, [selectedCategories, selectedSubCategories, selectedBrands, filters]);
@@ -519,7 +499,6 @@ const ShopPage = () => {
       minPrice: "",
       maxPrice: "",
       inStock: false,
-      onSale: false,
       keyword: "",
       page: 1,
     }));
@@ -550,9 +529,6 @@ const ShopPage = () => {
       case "inStock":
         setFilters((prev) => ({ ...prev, inStock: false, page: 1 }));
         break;
-      case "onSale":
-        setFilters((prev) => ({ ...prev, onSale: false, page: 1 }));
-        break;
       case "keyword":
         setFilters((prev) => ({ ...prev, keyword: "", page: 1 }));
         setSearchParams({});
@@ -569,15 +545,6 @@ const ShopPage = () => {
   });
 
   const ProductCard = ({ product }) => {
-    const discountPrice = product.priceAfterDiscount || product.price;
-    const hasDiscount =
-      product.priceAfterDiscount && product.priceAfterDiscount < product.price;
-    const discountPercentage = hasDiscount
-      ? Math.round(
-          ((product.price - product.priceAfterDiscount) / product.price) * 100
-        )
-      : 0;
-
     return (
       <Link to={`/product/${product._id}`} className="block h-full">
         <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col cursor-pointer">
@@ -646,39 +613,10 @@ const ShopPage = () => {
             <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-2 leading-tight flex-1">
               {product.name}
             </h3>
-            <div className="flex items-center mb-2">
-              <div className="flex items-center mr-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-3 w-3 ${
-                      i < Math.floor(product.rating || 0)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-xs text-muted-foreground hidden sm:inline">
-                ({product.ratingsQuantity || 0})
-              </span>
-              <span className="text-xs text-muted-foreground sm:hidden">
-                (
-                {product.ratingsQuantity > 1000
-                  ? `${Math.floor(product.ratingsQuantity / 1000)}k`
-                  : product.ratingsQuantity || 0}
-                )
-              </span>
-            </div>
             <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
               <span className="text-base sm:text-lg font-bold">
-                {discountPrice} DA
+                {product.price} DA
               </span>
-              {hasDiscount && (
-                <span className="text-xs sm:text-sm text-muted-foreground line-through">
-                  {product.price} DA
-                </span>
-              )}
             </div>
             <div className="flex items-center justify-between mt-auto">
               <span
@@ -698,15 +636,6 @@ const ShopPage = () => {
   };
 
   const ProductCardList = ({ product }) => {
-    const discountPrice = product.priceAfterDiscount || product.price;
-    const hasDiscount =
-      product.priceAfterDiscount && product.priceAfterDiscount < product.price;
-    const discountPercentage = hasDiscount
-      ? Math.round(
-          ((product.price - product.priceAfterDiscount) / product.price) * 100
-        )
-      : 0;
-
     return (
       <Card className="group hover:shadow-lg transition-all duration-300">
         <CardContent className="p-4">
@@ -720,13 +649,6 @@ const ShopPage = () => {
                 alt={product.name}
                 className="w-24 h-24 sm:w-32 sm:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute top-1 left-1 flex flex-wrap gap-1">
-                {hasDiscount && (
-                  <Badge className="bg-red-600 hover:bg-red-700 text-xs px-1 py-0.5">
-                    -{discountPercentage}%
-                  </Badge>
-                )}
-              </div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-start mb-2">
@@ -766,34 +688,12 @@ const ShopPage = () => {
                   </Button>
                 </div>
               </div>
-              <div className="flex items-center mb-2">
-                <div className="flex items-center mr-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-3 w-3 sm:h-4 sm:w-4 ${
-                        i < Math.floor(product.rating || 0)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  ({product.ratingsQuantity || 0} {t("shop.product.reviews")})
-                </span>
-              </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-lg sm:text-xl font-bold">
-                      {discountPrice} DA
+                      {product.price} DA
                     </span>
-                    {hasDiscount && (
-                      <span className="text-sm text-muted-foreground line-through">
-                        {product.price} DA
-                      </span>
-                    )}
                   </div>
                   <span
                     className={`text-sm ${
@@ -1079,15 +979,6 @@ const ShopPage = () => {
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => clearSpecificFilter("price")}
-                  />
-                </Badge>
-              )}
-              {filters.onSale && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  {t("shop.filters.onSale")}
-                  <X
-                    className="h-3 w-3 cursor-pointer"
-                    onClick={() => clearSpecificFilter("onSale")}
                   />
                 </Badge>
               )}

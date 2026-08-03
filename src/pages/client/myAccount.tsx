@@ -185,7 +185,7 @@ useEffect(() => {
   const displayWishlistItems = wishlistItems.slice(0, 4).map((item) => ({
     id: item._id,
     name: item.name,
-    price: item.priceAfterDiscount || item.price,
+    price: item.price,
     image: item.mainImage,
   }));
 

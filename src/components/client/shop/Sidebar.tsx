@@ -1,7 +1,6 @@
 import SidebarBrands from "./SidebarBrands";
 import SidebarCategory from "./SidebarCategory";
 import SidebarPrice from "./SidebarPrice";
-import SidebarPromo from "./SidebarPromo";
 import SidebarTags from "./SidebarTags";
 
 const Sidebar = () => {
@@ -11,7 +10,6 @@ const Sidebar = () => {
       <SidebarPrice />
       <SidebarBrands />
       <SidebarTags />
-      <SidebarPromo />
     </aside>
   );
 };

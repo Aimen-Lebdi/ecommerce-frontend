@@ -6,7 +6,6 @@ import {
   Heart,
   ShoppingCart,
   Trash2,
-  Star,
   Loader2,
   ArrowLeft,
   Eye,
@@ -144,17 +143,6 @@ const WishlistPage = () => {
       {/* Wishlist Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {wishlistItems.map((product) => {
-          const discountPrice = product.priceAfterDiscount || product.price;
-          const hasDiscount =
-            product.priceAfterDiscount &&
-            product.priceAfterDiscount < product.price;
-          const discountPercentage = hasDiscount
-            ? Math.round(
-                ((product.price - product.priceAfterDiscount!) /
-                  product.price) *
-                  100
-              )
-            : 0;
           const inStock = product.quantity > 0;
 
           return (
@@ -178,11 +166,6 @@ const WishlistPage = () => {
 
                   {/* Badges */}
                   <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                    {hasDiscount && (
-                      <Badge className="bg-red-600 hover:bg-red-700 text-xs px-1.5 py-0.5">
-                        -{discountPercentage}%
-                      </Badge>
-                    )}
                     {!inStock && (
                       <Badge className="bg-gray-600 hover:bg-gray-700 text-xs px-1.5 py-0.5">
                         Out of Stock
@@ -243,35 +226,11 @@ const WishlistPage = () => {
                     </h3>
                   </Link>
 
-                  {/* Rating */}
-                  <div className="flex items-center gap-1">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-3 w-3 ${
-                            i < Math.floor(product.rating || 0)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      ({product.ratingsQuantity || 0})
-                    </span>
-                  </div>
-
                   {/* Price */}
                   <div className="flex items-center gap-2">
                     <span className="text-base md:text-lg font-bold">
-                      ${discountPrice.toFixed(2)}
+                      ${product.price.toFixed(2)}
                     </span>
-                    {hasDiscount && (
-                      <span className="text-xs md:text-sm text-muted-foreground line-through">
-                        ${product.price.toFixed(2)}
-                      </span>
-                    )}
                   </div>
 
                   {/* Stock Status */}

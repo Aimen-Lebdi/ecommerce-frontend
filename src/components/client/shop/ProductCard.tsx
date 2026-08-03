@@ -2,7 +2,6 @@ type Product = {
   id: number;
   image: string;
   name: string;
-  rating: number;
   price: string;
   isHot?: boolean;
   isSale?: boolean;
@@ -30,10 +29,6 @@ const ProductCard = ({ product }: { product: Product }) => {
       </div>
 
       <h3 className="mt-4 text-sm font-semibold text-secondary">{product.name}</h3>
-      <div className="flex items-center gap-1 mt-2 text-yellow-400 text-sm">
-        {'★'.repeat(product.rating)}
-        {'☆'.repeat(5 - product.rating)}
-      </div>
       <p className="mt-1 font-bold text-blue">{product.price}</p>
     </div>
   );

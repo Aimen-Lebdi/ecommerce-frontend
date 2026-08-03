@@ -100,20 +100,6 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {/* Top Bar - Promotional */}
-      <div className="border-b bg-muted/50">
-        <div className="container mx-auto px-4">
-          <div className="flex h-10 items-center justify-center text-sm">
-            <p className="text-muted-foreground">
-              {t("header.promoText")}{" "}
-              <span className="font-semibold text-primary">
-                {t("header.promoCode")}
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Main Header */}
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">

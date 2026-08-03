@@ -66,7 +66,6 @@
       "badges": {
         "bestSeller": "Best Seller",
         "new": "New",
-        "sale": "Sale",
         "hotDeal": "Hot Deal"
       },
       "inStock": "In Stock",
@@ -148,7 +147,6 @@
       "applyPriceFilter": "Apply Price Filter",
       "active": "Active",
       "specialOffers": "Special Offers",
-      "onSale": "On Sale",
       "inStockOnly": "In Stock Only",
       "clearAllFilters": "Clear All Filters",
       "priceLabel": "Price"
@@ -159,7 +157,6 @@
       "oldestFirst": "Oldest First",
       "priceLowToHigh": "Price: Low to High",
       "priceHighToLow": "Price: High to Low",
-      "highestRated": "Highest Rated",
       "mostPopular": "Most Popular",
       "nameAToZ": "Name: A to Z",
       "nameZToA": "Name: Z to A"
@@ -173,8 +170,7 @@
       "outOfStock": "Out of Stock",
       "inStock": "In Stock ({{quantity}})",
       "addedToWishlist": "{{productName}} added to wishlist",
-      "failedToAddToWishlist": "Failed to add to wishlist",
-      "reviews": "reviews"
+      "failedToAddToWishlist": "Failed to add to wishlist"
     },
     "pagination": {
       "showingPage": "Showing page",
@@ -198,9 +194,6 @@
     "failedToAddToWishlist": "Failed to add to wishlist",
     "outOfStock": "Out of Stock",
     "onlyLeft": "Only {{quantity}} left",
-    "noRating": "No rating",
-    "reviews": "reviews",
-    "save": "Save {{percentage}}%",
     "selectColor": "Select Color",
     "quantity": "Quantity",
     "adding": "Adding...",
@@ -208,7 +201,6 @@
     "selectColorButton": "Select Color",
     "pleaseSelectColor": "Please select a color",
     "buyNow": "Buy Now",
-    "sale": "Sale",
     "relatedProducts": "Related Products",
     "breadcrumbs": {
       "shop": "Shop",
@@ -228,8 +220,7 @@
     },
     "tabs": {
       "description": "Description",
-      "specifications": "Specifications",
-      "reviews": "Reviews"
+      "specifications": "Specifications"
     },
     "specs": {
       "productName": "Product Name",
@@ -237,15 +228,10 @@
       "subcategory": "Subcategory",
       "brand": "Brand",
       "price": "Price",
-      "discountedPrice": "Discounted Price",
       "availability": "Availability",
       "inStock": "In Stock ({{quantity}})",
       "sold": "Sold",
       "units": "units"
-    },
-    "reviewsSection": {
-      "noReviews": "No reviews yet. Be the first to review this product!",
-      "writeReview": "Write a Review"
     }
   },
   "cart": {
@@ -253,8 +239,6 @@
     "itemRemoved": "Item removed from cart",
     "movedToWishlist": "{{productName}} moved to wishlist",
     "moveToWishlistFailed": "Failed to move to wishlist",
-    "enterPromoCode": "Please enter a promo code",
-    "couponApplied": "Coupon applied successfully",
     "loadingCart": "Loading cart...",
     "emptyCart": "Your cart is empty",
     "emptyCartDescription": "Looks like you haven't added anything to your cart yet.",
@@ -265,11 +249,7 @@
     "save": "Save",
     "remove": "Remove",
     "subtotal": "Subtotal",
-    "enterPromoCodePlaceholder": "Enter promo code",
-    "apply": "Apply",
-    "couponAppliedLabel": "Coupon applied",
     "orderSummary": "Order Summary",
-    "discount": "Discount",
     "shipping": "Shipping",
     "standardShipping": "Standard (5-7 days)",
     "expressShipping": "Express (2-3 days)",
@@ -952,8 +932,6 @@
       "category": "Category",
       "subcategory": "SubCategory",
       "brand": "Brand",
-      "review": "Review",
-      "coupon": "Coupon",
       "cart": "Cart"
     },
     "columns": {
@@ -1119,7 +1097,6 @@
       "productName": "Product Name",
       "description": "Description",
       "price": "Price ($)",
-      "discountPrice": "Discount Price ($)",
       "quantity": "Quantity",
       "colors": "Colors (comma separated)",
       "mainImage": "Main Product Image",
@@ -1136,7 +1113,6 @@
       "productName": "e.g., iPhone 15 Pro Max",
       "description": "Enter detailed product description...",
       "price": "99.99",
-      "discountPrice": "79.99",
       "quantity": "100",
       "colors": "e.g., Black, Silver, Gold, Space Gray"
     },
@@ -1392,8 +1368,6 @@
     "noData": "No data"
   },
   "header": {
-    "promoText": "Free shipping on orders over $50! Use code:",
-    "promoCode": "FREESHIP",
     "logo": "CLICON",
     "searchPlaceholder": "Search for products...",
     "adminBadge": "Admin",
