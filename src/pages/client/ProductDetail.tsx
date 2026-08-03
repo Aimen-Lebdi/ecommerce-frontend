@@ -433,15 +433,12 @@ const ProductDetails = () => {
 
       {/* Tabs Section */}
       <Tabs defaultValue="description" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="description" className="text-xs md:text-sm">
             {t('productDetail.tabs.description')}
           </TabsTrigger>
           <TabsTrigger value="specs" className="text-xs md:text-sm">
             {t('productDetail.tabs.specifications')}
-          </TabsTrigger>
-          <TabsTrigger value="reviews" className="text-xs md:text-sm">
-            {t('productDetail.tabs.reviews')} ({product.ratingsQuantity || 0})
           </TabsTrigger>
         </TabsList>
 
@@ -536,21 +533,6 @@ const ProductDetails = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="reviews" className="pt-4 md:pt-6">
-          <Card>
-            <CardContent className="p-4 md:p-6">
-              <div className="text-center py-8">
-                <Star className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm md:text-base text-muted-foreground">
-                  {t('productDetail.reviewsSection.noReviews')}
-                </p>
-                <Button className="mt-4" variant="outline">
-                  {t('productDetail.reviewsSection.writeReview')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Related Products */}
