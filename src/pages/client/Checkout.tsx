@@ -525,38 +525,6 @@ const Checkout = () => {
                     </div>
                   </div>
                 </RadioGroup>
-
-                {paymentMethod === "cash" && (
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex gap-3">
-                      <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium text-blue-900 text-sm">
-                          {t('checkout.cashOnDelivery')}
-                        </p>
-                        <p className="text-xs text-blue-700 mt-1">
-                          {t('checkout.codDescription')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === "card" && (
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex gap-3">
-                      <Shield className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium text-green-900 text-sm">
-                          {t('checkout.secureCardPayment')}
-                        </p>
-                        <p className="text-xs text-green-700 mt-1">
-                          {t('checkout.stripeRedirectInfo')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -674,36 +642,36 @@ const Checkout = () => {
           </Button>
         </div>
 
-        {/* Desktop Place Order Button */}
-        <div className="hidden lg:block mt-8">
-          <div className="max-w-2xl">
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={handlePlaceOrder}
-              disabled={!validateForm() || isProcessing}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('checkout.processingOrder')}
-                </>
-              ) : (
-                <>
-                  <Lock className="h-4 w-4 mr-2" />
-                  {t('checkout.placeOrder')} • DA{total.toFixed(2)}
-                </>
-              )}
-            </Button>
-            <p className="text-xs text-center text-muted-foreground mt-2">
-              {t('checkout.termsAgreement')}
-            </p>
-          </div>
-        </div>
+        {/* Desktop Place Order Button — sticky, centered */}
+<div className="hidden lg:block fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t p-4 z-10 shadow-lg">
+  <div className="max-w-2xl mx-auto">
+    <Button
+      size="lg"
+      className="w-full"
+      onClick={handlePlaceOrder}
+      disabled={!validateForm() || isProcessing}
+    >
+      {isProcessing ? (
+        <>
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          {t('checkout.processingOrder')}
+        </>
+      ) : (
+        <>
+          <Lock className="h-4 w-4 mr-2" />
+          {t('checkout.placeOrder')} • DA{total.toFixed(2)}
+        </>
+      )}
+    </Button>
+    <p className="text-xs text-center text-muted-foreground mt-2">
+      {t('checkout.termsAgreement')}
+    </p>
+  </div>
+</div>
       </div>
 
       {/* Mobile bottom spacing */}
-      <div className="lg:hidden h-20"></div>
+      <div className="h-20"></div>
     </div>
   );
 };
