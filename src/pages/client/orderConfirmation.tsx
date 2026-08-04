@@ -304,8 +304,8 @@ const OrderConfirmationPage = () => {
                       <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <div>
                         <p>{order.user.name}</p>
-                        {order.shippingAddress.details && (
-                          <p>{order.shippingAddress.details}</p>
+                        {order.shippingAddress.baladiya && (
+                          <p>{order.shippingAddress.baladiya}</p>
                         )}
                         <p>
                           {order.shippingAddress.wilaya},{" "}

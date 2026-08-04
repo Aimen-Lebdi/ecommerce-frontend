@@ -10,6 +10,8 @@ import activitiesReducer from "../features/activities/activitiesSlice";
 import authReducer from "../features/auth/authSlice";
 import cartReducer from "../features/cart/cartSlice"
 import wishlistReducer from "../features/wishlist/wishlistSlice";
+import addressesReducer from "../features/addresses/addressesSlice";
+import phonesReducer from "../features/phones/phonesSlice";
 import analyticsReducer from "../features/analytics/analyticsSlice";
 
 
@@ -25,6 +27,8 @@ export const store = configureStore({
     activities: activitiesReducer,
     cart: cartReducer,
     wishlist: wishlistReducer,
+    addresses: addressesReducer,
+    phones: phonesReducer,
     analytics: analyticsReducer,
   },
 });

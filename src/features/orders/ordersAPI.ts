@@ -30,7 +30,7 @@ export interface OrdersResponse {
 // Interface for creating cash order
 export interface CreateCashOrderData {
   shippingAddress: {
-    details: string;
+    baladiya: string;
     phone: string;
     dayra: string;
     wilaya: string;

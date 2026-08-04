@@ -7,6 +7,7 @@ import {
   User,
   Package,
   MapPin,
+  Phone,
   CreditCard,
   Heart,
   Settings,
@@ -14,14 +15,10 @@ import {
   LogOut,
   ChevronRight,
   Edit,
-  Plus,
   Eye,
   Truck,
   ShoppingCart,
-  Bell,
-  Globe,
   Shield,
-  Star,
   Menu,
   X,
   Loader2,
@@ -44,6 +41,8 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { SupportInfo } from "../../components/client/SupportInfo";
+import AddressBook from "../../components/client/AddressBook";
+import PhonesManager from "../../components/client/PhonesManager";
 import { Badge } from "../../components/ui/badge";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -55,7 +54,6 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
-import { Switch } from "../../components/ui/switch";
 import {
   Avatar,
   AvatarFallback,
@@ -81,6 +79,7 @@ const [activeSection, setActiveSection] = useState(tabFromUrl);
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [tempPersonalInfo, setTempPersonalInfo] = useState({
     name: "",
+    phone: "",
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -131,7 +130,10 @@ const { isUpdatingLoggedUser, isUpdatingLoggedPassword } = useAppSelector(
 
 useEffect(() => {
     if (user) {
-      setTempPersonalInfo({ name: user.name || "" });
+      setTempPersonalInfo({
+        name: user.name || "",
+        phone: user.phone || "",
+      });
     }
   }, [user]);
   // Show loading state
@@ -150,7 +152,7 @@ useEffect(() => {
   const userData = {
     name: user?.name || t('myAccount.guest'),
     email: user?.email || "",
-    phone: t('myAccount.notAvailable'),
+    phone: user?.phone || t('myAccount.notAvailable'),
     profilePicture:
       user?.image ||
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
@@ -193,6 +195,8 @@ useEffect(() => {
     { id: "overview", label: t('myAccount.sidebar.overview'), icon: User },
     { id: "orders", label: t('myAccount.sidebar.orders'), icon: Package },
     { id: "wishlist", label: t('myAccount.sidebar.wishlist'), icon: Heart },
+    { id: "addresses", label: t('myAccount.sidebar.addresses'), icon: MapPin },
+    { id: "phones", label: t('myAccount.sidebar.phones'), icon: Phone },
     { id: "settings", label: t('myAccount.sidebar.settings'), icon: Settings },
     { id: "support", label: t('myAccount.sidebar.support'), icon: HelpCircle },
   ];
@@ -255,6 +259,7 @@ useEffect(() => {
       await dispatch(
         updateLoggedUserData({
           name: tempPersonalInfo.name,
+          phone: tempPersonalInfo.phone,
           image: selectedImage,
         })
       ).unwrap();
@@ -269,7 +274,10 @@ useEffect(() => {
   };
 
   const handleCancelInfoEdit = () => {
-    setTempPersonalInfo({ name: user?.name || "" });
+    setTempPersonalInfo({
+      name: user?.name || "",
+      phone: user?.phone || "",
+    });
     setIsEditingInfo(false);
     setSelectedImage(null);
     setImagePreview(null);
@@ -653,6 +661,18 @@ useEffect(() => {
     </div>
   );
 
+  const renderAddresses = () => (
+    <div className="space-y-4 sm:space-y-6">
+      <AddressBook />
+    </div>
+  );
+
+  const renderPhones = () => (
+    <div className="space-y-4 sm:space-y-6">
+      <PhonesManager />
+    </div>
+  );
+
   const renderSettings = () => (
     <div className="space-y-4 sm:space-y-6">
       <h2 className="text-xl sm:text-2xl font-semibold">{t('myAccount.settings.title')}</h2>
@@ -679,6 +699,11 @@ useEffect(() => {
                   <p className="text-sm text-muted-foreground">
                     {userData.email}
                   </p>
+                  {userData.phone && (
+                    <p className="text-sm text-muted-foreground">
+                      {userData.phone}
+                    </p>
+                  )}
                 </div>
               </div>
               <Button onClick={() => setIsEditingInfo(true)}>
@@ -760,6 +785,25 @@ useEffect(() => {
                 />
                 <p className="text-xs text-muted-foreground">
                   {t('myAccount.settings.emailCannotChange')}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">{t('myAccount.settings.phone')}</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={tempPersonalInfo.phone}
+                  onChange={(e) =>
+                    setTempPersonalInfo({
+                      ...tempPersonalInfo,
+                      phone: e.target.value,
+                    })
+                  }
+                  placeholder={t('myAccount.settings.phonePlaceholder')}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('myAccount.settings.phoneHint')}
                 </p>
               </div>
 
@@ -926,6 +970,10 @@ useEffect(() => {
         return renderOrders();
       case "wishlist":
         return renderWishlist();
+      case "addresses":
+        return renderAddresses();
+      case "phones":
+        return renderPhones();
       case "settings":
         return renderSettings();
       case "support":

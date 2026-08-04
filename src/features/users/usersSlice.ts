@@ -19,6 +19,8 @@ import {
   unbanUserAPI,
   unbanManyUsersAPI,
 } from "./usersAPI";
+import type { Address } from "../addresses/addressesAPI";
+import type { Phone } from "../phones/phonesAPI";
 
 // Define the User type to match backend response
 export interface User {
@@ -30,6 +32,9 @@ export interface User {
   image?: string;
   createdAt: string;
   updatedAt?: string;
+  phone?: string;
+  addresses?: Address[];
+  phones?: Phone[];
 }
 
 // Define interface for creating user
@@ -88,6 +93,7 @@ interface UsersState {
 export interface UpdateLoggedUserData {
   name?: string;
   image?: File | null;
+  phone?: string;
 }
 
 export interface UpdateLoggedUserPasswordData {
@@ -355,20 +361,7 @@ export const updateLoggedUserData = createAsyncThunk<
   "users/updateLoggedUserData",
   async (userData, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
-      
-      if (userData.name !== undefined) {
-        formData.append("name", userData.name);
-      }
-      if (userData.image !== undefined) {
-        if (userData.image === null) {
-          formData.append("image", "null");
-        } else {
-          formData.append("image", userData.image);
-        }
-      }
-
-      const data = await updateLoggedUserDataAPI(formData);
+      const data = await updateLoggedUserDataAPI(userData);
       return data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || err.message);

@@ -133,9 +133,35 @@ export const updateUserPasswordAPI = async (
   return response.data.data;
 };
 
+// Interface for updating logged user data
+// (email stays non-editable for logged users; phone is editable via updateMe)
+export interface UpdateLoggedUserData {
+  name?: string;
+  image?: File | null;
+  phone?: string;
+}
+
 // Update logged user data
-export const updateLoggedUserDataAPI = async (userData: FormData) => {
-  const response = await axiosInstance.put("/api/users/updateMe", userData, {
+export const updateLoggedUserDataAPI = async (
+  userData: UpdateLoggedUserData
+) => {
+  const formData = new FormData();
+
+  if (userData.name !== undefined) {
+    formData.append("name", userData.name);
+  }
+  if (userData.image !== undefined) {
+    if (userData.image === null) {
+      formData.append("image", "null");
+    } else {
+      formData.append("image", userData.image);
+    }
+  }
+  if (userData.phone !== undefined) {
+    formData.append("phone", userData.phone);
+  }
+
+  const response = await axiosInstance.put("/api/users/updateMe", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

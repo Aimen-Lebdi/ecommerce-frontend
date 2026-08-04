@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import {
@@ -29,6 +29,7 @@ import { Label } from "../../components/ui/label";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
+import { Checkbox } from "../../components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
@@ -38,11 +39,16 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { fetchCart } from "../../features/cart/cartSlice";
 import {
   createCashOrder,
+  createCheckoutSession,
   clearError,
   clearCheckoutSession,
 } from "../../features/orders/ordersSlice";
+import {
+  fetchAddresses,
+  createAddress,
+} from "../../features/addresses/addressesSlice";
+import { fetchPhones, createPhone } from "../../features/phones/phonesSlice";
 import { toast } from "sonner";
-import axiosInstance from "../../utils/axiosInstance";
 
 const Checkout = () => {
   const { t } = useTranslation();
@@ -69,6 +75,14 @@ const Checkout = () => {
 
   const { user } = useAppSelector((state) => state.auth);
 
+  const {
+    addresses,
+    loading: addressesLoading,
+  } = useAppSelector((state) => state.addresses);
+  const { phones, loading: phonesLoading } = useAppSelector(
+    (state) => state.phones
+  );
+
   // Form state
   const [customerInfo, setCustomerInfo] = useState({
     email: user?.email || "",
@@ -77,24 +91,63 @@ const Checkout = () => {
   
 
   const [shippingAddress, setShippingAddress] = useState({
-    details: "",
     phone: "",
     dayra: "",
     wilaya: "",
-    country: "DZ",
+    baladiya: "",
   });
+
+  // Saved-address / phone selectors: "new" means the user is typing a fresh entry
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
+  const [selectedPhoneId, setSelectedPhoneId] = useState<string>("new");
+  const [saveToProfile, setSaveToProfile] = useState(false);
+
+  // One-shot prefill guards (avoid overriding the user after a later save)
+  const prefilledAddressRef = useRef(false);
+  const prefilledPhoneRef = useRef(false);
 
   // Checkout state
   // const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false);
 
-  // Fetch cart on mount (only if authenticated)
+  // Fetch cart + saved addresses/phones on mount (only if authenticated)
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchCart());
+      dispatch(fetchAddresses());
+      dispatch(fetchPhones());
     }
   }, [dispatch, isAuthenticated]);
+
+  // Prefill the address form from the default saved address once loaded
+  useEffect(() => {
+    if (!addressesLoading && !prefilledAddressRef.current) {
+      prefilledAddressRef.current = true;
+      const defaultAddress = addresses.find((a) => a.isDefault);
+      if (defaultAddress) {
+        setSelectedAddressId(defaultAddress._id);
+        setShippingAddress((prev) => ({
+          ...prev,
+          wilaya: defaultAddress.wilaya,
+          dayra: defaultAddress.dayra,
+          baladiya: defaultAddress.baladiya,
+        }));
+      }
+    }
+  }, [addresses, addressesLoading]);
+
+  // Prefill the phone field from the default saved phone once loaded
+  useEffect(() => {
+    if (!phonesLoading && !prefilledPhoneRef.current) {
+      prefilledPhoneRef.current = true;
+      const defaultPhone = phones.find((p) => p.isDefault);
+      if (defaultPhone) {
+        setSelectedPhoneId(defaultPhone._id);
+        setShippingAddress((prev) => ({ ...prev, phone: defaultPhone.phone }));
+      }
+    }
+  }, [phones, phonesLoading]);
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -133,6 +186,42 @@ const Checkout = () => {
   const shippingCost = 500;
   const total = subtotal + shippingCost;
 
+  // Select a saved address (or "new") and reflect its values in the form
+  const handleAddressSelect = (value: string) => {
+    setSelectedAddressId(value);
+    if (value === "new") {
+      setShippingAddress((prev) => ({
+        ...prev,
+        wilaya: "",
+        dayra: "",
+        baladiya: "",
+      }));
+      return;
+    }
+    const address = addresses.find((a) => a._id === value);
+    if (address) {
+      setShippingAddress((prev) => ({
+        ...prev,
+        wilaya: address.wilaya,
+        dayra: address.dayra,
+        baladiya: address.baladiya,
+      }));
+    }
+  };
+
+  // Select a saved phone (or "new") and reflect its value in the form
+  const handlePhoneSelect = (value: string) => {
+    setSelectedPhoneId(value);
+    if (value === "new") {
+      setShippingAddress((prev) => ({ ...prev, phone: "" }));
+      return;
+    }
+    const phone = phones.find((p) => p._id === value);
+    if (phone) {
+      setShippingAddress((prev) => ({ ...prev, phone: phone.phone }));
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
       toast.error(t('checkout.fillRequiredFields'));
@@ -144,34 +233,55 @@ const Checkout = () => {
       return;
     }
 
+    // Final snapshot: always the currently selected/typed values
+    const finalShippingAddress = {
+      wilaya: shippingAddress.wilaya,
+      dayra: shippingAddress.dayra,
+      baladiya: shippingAddress.baladiya,
+      phone: shippingAddress.phone,
+    };
+
     try {
-      if (paymentMethod === "cash") {
-        const orderData = {
-          shippingAddress: {
-            details: shippingAddress.details,
-            phone: shippingAddress.phone,
-            wilaya: shippingAddress.wilaya,
-            dayra: shippingAddress.dayra,
-          },
-        };
-
-        await dispatch(createCashOrder({ cartId, orderData })).unwrap();
-      } else {
-        const response = await axiosInstance.post(
-          `/api/orders/checkout-session/${cartId}`,
-          {
-            shippingAddress: {
-              details: shippingAddress.details,
-              phone: shippingAddress.phone,
-              wilaya: shippingAddress.wilaya,
-              dayra: shippingAddress.dayra,
-            },
+      // Save only brand-new entries to the profile when requested
+      if (saveToProfile) {
+        try {
+          if (selectedAddressId === "new") {
+            await dispatch(
+              createAddress({
+                wilaya: shippingAddress.wilaya,
+                dayra: shippingAddress.dayra,
+                baladiya: shippingAddress.baladiya,
+              })
+            ).unwrap();
           }
-        );
-
-        if (response.data.session && response.data.session.url) {
-          window.location.href = response.data.session.url;
+          if (selectedPhoneId === "new") {
+            await dispatch(
+              createPhone({ phone: shippingAddress.phone })
+            ).unwrap();
+          }
+        } catch (saveError: any) {
+          toast.error(
+            saveError.response?.data?.message ||
+              t('checkout.saveToProfileFailed')
+          );
+          console.error("Failed to save to profile:", saveError);
         }
+      }
+
+      if (paymentMethod === "cash") {
+        await dispatch(
+          createCashOrder({
+            cartId,
+            orderData: { shippingAddress: finalShippingAddress },
+          })
+        ).unwrap();
+      } else {
+        await dispatch(
+          createCheckoutSession({
+            cartId,
+            shippingAddress: finalShippingAddress,
+          })
+        ).unwrap();
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || t('checkout.orderCreationFailed'));
@@ -180,25 +290,14 @@ const Checkout = () => {
   };
 
   const validateForm = () => {
-    if (paymentMethod === "card") {
-      return (
-        customerInfo.email &&
-        customerInfo.userName &&
-        shippingAddress.details &&
-        shippingAddress.wilaya &&
-        shippingAddress.dayra &&
-        shippingAddress.phone
-      );
-    } else {
-      return (
-        customerInfo.email &&
-        customerInfo.userName &&
-        shippingAddress.details &&
-        shippingAddress.wilaya &&
-        shippingAddress.dayra &&
-        shippingAddress.phone
-      );
-    }
+    return (
+      customerInfo.email &&
+      customerInfo.userName &&
+      shippingAddress.wilaya &&
+      shippingAddress.dayra &&
+      shippingAddress.baladiya &&
+      shippingAddress.phone
+    );
   };
 
   // Loading state
@@ -400,6 +499,47 @@ const Checkout = () => {
                     </p>
                   )}
                 </div>
+
+                {/* Saved phone selector */}
+                <div className="space-y-3">
+                  <Label>{t('checkout.savedPhones')}</Label>
+                  <RadioGroup
+                    value={selectedPhoneId}
+                    onValueChange={handlePhoneSelect}
+                    disabled={isProcessing}
+                  >
+                    {phones.map((phone) => (
+                      <div
+                        key={phone._id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value={phone._id}
+                            id={`phone-${phone._id}`}
+                          />
+                          <Label
+                            htmlFor={`phone-${phone._id}`}
+                            className="font-medium"
+                          >
+                            {phone.phone}
+                          </Label>
+                        </div>
+                        {phone.isDefault && (
+                          <Badge variant="secondary">
+                            {t('checkout.default')}
+                          </Badge>
+                        )}
+                      </div>
+                    ))}
+                    <div className="flex items-center p-3 border rounded-lg">
+                      <RadioGroupItem value="new" id="new-phone" />
+                      <Label htmlFor="new-phone" className="font-medium ml-2">
+                        {t('checkout.newPhone')}
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </CardContent>
             </Card>
 
@@ -412,9 +552,51 @@ const Checkout = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {/* Saved address selector */}
+                <div className="space-y-3">
+                  <Label>{t('checkout.savedAddresses')}</Label>
+                  <RadioGroup
+                    value={selectedAddressId}
+                    onValueChange={handleAddressSelect}
+                    disabled={isProcessing}
+                  >
+                    {addresses.map((address) => (
+                      <div
+                        key={address._id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value={address._id}
+                            id={`address-${address._id}`}
+                          />
+                          <Label
+                            htmlFor={`address-${address._id}`}
+                            className="font-medium"
+                          >
+                            {address.wilaya} - {address.dayra} -{" "}
+                            {address.baladiya}
+                          </Label>
+                        </div>
+                        {address.isDefault && (
+                          <Badge variant="secondary">
+                            {t('checkout.default')}
+                          </Badge>
+                        )}
+                      </div>
+                    ))}
+                    <div className="flex items-center p-3 border rounded-lg">
+                      <RadioGroupItem value="new" id="new-address" />
+                      <Label htmlFor="new-address" className="font-medium ml-2">
+                        {t('checkout.newAddress')}
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="wilaya">{t('checkout.wilaya')}</Label>
+                    <Label htmlFor="wilaya">{t('checkout.wilaya')} *</Label>
                     <Input
                       value={shippingAddress.wilaya}
                       onChange={(e) =>
@@ -424,11 +606,11 @@ const Checkout = () => {
                         }))
                       }
                       placeholder={t('checkout.wilayaPlaceholder')}
-                      disabled={isProcessing}
+                      disabled={isProcessing || selectedAddressId !== "new"}
                     ></Input>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="dayra">{t('checkout.dayra')}</Label>
+                    <Label htmlFor="dayra">{t('checkout.dayra')} *</Label>
                     <Input
                       value={shippingAddress.dayra}
                       onChange={(e) =>
@@ -438,26 +620,48 @@ const Checkout = () => {
                         }))
                       }
                       placeholder={t('checkout.dayraPlaceholder')}
-                      disabled={isProcessing}
+                      disabled={isProcessing || selectedAddressId !== "new"}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="baladiya">{t('checkout.baladiya')} *</Label>
+                    <Input
+                      value={shippingAddress.baladiya}
+                      onChange={(e) =>
+                        setShippingAddress((prev) => ({
+                          ...prev,
+                          baladiya: e.target.value,
+                        }))
+                      }
+                      placeholder={t('checkout.baladiyaPlaceholder')}
+                      disabled={isProcessing || selectedAddressId !== "new"}
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">{t('checkout.streetAddress')} *</Label>
-                  <Input
-                    value={shippingAddress.details}
-                    onChange={(e) =>
-                      setShippingAddress((prev) => ({
-                        ...prev,
-                        details: e.target.value,
-                      }))
-                    }
-                    placeholder={t('checkout.streetAddressPlaceholder')}
-                    disabled={isProcessing}
-                  />
-                </div>
               </CardContent>
             </Card>
+
+            {/* Save to profile (only when a new address/phone is being typed) */}
+            {(selectedAddressId === "new" || selectedPhoneId === "new") && (
+              <Card>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <Checkbox
+                    id="saveToProfile"
+                    checked={saveToProfile}
+                    onCheckedChange={(checked) =>
+                      setSaveToProfile(checked === true)
+                    }
+                    disabled={isProcessing}
+                  />
+                  <Label
+                    htmlFor="saveToProfile"
+                    className="text-sm font-normal"
+                  >
+                    {t('checkout.saveToProfile')}
+                  </Label>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Shipping Method */}
             <Card>

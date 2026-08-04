@@ -225,7 +225,7 @@ function OrderDetailsDialog({
               </h3>
               <div className="p-4 border rounded-lg">
                 <p className="font-medium">{order.shippingAddress.wilaya}, {order.shippingAddress.dayra}</p>
-                <p className="text-muted-foreground">{order.shippingAddress.details}</p>
+                <p className="text-muted-foreground">{order.shippingAddress.baladiya}</p>
                 <p className="text-sm text-muted-foreground mt-2">
                   <IconPhone className="w-4 h-4 inline mr-1" />
                   {order.shippingAddress.phone}

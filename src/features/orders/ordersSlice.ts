@@ -46,7 +46,7 @@ export interface Order {
   }[];
   taxPrice: number;
   shippingAddress: {
-    details: string;
+    baladiya: string;
     phone: string;
     dayra: string;
     wilaya: string;

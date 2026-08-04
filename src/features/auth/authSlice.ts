@@ -23,6 +23,8 @@ import {
   type VerifyResetCodeResponse,
   type ResetPasswordResponse,
 } from "./authAPI";
+import type { Address } from "../addresses/addressesAPI";
+import type { Phone } from "../phones/phonesAPI";
 
 // Define the User type
 export interface User {
@@ -34,6 +36,9 @@ export interface User {
   active: boolean;
   createdAt: string;
   updatedAt?: string;
+  phone?: string;
+  addresses?: Address[];
+  phones?: Phone[];
 }
 
 // State interface for auth slice
