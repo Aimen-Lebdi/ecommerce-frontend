@@ -313,7 +313,8 @@
     "newAddress": "New address",
     "newPhone": "New phone number",
     "default": "Default",
-    "saveToProfile": "Save this address / phone number to my profile for future orders",
+    "savePhoneToProfile": "Save this phone number to my profile for future orders",
+    "saveAddressToProfile": "Save this address to my profile for future orders",
     "saveToProfileFailed": "Failed to save your details to your profile"
   },
   "orderConfirmation": {

@@ -313,7 +313,8 @@
     "newAddress": "Nouvelle adresse",
     "newPhone": "Nouveau numéro de téléphone",
     "default": "Par défaut",
-    "saveToProfile": "Enregistrer cette adresse / ce numéro de téléphone dans mon profil pour les futures commandes",
+    "savePhoneToProfile": "Enregistrer ce numéro de téléphone dans mon profil pour les futures commandes",
+    "saveAddressToProfile": "Enregistrer cette adresse dans mon profil pour les futures commandes",
     "saveToProfileFailed": "Échec de l'enregistrement de vos coordonnées dans votre profil"
   },
   "orderConfirmation": {

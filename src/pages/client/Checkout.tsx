@@ -100,7 +100,8 @@ const Checkout = () => {
   // Saved-address / phone selectors: "new" means the user is typing a fresh entry
   const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
   const [selectedPhoneId, setSelectedPhoneId] = useState<string>("new");
-  const [saveToProfile, setSaveToProfile] = useState(false);
+  const [savePhoneToProfile, setSavePhoneToProfile] = useState(false);
+  const [saveAddressToProfile, setSaveAddressToProfile] = useState(false);
 
   // One-shot prefill guards (avoid overriding the user after a later save)
   const prefilledAddressRef = useRef(false);
@@ -242,29 +243,37 @@ const Checkout = () => {
     };
 
     try {
-      // Save only brand-new entries to the profile when requested
-      if (saveToProfile) {
+      // Save a brand-new address to the profile when requested
+      if (saveAddressToProfile && selectedAddressId === "new") {
         try {
-          if (selectedAddressId === "new") {
-            await dispatch(
-              createAddress({
-                wilaya: shippingAddress.wilaya,
-                dayra: shippingAddress.dayra,
-                baladiya: shippingAddress.baladiya,
-              })
-            ).unwrap();
-          }
-          if (selectedPhoneId === "new") {
-            await dispatch(
-              createPhone({ phone: shippingAddress.phone })
-            ).unwrap();
-          }
+          await dispatch(
+            createAddress({
+              wilaya: shippingAddress.wilaya,
+              dayra: shippingAddress.dayra,
+              baladiya: shippingAddress.baladiya,
+            })
+          ).unwrap();
         } catch (saveError: any) {
           toast.error(
             saveError.response?.data?.message ||
               t('checkout.saveToProfileFailed')
           );
-          console.error("Failed to save to profile:", saveError);
+          console.error("Failed to save address:", saveError);
+        }
+      }
+
+      // Save a brand-new phone to the profile when requested
+      if (savePhoneToProfile && selectedPhoneId === "new") {
+        try {
+          await dispatch(
+            createPhone({ phone: shippingAddress.phone })
+          ).unwrap();
+        } catch (saveError: any) {
+          toast.error(
+            saveError.response?.data?.message ||
+              t('checkout.saveToProfileFailed')
+          );
+          console.error("Failed to save phone:", saveError);
         }
       }
 
@@ -500,6 +509,26 @@ const Checkout = () => {
                   )}
                 </div>
 
+                {/* Save new phone to profile (only when typing a new phone) */}
+                {selectedPhoneId === "new" && (
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id="savePhoneToProfile"
+                      checked={savePhoneToProfile}
+                      onCheckedChange={(checked) =>
+                        setSavePhoneToProfile(checked === true)
+                      }
+                      disabled={isProcessing}
+                    />
+                    <Label
+                      htmlFor="savePhoneToProfile"
+                      className="text-sm font-normal"
+                    >
+                      {t('checkout.savePhoneToProfile')}
+                    </Label>
+                  </div>
+                )}
+
                 {/* Saved phone selector */}
                 <div className="space-y-3">
                   <Label>{t('checkout.savedPhones')}</Label>
@@ -638,30 +667,28 @@ const Checkout = () => {
                     />
                   </div>
                 </div>
+
+                {/* Save new address to profile (only when typing a new address) */}
+                {selectedAddressId === "new" && (
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id="saveAddressToProfile"
+                      checked={saveAddressToProfile}
+                      onCheckedChange={(checked) =>
+                        setSaveAddressToProfile(checked === true)
+                      }
+                      disabled={isProcessing}
+                    />
+                    <Label
+                      htmlFor="saveAddressToProfile"
+                      className="text-sm font-normal"
+                    >
+                      {t('checkout.saveAddressToProfile')}
+                    </Label>
+                  </div>
+                )}
               </CardContent>
             </Card>
-
-            {/* Save to profile (only when a new address/phone is being typed) */}
-            {(selectedAddressId === "new" || selectedPhoneId === "new") && (
-              <Card>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <Checkbox
-                    id="saveToProfile"
-                    checked={saveToProfile}
-                    onCheckedChange={(checked) =>
-                      setSaveToProfile(checked === true)
-                    }
-                    disabled={isProcessing}
-                  />
-                  <Label
-                    htmlFor="saveToProfile"
-                    className="text-sm font-normal"
-                  >
-                    {t('checkout.saveToProfile')}
-                  </Label>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Shipping Method */}
             <Card>

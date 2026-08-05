@@ -313,7 +313,8 @@
     "newAddress": "عنوان جديد",
     "newPhone": "رقم هاتف جديد",
     "default": "افتراضي",
-    "saveToProfile": "حفظ هذا العنوان / رقم الهاتف في ملفي للطلبات المستقبلية",
+    "savePhoneToProfile": "حفظ رقم الهاتف هذا في ملفي للطلبات المستقبلية",
+    "saveAddressToProfile": "حفظ هذا العنوان في ملفي للطلبات المستقبلية",
     "saveToProfileFailed": "فشل حفظ بياناتك في ملفك الشخصي"
   },
   "orderConfirmation": {
