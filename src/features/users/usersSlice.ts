@@ -93,7 +93,6 @@ interface UsersState {
 export interface UpdateLoggedUserData {
   name?: string;
   image?: File | null;
-  phone?: string;
 }
 
 export interface UpdateLoggedUserPasswordData {

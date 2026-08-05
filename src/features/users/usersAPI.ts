@@ -134,11 +134,10 @@ export const updateUserPasswordAPI = async (
 };
 
 // Interface for updating logged user data
-// (email stays non-editable for logged users; phone is editable via updateMe)
+// (email stays non-editable for logged users; phone is managed via Phone Numbers)
 export interface UpdateLoggedUserData {
   name?: string;
   image?: File | null;
-  phone?: string;
 }
 
 // Update logged user data
@@ -156,9 +155,6 @@ export const updateLoggedUserDataAPI = async (
     } else {
       formData.append("image", userData.image);
     }
-  }
-  if (userData.phone !== undefined) {
-    formData.append("phone", userData.phone);
   }
 
   const response = await axiosInstance.put("/api/users/updateMe", formData, {

@@ -17,12 +17,14 @@ import {
 // Interface for the create-phone payload
 export interface AddPhoneData {
   phone: string;
+  label: string;
 }
 
 // Interface for the update-phone payload
 export interface UpdatePhoneData {
   phoneId: string;
   phone?: string;
+  label?: string;
   isDefault?: boolean;
 }
 
@@ -75,7 +77,7 @@ export const createPhone = createAsyncThunk<
   { rejectValue: string }
 >("phones/createPhone", async (phoneData, { rejectWithValue }) => {
   try {
-    const data = await addPhoneAPI(phoneData.phone);
+    const data = await addPhoneAPI(phoneData);
     return data;
   } catch (err: any) {
     return rejectWithValue(

@@ -79,7 +79,6 @@ const [activeSection, setActiveSection] = useState(tabFromUrl);
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [tempPersonalInfo, setTempPersonalInfo] = useState({
     name: "",
-    phone: "",
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -132,7 +131,6 @@ useEffect(() => {
     if (user) {
       setTempPersonalInfo({
         name: user.name || "",
-        phone: user.phone || "",
       });
     }
   }, [user]);
@@ -152,7 +150,6 @@ useEffect(() => {
   const userData = {
     name: user?.name || t('myAccount.guest'),
     email: user?.email || "",
-    phone: user?.phone || t('myAccount.notAvailable'),
     profilePicture:
       user?.image ||
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
@@ -259,7 +256,6 @@ useEffect(() => {
       await dispatch(
         updateLoggedUserData({
           name: tempPersonalInfo.name,
-          phone: tempPersonalInfo.phone,
           image: selectedImage,
         })
       ).unwrap();
@@ -276,7 +272,6 @@ useEffect(() => {
   const handleCancelInfoEdit = () => {
     setTempPersonalInfo({
       name: user?.name || "",
-      phone: user?.phone || "",
     });
     setIsEditingInfo(false);
     setSelectedImage(null);
@@ -699,11 +694,6 @@ useEffect(() => {
                   <p className="text-sm text-muted-foreground">
                     {userData.email}
                   </p>
-                  {userData.phone && (
-                    <p className="text-sm text-muted-foreground">
-                      {userData.phone}
-                    </p>
-                  )}
                 </div>
               </div>
               <Button onClick={() => setIsEditingInfo(true)}>
@@ -785,25 +775,6 @@ useEffect(() => {
                 />
                 <p className="text-xs text-muted-foreground">
                   {t('myAccount.settings.emailCannotChange')}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">{t('myAccount.settings.phone')}</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={tempPersonalInfo.phone}
-                  onChange={(e) =>
-                    setTempPersonalInfo({
-                      ...tempPersonalInfo,
-                      phone: e.target.value,
-                    })
-                  }
-                  placeholder={t('myAccount.settings.phonePlaceholder')}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('myAccount.settings.phoneHint')}
                 </p>
               </div>
 

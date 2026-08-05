@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { MapPin, Plus, Edit, Trash2, Star, Loader2, X } from "lucide-react";
+import {
+  MapPin,
+  Plus,
+  Edit,
+  Trash2,
+  Star,
+  Loader2,
+  X,
+  AlertTriangle,
+} from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchAddresses,
@@ -24,12 +33,18 @@ import { Badge } from "../ui/badge";
 
 // Local form shape (no _id / isDefault)
 interface AddressForm {
+  label: string;
   wilaya: string;
   dayra: string;
   baladiya: string;
 }
 
-const emptyForm: AddressForm = { wilaya: "", dayra: "", baladiya: "" };
+const emptyForm: AddressForm = {
+  label: "",
+  wilaya: "",
+  dayra: "",
+  baladiya: "",
+};
 
 const AddressBook = () => {
   const { t } = useTranslation();
@@ -54,6 +69,8 @@ const AddressBook = () => {
 
   // Field-level validation (empty = error)
   const [errors, setErrors] = useState<{
+    label?: boolean;
+    labelTooLong?: boolean;
     wilaya?: boolean;
     dayra?: boolean;
     baladiya?: boolean;
@@ -65,12 +82,20 @@ const AddressBook = () => {
 
   const validate = (form: AddressForm) => {
     const nextErrors = {
+      label: !form.label.trim(),
+      labelTooLong: form.label.trim().length > 30,
       wilaya: !form.wilaya.trim(),
       dayra: !form.dayra.trim(),
       baladiya: !form.baladiya.trim(),
     };
     setErrors(nextErrors);
-    return !nextErrors.wilaya && !nextErrors.dayra && !nextErrors.baladiya;
+    return (
+      !nextErrors.label &&
+      !nextErrors.labelTooLong &&
+      !nextErrors.wilaya &&
+      !nextErrors.dayra &&
+      !nextErrors.baladiya
+    );
   };
 
   const resetAddForm = () => {
@@ -84,9 +109,20 @@ const AddressBook = () => {
       toast.error(t("myAccount.addresses.required"));
       return;
     }
+    // Case-insensitive label uniqueness (backend stays authoritative).
+    const label = newAddress.label.trim();
+    if (
+      addresses.some(
+        (a) => a.label && a.label.toLowerCase() === label.toLowerCase()
+      )
+    ) {
+      toast.error(t("myAccount.addresses.labelDuplicate"));
+      return;
+    }
     try {
       await dispatch(
         createAddress({
+          label,
           wilaya: newAddress.wilaya.trim(),
           dayra: newAddress.dayra.trim(),
           baladiya: newAddress.baladiya.trim(),
@@ -104,6 +140,7 @@ const AddressBook = () => {
   const startEdit = (address: Address) => {
     setEditingId(address._id);
     setEditForm({
+      label: address.label || "",
       wilaya: address.wilaya,
       dayra: address.dayra,
       baladiya: address.baladiya,
@@ -122,10 +159,24 @@ const AddressBook = () => {
       toast.error(t("myAccount.addresses.required"));
       return;
     }
+    // Case-insensitive uniqueness excluding the entry being edited.
+    const label = editForm.label.trim();
+    if (
+      addresses.some(
+        (a) =>
+          a._id !== editingId &&
+          a.label &&
+          a.label.toLowerCase() === label.toLowerCase()
+      )
+    ) {
+      toast.error(t("myAccount.addresses.labelDuplicate"));
+      return;
+    }
     try {
       await dispatch(
         updateAddress({
           addressId: editingId,
+          label,
           wilaya: editForm.wilaya.trim(),
           dayra: editForm.dayra.trim(),
           baladiya: editForm.baladiya.trim(),
@@ -163,59 +214,92 @@ const AddressBook = () => {
     }
   };
 
+  // Hard gate: block adding new entries while any entry lacks a label.
+  // Editing stays allowed (the fix path) and deleting stays allowed (escape hatch).
+  const entriesNeedingLabels = addresses.filter(
+    (a) => !a.label || !a.label.trim()
+  ).length;
+  const canAddNew = entriesNeedingLabels === 0;
+
   const renderAddressFields = (
     form: AddressForm,
     onChange: (field: keyof AddressForm, value: string) => void,
     disabled: boolean
   ) => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="addr-wilaya">{t("checkout.wilaya")} *</Label>
+        <Label htmlFor="addr-label">{t("myAccount.addresses.label")} *</Label>
         <Input
-          id="addr-wilaya"
-          value={form.wilaya}
-          onChange={(e) => onChange("wilaya", e.target.value)}
-          placeholder={t("checkout.wilayaPlaceholder")}
+          id="addr-label"
+          value={form.label}
+          onChange={(e) => onChange("label", e.target.value)}
+          placeholder={t("myAccount.addresses.labelPlaceholder")}
+          maxLength={30}
           disabled={disabled}
-          className={errors.wilaya ? "border-destructive" : ""}
+          className={
+            errors.label || errors.labelTooLong ? "border-destructive" : ""
+          }
         />
-        {errors.wilaya && (
+        {errors.label && (
           <p className="text-xs text-destructive">
-            {t("myAccount.addresses.required")}
+            {t("myAccount.addresses.labelRequired")}
+          </p>
+        )}
+        {errors.labelTooLong && (
+          <p className="text-xs text-destructive">
+            {t("myAccount.addresses.labelMaxLength")}
           </p>
         )}
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="addr-dayra">{t("checkout.dayra")} *</Label>
-        <Input
-          id="addr-dayra"
-          value={form.dayra}
-          onChange={(e) => onChange("dayra", e.target.value)}
-          placeholder={t("checkout.dayraPlaceholder")}
-          disabled={disabled}
-          className={errors.dayra ? "border-destructive" : ""}
-        />
-        {errors.dayra && (
-          <p className="text-xs text-destructive">
-            {t("myAccount.addresses.required")}
-          </p>
-        )}
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="addr-baladiya">{t("checkout.baladiya")} *</Label>
-        <Input
-          id="addr-baladiya"
-          value={form.baladiya}
-          onChange={(e) => onChange("baladiya", e.target.value)}
-          placeholder={t("checkout.baladiyaPlaceholder")}
-          disabled={disabled}
-          className={errors.baladiya ? "border-destructive" : ""}
-        />
-        {errors.baladiya && (
-          <p className="text-xs text-destructive">
-            {t("myAccount.addresses.required")}
-          </p>
-        )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="addr-wilaya">{t("checkout.wilaya")} *</Label>
+          <Input
+            id="addr-wilaya"
+            value={form.wilaya}
+            onChange={(e) => onChange("wilaya", e.target.value)}
+            placeholder={t("checkout.wilayaPlaceholder")}
+            disabled={disabled}
+            className={errors.wilaya ? "border-destructive" : ""}
+          />
+          {errors.wilaya && (
+            <p className="text-xs text-destructive">
+              {t("myAccount.addresses.required")}
+            </p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="addr-dayra">{t("checkout.dayra")} *</Label>
+          <Input
+            id="addr-dayra"
+            value={form.dayra}
+            onChange={(e) => onChange("dayra", e.target.value)}
+            placeholder={t("checkout.dayraPlaceholder")}
+            disabled={disabled}
+            className={errors.dayra ? "border-destructive" : ""}
+          />
+          {errors.dayra && (
+            <p className="text-xs text-destructive">
+              {t("myAccount.addresses.required")}
+            </p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="addr-baladiya">{t("checkout.baladiya")} *</Label>
+          <Input
+            id="addr-baladiya"
+            value={form.baladiya}
+            onChange={(e) => onChange("baladiya", e.target.value)}
+            placeholder={t("checkout.baladiyaPlaceholder")}
+            disabled={disabled}
+            className={errors.baladiya ? "border-destructive" : ""}
+          />
+          {errors.baladiya && (
+            <p className="text-xs text-destructive">
+              {t("myAccount.addresses.required")}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -233,6 +317,10 @@ const AddressBook = () => {
               variant="outline"
               size="sm"
               onClick={() => setIsAddingNew(true)}
+              disabled={!canAddNew}
+              title={
+                canAddNew ? undefined : t("myAccount.addresses.labelsNeededHint")
+              }
             >
               <Plus className="h-4 w-4 mr-2" />
               {t("myAccount.addresses.addNew")}
@@ -247,6 +335,23 @@ const AddressBook = () => {
           </div>
         ) : (
           <>
+            {/* Hard-gate banner: some entries are missing labels */}
+            {entriesNeedingLabels > 0 && (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-300/70 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-medium">
+                    {t("myAccount.addresses.labelsNeeded", {
+                      count: entriesNeedingLabels,
+                    })}
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    {t("myAccount.addresses.labelsNeededHint")}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Add-new form */}
             {isAddingNew && (
               <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
@@ -319,10 +424,28 @@ const AddressBook = () => {
                       <div className="flex items-start space-x-3">
                         <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                         <div>
-                          <p className="font-medium text-sm sm:text-base">
-                            {address.wilaya} - {address.dayra} -{" "}
-                            {address.baladiya}
-                          </p>
+                          {address.label && address.label.trim() ? (
+                            <>
+                              <p className="font-medium text-sm sm:text-base">
+                                {address.label}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {address.wilaya} - {address.dayra} -{" "}
+                                {address.baladiya}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="font-medium text-sm sm:text-base">
+                                {address.wilaya} - {address.dayra} -{" "}
+                                {address.baladiya}
+                              </p>
+                              <Badge variant="secondary" className="mt-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                {t("myAccount.addresses.labelMissing")}
+                              </Badge>
+                            </>
+                          )}
                           {address.isDefault && (
                             <Badge variant="secondary" className="mt-1">
                               <Star className="h-3 w-3 mr-1" />

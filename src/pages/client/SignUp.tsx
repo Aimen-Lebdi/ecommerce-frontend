@@ -31,7 +31,6 @@ export default function SignUpPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    phone: '',
     agreeToTerms: false,
     marketingEmails: true
   });
@@ -85,11 +84,6 @@ export default function SignUpPage() {
   // Email validation
   const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  // Phone validation (basic)
-  const isValidPhone = (phone) => {
-    return phone === '' || /^[\+]?[\d\s\-\(\)]{10,}$/.test(phone);
   };
 
   const handleInputChange = (name, value) => {

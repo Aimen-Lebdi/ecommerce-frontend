@@ -16,6 +16,7 @@ import {
   Home,
   CheckCircle,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import {
@@ -46,8 +47,20 @@ import {
 import {
   fetchAddresses,
   createAddress,
+  updateAddress,
 } from "../../features/addresses/addressesSlice";
-import { fetchPhones, createPhone } from "../../features/phones/phonesSlice";
+import {
+  fetchPhones,
+  createPhone,
+  updatePhone,
+} from "../../features/phones/phonesSlice";
+import {
+  formatPhoneForDisplay,
+  formatPhoneMask,
+  isCompleteLocalPhone,
+  maskPhoneChange,
+  phoneToLocalDigits,
+} from "../../utils/phoneFormat";
 import { toast } from "sonner";
 
 const Checkout = () => {
@@ -103,6 +116,21 @@ const Checkout = () => {
   const [savePhoneToProfile, setSavePhoneToProfile] = useState(false);
   const [saveAddressToProfile, setSaveAddressToProfile] = useState(false);
 
+  // Label for a brand-new entry being saved to the profile (shown only when saving)
+  const [newAddressLabel, setNewAddressLabel] = useState("");
+  const [newPhoneLabel, setNewPhoneLabel] = useState("");
+  // Inline label: required when the user selects a saved entry that lacks a label
+  const [inlineAddressLabel, setInlineAddressLabel] = useState("");
+  const [inlinePhoneLabel, setInlinePhoneLabel] = useState("");
+  // Field-level errors for the active label input (inline or save-to-profile)
+  const [labelErrors, setLabelErrors] = useState<{
+    address?: "required" | "tooLong";
+    phone?: "required" | "tooLong";
+  }>({});
+
+  // Inline error for an incomplete phone number
+  const [phoneError, setPhoneError] = useState(false);
+
   // One-shot prefill guards (avoid overriding the user after a later save)
   const prefilledAddressRef = useRef(false);
   const prefilledPhoneRef = useRef(false);
@@ -145,7 +173,10 @@ const Checkout = () => {
       const defaultPhone = phones.find((p) => p.isDefault);
       if (defaultPhone) {
         setSelectedPhoneId(defaultPhone._id);
-        setShippingAddress((prev) => ({ ...prev, phone: defaultPhone.phone }));
+        setShippingAddress((prev) => ({
+          ...prev,
+          phone: formatPhoneMask(phoneToLocalDigits(defaultPhone.phone)),
+        }));
       }
     }
   }, [phones, phonesLoading]);
@@ -190,6 +221,7 @@ const Checkout = () => {
   // Select a saved address (or "new") and reflect its values in the form
   const handleAddressSelect = (value: string) => {
     setSelectedAddressId(value);
+    setLabelErrors((prev) => ({ ...prev, address: undefined }));
     if (value === "new") {
       setShippingAddress((prev) => ({
         ...prev,
@@ -213,18 +245,25 @@ const Checkout = () => {
   // Select a saved phone (or "new") and reflect its value in the form
   const handlePhoneSelect = (value: string) => {
     setSelectedPhoneId(value);
+    setLabelErrors((prev) => ({ ...prev, phone: undefined }));
+    setPhoneError(false);
     if (value === "new") {
       setShippingAddress((prev) => ({ ...prev, phone: "" }));
       return;
     }
     const phone = phones.find((p) => p._id === value);
     if (phone) {
-      setShippingAddress((prev) => ({ ...prev, phone: phone.phone }));
+      setShippingAddress((prev) => ({
+        ...prev,
+        phone: formatPhoneMask(phoneToLocalDigits(phone.phone)),
+      }));
     }
   };
 
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
+      setLabelErrors(getLabelErrors());
+      setPhoneError(!isCompleteLocalPhone(shippingAddress.phone));
       toast.error(t('checkout.fillRequiredFields'));
       return;
     }
@@ -239,15 +278,44 @@ const Checkout = () => {
       wilaya: shippingAddress.wilaya,
       dayra: shippingAddress.dayra,
       baladiya: shippingAddress.baladiya,
-      phone: shippingAddress.phone,
+      phone: phoneToLocalDigits(shippingAddress.phone),
     };
 
     try {
+      // Persist an inline label for a selected saved address that lacked one
+      // (also unblocks the My Account hard gate).
+      if (selectedAddressId !== "new") {
+        const selectedAddress = addresses.find(
+          (a) => a._id === selectedAddressId
+        );
+        if (
+          selectedAddress &&
+          !(selectedAddress.label && selectedAddress.label.trim()) &&
+          inlineAddressLabel.trim()
+        ) {
+          try {
+            await dispatch(
+              updateAddress({
+                addressId: selectedAddressId,
+                label: inlineAddressLabel.trim(),
+              })
+            ).unwrap();
+            toast.success(t('checkout.labelSaved'));
+          } catch (saveError: any) {
+            toast.error(
+              saveError.response?.data?.message || t('checkout.labelSaveFailed')
+            );
+            console.error("Failed to save address label:", saveError);
+          }
+        }
+      }
+
       // Save a brand-new address to the profile when requested
       if (saveAddressToProfile && selectedAddressId === "new") {
         try {
           await dispatch(
             createAddress({
+              label: newAddressLabel.trim(),
               wilaya: shippingAddress.wilaya,
               dayra: shippingAddress.dayra,
               baladiya: shippingAddress.baladiya,
@@ -262,11 +330,39 @@ const Checkout = () => {
         }
       }
 
+      // Persist an inline label for a selected saved phone that lacked one
+      if (selectedPhoneId !== "new") {
+        const selectedPhone = phones.find((p) => p._id === selectedPhoneId);
+        if (
+          selectedPhone &&
+          !(selectedPhone.label && selectedPhone.label.trim()) &&
+          inlinePhoneLabel.trim()
+        ) {
+          try {
+            await dispatch(
+              updatePhone({
+                phoneId: selectedPhoneId,
+                label: inlinePhoneLabel.trim(),
+              })
+            ).unwrap();
+            toast.success(t('checkout.labelSaved'));
+          } catch (saveError: any) {
+            toast.error(
+              saveError.response?.data?.message || t('checkout.labelSaveFailed')
+            );
+            console.error("Failed to save phone label:", saveError);
+          }
+        }
+      }
+
       // Save a brand-new phone to the profile when requested
       if (savePhoneToProfile && selectedPhoneId === "new") {
         try {
           await dispatch(
-            createPhone({ phone: shippingAddress.phone })
+            createPhone({
+              phone: phoneToLocalDigits(shippingAddress.phone),
+              label: newPhoneLabel.trim(),
+            })
           ).unwrap();
         } catch (saveError: any) {
           toast.error(
@@ -298,15 +394,55 @@ const Checkout = () => {
     }
   };
 
+  // Compute label-input errors for the currently active label field:
+  // the inline prompt for a selected saved entry that lacks a label, or the
+  // label shown only when a brand-new entry is being saved to the profile.
+  const getLabelErrors = () => {
+    const errors: {
+      address?: "required" | "tooLong";
+      phone?: "required" | "tooLong";
+    } = {};
+
+    // Address label is required when the selected saved address has no label,
+    // or when a new address is being saved to the profile.
+    const selectedAddress = addresses.find((a) => a._id === selectedAddressId);
+    const needsAddressLabel =
+      (selectedAddress !== undefined &&
+        !(selectedAddress.label && selectedAddress.label.trim())) ||
+      (selectedAddressId === "new" && saveAddressToProfile);
+    if (needsAddressLabel) {
+      const addressLabel =
+        selectedAddress !== undefined ? inlineAddressLabel : newAddressLabel;
+      if (!addressLabel.trim()) errors.address = "required";
+      else if (addressLabel.trim().length > 30) errors.address = "tooLong";
+    }
+
+    // Phone label: same rules, applied to phones.
+    const selectedPhone = phones.find((p) => p._id === selectedPhoneId);
+    const needsPhoneLabel =
+      (selectedPhone !== undefined &&
+        !(selectedPhone.label && selectedPhone.label.trim())) ||
+      (selectedPhoneId === "new" && savePhoneToProfile);
+    if (needsPhoneLabel) {
+      const phoneLabel =
+        selectedPhone !== undefined ? inlinePhoneLabel : newPhoneLabel;
+      if (!phoneLabel.trim()) errors.phone = "required";
+      else if (phoneLabel.trim().length > 30) errors.phone = "tooLong";
+    }
+
+    return errors;
+  };
+
   const validateForm = () => {
-    return (
-      customerInfo.email &&
-      customerInfo.userName &&
-      shippingAddress.wilaya &&
-      shippingAddress.dayra &&
-      shippingAddress.baladiya &&
-      shippingAddress.phone
-    );
+    const baseValid =
+      Boolean(customerInfo.email) &&
+      Boolean(customerInfo.userName) &&
+      Boolean(shippingAddress.wilaya) &&
+      Boolean(shippingAddress.dayra) &&
+      Boolean(shippingAddress.baladiya) &&
+      isCompleteLocalPhone(shippingAddress.phone);
+    const labelErrors = getLabelErrors();
+    return baseValid && !labelErrors.address && !labelErrors.phone;
   };
 
   // Loading state
@@ -481,27 +617,157 @@ const Checkout = () => {
                     />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Phone Number */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  {t('checkout.phoneNumber')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Saved phone selector */}
+                <div className="space-y-3">
+                  <Label>{t('checkout.savedPhones')}</Label>
+                  <RadioGroup
+                    value={selectedPhoneId}
+                    onValueChange={handlePhoneSelect}
+                    disabled={isProcessing}
+                  >
+                    {phones.map((phone) => {
+                      const hasLabel = Boolean(
+                        phone.label && phone.label.trim()
+                      );
+                      return (
+                        <div
+                          key={phone._id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem
+                              value={phone._id}
+                              id={`phone-${phone._id}`}
+                            />
+                            <div>
+                              {hasLabel ? (
+                                <>
+                                  <Label
+                                    htmlFor={`phone-${phone._id}`}
+                                    className="font-medium"
+                                  >
+                                    {phone.label}
+                                  </Label>
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatPhoneForDisplay(phone.phone)}
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <Label
+                                    htmlFor={`phone-${phone._id}`}
+                                    className="font-medium"
+                                  >
+                                    {formatPhoneForDisplay(phone.phone)}
+                                  </Label>
+                                  <Badge variant="secondary" className="mt-1">
+                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                    {t('checkout.labelMissing')}
+                                  </Badge>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          {phone.isDefault && (
+                            <Badge variant="secondary">
+                              {t('checkout.default')}
+                            </Badge>
+                          )}
+                        </div>
+                      );
+                    })}
+                    <div className="flex items-center p-3 border rounded-lg">
+                      <RadioGroupItem value="new" id="new-phone" />
+                      <Label htmlFor="new-phone" className="font-medium ml-2">
+                        {t('checkout.newPhone')}
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {/* Inline label prompt for a selected saved phone missing a label */}
+                {selectedPhoneId !== "new" &&
+                  (() => {
+                    const selectedPhone = phones.find(
+                      (p) => p._id === selectedPhoneId
+                    );
+                    if (
+                      !selectedPhone ||
+                      (selectedPhone.label && selectedPhone.label.trim())
+                    ) {
+                      return null;
+                    }
+                    return (
+                      <div className="space-y-2 rounded-lg border border-amber-300/70 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                        <p className="text-xs text-amber-700 dark:text-amber-300">
+                          {t('checkout.labelNeededPrompt')}
+                        </p>
+                        <Label htmlFor="inline-phone-label">
+                          {t('checkout.label')} *
+                        </Label>
+                        <Input
+                          id="inline-phone-label"
+                          value={inlinePhoneLabel}
+                          onChange={(e) => setInlinePhoneLabel(e.target.value)}
+                          placeholder={t('checkout.labelPlaceholder')}
+                          maxLength={30}
+                          disabled={isProcessing}
+                          className={
+                            labelErrors.phone ? "border-destructive" : ""
+                          }
+                        />
+                        {labelErrors.phone === "required" && (
+                          <p className="text-xs text-destructive">
+                            {t('checkout.labelRequired')}
+                          </p>
+                        )}
+                        {labelErrors.phone === "tooLong" && (
+                          <p className="text-xs text-destructive">
+                            {t('checkout.labelMaxLength')}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                {/* Phone number input */}
                 <div className="space-y-2">
-                  <Label htmlFor="phone">
-                    {t('checkout.phoneNumber')} {paymentMethod === "cash" && "*"}
-                  </Label>
+                  <Label htmlFor="phone">{t('checkout.phoneNumber')} *</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="phone"
                       type="tel"
-                      className="pl-10"
+                      className={`pl-10 ${phoneError ? "border-destructive" : ""}`}
                       value={shippingAddress.phone}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        setPhoneError(false);
                         setShippingAddress((prev) => ({
                           ...prev,
-                          phone: e.target.value,
-                        }))
-                      }
+                          phone: maskPhoneChange(e.target.value),
+                        }));
+                      }}
                       placeholder={t('checkout.phonePlaceholder')}
-                      disabled={isProcessing}
+                      disabled={isProcessing || selectedPhoneId !== "new"}
                     />
                   </div>
+                  {phoneError && (
+                    <p className="text-xs text-destructive">
+                      {t('checkout.phoneInvalid')}
+                    </p>
+                  )}
                   {paymentMethod === "cash" && (
                     <p className="text-xs text-muted-foreground">
                       {t('checkout.phoneRequiredCOD')}
@@ -511,64 +777,53 @@ const Checkout = () => {
 
                 {/* Save new phone to profile (only when typing a new phone) */}
                 {selectedPhoneId === "new" && (
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      id="savePhoneToProfile"
-                      checked={savePhoneToProfile}
-                      onCheckedChange={(checked) =>
-                        setSavePhoneToProfile(checked === true)
-                      }
-                      disabled={isProcessing}
-                    />
-                    <Label
-                      htmlFor="savePhoneToProfile"
-                      className="text-sm font-normal"
-                    >
-                      {t('checkout.savePhoneToProfile')}
-                    </Label>
-                  </div>
-                )}
-
-                {/* Saved phone selector */}
-                <div className="space-y-3">
-                  <Label>{t('checkout.savedPhones')}</Label>
-                  <RadioGroup
-                    value={selectedPhoneId}
-                    onValueChange={handlePhoneSelect}
-                    disabled={isProcessing}
-                  >
-                    {phones.map((phone) => (
-                      <div
-                        key={phone._id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id="savePhoneToProfile"
+                        checked={savePhoneToProfile}
+                        onCheckedChange={(checked) =>
+                          setSavePhoneToProfile(checked === true)
+                        }
+                        disabled={isProcessing}
+                      />
+                      <Label
+                        htmlFor="savePhoneToProfile"
+                        className="text-sm font-normal"
                       >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem
-                            value={phone._id}
-                            id={`phone-${phone._id}`}
-                          />
-                          <Label
-                            htmlFor={`phone-${phone._id}`}
-                            className="font-medium"
-                          >
-                            {phone.phone}
-                          </Label>
-                        </div>
-                        {phone.isDefault && (
-                          <Badge variant="secondary">
-                            {t('checkout.default')}
-                          </Badge>
-                        )}
-                      </div>
-                    ))}
-                    <div className="flex items-center p-3 border rounded-lg">
-                      <RadioGroupItem value="new" id="new-phone" />
-                      <Label htmlFor="new-phone" className="font-medium ml-2">
-                        {t('checkout.newPhone')}
+                        {t('checkout.savePhoneToProfile')}
                       </Label>
                     </div>
-                  </RadioGroup>
-                </div>
+                    {savePhoneToProfile && (
+                      <div className="space-y-2">
+                        <Label htmlFor="new-phone-label">
+                          {t('checkout.label')} *
+                        </Label>
+                        <Input
+                          id="new-phone-label"
+                          value={newPhoneLabel}
+                          onChange={(e) => setNewPhoneLabel(e.target.value)}
+                          placeholder={t('checkout.labelPlaceholder')}
+                          maxLength={30}
+                          disabled={isProcessing}
+                          className={
+                            labelErrors.phone ? "border-destructive" : ""
+                          }
+                        />
+                        {labelErrors.phone === "required" && (
+                          <p className="text-xs text-destructive">
+                            {t('checkout.labelRequired')}
+                          </p>
+                        )}
+                        {labelErrors.phone === "tooLong" && (
+                          <p className="text-xs text-destructive">
+                            {t('checkout.labelMaxLength')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -589,31 +844,59 @@ const Checkout = () => {
                     onValueChange={handleAddressSelect}
                     disabled={isProcessing}
                   >
-                    {addresses.map((address) => (
-                      <div
-                        key={address._id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem
-                            value={address._id}
-                            id={`address-${address._id}`}
-                          />
-                          <Label
-                            htmlFor={`address-${address._id}`}
-                            className="font-medium"
-                          >
-                            {address.wilaya} - {address.dayra} -{" "}
-                            {address.baladiya}
-                          </Label>
+                    {addresses.map((address) => {
+                      const hasLabel = Boolean(
+                        address.label && address.label.trim()
+                      );
+                      return (
+                        <div
+                          key={address._id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem
+                              value={address._id}
+                              id={`address-${address._id}`}
+                            />
+                            <div>
+                              {hasLabel ? (
+                                <>
+                                  <Label
+                                    htmlFor={`address-${address._id}`}
+                                    className="font-medium"
+                                  >
+                                    {address.label}
+                                  </Label>
+                                  <p className="text-sm text-muted-foreground">
+                                    {address.wilaya} - {address.dayra} -{" "}
+                                    {address.baladiya}
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <Label
+                                    htmlFor={`address-${address._id}`}
+                                    className="font-medium"
+                                  >
+                                    {address.wilaya} - {address.dayra} -{" "}
+                                    {address.baladiya}
+                                  </Label>
+                                  <Badge variant="secondary" className="mt-1">
+                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                    {t('checkout.labelMissing')}
+                                  </Badge>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          {address.isDefault && (
+                            <Badge variant="secondary">
+                              {t('checkout.default')}
+                            </Badge>
+                          )}
                         </div>
-                        {address.isDefault && (
-                          <Badge variant="secondary">
-                            {t('checkout.default')}
-                          </Badge>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div className="flex items-center p-3 border rounded-lg">
                       <RadioGroupItem value="new" id="new-address" />
                       <Label htmlFor="new-address" className="font-medium ml-2">
@@ -622,6 +905,53 @@ const Checkout = () => {
                     </div>
                   </RadioGroup>
                 </div>
+
+                {/* Inline label prompt for a selected saved address missing a label */}
+                {selectedAddressId !== "new" &&
+                  (() => {
+                    const selectedAddress = addresses.find(
+                      (a) => a._id === selectedAddressId
+                    );
+                    if (
+                      !selectedAddress ||
+                      (selectedAddress.label && selectedAddress.label.trim())
+                    ) {
+                      return null;
+                    }
+                    return (
+                      <div className="space-y-2 rounded-lg border border-amber-300/70 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                        <p className="text-xs text-amber-700 dark:text-amber-300">
+                          {t('checkout.labelNeededPrompt')}
+                        </p>
+                        <Label htmlFor="inline-address-label">
+                          {t('checkout.label')} *
+                        </Label>
+                        <Input
+                          id="inline-address-label"
+                          value={inlineAddressLabel}
+                          onChange={(e) =>
+                            setInlineAddressLabel(e.target.value)
+                          }
+                          placeholder={t('checkout.labelPlaceholder')}
+                          maxLength={30}
+                          disabled={isProcessing}
+                          className={
+                            labelErrors.address ? "border-destructive" : ""
+                          }
+                        />
+                        {labelErrors.address === "required" && (
+                          <p className="text-xs text-destructive">
+                            {t('checkout.labelRequired')}
+                          </p>
+                        )}
+                        {labelErrors.address === "tooLong" && (
+                          <p className="text-xs text-destructive">
+                            {t('checkout.labelMaxLength')}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
@@ -670,21 +1000,51 @@ const Checkout = () => {
 
                 {/* Save new address to profile (only when typing a new address) */}
                 {selectedAddressId === "new" && (
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      id="saveAddressToProfile"
-                      checked={saveAddressToProfile}
-                      onCheckedChange={(checked) =>
-                        setSaveAddressToProfile(checked === true)
-                      }
-                      disabled={isProcessing}
-                    />
-                    <Label
-                      htmlFor="saveAddressToProfile"
-                      className="text-sm font-normal"
-                    >
-                      {t('checkout.saveAddressToProfile')}
-                    </Label>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id="saveAddressToProfile"
+                        checked={saveAddressToProfile}
+                        onCheckedChange={(checked) =>
+                          setSaveAddressToProfile(checked === true)
+                        }
+                        disabled={isProcessing}
+                      />
+                      <Label
+                        htmlFor="saveAddressToProfile"
+                        className="text-sm font-normal"
+                      >
+                        {t('checkout.saveAddressToProfile')}
+                      </Label>
+                    </div>
+                    {saveAddressToProfile && (
+                      <div className="space-y-2">
+                        <Label htmlFor="new-address-label">
+                          {t('checkout.label')} *
+                        </Label>
+                        <Input
+                          id="new-address-label"
+                          value={newAddressLabel}
+                          onChange={(e) => setNewAddressLabel(e.target.value)}
+                          placeholder={t('checkout.labelPlaceholder')}
+                          maxLength={30}
+                          disabled={isProcessing}
+                          className={
+                            labelErrors.address ? "border-destructive" : ""
+                          }
+                        />
+                        {labelErrors.address === "required" && (
+                          <p className="text-xs text-destructive">
+                            {t('checkout.labelRequired')}
+                          </p>
+                        )}
+                        {labelErrors.address === "tooLong" && (
+                          <p className="text-xs text-destructive">
+                            {t('checkout.labelMaxLength')}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>

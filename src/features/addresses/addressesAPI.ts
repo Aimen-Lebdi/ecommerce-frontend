@@ -3,6 +3,7 @@ import axiosInstance from "../../utils/axiosInstance";
 // Interface for a saved address
 export interface Address {
   _id: string;
+  label: string;
   wilaya: string;
   dayra: string;
   baladiya: string;
@@ -25,6 +26,7 @@ export const fetchAddressesAPI = async (): Promise<AddressResponse> => {
 
 // Add a new address to the user's address book
 export const addAddressAPI = async (addressData: {
+  label: string;
   wilaya: string;
   dayra: string;
   baladiya: string;
@@ -37,6 +39,7 @@ export const addAddressAPI = async (addressData: {
 export const updateAddressAPI = async (
   addressId: string,
   addressData: {
+    label?: string;
     wilaya?: string;
     dayra?: string;
     baladiya?: string;

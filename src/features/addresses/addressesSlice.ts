@@ -16,6 +16,7 @@ import {
 
 // Interface for the create-address payload
 export interface AddAddressData {
+  label: string;
   wilaya: string;
   dayra: string;
   baladiya: string;
@@ -24,6 +25,7 @@ export interface AddAddressData {
 // Interface for the update-address payload
 export interface UpdateAddressData {
   addressId: string;
+  label?: string;
   wilaya?: string;
   dayra?: string;
   baladiya?: string;

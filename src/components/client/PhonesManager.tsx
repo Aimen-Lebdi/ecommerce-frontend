@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Phone, Plus, Edit, Trash2, Star, Loader2, X } from "lucide-react";
+import { Phone, Plus, Edit, Trash2, Star, Loader2, X, AlertTriangle } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchPhones,
@@ -10,6 +10,12 @@ import {
   setDefaultPhone,
 } from "../../features/phones/phonesSlice";
 import type { Phone as SavedPhone } from "../../features/phones/phonesAPI";
+import {
+  formatPhoneForDisplay,
+  isCompleteLocalPhone,
+  maskPhoneChange,
+  phoneToLocalDigits,
+} from "../../utils/phoneFormat";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
@@ -38,37 +44,60 @@ const PhonesManager = () => {
   // Add-new form state
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newPhone, setNewPhone] = useState("");
+  const [newPhoneLabel, setNewPhoneLabel] = useState("");
 
   // Edit-in-place state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPhone, setEditPhone] = useState("");
+  const [editPhoneLabel, setEditPhoneLabel] = useState("");
 
   // Validation errors
-  const [error, setError] = useState(false);
+  const [errors, setErrors] = useState<{
+    phone?: boolean;
+    label?: boolean;
+    labelTooLong?: boolean;
+  }>({});
 
   useEffect(() => {
     dispatch(fetchPhones());
   }, [dispatch]);
 
-  const validate = (phone: string) => {
-    const valid = phone.trim().length > 0;
-    setError(!valid);
-    return valid;
+  const validate = (phone: string, label: string) => {
+    const nextErrors = {
+      phone: !isCompleteLocalPhone(phone),
+      label: label.trim().length === 0,
+      labelTooLong: label.trim().length > 30,
+    };
+    setErrors(nextErrors);
+    return !nextErrors.phone && !nextErrors.label && !nextErrors.labelTooLong;
   };
 
   const resetAddForm = () => {
     setNewPhone("");
+    setNewPhoneLabel("");
     setIsAddingNew(false);
-    setError(false);
+    setErrors({});
   };
 
   const handleAdd = async () => {
-    if (!validate(newPhone)) {
+    if (!validate(newPhone, newPhoneLabel)) {
       toast.error(t("myAccount.phones.required"));
       return;
     }
+    // Case-insensitive label uniqueness (backend stays authoritative).
+    const label = newPhoneLabel.trim();
+    if (
+      phones.some(
+        (p) => p.label && p.label.toLowerCase() === label.toLowerCase()
+      )
+    ) {
+      toast.error(t("myAccount.phones.labelDuplicate"));
+      return;
+    }
     try {
-      await dispatch(createPhone({ phone: newPhone.trim() })).unwrap();
+      await dispatch(
+        createPhone({ phone: phoneToLocalDigits(newPhone), label })
+      ).unwrap();
       toast.success(t("myAccount.phones.added"));
       resetAddForm();
     } catch (err) {
@@ -81,23 +110,42 @@ const PhonesManager = () => {
   const startEdit = (phone: SavedPhone) => {
     setEditingId(phone._id);
     setEditPhone(phone.phone);
-    setError(false);
+    setEditPhoneLabel(phone.label || "");
+    setErrors({});
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditPhone("");
-    setError(false);
+    setEditPhoneLabel("");
+    setErrors({});
   };
 
   const handleUpdate = async () => {
-    if (!editingId || !validate(editPhone)) {
+    if (!editingId || !validate(editPhone, editPhoneLabel)) {
       toast.error(t("myAccount.phones.required"));
+      return;
+    }
+    // Case-insensitive uniqueness excluding the entry being edited.
+    const label = editPhoneLabel.trim();
+    if (
+      phones.some(
+        (p) =>
+          p._id !== editingId &&
+          p.label &&
+          p.label.toLowerCase() === label.toLowerCase()
+      )
+    ) {
+      toast.error(t("myAccount.phones.labelDuplicate"));
       return;
     }
     try {
       await dispatch(
-        updatePhone({ phoneId: editingId, phone: editPhone.trim() })
+        updatePhone({
+          phoneId: editingId,
+          phone: phoneToLocalDigits(editPhone),
+          label,
+        })
       ).unwrap();
       toast.success(t("myAccount.phones.updated"));
       cancelEdit();
@@ -131,28 +179,67 @@ const PhonesManager = () => {
     }
   };
 
-  const renderPhoneInput = (
-    value: string,
-    onChange: (value: string) => void,
-    id: string,
+  // Hard gate: block adding new entries while any entry lacks a label.
+  // Editing stays allowed (the fix path) and deleting stays allowed (escape hatch).
+  const entriesNeedingLabels = phones.filter(
+    (p) => !p.label || !p.label.trim()
+  ).length;
+  const canAddNew = entriesNeedingLabels === 0;
+
+  const renderPhoneFields = (
+    phone: string,
+    label: string,
+    onPhoneChange: (value: string) => void,
+    onLabelChange: (value: string) => void,
+    idPrefix: string,
     disabled: boolean
   ) => (
-    <div className="space-y-2 max-w-sm">
-      <Label htmlFor={id}>{t("myAccount.phones.phone")} *</Label>
-      <Input
-        id={id}
-        type="tel"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="+213 5 55 12 34 56"
-        disabled={disabled}
-        className={error ? "border-destructive" : ""}
-      />
-      {error && (
-        <p className="text-xs text-destructive">
-          {t("myAccount.phones.required")}
-        </p>
-      )}
+    <div className="space-y-4 max-w-sm">
+      <div className="space-y-2">
+        <Label htmlFor={`${idPrefix}-label`}>
+          {t("myAccount.phones.label")} *
+        </Label>
+        <Input
+          id={`${idPrefix}-label`}
+          value={label}
+          onChange={(e) => onLabelChange(e.target.value)}
+          placeholder={t("myAccount.phones.labelPlaceholder")}
+          maxLength={30}
+          disabled={disabled}
+          className={
+            errors.label || errors.labelTooLong ? "border-destructive" : ""
+          }
+        />
+        {errors.label && (
+          <p className="text-xs text-destructive">
+            {t("myAccount.phones.labelRequired")}
+          </p>
+        )}
+        {errors.labelTooLong && (
+          <p className="text-xs text-destructive">
+            {t("myAccount.phones.labelMaxLength")}
+          </p>
+        )}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor={`${idPrefix}-phone`}>
+          {t("myAccount.phones.phone")} *
+        </Label>
+        <Input
+          id={`${idPrefix}-phone`}
+          type="tel"
+          value={phone}
+          onChange={(e) => onPhoneChange(maskPhoneChange(e.target.value))}
+          placeholder={t("myAccount.phones.phonePlaceholder")}
+          disabled={disabled}
+          className={errors.phone ? "border-destructive" : ""}
+        />
+        {errors.phone && (
+          <p className="text-xs text-destructive">
+            {t("myAccount.phones.phoneInvalid")}
+          </p>
+        )}
+      </div>
     </div>
   );
 
@@ -169,6 +256,10 @@ const PhonesManager = () => {
               variant="outline"
               size="sm"
               onClick={() => setIsAddingNew(true)}
+              disabled={!canAddNew}
+              title={
+                canAddNew ? undefined : t("myAccount.phones.labelsNeededHint")
+              }
             >
               <Plus className="h-4 w-4 mr-2" />
               {t("myAccount.phones.addNew")}
@@ -183,12 +274,31 @@ const PhonesManager = () => {
           </div>
         ) : (
           <>
+            {/* Hard-gate banner: some entries are missing labels */}
+            {entriesNeedingLabels > 0 && (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-300/70 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-medium">
+                    {t("myAccount.phones.labelsNeeded", {
+                      count: entriesNeedingLabels,
+                    })}
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    {t("myAccount.phones.labelsNeededHint")}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Add-new form */}
             {isAddingNew && (
               <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
-                {renderPhoneInput(
+                {renderPhoneFields(
                   newPhone,
+                  newPhoneLabel,
                   setNewPhone,
+                  setNewPhoneLabel,
                   "phone-new",
                   isAdding
                 )}
@@ -224,9 +334,11 @@ const PhonesManager = () => {
                       key={phone._id}
                       className="border rounded-lg p-4 space-y-4 bg-muted/30"
                     >
-                      {renderPhoneInput(
+                      {renderPhoneFields(
                         editPhone,
+                        editPhoneLabel,
                         setEditPhone,
+                        setEditPhoneLabel,
                         "phone-edit",
                         isUpdating
                       )}
@@ -255,9 +367,26 @@ const PhonesManager = () => {
                       <div className="flex items-start space-x-3">
                         <Phone className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                         <div>
-                          <p className="font-medium text-sm sm:text-base">
-                            {phone.phone}
-                          </p>
+                          {phone.label && phone.label.trim() ? (
+                            <>
+                              <p className="font-medium text-sm sm:text-base">
+                                {phone.label}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatPhoneForDisplay(phone.phone)}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="font-medium text-sm sm:text-base">
+                                {formatPhoneForDisplay(phone.phone)}
+                              </p>
+                              <Badge variant="secondary" className="mt-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                {t("myAccount.phones.labelMissing")}
+                              </Badge>
+                            </>
+                          )}
                           {phone.isDefault && (
                             <Badge variant="secondary" className="mt-1">
                               <Star className="h-3 w-3 mr-1" />

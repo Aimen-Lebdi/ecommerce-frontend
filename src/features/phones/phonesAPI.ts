@@ -3,6 +3,7 @@ import axiosInstance from "../../utils/axiosInstance";
 // Interface for a saved phone number
 export interface Phone {
   _id: string;
+  label: string;
   phone: string;
   isDefault: boolean;
 }
@@ -22,15 +23,18 @@ export const fetchPhonesAPI = async (): Promise<PhoneResponse> => {
 };
 
 // Add a new phone number to the user's phone list
-export const addPhoneAPI = async (phone: string): Promise<PhoneResponse> => {
-  const response = await axiosInstance.post("/api/phones", { phone });
+export const addPhoneAPI = async (phoneData: {
+  phone: string;
+  label: string;
+}): Promise<PhoneResponse> => {
+  const response = await axiosInstance.post("/api/phones", phoneData);
   return response.data;
 };
 
 // Update an existing phone number
 export const updatePhoneAPI = async (
   phoneId: string,
-  phoneData: { phone?: string; isDefault?: boolean }
+  phoneData: { phone?: string; label?: string; isDefault?: boolean }
 ): Promise<PhoneResponse> => {
   const response = await axiosInstance.put(`/api/phones/${phoneId}`, phoneData);
   return response.data;
