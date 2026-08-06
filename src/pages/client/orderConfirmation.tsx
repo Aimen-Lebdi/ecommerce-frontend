@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Check,
@@ -19,6 +19,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   getOrder,
+  getOrderBySession,
   clearError,
 } from "../../features/orders/ordersSlice";
 import { Button } from "../../components/ui/button";
@@ -34,6 +35,11 @@ const OrderConfirmationPage = () => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
+  // M2: Stripe redirects here with ?session_id=... after a successful card
+  // payment. We poll until the webhook creates the order.
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+
   const { currentOrder, loadingOrder, orderError } = useAppSelector(
     (state) => state.orders
   );
@@ -44,6 +50,38 @@ const OrderConfirmationPage = () => {
       dispatch(getOrder(id));
     }
   }, [id, dispatch]);
+
+  // M2: Poll getOrderBySession every 2s (timeout ~30s) while the checkout
+  // webhook creates the order. Keep /:id direct path for cash orders.
+  useEffect(() => {
+    if (!sessionId) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 15; // 15 * 2s = 30s timeout
+    const POLL_INTERVAL_MS = 2000;
+
+    const poll = async () => {
+      try {
+        await dispatch(getOrderBySession(sessionId)).unwrap();
+      } catch (err) {
+        if (cancelled) return;
+        attempts += 1;
+        if (attempts >= MAX_ATTEMPTS) {
+          toast.error(t("orderConfirmation.loading.timeout"));
+          navigate("/checkout");
+          return;
+        }
+        window.setTimeout(poll, POLL_INTERVAL_MS);
+      }
+    };
+
+    poll();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, dispatch, navigate, t]);
 
   useEffect(() => {
     if (orderError) {
@@ -59,7 +97,11 @@ const OrderConfirmationPage = () => {
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
           <p className="text-gray-600">
-            {t("orderConfirmation.loading.message")}
+            {t(
+              sessionId
+                ? "orderConfirmation.loading.processing"
+                : "orderConfirmation.loading.message"
+            )}
           </p>
         </div>
       </div>

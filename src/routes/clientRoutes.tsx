@@ -42,6 +42,7 @@ const UserRoutes = {
         { path: "cart", element: <Cart /> },
         { path: "/checkout", element: <Checkout /> },
         { path: "/order-confirmation/:id", element: <OrderConfirmationPage /> },
+        { path: "/order-confirmation", element: <OrderConfirmationPage /> },
         { path: "/orders/:id/tracking", element: <OrderTracking /> },
         { path: "my-account", element: <MyAccountDashboard /> },
       ],

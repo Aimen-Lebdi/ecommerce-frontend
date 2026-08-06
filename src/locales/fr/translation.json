@@ -328,7 +328,9 @@
   },
   "orderConfirmation": {
     "loading": {
-      "message": "Chargement de votre commande..."
+      "message": "Chargement de votre commande...",
+      "processing": "Confirmation de votre paiement, veuillez patienter...",
+      "timeout": "Nous confirmons encore votre paiement. Si cela prend trop de temps, vérifiez vos commandes."
     },
     "toasts": {
       "invoiceSuccess": "Facture téléchargée avec succès !",

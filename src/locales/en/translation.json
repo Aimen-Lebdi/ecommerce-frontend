@@ -328,7 +328,9 @@
   },
   "orderConfirmation": {
     "loading": {
-      "message": "Loading your order..."
+      "message": "Loading your order...",
+      "processing": "Confirming your payment, please wait...",
+      "timeout": "We're still confirming your payment. If this takes too long, please check your orders."
     },
     "toasts": {
       "invoiceSuccess": "Invoice downloaded successfully!",

@@ -469,6 +469,20 @@ const ordersSlice = createSlice({
         state.loadingOrder = false;
         state.orderError = action.payload || "Failed to fetch order";
       })
+      // Get order by Stripe session (M2: card flow confirmation polling)
+      .addCase(getOrderBySession.pending, (state) => {
+        state.loadingOrder = true;
+        state.orderError = null;
+      })
+      .addCase(getOrderBySession.fulfilled, (state, action) => {
+        state.loadingOrder = false;
+        state.currentOrder = action.payload;
+      })
+      // NOTE: rejected intentionally does NOT set orderError — a 404 is
+      // expected while the checkout webhook is still creating the order.
+      .addCase(getOrderBySession.rejected, (state) => {
+        state.loadingOrder = false;
+      })
       // Create cash order
       .addCase(createCashOrder.pending, (state) => {
         state.isCreatingOrder = true;
