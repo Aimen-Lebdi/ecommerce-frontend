@@ -30,6 +30,7 @@ import {
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
+import AddressCascadeFields from "./AddressCascadeFields";
 
 // Local form shape (no _id / isDefault)
 interface AddressForm {
@@ -251,56 +252,17 @@ const AddressBook = () => {
           </p>
         )}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="addr-wilaya">{t("checkout.wilaya")} *</Label>
-          <Input
-            id="addr-wilaya"
-            value={form.wilaya}
-            onChange={(e) => onChange("wilaya", e.target.value)}
-            placeholder={t("checkout.wilayaPlaceholder")}
-            disabled={disabled}
-            className={errors.wilaya ? "border-destructive" : ""}
-          />
-          {errors.wilaya && (
-            <p className="text-xs text-destructive">
-              {t("myAccount.addresses.required")}
-            </p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="addr-dayra">{t("checkout.dayra")} *</Label>
-          <Input
-            id="addr-dayra"
-            value={form.dayra}
-            onChange={(e) => onChange("dayra", e.target.value)}
-            placeholder={t("checkout.dayraPlaceholder")}
-            disabled={disabled}
-            className={errors.dayra ? "border-destructive" : ""}
-          />
-          {errors.dayra && (
-            <p className="text-xs text-destructive">
-              {t("myAccount.addresses.required")}
-            </p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="addr-baladiya">{t("checkout.baladiya")} *</Label>
-          <Input
-            id="addr-baladiya"
-            value={form.baladiya}
-            onChange={(e) => onChange("baladiya", e.target.value)}
-            placeholder={t("checkout.baladiyaPlaceholder")}
-            disabled={disabled}
-            className={errors.baladiya ? "border-destructive" : ""}
-          />
-          {errors.baladiya && (
-            <p className="text-xs text-destructive">
-              {t("myAccount.addresses.required")}
-            </p>
-          )}
-        </div>
-      </div>
+      <AddressCascadeFields
+        value={{
+          wilaya: form.wilaya,
+          dayra: form.dayra,
+          baladiya: form.baladiya,
+        }}
+        onChange={onChange}
+        disabled={disabled}
+        errors={errors}
+        idPrefix="addr"
+      />
     </div>
   );
 

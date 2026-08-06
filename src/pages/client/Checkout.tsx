@@ -28,6 +28,7 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Badge } from "../../components/ui/badge";
+import AddressCascadeFields from "../../components/client/AddressCascadeFields";
 import { Separator } from "../../components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Checkbox } from "../../components/ui/checkbox";
@@ -953,50 +954,18 @@ const Checkout = () => {
                     );
                   })()}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="wilaya">{t('checkout.wilaya')} *</Label>
-                    <Input
-                      value={shippingAddress.wilaya}
-                      onChange={(e) =>
-                        setShippingAddress((prev) => ({
-                          ...prev,
-                          wilaya: e.target.value,
-                        }))
-                      }
-                      placeholder={t('checkout.wilayaPlaceholder')}
-                      disabled={isProcessing || selectedAddressId !== "new"}
-                    ></Input>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dayra">{t('checkout.dayra')} *</Label>
-                    <Input
-                      value={shippingAddress.dayra}
-                      onChange={(e) =>
-                        setShippingAddress((prev) => ({
-                          ...prev,
-                          dayra: e.target.value,
-                        }))
-                      }
-                      placeholder={t('checkout.dayraPlaceholder')}
-                      disabled={isProcessing || selectedAddressId !== "new"}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="baladiya">{t('checkout.baladiya')} *</Label>
-                    <Input
-                      value={shippingAddress.baladiya}
-                      onChange={(e) =>
-                        setShippingAddress((prev) => ({
-                          ...prev,
-                          baladiya: e.target.value,
-                        }))
-                      }
-                      placeholder={t('checkout.baladiyaPlaceholder')}
-                      disabled={isProcessing || selectedAddressId !== "new"}
-                    />
-                  </div>
-                </div>
+                <AddressCascadeFields
+                  value={{
+                    wilaya: shippingAddress.wilaya,
+                    dayra: shippingAddress.dayra,
+                    baladiya: shippingAddress.baladiya,
+                  }}
+                  onChange={(field, value) =>
+                    setShippingAddress((prev) => ({ ...prev, [field]: value }))
+                  }
+                  disabled={isProcessing || selectedAddressId !== "new"}
+                  idPrefix="co"
+                />
 
                 {/* Save new address to profile (only when typing a new address) */}
                 {selectedAddressId === "new" && (
