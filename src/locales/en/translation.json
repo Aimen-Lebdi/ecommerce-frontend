@@ -1291,7 +1291,16 @@
       "passwordsDontMatch": "Passwords do not match",
       "roleRequired": "Role is required",
       "imageRequired": "User image is required"
-    }
+    },
+    "phones": {
+      "title": "Phones",
+      "empty": "No saved phones"
+    },
+    "addresses": {
+      "title": "Addresses",
+      "empty": "No saved addresses"
+    },
+    "default": "Default"
   },
   "advancedFilter": {
     "trigger": "Advanced Filters",

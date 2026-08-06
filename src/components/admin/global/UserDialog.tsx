@@ -2,6 +2,7 @@
 import * as React from "react";
 import { useTranslation } from 'react-i18next';
 import {
+  IconChevronDown,
   IconCloudUpload,
   IconPlus,
   IconX,
@@ -26,6 +27,15 @@ import {
   SelectContent,
   SelectItem,
 } from "../../ui/select";
+import { Badge } from "../../ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../ui/collapsible";
+import { Separator } from "../../ui/separator";
+import type { Address } from "../../../features/addresses/addressesAPI";
+import type { Phone } from "../../../features/phones/phonesAPI";
 
 type Errors = {
   name?: string;
@@ -45,6 +55,8 @@ interface User {
   image?: string;
   createdAt: string;
   updatedAt?: string;
+  phones?: Phone[];
+  addresses?: Address[];
 }
 
 interface UserDialogProps {
@@ -95,6 +107,18 @@ export function UserDialog({
   const [errors, setErrors] = React.useState<Errors>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  // Read-only collapsibles (edit mode only)
+  const [phonesOpen, setPhonesOpen] = React.useState(false);
+  const [addressesOpen, setAddressesOpen] = React.useState(false);
+
+  // Default item first, then the rest in insertion order
+  const phones = [...(existingData?.phones ?? [])].sort(
+    (a, b) => Number(b.isDefault) - Number(a.isDefault)
+  );
+  const addresses = [...(existingData?.addresses ?? [])].sort(
+    (a, b) => Number(b.isDefault) - Number(a.isDefault)
+  );
+
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
 
@@ -112,6 +136,9 @@ export function UserDialog({
       setPassword("");
       setConfirmPassword("");
       setImageRemoved(false);
+      // Reset read-only collapsibles so a stale open state doesn't carry over
+      setPhonesOpen(false);
+      setAddressesOpen(false);
     } else if (mode === "add" && open) {
       resetForm();
     }
@@ -476,6 +503,98 @@ export function UserDialog({
           )}
         </div>
       </div>
+
+      {mode === "edit" && (
+        <div className="grid gap-4">
+          {/* Phones (read-only) */}
+          <Collapsible open={phonesOpen} onOpenChange={setPhonesOpen}>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex w-full items-center justify-between rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
+              >
+                {t('userDialog.phones.title')}
+                <IconChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    phonesOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="py-2">
+              {phones.length === 0 ? (
+                <p className="px-1 text-sm text-muted-foreground">
+                  {t('userDialog.phones.empty')}
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {phones.map((p) => (
+                    <li
+                      key={p._id}
+                      className="flex items-center justify-between rounded-md bg-muted px-3 py-2"
+                    >
+                      <span className="text-sm">
+                        {p.label}: {p.phone}
+                      </span>
+                      {p.isDefault && (
+                        <Badge variant="secondary">
+                          {t('userDialog.default')}
+                        </Badge>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Separator />
+
+          {/* Addresses (read-only) */}
+          <Collapsible open={addressesOpen} onOpenChange={setAddressesOpen}>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex w-full items-center justify-between rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
+              >
+                {t('userDialog.addresses.title')}
+                <IconChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    addressesOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="py-2">
+              {addresses.length === 0 ? (
+                <p className="px-1 text-sm text-muted-foreground">
+                  {t('userDialog.addresses.empty')}
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {addresses.map((a) => (
+                    <li
+                      key={a._id}
+                      className="flex items-center justify-between rounded-md bg-muted px-3 py-2"
+                    >
+                      <span className="text-sm">
+                        {a.label}: {a.wilaya}
+                        {a.dayra ? ` / ${a.dayra}` : ""}
+                        {a.baladiya ? ` / ${a.baladiya}` : ""}
+                      </span>
+                      {a.isDefault && (
+                        <Badge variant="secondary">
+                          {t('userDialog.default')}
+                        </Badge>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      )}
 
       <DialogFooter>
         <Button onClick={handleSave} disabled={isDisabled}>

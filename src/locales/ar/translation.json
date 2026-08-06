@@ -1291,7 +1291,16 @@
       "passwordsDontMatch": "كلمات المرور غير متطابقة",
       "roleRequired": "الدور مطلوب",
       "imageRequired": "صورة المستخدم مطلوبة"
-    }
+    },
+    "phones": {
+      "title": "الهواتف",
+      "empty": "لا توجد هواتف محفوظة"
+    },
+    "addresses": {
+      "title": "العناوين",
+      "empty": "لا توجد عناوين محفوظة"
+    },
+    "default": "الافتراضي"
   },
   "advancedFilter": {
     "trigger": "فلاتر متقدمة",

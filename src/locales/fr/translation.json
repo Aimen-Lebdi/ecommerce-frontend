@@ -1291,7 +1291,16 @@
       "passwordsDontMatch": "Les mots de passe ne correspondent pas",
       "roleRequired": "Le rôle est requis",
       "imageRequired": "La photo de profil est requise"
-    }
+    },
+    "phones": {
+      "title": "Téléphones",
+      "empty": "Aucun téléphone enregistré"
+    },
+    "addresses": {
+      "title": "Adresses",
+      "empty": "Aucune adresse enregistrée"
+    },
+    "default": "Par défaut"
   },
   "advancedFilter": {
     "trigger": "Filtres Avancés",
