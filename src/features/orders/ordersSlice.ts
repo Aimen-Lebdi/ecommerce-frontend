@@ -37,7 +37,7 @@ export interface Order {
     _id: string;
     product: {
       _id: string;
-      title: string;
+      name: string;
       mainImage?: string;
     };
     quantity: number;
@@ -224,7 +224,6 @@ export const getOrder = createAsyncThunk<
 >("orders/getOrder", async (id, { rejectWithValue }) => {
   try {
     const data = await getOrderAPI(id);
-    console.log(data);
     return data;
   } catch (err: any) {
     return rejectWithValue(err.response?.data?.message || err.message);
@@ -462,7 +461,6 @@ const ordersSlice = createSlice({
       })
       .addCase(getOrder.fulfilled, (state, action) => {
         state.loadingOrder = false;
-        console.log(action);
         state.currentOrder = action.payload;
       })
       .addCase(getOrder.rejected, (state, action) => {

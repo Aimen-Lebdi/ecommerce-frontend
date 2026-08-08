@@ -143,7 +143,7 @@ function OrderDetailsDialog({
   };
 
   const canConfirmCash = order.paymentMethodType === "cash" && order.deliveryStatus === "pending";
-  const canConfirmCard = order.paymentMethodType === "card" && order.paymentStatus === "authorized";
+  const canConfirmCard = order.paymentMethodType === "card" && order.deliveryStatus === "pending" && ["authorized", "confirmed"].includes(order.paymentStatus);
   const canCancel = ["pending", "confirmed"].includes(order.deliveryStatus);
   const canShip = order.deliveryStatus === "confirmed";
   const canSimulate = order.trackingNumber && ["shipped", "in_transit"].includes(order.deliveryStatus);
@@ -243,12 +243,15 @@ function OrderDetailsDialog({
                 {order.cartItems.map((item) => (
                   <div key={item._id} className="flex items-center gap-4 p-3 border rounded-lg">
                     <img 
-                      src={item.product.imageCover} 
-                      alt={item.product.title}
+                      src={item.product.mainImage} 
+                      alt={item.product.name}
                       className="w-16 h-16 object-cover rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder.png";
+                      }}
                     />
                     <div className="flex-1">
-                      <p className="font-medium">{item.product.title}</p>
+                      <p className="font-medium">{item.product.name}</p>
                       {item.color && (
                         <p className="text-sm text-muted-foreground">{t('orders.details.color')}: {item.color}</p>
                       )}

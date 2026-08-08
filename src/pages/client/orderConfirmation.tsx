@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -43,7 +43,6 @@ const OrderConfirmationPage = () => {
   const { currentOrder, loadingOrder, orderError } = useAppSelector(
     (state) => state.orders
   );
-  const [emailSent] = useState(true);
 
   useEffect(() => {
     if (id) {
@@ -244,25 +243,6 @@ const OrderConfirmationPage = () => {
           </div>
         </div>
 
-        {emailSent && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-6 flex items-start space-x-3">
-            <Mail className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-blue-800 font-medium text-sm sm:text-base">
-                {t("orderConfirmation.emailBanner.title")}
-              </p>
-              <p
-                className="text-blue-700 text-xs sm:text-sm break-words"
-                dangerouslySetInnerHTML={{
-                  __html: t("orderConfirmation.emailBanner.confirmationSentTo", {
-                    email: order.user.email,
-                  }),
-                }}
-              />
-            </div>
-          </div>
-        )}
-
         {order.paymentMethodType === "cash" && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-6 flex items-start space-x-3">
             <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
@@ -299,12 +279,15 @@ const OrderConfirmationPage = () => {
                   >
                     <img
                       src={item.product.mainImage}
-                      alt={item.product.title}
+                      alt={item.product.name}
                       className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg flex-shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder.png";
+                      }}
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
-                        {item.product.title}
+                        {item.product.name}
                       </h3>
                       {item.color && (
                         <p className="text-xs sm:text-sm text-gray-600">

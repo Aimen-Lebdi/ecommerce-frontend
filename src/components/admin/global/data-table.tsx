@@ -140,7 +140,8 @@ export interface DataTableProps<TData extends BaseEntity> {
   data: TData[];
   columns: ColumnDef<TData>[];
   serverSide?: boolean;
-  pagination?: PaginationMeta;
+  // Accept null too — all admin slices initialise pagination as null.
+  pagination?: PaginationMeta | null;
   loading?: boolean;
   error?: string | null;
   onQueryParamsChange?: (params: ServerQueryParams) => void;
