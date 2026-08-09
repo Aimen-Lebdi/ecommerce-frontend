@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -44,14 +44,22 @@ const OrderConfirmationPage = () => {
     (state) => state.orders
   );
 
+  // M3: When the Stripe webhook hasn't created the order within the poll
+  // window, show an inline "payment still processing" state instead of
+  // bouncing the user back to /checkout.
+  const [timedOut, setTimedOut] = useState(false);
+  // Incrementing re-runs the session poll (used by the timeout "Try again").
+  const [retryKey, setRetryKey] = useState(0);
+
   useEffect(() => {
     if (id) {
       dispatch(getOrder(id));
     }
   }, [id, dispatch]);
 
-  // M2: Poll getOrderBySession every 2s (timeout ~30s) while the checkout
-  // webhook creates the order. Keep /:id direct path for cash orders.
+  // M2/M3: Poll getOrderBySession every 2s (timeout ~30s) while the checkout
+  // webhook creates the order. Keep /:id direct path for cash orders. On
+  // timeout we set `timedOut` and render the inline retry UI (no redirect).
   useEffect(() => {
     if (!sessionId) return;
 
@@ -67,8 +75,7 @@ const OrderConfirmationPage = () => {
         if (cancelled) return;
         attempts += 1;
         if (attempts >= MAX_ATTEMPTS) {
-          toast.error(t("orderConfirmation.loading.timeout"));
-          navigate("/checkout");
+          setTimedOut(true);
           return;
         }
         window.setTimeout(poll, POLL_INTERVAL_MS);
@@ -80,7 +87,22 @@ const OrderConfirmationPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, dispatch, navigate, t]);
+  }, [sessionId, dispatch, retryKey]);
+
+  // M3: Once the order is found via the Stripe session, replace the URL with
+  // the canonical /order-confirmation/<id> (drops ?session_id=) so a refresh
+  // loads the order directly instead of re-polling a stale session.
+  useEffect(() => {
+    if (currentOrder && sessionId) {
+      navigate(`/order-confirmation/${currentOrder._id}`, { replace: true });
+    }
+  }, [currentOrder, sessionId, navigate]);
+
+  // Re-run the session poll from the inline timeout UI.
+  const handleRetry = () => {
+    setTimedOut(false);
+    setRetryKey((key) => key + 1);
+  };
 
   useEffect(() => {
     if (orderError) {
@@ -89,6 +111,39 @@ const OrderConfirmationPage = () => {
       navigate("/checkout");
     }
   }, [orderError, dispatch, navigate]);
+
+  // M3: Inline "payment still processing" state shown after the poll window
+  // expires — lets the user retry or go back without losing their session.
+  if (timedOut) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-sm border p-6 sm:p-8 text-center">
+          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-6 h-6 text-amber-600" />
+          </div>
+          <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+            {t("orderConfirmation.timeout.title")}
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 mb-6">
+            {t("orderConfirmation.timeout.body")}
+          </p>
+          <div className="flex flex-col gap-3">
+            <Button onClick={handleRetry}>
+              {t("orderConfirmation.timeout.retry")}
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/checkout">
+                {t("orderConfirmation.timeout.backToCheckout")}
+              </Link>
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500 mt-6">
+            {t("orderConfirmation.timeout.supportNote")}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loadingOrder || !currentOrder) {
     return (

@@ -44,6 +44,7 @@ import {
   createCheckoutSession,
   clearError,
   clearCheckoutSession,
+  clearCurrentOrder,
 } from "../../features/orders/ordersSlice";
 import {
   fetchAddresses,
@@ -197,14 +198,33 @@ const Checkout = () => {
     }
   }, [checkoutSession]);
 
+  // M4: Track the last order id we navigated to. The success effect must only
+  // fire for a NEW order — without this guard, a stale `currentOrder` left
+  // over from a previous visit re-fires on mount and yanks the user back to
+  // an old confirmation page.
+  const lastNavigatedOrderIdRef = useRef<string | null>(null);
+
   // Handle successful order creation
   useEffect(() => {
-    if (currentOrder && !isCreatingOrder) {
+    if (
+      currentOrder &&
+      !isCreatingOrder &&
+      currentOrder._id !== lastNavigatedOrderIdRef.current
+    ) {
+      lastNavigatedOrderIdRef.current = currentOrder._id;
       toast.success(t('checkout.orderPlacedSuccess'));
       navigate(`/order-confirmation/${currentOrder._id}`);
       dispatch(clearCheckoutSession());
     }
   }, [currentOrder, isCreatingOrder, navigate, dispatch, t]);
+
+  // M4: Clear the stale currentOrder when leaving /checkout so the next visit
+  // starts clean (no redirect back to a previously placed order).
+  useEffect(() => {
+    return () => {
+      dispatch(clearCurrentOrder());
+    };
+  }, [dispatch]);
 
   // Show errors
   useEffect(() => {

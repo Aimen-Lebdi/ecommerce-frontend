@@ -336,6 +336,13 @@
       "invoiceSuccess": "Facture téléchargée avec succès !",
       "invoiceError": "Échec du téléchargement de la facture."
     },
+    "timeout": {
+      "title": "Paiement toujours en cours",
+      "body": "Votre paiement a peut-être réussi, mais nous n'avons pas encore pu confirmer votre commande. Veuillez réessayer dans un instant.",
+      "retry": "Réessayer",
+      "backToCheckout": "Retour au paiement",
+      "supportNote": "Si vous avez été débité mais ne voyez pas votre commande, veuillez contacter le support avec votre référence de paiement."
+    },
     "header": {
       "title": "Merci pour Votre Commande !",
       "subtitle": "Votre commande est confirmée et en cours de traitement",

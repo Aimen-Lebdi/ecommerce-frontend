@@ -336,6 +336,13 @@
       "invoiceSuccess": "Invoice downloaded successfully!",
       "invoiceError": "Failed to download invoice."
     },
+    "timeout": {
+      "title": "Payment Still Processing",
+      "body": "Your payment may have succeeded, but we couldn't confirm your order yet. Please try again in a moment.",
+      "retry": "Try Again",
+      "backToCheckout": "Back to Checkout",
+      "supportNote": "If you were charged but don't see your order, please contact support with your payment reference."
+    },
     "header": {
       "title": "Thank You for Your Order!",
       "subtitle": "Your order has been confirmed and is being processed",
