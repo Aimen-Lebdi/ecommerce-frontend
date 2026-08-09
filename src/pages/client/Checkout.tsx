@@ -38,12 +38,11 @@ import {
   CollapsibleTrigger,
 } from "../../components/ui/collapsible";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { fetchCart } from "../../features/cart/cartSlice";
+import { fetchCart, resetCart } from "../../features/cart/cartSlice";
 import {
   createCashOrder,
   createCheckoutSession,
   clearError,
-  clearCheckoutSession,
   clearCurrentOrder,
 } from "../../features/orders/ordersSlice";
 import {
@@ -85,7 +84,6 @@ const Checkout = () => {
     isCreatingCheckout,
     checkoutSession,
     error: orderError,
-    currentOrder,
   } = useAppSelector((state) => state.orders);
 
   const { user } = useAppSelector((state) => state.auth);
@@ -137,6 +135,10 @@ const Checkout = () => {
   const prefilledAddressRef = useRef(false);
   const prefilledPhoneRef = useRef(false);
 
+  // Set once an order has been placed successfully, so the empty-cart
+  // redirect effect below doesn't kick in while we navigate to confirmation.
+  const orderPlacedRef = useRef(false);
+
   // Checkout state
   // const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
@@ -183,8 +185,10 @@ const Checkout = () => {
     }
   }, [phones, phonesLoading]);
 
-  // Redirect if cart is empty
+  // Redirect if cart is empty (skip after a successful order so we land on
+  // /order-confirmation instead of bouncing back to /cart)
   useEffect(() => {
+    if (orderPlacedRef.current) return;
     if (!cartLoading && cartItems.length === 0) {
       toast.error(t('checkout.cartEmpty'));
       navigate("/cart");
@@ -197,26 +201,6 @@ const Checkout = () => {
       window.location.href = checkoutSession.url;
     }
   }, [checkoutSession]);
-
-  // M4: Track the last order id we navigated to. The success effect must only
-  // fire for a NEW order — without this guard, a stale `currentOrder` left
-  // over from a previous visit re-fires on mount and yanks the user back to
-  // an old confirmation page.
-  const lastNavigatedOrderIdRef = useRef<string | null>(null);
-
-  // Handle successful order creation
-  useEffect(() => {
-    if (
-      currentOrder &&
-      !isCreatingOrder &&
-      currentOrder._id !== lastNavigatedOrderIdRef.current
-    ) {
-      lastNavigatedOrderIdRef.current = currentOrder._id;
-      toast.success(t('checkout.orderPlacedSuccess'));
-      navigate(`/order-confirmation/${currentOrder._id}`);
-      dispatch(clearCheckoutSession());
-    }
-  }, [currentOrder, isCreatingOrder, navigate, dispatch, t]);
 
   // M4: Clear the stale currentOrder when leaving /checkout so the next visit
   // starts clean (no redirect back to a previously placed order).
@@ -395,12 +379,19 @@ const Checkout = () => {
       }
 
       if (paymentMethod === "cash") {
-        await dispatch(
+        const order = await dispatch(
           createCashOrder({
             cartId,
             orderData: { shippingAddress: finalShippingAddress },
           })
         ).unwrap();
+        // The backend already deleted this cart when the order was created, so
+        // clear the local Redux cart state to keep the badge and /cart in sync.
+        // Mark the order as placed first so the empty-cart redirect is skipped.
+        orderPlacedRef.current = true;
+        dispatch(resetCart());
+        toast.success(t('checkout.orderPlacedSuccess'));
+        navigate(`/order-confirmation/${order._id}`);
       } else {
         await dispatch(
           createCheckoutSession({

@@ -103,6 +103,9 @@ axiosInstance.interceptors.response.use(
       const customError = new Error(
         errorData.message || errorData.errors?.[0]?.msg || error.message
       );
+      // Preserve the original response (status + data) so callers can still
+      // branch on err.response?.status (e.g. 404 -> empty cart)
+      (customError as any).response = error.response;
       return Promise.reject(customError);
     }
 

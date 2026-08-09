@@ -199,6 +199,19 @@ const cartSlice = createSlice({
       .addCase(fetchCart.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch cart";
+        // 404 means the cart no longer exists (e.g. it was deleted after an
+        // order was placed) — clear the stale local cart so old items don't
+        // linger on the cart page.
+        if (
+          typeof action.payload === "string" &&
+          (action.payload.toLowerCase().includes("cart not found") ||
+            action.payload.includes("no cart"))
+        ) {
+          state.cartItems = [];
+          state.numOfCartItems = 0;
+          state.totalCartPrice = 0;
+          state.cartId = null;
+        }
       })
       // Remove cart item
       .addCase(removeCartItem.pending, (state) => {
