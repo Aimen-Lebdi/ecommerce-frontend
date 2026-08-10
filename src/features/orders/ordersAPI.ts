@@ -37,6 +37,36 @@ export interface CreateCashOrderData {
   };
 }
 
+// Payload for the admin order edit dialog (PUT /api/v1/orders/:id)
+// All fields optional; server whitelists + validates against transition map.
+export interface UpdateOrderPayload {
+  deliveryStatus?:
+    | "pending"
+    | "confirmed"
+    | "shipped"
+    | "in_transit"
+    | "out_for_delivery"
+    | "delivered"
+    | "completed"
+    | "failed"
+    | "returned"
+    | "cancelled";
+  statusNote?: string;
+  shippingAddress?: {
+    wilaya: string;
+    dayra: string;
+    baladiya: string;
+    phone: string;
+  };
+  cartItems?: Array<{
+    _id: string;
+    quantity: number;
+    color?: string;
+  }>;
+  shippingPrice?: number;
+  trackingNumber?: string;
+}
+
 // Interface for tracking info
 export interface TrackingInfo {
   order: {
@@ -151,6 +181,15 @@ export const cancelOrderAPI = async (id: string, reason?: string) => {
   const response = await axiosInstance.put(`/api/v1/orders/${id}/cancel`, {
     reason,
   });
+  return response.data;
+};
+
+// Update order (Admin/Seller) — generic edit endpoint for the edit dialog
+export const updateOrderAPI = async (
+  id: string,
+  payload: UpdateOrderPayload
+) => {
+  const response = await axiosInstance.put(`/api/v1/orders/${id}`, payload);
   return response.data;
 };
 

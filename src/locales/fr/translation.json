@@ -949,6 +949,49 @@
       "keepOrder": "Non, garder la commande",
       "confirmCancel": "Oui, annuler la commande"
     },
+    "editDialog": {
+      "title": "Modifier la Commande",
+      "subtitle": "Mettre à jour les détails de la commande",
+      "tabs": {
+        "status": "Statut",
+        "address": "Adresse",
+        "items": "Articles",
+        "amounts": "Montants",
+        "tracking": "Suivi"
+      },
+      "lockNotice": "Cette commande a été payée par carte. Seul son statut de livraison peut être modifié.",
+      "save": "Enregistrer les Modifications",
+      "saving": "Enregistrement...",
+      "cancel": "Annuler",
+      "status": {
+        "currentStatus": "Statut Actuel",
+        "deliveryStatus": "Statut de Livraison",
+        "statusNote": "Note de Statut",
+        "statusNotePlaceholder": "Entrez une note pour ce changement de statut...",
+        "terminalNotice": "Cette commande est dans un état terminal et ne peut pas être modifiée."
+      },
+      "items": {
+        "product": "Produit",
+        "price": "Prix",
+        "quantity": "Quantité",
+        "color": "Couleur",
+        "quantityMin": "La quantité doit être d'au moins 1"
+      },
+      "amounts": {
+        "shippingPrice": "Frais de Livraison",
+        "shippingPricePlaceholder": "Entrez les frais de livraison",
+        "subtotal": "Sous-total",
+        "tax": "TVA",
+        "total": "Total",
+        "codAmount": "Montant Paiement à la Livraison",
+        "derivedTotalHint": "Le total est recalculé automatiquement à partir des articles, des frais de livraison et de la TVA."
+      },
+      "tracking": {
+        "trackingNumber": "Numéro de Suivi",
+        "trackingNumberPlaceholder": "Entrez le numéro de suivi...",
+        "deliveryAgency": "Agence de Livraison"
+      }
+    },
     "filters": {
       "totalPrice": "Prix Total",
       "amountPlaceholder": "Entrez le montant",
@@ -961,7 +1004,9 @@
       "confirmCardSuccess": "Paiement par carte confirmé avec succès",
       "shipSuccess": "Commande expédiée avec succès",
       "cancelSuccess": "Commande annulée avec succès",
-      "simulationStarted": "Simulation de livraison démarrée (scénario {{scenario}})"
+      "simulationStarted": "Simulation de livraison démarrée (scénario {{scenario}})",
+      "updateSuccess": "Commande mise à jour avec succès",
+      "updateError": "Échec de la mise à jour de la commande"
     }
   },
   "users": {

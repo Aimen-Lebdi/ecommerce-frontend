@@ -15,9 +15,11 @@ import {
   cancelOrderAPI,
   getOrderTrackingAPI,
   simulateDeliveryAPI,
+  updateOrderAPI,
   type OrdersQueryParams,
   type OrdersResponse,
   type CreateCashOrderData,
+  type UpdateOrderPayload,
   type TrackingInfo,
   getOrderBySessionAPI,
   fetchMyOrdersAPI,
@@ -115,12 +117,14 @@ interface OrdersState {
   loadingTracking: boolean;
   error: string | null;
   orderError: string | null;
+  updateError: string | null;
   isCreatingOrder: boolean;
   isCreatingCheckout: boolean;
   isConfirming: boolean;
   isShipping: boolean;
   isCancelling: boolean;
   isSimulating: boolean;
+  isUpdatingOrder: boolean;
   currentQueryParams: OrdersQueryParams;
 }
 
@@ -136,12 +140,14 @@ const initialState: OrdersState = {
   loadingTracking: false,
   error: null,
   orderError: null,
+  updateError: null,
   isCreatingOrder: false,
   isCreatingCheckout: false,
   isConfirming: false,
   isShipping: false,
   isCancelling: false,
   isSimulating: false,
+  isUpdatingOrder: false,
   currentQueryParams: {},
 };
 
@@ -394,6 +400,20 @@ export const simulateDelivery = createAsyncThunk<
   }
 );
 
+// Async thunk to update an order (Admin/Seller edit dialog)
+export const updateOrder = createAsyncThunk<
+  Order,
+  { id: string; payload: UpdateOrderPayload },
+  { rejectValue: string }
+>("orders/updateOrder", async ({ id, payload }, { rejectWithValue }) => {
+  try {
+    const response = await updateOrderAPI(id, payload);
+    return response.data;
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.message || err.message);
+  }
+});
+
 // Slice with reducers and state management
 const ordersSlice = createSlice({
   name: "orders",
@@ -402,6 +422,7 @@ const ordersSlice = createSlice({
     clearError: (state) => {
       state.error = null;
       state.orderError = null;
+      state.updateError = null;
     },
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
@@ -579,6 +600,26 @@ const ordersSlice = createSlice({
       .addCase(simulateDelivery.rejected, (state, action) => {
         state.isSimulating = false;
         state.error = action.payload || "Failed to simulate delivery";
+      })
+      // Update order (Admin/Seller edit dialog)
+      .addCase(updateOrder.pending, (state) => {
+        state.isUpdatingOrder = true;
+        state.updateError = null;
+      })
+      .addCase(updateOrder.fulfilled, (state, action) => {
+        state.isUpdatingOrder = false;
+        // Replace order in the list and keep it as the selected order
+        state.currentOrder = action.payload;
+        const index = state.orders.findIndex(
+          (order) => order._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.orders[index] = action.payload;
+        }
+      })
+      .addCase(updateOrder.rejected, (state, action) => {
+        state.isUpdatingOrder = false;
+        state.updateError = action.payload || "Failed to update order";
       });
   },
 });

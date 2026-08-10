@@ -949,6 +949,49 @@
       "keepOrder": "No, keep order",
       "confirmCancel": "Yes, cancel order"
     },
+    "editDialog": {
+      "title": "Edit Order",
+      "subtitle": "Update order details",
+      "tabs": {
+        "status": "Status",
+        "address": "Address",
+        "items": "Items",
+        "amounts": "Amounts",
+        "tracking": "Tracking"
+      },
+      "lockNotice": "This order was paid by card. Only its delivery status can be changed.",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "status": {
+        "currentStatus": "Current Status",
+        "deliveryStatus": "Delivery Status",
+        "statusNote": "Status Note",
+        "statusNotePlaceholder": "Enter a note for this status change...",
+        "terminalNotice": "This order is in a terminal state and cannot be changed."
+      },
+      "items": {
+        "product": "Product",
+        "price": "Price",
+        "quantity": "Quantity",
+        "color": "Color",
+        "quantityMin": "Quantity must be at least 1"
+      },
+      "amounts": {
+        "shippingPrice": "Shipping Price",
+        "shippingPricePlaceholder": "Enter shipping price",
+        "subtotal": "Subtotal",
+        "tax": "Tax",
+        "total": "Total",
+        "codAmount": "Cash on Delivery Amount",
+        "derivedTotalHint": "Total is recalculated automatically from items, shipping and tax."
+      },
+      "tracking": {
+        "trackingNumber": "Tracking Number",
+        "trackingNumberPlaceholder": "Enter tracking number...",
+        "deliveryAgency": "Delivery Agency"
+      }
+    },
     "filters": {
       "totalPrice": "Total Price",
       "amountPlaceholder": "Enter amount",
@@ -961,7 +1004,9 @@
       "confirmCardSuccess": "Card payment confirmed successfully",
       "shipSuccess": "Order shipped successfully",
       "cancelSuccess": "Order cancelled successfully",
-      "simulationStarted": "Delivery simulation started ({{scenario}} scenario)"
+      "simulationStarted": "Delivery simulation started ({{scenario}} scenario)",
+      "updateSuccess": "Order updated successfully",
+      "updateError": "Failed to update order"
     }
   },
   "users": {

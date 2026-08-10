@@ -949,6 +949,49 @@
       "keepOrder": "لا، احتفظ بالطلب",
       "confirmCancel": "نعم، إلغاء الطلب"
     },
+    "editDialog": {
+      "title": "تعديل الطلب",
+      "subtitle": "تحديث تفاصيل الطلب",
+      "tabs": {
+        "status": "الحالة",
+        "address": "العنوان",
+        "items": "العناصر",
+        "amounts": "المبالغ",
+        "tracking": "التتبع"
+      },
+      "lockNotice": "تم دفع هذا الطلب ببطاقة. يمكن تغيير حالة التوصيل فقط.",
+      "save": "حفظ التغييرات",
+      "saving": "جاري الحفظ...",
+      "cancel": "إلغاء",
+      "status": {
+        "currentStatus": "الحالة الحالية",
+        "deliveryStatus": "حالة التوصيل",
+        "statusNote": "ملاحظة الحالة",
+        "statusNotePlaceholder": "أدخل ملاحظة لهذا التغيير...",
+        "terminalNotice": "هذا الطلب في حالة نهائية ولا يمكن تغييره."
+      },
+      "items": {
+        "product": "المنتج",
+        "price": "السعر",
+        "quantity": "الكمية",
+        "color": "اللون",
+        "quantityMin": "يجب أن تكون الكمية 1 على الأقل"
+      },
+      "amounts": {
+        "shippingPrice": "سعر الشحن",
+        "shippingPricePlaceholder": "أدخل سعر الشحن",
+        "subtotal": "المجموع الجزئي",
+        "tax": "الضريبة",
+        "total": "المجموع الكلي",
+        "codAmount": "مبلغ الدفع عند الاستلام",
+        "derivedTotalHint": "يتم إعادة حساب المجموع تلقائياً من العناصر والشحن والضريبة."
+      },
+      "tracking": {
+        "trackingNumber": "رقم التتبع",
+        "trackingNumberPlaceholder": "أدخل رقم التتبع...",
+        "deliveryAgency": "وكالة التوصيل"
+      }
+    },
     "filters": {
       "totalPrice": "السعر الإجمالي",
       "amountPlaceholder": "أدخل المبلغ",
@@ -961,7 +1004,9 @@
       "confirmCardSuccess": "تم تأكيد الدفع بالبطاقة بنجاح",
       "shipSuccess": "تم شحن الطلب بنجاح",
       "cancelSuccess": "تم إلغاء الطلب بنجاح",
-      "simulationStarted": "بدأت محاكاة التوصيل (سيناريو {{scenario}})"
+      "simulationStarted": "بدأت محاكاة التوصيل (سيناريو {{scenario}})",
+      "updateSuccess": "تم تحديث الطلب بنجاح",
+      "updateError": "فشل تحديث الطلب"
     }
   },
   "users": {
