@@ -951,7 +951,7 @@
     },
     "editDialog": {
       "title": "Modifier la Commande",
-      "subtitle": "Mettre à jour les détails de la commande",
+      "description": "Mettre à jour les détails de la commande",
       "tabs": {
         "status": "Statut",
         "address": "Adresse",
@@ -959,37 +959,47 @@
         "amounts": "Montants",
         "tracking": "Suivi"
       },
+      "lockNoticeTitle": "Commande en lecture seule",
       "lockNotice": "Cette commande a été payée par carte. Seul son statut de livraison peut être modifié.",
-      "save": "Enregistrer les Modifications",
-      "saving": "Enregistrement...",
-      "cancel": "Annuler",
-      "status": {
-        "currentStatus": "Statut Actuel",
+      "labels": {
         "deliveryStatus": "Statut de Livraison",
         "statusNote": "Note de Statut",
-        "statusNotePlaceholder": "Entrez une note pour ce changement de statut...",
-        "terminalNotice": "Cette commande est dans un état terminal et ne peut pas être modifiée."
+        "trackingNumber": "Numéro de Suivi",
+        "phone": "Téléphone"
+      },
+      "placeholders": {
+        "statusNote": "Entrez une note pour ce changement de statut...",
+        "trackingNumber": "Entrez le numéro de suivi...",
+        "phone": "Entrez le numéro de téléphone"
+      },
+      "currentStatus": "Statut Actuel",
+      "terminalLocked": "Cette commande est dans un état terminal et ne peut pas être modifiée.",
+      "errors": {
+        "phoneRequired": "Un numéro de téléphone valide est requis",
+        "quantityMin": "La quantité doit être d'au moins 1",
+        "shippingPriceMin": "Les frais de livraison doivent être de 0 ou plus"
       },
       "items": {
-        "product": "Produit",
+        "frozenNote": "Les prix des articles sont fixés à l'achat et ne peuvent pas être modifiés.",
         "price": "Prix",
         "quantity": "Quantité",
-        "color": "Couleur",
-        "quantityMin": "La quantité doit être d'au moins 1"
+        "color": "Couleur"
       },
       "amounts": {
-        "shippingPrice": "Frais de Livraison",
-        "shippingPricePlaceholder": "Entrez les frais de livraison",
         "subtotal": "Sous-total",
+        "shipping": "Livraison",
         "tax": "TVA",
         "total": "Total",
-        "codAmount": "Montant Paiement à la Livraison",
-        "derivedTotalHint": "Le total est recalculé automatiquement à partir des articles, des frais de livraison et de la TVA."
+        "codAmount": "Montant Paiement à la Livraison"
       },
       "tracking": {
-        "trackingNumber": "Numéro de Suivi",
-        "trackingNumberPlaceholder": "Entrez le numéro de suivi...",
-        "deliveryAgency": "Agence de Livraison"
+        "agency": "Agence de Livraison",
+        "agencyPlaceholder": "Aucune agence de livraison assignée"
+      },
+      "buttons": {
+        "cancel": "Annuler",
+        "save": "Enregistrer les Modifications",
+        "saving": "Enregistrement..."
       }
     },
     "filters": {

@@ -951,7 +951,7 @@
     },
     "editDialog": {
       "title": "Edit Order",
-      "subtitle": "Update order details",
+      "description": "Update order details",
       "tabs": {
         "status": "Status",
         "address": "Address",
@@ -959,37 +959,47 @@
         "amounts": "Amounts",
         "tracking": "Tracking"
       },
+      "lockNoticeTitle": "Read-only order",
       "lockNotice": "This order was paid by card. Only its delivery status can be changed.",
-      "save": "Save Changes",
-      "saving": "Saving...",
-      "cancel": "Cancel",
-      "status": {
-        "currentStatus": "Current Status",
+      "labels": {
         "deliveryStatus": "Delivery Status",
         "statusNote": "Status Note",
-        "statusNotePlaceholder": "Enter a note for this status change...",
-        "terminalNotice": "This order is in a terminal state and cannot be changed."
+        "trackingNumber": "Tracking Number",
+        "phone": "Phone"
+      },
+      "placeholders": {
+        "statusNote": "Enter a note for this status change...",
+        "trackingNumber": "Enter tracking number...",
+        "phone": "Enter phone number"
+      },
+      "currentStatus": "Current Status",
+      "terminalLocked": "This order is in a terminal state and cannot be changed.",
+      "errors": {
+        "phoneRequired": "A valid phone number is required",
+        "quantityMin": "Quantity must be at least 1",
+        "shippingPriceMin": "Shipping price must be 0 or more"
       },
       "items": {
-        "product": "Product",
+        "frozenNote": "Item prices are fixed at purchase time and cannot be changed.",
         "price": "Price",
         "quantity": "Quantity",
-        "color": "Color",
-        "quantityMin": "Quantity must be at least 1"
+        "color": "Color"
       },
       "amounts": {
-        "shippingPrice": "Shipping Price",
-        "shippingPricePlaceholder": "Enter shipping price",
         "subtotal": "Subtotal",
+        "shipping": "Shipping",
         "tax": "Tax",
         "total": "Total",
-        "codAmount": "Cash on Delivery Amount",
-        "derivedTotalHint": "Total is recalculated automatically from items, shipping and tax."
+        "codAmount": "Cash on Delivery Amount"
       },
       "tracking": {
-        "trackingNumber": "Tracking Number",
-        "trackingNumberPlaceholder": "Enter tracking number...",
-        "deliveryAgency": "Delivery Agency"
+        "agency": "Delivery Agency",
+        "agencyPlaceholder": "No delivery agency assigned"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving..."
       }
     },
     "filters": {

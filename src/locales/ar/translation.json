@@ -951,7 +951,7 @@
     },
     "editDialog": {
       "title": "تعديل الطلب",
-      "subtitle": "تحديث تفاصيل الطلب",
+      "description": "تحديث تفاصيل الطلب",
       "tabs": {
         "status": "الحالة",
         "address": "العنوان",
@@ -959,37 +959,47 @@
         "amounts": "المبالغ",
         "tracking": "التتبع"
       },
+      "lockNoticeTitle": "طلب للقراءة فقط",
       "lockNotice": "تم دفع هذا الطلب ببطاقة. يمكن تغيير حالة التوصيل فقط.",
-      "save": "حفظ التغييرات",
-      "saving": "جاري الحفظ...",
-      "cancel": "إلغاء",
-      "status": {
-        "currentStatus": "الحالة الحالية",
+      "labels": {
         "deliveryStatus": "حالة التوصيل",
         "statusNote": "ملاحظة الحالة",
-        "statusNotePlaceholder": "أدخل ملاحظة لهذا التغيير...",
-        "terminalNotice": "هذا الطلب في حالة نهائية ولا يمكن تغييره."
+        "trackingNumber": "رقم التتبع",
+        "phone": "الهاتف"
+      },
+      "placeholders": {
+        "statusNote": "أدخل ملاحظة لهذا التغيير...",
+        "trackingNumber": "أدخل رقم التتبع...",
+        "phone": "أدخل رقم الهاتف"
+      },
+      "currentStatus": "الحالة الحالية",
+      "terminalLocked": "هذا الطلب في حالة نهائية ولا يمكن تغييره.",
+      "errors": {
+        "phoneRequired": "رقم هاتف صالح مطلوب",
+        "quantityMin": "يجب أن تكون الكمية 1 على الأقل",
+        "shippingPriceMin": "يجب أن يكون سعر الشحن 0 أو أكثر"
       },
       "items": {
-        "product": "المنتج",
+        "frozenNote": "أسعار العناصر ثابتة وقت الشراء ولا يمكن تغييرها.",
         "price": "السعر",
         "quantity": "الكمية",
-        "color": "اللون",
-        "quantityMin": "يجب أن تكون الكمية 1 على الأقل"
+        "color": "اللون"
       },
       "amounts": {
-        "shippingPrice": "سعر الشحن",
-        "shippingPricePlaceholder": "أدخل سعر الشحن",
         "subtotal": "المجموع الجزئي",
+        "shipping": "الشحن",
         "tax": "الضريبة",
         "total": "المجموع الكلي",
-        "codAmount": "مبلغ الدفع عند الاستلام",
-        "derivedTotalHint": "يتم إعادة حساب المجموع تلقائياً من العناصر والشحن والضريبة."
+        "codAmount": "مبلغ الدفع عند الاستلام"
       },
       "tracking": {
-        "trackingNumber": "رقم التتبع",
-        "trackingNumberPlaceholder": "أدخل رقم التتبع...",
-        "deliveryAgency": "وكالة التوصيل"
+        "agency": "وكالة التوصيل",
+        "agencyPlaceholder": "لم يتم تعيين وكالة توصيل"
+      },
+      "buttons": {
+        "cancel": "إلغاء",
+        "save": "حفظ التغييرات",
+        "saving": "جاري الحفظ..."
       }
     },
     "filters": {
