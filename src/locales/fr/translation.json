@@ -929,17 +929,7 @@
       "confirmCard": "Confirmer Paiement (Carte)",
       "shipping": "Expédition...",
       "shipOrder": "Expédier la Commande",
-      "cancelOrder": "Annuler la Commande",
-      "simulating": "Simulation...",
-      "simulateDelivery": "Simuler la Livraison"
-    },
-    "simulation": {
-      "fast": "Rapide",
-      "normal": "Normal",
-      "slow": "Lent",
-      "success": "Succès",
-      "failed": "Échec",
-      "testingNote": "Test uniquement : Simule les mises à jour du statut de livraison"
+      "cancelOrder": "Annuler la Commande"
     },
     "cancelDialog": {
       "title": "Annuler la Commande",
@@ -965,14 +955,17 @@
         "deliveryStatus": "Statut de Livraison",
         "statusNote": "Note de Statut",
         "trackingNumber": "Numéro de Suivi",
-        "phone": "Téléphone"
+        "phone": "Téléphone",
+        "cancelReason": "Raison d'annulation"
       },
       "placeholders": {
         "statusNote": "Entrez une note pour ce changement de statut...",
         "trackingNumber": "Entrez le numéro de suivi...",
-        "phone": "Entrez le numéro de téléphone"
+        "phone": "Entrez le numéro de téléphone",
+        "cancelReason": "Entrez la raison de l'annulation..."
       },
       "currentStatus": "Statut Actuel",
+      "retryConfirm": "Réessayer la confirmation",
       "terminalLocked": "Cette commande est dans un état terminal et ne peut pas être modifiée.",
       "errors": {
         "phoneRequired": "Un numéro de téléphone valide est requis",
@@ -1014,7 +1007,6 @@
       "confirmCardSuccess": "Paiement par carte confirmé avec succès",
       "shipSuccess": "Commande expédiée avec succès",
       "cancelSuccess": "Commande annulée avec succès",
-      "simulationStarted": "Simulation de livraison démarrée (scénario {{scenario}})",
       "updateSuccess": "Commande mise à jour avec succès",
       "updateError": "Échec de la mise à jour de la commande"
     }

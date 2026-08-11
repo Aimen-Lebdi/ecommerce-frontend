@@ -9,18 +9,21 @@ import {
   DataTable,
   type ServerQueryParams,
 } from "../../components/admin/global/data-table";
-import { OrderEditDialog } from "../../components/admin/global/OrderEditDialog";
+import {
+  OrderEditDialog,
+  type OrderEditSavePayload,
+} from "../../components/admin/global/OrderEditDialog";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchOrders,
   updateOrder,
+  confirmOrder,
+  cancelOrder,
   getOrderTracking,
-  simulateDelivery,
   clearError,
   setQueryParams,
   type Order,
 } from "../../features/orders/ordersSlice";
-import type { UpdateOrderPayload } from "../../features/orders/ordersAPI";
 import { IconEye } from "@tabler/icons-react";
 import { useTranslation } from 'react-i18next';
 
@@ -200,7 +203,6 @@ export default function Orders() {
     pagination,
     loading,
     error,
-    isSimulating,
     isUpdatingOrder,
     currentQueryParams,
   } = useAppSelector((state) => state.orders);
@@ -248,12 +250,31 @@ export default function Orders() {
     setEditDialogOpen(true);
   };
 
-  const handleSaveOrder = async (payload: UpdateOrderPayload) => {
+  const handleSaveOrder = async (payload: OrderEditSavePayload) => {
     if (!selectedOrder) return;
     try {
-      const updated = await dispatch(
-        updateOrder({ id: selectedOrder._id, payload })
-      ).unwrap();
+      const id = selectedOrder._id;
+      let updated: Order;
+
+      // Route by the target delivery status: `confirmed` and `cancelled` are
+      // owned by dedicated endpoints (confirm = create parcel + auto-simulate,
+      // cancel = restock + refund + cancel parcel). Everything else is a plain
+      // data edit via PUT /:id.
+      if (payload.deliveryStatus === "confirmed") {
+        updated = await dispatch(confirmOrder(id)).unwrap();
+      } else if (payload.deliveryStatus === "cancelled") {
+        updated = await dispatch(
+          cancelOrder({ id, reason: payload.reason })
+        ).unwrap();
+      } else {
+        // Keep the PUT payload clean: `reason` is dialog-only (cancel route).
+        const { reason, ...putPayload } = payload;
+        void reason;
+        updated = await dispatch(
+          updateOrder({ id, payload: putPayload })
+        ).unwrap();
+      }
+
       setSelectedOrder(updated);
       toast.success(t('orders.toasts.updateSuccess'));
       // Refresh the server-side table and keep the selected order in sync.
@@ -267,15 +288,6 @@ export default function Orders() {
       toast.error(message);
       // Re-throw so the dialog stays open and the seller can retry.
       throw err;
-    }
-  };
-
-  const handleSimulateDelivery = async (id: string, speed: string, scenario: string) => {
-    try {
-      await dispatch(simulateDelivery({ id, speed, scenario })).unwrap();
-      toast.success(t('orders.toasts.simulationStarted', { scenario: t(`orders.simulation.${scenario}`) }));
-    } catch (error) {
-      console.error("Failed to simulate delivery:", error);
     }
   };
 
@@ -342,8 +354,6 @@ export default function Orders() {
           onOpenChange={setEditDialogOpen}
           onSave={handleSaveOrder}
           isLoading={isUpdatingOrder}
-          onSimulate={handleSimulateDelivery}
-          isSimulating={isSimulating}
         />
       )}
     </div>

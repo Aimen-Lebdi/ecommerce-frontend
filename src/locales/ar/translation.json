@@ -929,17 +929,7 @@
       "confirmCard": "تأكيد الدفع (بطاقة)",
       "shipping": "جاري الشحن...",
       "shipOrder": "شحن الطلب",
-      "cancelOrder": "إلغاء الطلب",
-      "simulating": "جاري المحاكاة...",
-      "simulateDelivery": "محاكاة التوصيل"
-    },
-    "simulation": {
-      "fast": "سريع",
-      "normal": "عادي",
-      "slow": "بطيء",
-      "success": "نجح",
-      "failed": "فشل",
-      "testingNote": "للاختبار فقط: يحاكي تحديثات حالة التوصيل"
+      "cancelOrder": "إلغاء الطلب"
     },
     "cancelDialog": {
       "title": "إلغاء الطلب",
@@ -965,14 +955,17 @@
         "deliveryStatus": "حالة التوصيل",
         "statusNote": "ملاحظة الحالة",
         "trackingNumber": "رقم التتبع",
-        "phone": "الهاتف"
+        "phone": "الهاتف",
+        "cancelReason": "سبب الإلغاء"
       },
       "placeholders": {
         "statusNote": "أدخل ملاحظة لهذا التغيير...",
         "trackingNumber": "أدخل رقم التتبع...",
-        "phone": "أدخل رقم الهاتف"
+        "phone": "أدخل رقم الهاتف",
+        "cancelReason": "أدخل سبب الإلغاء..."
       },
       "currentStatus": "الحالة الحالية",
+      "retryConfirm": "إعادة محاولة التأكيد",
       "terminalLocked": "هذا الطلب في حالة نهائية ولا يمكن تغييره.",
       "errors": {
         "phoneRequired": "رقم هاتف صالح مطلوب",
@@ -1014,7 +1007,6 @@
       "confirmCardSuccess": "تم تأكيد الدفع بالبطاقة بنجاح",
       "shipSuccess": "تم شحن الطلب بنجاح",
       "cancelSuccess": "تم إلغاء الطلب بنجاح",
-      "simulationStarted": "بدأت محاكاة التوصيل (سيناريو {{scenario}})",
       "updateSuccess": "تم تحديث الطلب بنجاح",
       "updateError": "فشل تحديث الطلب"
     }

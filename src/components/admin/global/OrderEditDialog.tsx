@@ -27,7 +27,6 @@ import {
   IconMapPin,
   IconMoneybag,
   IconPackage,
-  IconPlayerPlay,
   IconStatusChange,
   IconTruck,
 } from "@tabler/icons-react";
@@ -44,11 +43,15 @@ import type { Order } from "../../../features/orders/ordersSlice";
 import type { UpdateOrderPayload } from "../../../features/orders/ordersAPI";
 
 // ---------------------------------------------------------------------------
-// Delivery-status transition rules — frontend mirror of the backend's
-// `backend/utils/orderStatusTransitions.js` (single source of truth).
-// Forward chain is enforced step-by-step; any non-terminal state may abort to
-// a terminal state; terminal states (cancelled/failed/returned/completed) are
-// locked and have no outgoing transitions.
+// Delivery-status rules for the dialog — derived from the backend's
+// `backend/utils/orderStatusTransitions.js` (single source of truth) plus the
+// locked confirm/cancel design (plan M5):
+//   pending   → [confirmed, cancelled]
+//   confirmed → [cancelled] (+ "confirmed" retry option when no parcel exists)
+//   shipped+  → next forward step only (forward chain)
+//   terminal  → locked (cancelled/failed/returned/completed have no moves)
+// `confirmed`/`cancelled` moves are owned by dedicated confirm/cancel
+// endpoints (auto-ship + auto-simulate), never by a plain status edit.
 // ---------------------------------------------------------------------------
 type OrderDeliveryStatus = Order["deliveryStatus"];
 
@@ -59,27 +62,37 @@ const TERMINAL_STATES: readonly OrderDeliveryStatus[] = [
   "completed",
 ];
 
-const TRANSITIONS: Record<OrderDeliveryStatus, readonly OrderDeliveryStatus[]> = {
-  pending: ["confirmed", "failed", "returned", "cancelled"],
-  confirmed: ["shipped", "failed", "returned", "cancelled"],
-  shipped: ["in_transit", "failed", "returned", "cancelled"],
-  in_transit: ["out_for_delivery", "failed", "returned", "cancelled"],
-  out_for_delivery: ["delivered", "failed", "returned", "cancelled"],
-  delivered: ["completed", "failed", "returned", "cancelled"],
-  completed: [],
-  failed: [],
-  returned: [],
-  cancelled: [],
-};
-
-/** Statuses reachable from `from` (empty array for terminal/unknown states). */
-const getNextAllowedStatuses = (
-  from: OrderDeliveryStatus
-): OrderDeliveryStatus[] =>
-  TRANSITIONS[from] ? [...TRANSITIONS[from]] : [];
+const FORWARD_CHAIN: readonly OrderDeliveryStatus[] = [
+  "pending",
+  "confirmed",
+  "shipped",
+  "in_transit",
+  "out_for_delivery",
+  "delivered",
+  "completed",
+];
 
 const isTerminalState = (state: OrderDeliveryStatus): boolean =>
   TERMINAL_STATES.includes(state);
+
+/** Status options offered by the dialog for the given current status. */
+const getDialogStatusOptions = (
+  current: OrderDeliveryStatus,
+  hasTrackingNumber: boolean
+): OrderDeliveryStatus[] => {
+  if (current === "pending") return ["confirmed", "cancelled"];
+  if (current === "confirmed") {
+    // "confirmed" doubles as the RETRY option when a previous confirm failed
+    // before a parcel was created (i.e. no tracking number yet).
+    return hasTrackingNumber ? ["cancelled"] : ["confirmed", "cancelled"];
+  }
+  if (isTerminalState(current)) return [];
+  // shipped+ (forward states): only the next step in the forward chain.
+  const idx = FORWARD_CHAIN.indexOf(current);
+  return idx >= 0 && idx < FORWARD_CHAIN.length - 1
+    ? [FORWARD_CHAIN[idx + 1]]
+    : [];
+};
 
 // i18n key suffix per status value (orders.status.* keys already exist).
 const STATUS_I18N_KEY: Record<OrderDeliveryStatus, string> = {
@@ -94,11 +107,6 @@ const STATUS_I18N_KEY: Record<OrderDeliveryStatus, string> = {
   returned: "returned",
   cancelled: "cancelled",
 };
-
-const SIMULATION_STATUSES: readonly OrderDeliveryStatus[] = [
-  "shipped",
-  "in_transit",
-];
 
 // ---------------------------------------------------------------------------
 // Local editable cart item (quantity/color are the only mutable fields; price
@@ -125,6 +133,12 @@ type Errors = {
   items?: Record<string, string>;
 };
 
+/**
+ * Payload handed to `onSave`. Extends the PUT payload with `reason`, which is
+ * only used by the cancel route — the page strips it before a plain PUT /:id.
+ */
+export type OrderEditSavePayload = UpdateOrderPayload & { reason?: string };
+
 interface OrderEditDialogProps {
   /**
    * Kept for parity with the other admin dialogs (UserDialog/CategoryDialog).
@@ -134,11 +148,8 @@ interface OrderEditDialogProps {
   existingData?: Order;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSave?: (data: UpdateOrderPayload) => Promise<void>;
+  onSave?: (data: OrderEditSavePayload) => Promise<void>;
   isLoading?: boolean;
-  // Simulate controls (moved from the old OrderDetailsDialog Status actions).
-  onSimulate?: (id: string, speed: string, scenario: string) => void;
-  isSimulating?: boolean;
 }
 
 const round2 = (value: number): number => Math.round(value * 100) / 100;
@@ -168,8 +179,6 @@ export function OrderEditDialog({
   onOpenChange,
   onSave,
   isLoading = false,
-  onSimulate,
-  isSimulating = false,
 }: OrderEditDialogProps) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = React.useState(false);
@@ -178,6 +187,7 @@ export function OrderEditDialog({
   const [deliveryStatus, setDeliveryStatus] =
     React.useState<OrderDeliveryStatus>("pending");
   const [statusNote, setStatusNote] = React.useState("");
+  const [cancelReason, setCancelReason] = React.useState("");
   const [shippingAddress, setShippingAddress] = React.useState<AddressLocation>({
     wilaya: "",
     dayra: "",
@@ -191,10 +201,6 @@ export function OrderEditDialog({
   const [activeTab, setActiveTab] = React.useState("status");
   const [errors, setErrors] = React.useState<Errors>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-
-  // Simulate controls
-  const [simulationSpeed, setSimulationSpeed] = React.useState("fast");
-  const [simulationScenario, setSimulationScenario] = React.useState("success");
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -234,16 +240,25 @@ export function OrderEditDialog({
           : "0"
       );
       setTrackingNumber(existingData.trackingNumber || "");
-      setSimulationSpeed("fast");
-      setSimulationScenario("success");
+      setCancelReason("");
       setErrors({});
       setActiveTab("status");
     }
   }, [open, existingData]);
 
-  const nextAllowedStatuses = getNextAllowedStatuses(deliveryStatus);
-  const statusLocked =
-    isTerminalState(deliveryStatus) || nextAllowedStatuses.length === 0;
+  const statusOptions = getDialogStatusOptions(
+    deliveryStatus,
+    !!existingData?.trackingNumber
+  );
+  const statusLocked = statusOptions.length === 0;
+
+  // True when the order is already `confirmed` but has no parcel yet: the Save
+  // button then RETRIES the confirm (create parcel + auto-simulate) instead of
+  // performing a plain status edit. Matches prepareUpdatePayload's isRetryConfirm.
+  const isRetryConfirmCase =
+    existingData?.deliveryStatus === "confirmed" &&
+    deliveryStatus === "confirmed" &&
+    !existingData?.trackingNumber;
 
   // Derived totals — recomputed live; per-item price and tax are frozen.
   const subtotal = items.reduce(
@@ -255,10 +270,6 @@ export function OrderEditDialog({
     ? 0
     : parseFloat(shippingPrice);
   const derivedTotal = round2(subtotal + parsedShippingPrice + taxPrice);
-
-  const canSimulate =
-    !!existingData?.trackingNumber &&
-    SIMULATION_STATUSES.includes(deliveryStatus);
 
   const statusLabel = (status: OrderDeliveryStatus): string =>
     t(`orders.status.${STATUS_I18N_KEY[status]}`);
@@ -302,13 +313,26 @@ export function OrderEditDialog({
     return Object.keys(e).length === 0;
   };
 
-  const prepareUpdatePayload = (): UpdateOrderPayload => {
-    const payload: UpdateOrderPayload = {};
+  const prepareUpdatePayload = (): OrderEditSavePayload => {
+    const payload: OrderEditSavePayload = {};
 
-    // Status progression (cash + card share the Status tab)
-    if (existingData && deliveryStatus !== existingData.deliveryStatus) {
-      payload.deliveryStatus = deliveryStatus;
-      if (statusNote.trim()) payload.statusNote = statusNote.trim();
+    // Status progression (cash + card share the Status tab). `confirmed` from
+    // an already-confirmed order without a parcel is a RETRY — keep it in the
+    // payload so the page routes to the confirm endpoint again.
+    if (existingData) {
+      const isRetryConfirm =
+        existingData.deliveryStatus === "confirmed" &&
+        deliveryStatus === "confirmed" &&
+        !existingData.trackingNumber;
+      if (deliveryStatus !== existingData.deliveryStatus || isRetryConfirm) {
+        payload.deliveryStatus = deliveryStatus;
+        if (statusNote.trim()) payload.statusNote = statusNote.trim();
+      }
+    }
+
+    // Cancellation reason — only meaningful when the target status is cancelled.
+    if (deliveryStatus === "cancelled" && cancelReason.trim()) {
+      payload.reason = cancelReason.trim();
     }
 
     // Cash-only editable fields (card orders reject these server-side)
@@ -481,14 +505,18 @@ export function OrderEditDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={deliveryStatus} disabled>
-                    {statusLabel(deliveryStatus)}{" "}
+                    {isRetryConfirmCase
+                      ? t("orders.editDialog.retryConfirm")
+                      : statusLabel(deliveryStatus)}{" "}
                     {t("orders.editDialog.currentStatus")}
                   </SelectItem>
-                  {nextAllowedStatuses.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {statusLabel(status)}
-                    </SelectItem>
-                  ))}
+                  {statusOptions
+                    .filter((status) => status !== deliveryStatus)
+                    .map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {statusLabel(status)}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
               {statusLocked && (
@@ -525,67 +553,19 @@ export function OrderEditDialog({
               />
             </div>
 
-            {canSimulate && (
-              <div className="space-y-2 rounded-lg border p-3">
-                <div className="flex flex-wrap gap-2">
-                  <Select
-                    value={simulationSpeed}
-                    onValueChange={setSimulationSpeed}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fast">
-                        {t("orders.simulation.fast")}
-                      </SelectItem>
-                      <SelectItem value="normal">
-                        {t("orders.simulation.normal")}
-                      </SelectItem>
-                      <SelectItem value="slow">
-                        {t("orders.simulation.slow")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={simulationScenario}
-                    onValueChange={setSimulationScenario}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="success">
-                        {t("orders.simulation.success")}
-                      </SelectItem>
-                      <SelectItem value="failed">
-                        {t("orders.simulation.failed")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    disabled={isSimulating}
-                    onClick={() =>
-                      existingData &&
-                      onSimulate?.(
-                        existingData._id,
-                        simulationSpeed,
-                        simulationScenario
-                      )
-                    }
-                  >
-                    <IconPlayerPlay className="mr-2 h-4 w-4" />
-                    {isSimulating
-                      ? t("orders.actions.simulating")
-                      : t("orders.actions.simulateDelivery")}
-                  </Button>
-                </div>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <IconInfoCircle className="h-3 w-3" />
-                  {t("orders.simulation.testingNote")}
-                </p>
+            {deliveryStatus === "cancelled" && (
+              <div className="grid gap-2">
+                <Label htmlFor="ord-cancel-reason">
+                  {t("orders.editDialog.labels.cancelReason")}
+                </Label>
+                <Textarea
+                  id="ord-cancel-reason"
+                  rows={3}
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder={t("orders.editDialog.placeholders.cancelReason")}
+                  disabled={statusLocked}
+                />
               </div>
             )}
           </TabsContent>

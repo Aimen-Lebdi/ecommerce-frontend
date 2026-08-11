@@ -123,7 +123,6 @@ interface OrdersState {
   isConfirming: boolean;
   isShipping: boolean;
   isCancelling: boolean;
-  isSimulating: boolean;
   isUpdatingOrder: boolean;
   currentQueryParams: OrdersQueryParams;
 }
@@ -146,7 +145,6 @@ const initialState: OrdersState = {
   isConfirming: false,
   isShipping: false,
   isCancelling: false,
-  isSimulating: false,
   isUpdatingOrder: false,
   currentQueryParams: {},
 };
@@ -588,18 +586,6 @@ const ordersSlice = createSlice({
       .addCase(getOrderTracking.rejected, (state, action) => {
         state.loadingTracking = false;
         state.error = action.payload || "Failed to get tracking info";
-      })
-      // Simulate delivery
-      .addCase(simulateDelivery.pending, (state) => {
-        state.isSimulating = true;
-        state.error = null;
-      })
-      .addCase(simulateDelivery.fulfilled, (state) => {
-        state.isSimulating = false;
-      })
-      .addCase(simulateDelivery.rejected, (state, action) => {
-        state.isSimulating = false;
-        state.error = action.payload || "Failed to simulate delivery";
       })
       // Update order (Admin/Seller edit dialog)
       .addCase(updateOrder.pending, (state) => {

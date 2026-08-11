@@ -929,17 +929,7 @@
       "confirmCard": "Confirm Payment (Card)",
       "shipping": "Shipping...",
       "shipOrder": "Ship Order",
-      "cancelOrder": "Cancel Order",
-      "simulating": "Simulating...",
-      "simulateDelivery": "Simulate Delivery"
-    },
-    "simulation": {
-      "fast": "Fast",
-      "normal": "Normal",
-      "slow": "Slow",
-      "success": "Success",
-      "failed": "Failed",
-      "testingNote": "Testing only: Simulates delivery status updates"
+      "cancelOrder": "Cancel Order"
     },
     "cancelDialog": {
       "title": "Cancel Order",
@@ -965,14 +955,17 @@
         "deliveryStatus": "Delivery Status",
         "statusNote": "Status Note",
         "trackingNumber": "Tracking Number",
-        "phone": "Phone"
+        "phone": "Phone",
+        "cancelReason": "Cancellation Reason"
       },
       "placeholders": {
         "statusNote": "Enter a note for this status change...",
         "trackingNumber": "Enter tracking number...",
-        "phone": "Enter phone number"
+        "phone": "Enter phone number",
+        "cancelReason": "Enter reason for cancellation..."
       },
       "currentStatus": "Current Status",
+      "retryConfirm": "Retry Confirm",
       "terminalLocked": "This order is in a terminal state and cannot be changed.",
       "errors": {
         "phoneRequired": "A valid phone number is required",
@@ -1014,7 +1007,6 @@
       "confirmCardSuccess": "Card payment confirmed successfully",
       "shipSuccess": "Order shipped successfully",
       "cancelSuccess": "Order cancelled successfully",
-      "simulationStarted": "Delivery simulation started ({{scenario}} scenario)",
       "updateSuccess": "Order updated successfully",
       "updateError": "Failed to update order"
     }
