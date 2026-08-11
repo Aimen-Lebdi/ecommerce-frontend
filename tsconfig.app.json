@@ -7,11 +7,6 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    /* Path alias (must match vite.config.ts resolve.alias "@" -> ./src) */
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
