@@ -74,7 +74,8 @@ export interface Order {
     | "confirmed"
     | "refunded"
     | "partially_refunded"
-    | "completed";
+    | "completed"
+    | "cancelled";
   trackingNumber?: string;
   codAmount?: number;
   statusHistory: Array<{

@@ -894,7 +894,8 @@
       "completed": "Complété",
       "failed": "Échoué",
       "refunded": "Remboursé",
-      "partiallyRefunded": "Partiellement Remboursé"
+      "partiallyRefunded": "Partiellement Remboursé",
+      "cancelled": "Annulé"
     },
     "details": {
       "orderNumber": "Commande #{{id}}",
@@ -931,14 +932,6 @@
       "shipOrder": "Expédier la Commande",
       "cancelOrder": "Annuler la Commande"
     },
-    "cancelDialog": {
-      "title": "Annuler la Commande",
-      "description": "Êtes-vous sûr de vouloir annuler cette commande ? Cette action ne peut pas être annulée.",
-      "reasonLabel": "Raison d'annulation (Optionnel)",
-      "reasonPlaceholder": "Entrez la raison de l'annulation...",
-      "keepOrder": "Non, garder la commande",
-      "confirmCancel": "Oui, annuler la commande"
-    },
     "editDialog": {
       "title": "Modifier la Commande",
       "description": "Mettre à jour les détails de la commande",
@@ -953,16 +946,12 @@
       "lockNotice": "Cette commande a été payée par carte. Seul son statut de livraison peut être modifié.",
       "labels": {
         "deliveryStatus": "Statut de Livraison",
-        "statusNote": "Note de Statut",
         "trackingNumber": "Numéro de Suivi",
-        "phone": "Téléphone",
-        "cancelReason": "Raison d'annulation"
+        "phone": "Téléphone"
       },
       "placeholders": {
-        "statusNote": "Entrez une note pour ce changement de statut...",
         "trackingNumber": "Entrez le numéro de suivi...",
-        "phone": "Entrez le numéro de téléphone",
-        "cancelReason": "Entrez la raison de l'annulation..."
+        "phone": "Entrez le numéro de téléphone"
       },
       "currentStatus": "Statut Actuel",
       "retryConfirm": "Réessayer la confirmation",

@@ -894,7 +894,8 @@
       "completed": "Completed",
       "failed": "Failed",
       "refunded": "Refunded",
-      "partiallyRefunded": "Partially Refunded"
+      "partiallyRefunded": "Partially Refunded",
+      "cancelled": "Cancelled"
     },
     "details": {
       "orderNumber": "Order #{{id}}",
@@ -931,14 +932,6 @@
       "shipOrder": "Ship Order",
       "cancelOrder": "Cancel Order"
     },
-    "cancelDialog": {
-      "title": "Cancel Order",
-      "description": "Are you sure you want to cancel this order? This action cannot be undone.",
-      "reasonLabel": "Cancellation Reason (Optional)",
-      "reasonPlaceholder": "Enter reason for cancellation...",
-      "keepOrder": "No, keep order",
-      "confirmCancel": "Yes, cancel order"
-    },
     "editDialog": {
       "title": "Edit Order",
       "description": "Update order details",
@@ -953,16 +946,12 @@
       "lockNotice": "This order was paid by card. Only its delivery status can be changed.",
       "labels": {
         "deliveryStatus": "Delivery Status",
-        "statusNote": "Status Note",
         "trackingNumber": "Tracking Number",
-        "phone": "Phone",
-        "cancelReason": "Cancellation Reason"
+        "phone": "Phone"
       },
       "placeholders": {
-        "statusNote": "Enter a note for this status change...",
         "trackingNumber": "Enter tracking number...",
-        "phone": "Enter phone number",
-        "cancelReason": "Enter reason for cancellation..."
+        "phone": "Enter phone number"
       },
       "currentStatus": "Current Status",
       "retryConfirm": "Retry Confirm",

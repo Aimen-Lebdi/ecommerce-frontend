@@ -51,7 +51,6 @@ export interface UpdateOrderPayload {
     | "failed"
     | "returned"
     | "cancelled";
-  statusNote?: string;
   shippingAddress?: {
     wilaya: string;
     dayra: string;

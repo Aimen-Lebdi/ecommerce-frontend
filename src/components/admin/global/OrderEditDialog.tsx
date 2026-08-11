@@ -11,7 +11,6 @@ import {
 } from "../../ui/dialog";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
-import { Textarea } from "../../ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../ui/tabs";
 import {
   Select,
@@ -134,10 +133,10 @@ type Errors = {
 };
 
 /**
- * Payload handed to `onSave`. Extends the PUT payload with `reason`, which is
- * only used by the cancel route — the page strips it before a plain PUT /:id.
+ * Payload handed to `onSave`. Identical to the PUT payload; cancellation is
+ * routed to the dedicated cancel endpoint (no reason field in the UI).
  */
-export type OrderEditSavePayload = UpdateOrderPayload & { reason?: string };
+export type OrderEditSavePayload = UpdateOrderPayload;
 
 interface OrderEditDialogProps {
   /**
@@ -186,8 +185,6 @@ export function OrderEditDialog({
   // Form state
   const [deliveryStatus, setDeliveryStatus] =
     React.useState<OrderDeliveryStatus>("pending");
-  const [statusNote, setStatusNote] = React.useState("");
-  const [cancelReason, setCancelReason] = React.useState("");
   const [shippingAddress, setShippingAddress] = React.useState<AddressLocation>({
     wilaya: "",
     dayra: "",
@@ -212,7 +209,6 @@ export function OrderEditDialog({
   React.useEffect(() => {
     if (open && existingData) {
       setDeliveryStatus(existingData.deliveryStatus);
-      setStatusNote("");
       setShippingAddress({
         wilaya: existingData.shippingAddress?.wilaya || "",
         dayra: existingData.shippingAddress?.dayra || "",
@@ -240,7 +236,6 @@ export function OrderEditDialog({
           : "0"
       );
       setTrackingNumber(existingData.trackingNumber || "");
-      setCancelReason("");
       setErrors({});
       setActiveTab("status");
     }
@@ -326,13 +321,7 @@ export function OrderEditDialog({
         !existingData.trackingNumber;
       if (deliveryStatus !== existingData.deliveryStatus || isRetryConfirm) {
         payload.deliveryStatus = deliveryStatus;
-        if (statusNote.trim()) payload.statusNote = statusNote.trim();
       }
-    }
-
-    // Cancellation reason — only meaningful when the target status is cancelled.
-    if (deliveryStatus === "cancelled" && cancelReason.trim()) {
-      payload.reason = cancelReason.trim();
     }
 
     // Cash-only editable fields (card orders reject these server-side)
@@ -528,19 +517,6 @@ export function OrderEditDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="ord-status-note">
-                {t("orders.editDialog.labels.statusNote")}
-              </Label>
-              <Textarea
-                id="ord-status-note"
-                rows={3}
-                value={statusNote}
-                onChange={(e) => setStatusNote(e.target.value)}
-                placeholder={t("orders.editDialog.placeholders.statusNote")}
-              />
-            </div>
-
-            <div className="grid gap-2">
               <Label htmlFor="ord-tracking-number">
                 {t("orders.editDialog.labels.trackingNumber")}
               </Label>
@@ -553,21 +529,6 @@ export function OrderEditDialog({
               />
             </div>
 
-            {deliveryStatus === "cancelled" && (
-              <div className="grid gap-2">
-                <Label htmlFor="ord-cancel-reason">
-                  {t("orders.editDialog.labels.cancelReason")}
-                </Label>
-                <Textarea
-                  id="ord-cancel-reason"
-                  rows={3}
-                  value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  placeholder={t("orders.editDialog.placeholders.cancelReason")}
-                  disabled={statusLocked}
-                />
-              </div>
-            )}
           </TabsContent>
 
           {/* ---------- Address tab ---------- */}

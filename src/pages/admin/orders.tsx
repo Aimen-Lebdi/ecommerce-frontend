@@ -53,6 +53,7 @@ const getPaymentStatusBadge = (status: string, t: any) => {
     failed: { label: t('orders.paymentStatus.failed'), variant: "destructive" },
     refunded: { label: t('orders.paymentStatus.refunded'), variant: "destructive" },
     partially_refunded: { label: t('orders.paymentStatus.partiallyRefunded'), variant: "destructive" },
+    cancelled: { label: t('orders.paymentStatus.cancelled'), variant: "destructive" },
   };
   return statusConfig[status] || statusConfig.pending;
 };
@@ -263,16 +264,9 @@ export default function Orders() {
       if (payload.deliveryStatus === "confirmed") {
         updated = await dispatch(confirmOrder(id)).unwrap();
       } else if (payload.deliveryStatus === "cancelled") {
-        updated = await dispatch(
-          cancelOrder({ id, reason: payload.reason })
-        ).unwrap();
+        updated = await dispatch(cancelOrder({ id })).unwrap();
       } else {
-        // Keep the PUT payload clean: `reason` is dialog-only (cancel route).
-        const { reason, ...putPayload } = payload;
-        void reason;
-        updated = await dispatch(
-          updateOrder({ id, payload: putPayload })
-        ).unwrap();
+        updated = await dispatch(updateOrder({ id, payload })).unwrap();
       }
 
       setSelectedOrder(updated);

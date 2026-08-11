@@ -894,7 +894,8 @@
       "completed": "مكتمل",
       "failed": "فشل",
       "refunded": "تم الاسترداد",
-      "partiallyRefunded": "تم الاسترداد جزئياً"
+      "partiallyRefunded": "تم الاسترداد جزئياً",
+      "cancelled": "ملغي"
     },
     "details": {
       "orderNumber": "الطلب #{{id}}",
@@ -931,14 +932,6 @@
       "shipOrder": "شحن الطلب",
       "cancelOrder": "إلغاء الطلب"
     },
-    "cancelDialog": {
-      "title": "إلغاء الطلب",
-      "description": "هل أنت متأكد من رغبتك في إلغاء هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.",
-      "reasonLabel": "سبب الإلغاء (اختياري)",
-      "reasonPlaceholder": "أدخل سبب الإلغاء...",
-      "keepOrder": "لا، احتفظ بالطلب",
-      "confirmCancel": "نعم، إلغاء الطلب"
-    },
     "editDialog": {
       "title": "تعديل الطلب",
       "description": "تحديث تفاصيل الطلب",
@@ -953,16 +946,12 @@
       "lockNotice": "تم دفع هذا الطلب ببطاقة. يمكن تغيير حالة التوصيل فقط.",
       "labels": {
         "deliveryStatus": "حالة التوصيل",
-        "statusNote": "ملاحظة الحالة",
         "trackingNumber": "رقم التتبع",
-        "phone": "الهاتف",
-        "cancelReason": "سبب الإلغاء"
+        "phone": "الهاتف"
       },
       "placeholders": {
-        "statusNote": "أدخل ملاحظة لهذا التغيير...",
         "trackingNumber": "أدخل رقم التتبع...",
-        "phone": "أدخل رقم الهاتف",
-        "cancelReason": "أدخل سبب الإلغاء..."
+        "phone": "أدخل رقم الهاتف"
       },
       "currentStatus": "الحالة الحالية",
       "retryConfirm": "إعادة محاولة التأكيد",
