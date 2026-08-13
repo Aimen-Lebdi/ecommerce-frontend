@@ -55,6 +55,11 @@ export interface ActivityStats {
   dailyStats: Array<{ _id: string; count: number }>;
 }
 
+// Activity types that directly drive the dashboard cards/chart (revenue,
+// orders, customers, top product). Only these should trigger a live metrics
+// refresh so unrelated cart/product noise doesn't hammer the analytics endpoints.
+const METRICS_RELEVANT_TYPES = new Set(["order", "user"]);
+
 // State interface for activities slice
 interface ActivitiesState {
   // Main activities data
@@ -72,6 +77,11 @@ interface ActivitiesState {
   // Real-time activities (from socket)
   realtimeActivities: Activity[];
   isConnected: boolean;
+
+  // Live metrics refresh signal: increments whenever a realtime activity that
+  // affects the dashboard cards/chart (order/user) arrives, so the dashboard
+  // can re-fetch analytics without reacting to initial loads or cart noise.
+  metricsActivityCount: number;
 
   // Statistics
   stats: ActivityStats | null;
@@ -105,6 +115,7 @@ const initialState: ActivitiesState = {
   // Real-time
   realtimeActivities: [],
   isConnected: false,
+  metricsActivityCount: 0,
 
   // Statistics
   stats: null,
@@ -309,6 +320,12 @@ const activitiesSlice = createSlice({
       // Add new activity to the top of realtime activities
       state.realtimeActivities = [action.payload, ...state.realtimeActivities];
 
+      // FIXED (M6): Bump the live metrics signal for order/user activities so
+      // the dashboard cards/chart refresh in real time (never on initial load).
+      if (METRICS_RELEVANT_TYPES.has(action.payload.type)) {
+        state.metricsActivityCount += 1;
+      }
+
       // Also add to dashboard activities if they exist
       if (state.dashboardActivities.length > 0) {
         state.dashboardActivities = [
@@ -337,9 +354,17 @@ const activitiesSlice = createSlice({
       state,
       action: PayloadAction<Partial<ActivityStats>>
     ) => {
-      if (state.stats) {
-        state.stats = { ...state.stats, ...action.payload };
-      }
+      // FIXED (M6): Initialize stats from the payload instead of silently
+      // skipping when stats is null — otherwise the live `activity_stats`
+      // socket event was a no-op until a REST stats fetch happened first.
+      const payload = action.payload;
+      state.stats = {
+        timeframe: payload.timeframe ?? state.stats?.timeframe ?? "24h",
+        totalActivities:
+          payload.totalActivities ?? state.stats?.totalActivities ?? 0,
+        typeStats: payload.typeStats ?? state.stats?.typeStats ?? [],
+        dailyStats: payload.dailyStats ?? state.stats?.dailyStats ?? [],
+      };
     },
   },
   extraReducers: (builder) => {

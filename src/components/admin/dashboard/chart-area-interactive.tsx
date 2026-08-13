@@ -40,7 +40,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartAreaInteractive() {
+export function ChartAreaInteractive({
+  refreshSignal = 0,
+}: {
+  refreshSignal?: number;
+}) {
   const { t } = useTranslation();
   const dispatch = useAppDispatch()
   const { growthRateData, growthRateLoading, growthRateError } = 
@@ -48,11 +52,12 @@ export function ChartAreaInteractive() {
   
   const [timeRange, setTimeRange] = React.useState("90d")
 
-  // Fetch growth rate data when component mounts or timeRange changes
+  // Fetch growth rate data when component mounts, timeRange changes, or a live
+  // activity arrives (refreshSignal) so the chart stays current in real time.
   React.useEffect(() => {
     const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90
     dispatch(fetchGrowthRate(days))
-  }, [timeRange, dispatch])
+  }, [timeRange, refreshSignal, dispatch])
 
   const handleTimeRangeChange = (value: string) => {
     if (value) {
@@ -65,7 +70,11 @@ export function ChartAreaInteractive() {
     return growthRateData.reduce((sum, item) => sum + item.desktop, 0)
   }, [growthRateData])
 
-  if (growthRateLoading) {
+  // FIXED (M6): Only show the skeleton on the very first load; during live
+  // refreshes keep the last chart visible so it doesn't flicker.
+  const isInitialLoading = growthRateLoading && growthRateData.length === 0
+
+  if (isInitialLoading) {
     return (
       <Card className="@container/card">
         <CardHeader>
@@ -79,7 +88,7 @@ export function ChartAreaInteractive() {
     )
   }
 
-  if (growthRateError) {
+  if (growthRateError && growthRateData.length === 0) {
     return (
       <Card className="@container/card border-destructive">
         <CardHeader>

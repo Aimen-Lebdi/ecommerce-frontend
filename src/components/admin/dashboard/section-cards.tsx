@@ -66,7 +66,13 @@ export function SectionCards() {
     dispatch(fetchDashboardCards());
   }, [dispatch]);
 
-  if (cardsLoading) {
+  // FIXED (M6): Only show skeletons on the very first load. During live
+  // refreshes (triggered by realtime activity) keep the last known values
+  // visible instead of flickering to skeletons.
+  const isInitialLoading =
+    cardsLoading && !revenue && !orders && !customers && !topProduct;
+
+  if (isInitialLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         <CardSkeleton />
@@ -77,7 +83,8 @@ export function SectionCards() {
     );
   }
 
-  if (cardsError) {
+  // Only show the error state when there is nothing to display yet.
+  if (cardsError && !revenue && !orders && !customers && !topProduct) {
     return (
       <div className="grid grid-cols-1 gap-4 px-4 lg:px-6">
         <Card className="border-destructive">

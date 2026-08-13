@@ -14,6 +14,7 @@ interface SocketResponse {
   activities?: Activity[];
   activity?: Activity;
   stats?: any[];
+  dailyStats?: any[];
   total?: number;
   timeframe?: string;
   timestamp?: string;
@@ -27,7 +28,6 @@ class SocketService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
-  private hasRequestedInitialActivities = false;
   private hasJoinedDashboard = false;
 
   // Initialize socket connection with accessToken
@@ -94,14 +94,17 @@ class SocketService {
       console.log("✅ Socket connected with ID:", this.socket?.id);
       store.dispatch(setConnectionStatus(true));
       this.reconnectAttempts = 0;
-      // Reset flags on reconnection
-      this.hasRequestedInitialActivities = false;
+      // Reset flags on (re)connection - a reconnected socket must re-join
       this.hasJoinedDashboard = false;
+      // FIXED (M4): Auto (re)join the dashboard on every connect so admins
+      // receive live updates again after a reconnect. The server auto-sends
+      // a fresh initial_activities payload on each join (it resets its own
+      // hasReceivedInitialActivities per connection).
+      this.joinDashboard();
     });
 
     this.socket.on("disconnect", (reason) => {
       console.log("❌ Socket disconnected:", reason);
-      this.hasRequestedInitialActivities = false;
       this.hasJoinedDashboard = false;
       store.dispatch(setConnectionStatus(false));
       
@@ -144,11 +147,6 @@ class SocketService {
       store.dispatch(addRealtimeActivity(data));
     });
 
-    this.socket.on("activity_update", (data: Activity) => {
-      console.log("🔄 Activity update received:", data.activity);
-      store.dispatch(addRealtimeActivity(data));
-    });
-
     this.socket.on("initial_activities", (data: SocketResponse) => {
       console.log("📋 Initial activities received:", data.activities?.length || 0, "activities");
       if (data.activities) {
@@ -169,16 +167,10 @@ class SocketService {
         const statsUpdate: Partial<ActivityStats> = {
           totalActivities: data.total,
           typeStats: data.stats,
+          dailyStats: data.dailyStats ?? [],
           timeframe: data.timeframe,
         };
         store.dispatch(updateActivityStats(statsUpdate));
-      }
-    });
-
-    this.socket.on("my_activities", (data: SocketResponse) => {
-      console.log("👤 User activities received:", data.activities?.length || 0, "activities");
-      if (data.activities) {
-        store.dispatch(setInitialActivities(data.activities));
       }
     });
 
@@ -186,6 +178,10 @@ class SocketService {
     this.socket.on("dashboard_joined", (data: SocketResponse) => {
       console.log("📊 Dashboard joined successfully:", data.message);
       this.hasJoinedDashboard = true;
+      // FIXED (M6): Seed/refresh realtime stats right after joining so the
+      // dashboard has live metrics even before the first new activity arrives
+      // (and again after every reconnect).
+      this.requestActivityStats();
     });
 
     this.socket.on("dashboard_left", (data: SocketResponse) => {
@@ -222,23 +218,18 @@ class SocketService {
     }
   }
 
-  // FIXED: Request initial activities - only after joining dashboard
-  requestInitialActivities(): void {
-    if (this.socket && this.socket.connected && !this.hasRequestedInitialActivities && this.hasJoinedDashboard) {
-      console.log("📥 Requesting initial activities...");
-      this.hasRequestedInitialActivities = true;
-      this.socket.emit("request_initial_activities");
-    } else if (!this.hasJoinedDashboard) {
-      console.warn("⚠️ Cannot request initial activities - dashboard not joined yet");
-    }
-  }
-
-  // FIXED: Join dashboard room - waits for confirmation before requesting activities
+  // FIXED (M4): Single source of truth for joining the dashboard room.
+  // Called on every connect (initial + reconnect) for admins, so the
+  // dashboard re-joins after a reconnect without a component-level guard.
+  // The server auto-sends initial_activities after each successful join.
   joinDashboard(): void {
+    const userRole = (store.getState() as any)?.auth?.user?.role;
+    if (userRole !== "admin") {
+      return; // Dashboard room is admin-only (server enforces this too)
+    }
     if (this.socket && this.socket.connected && !this.hasJoinedDashboard) {
       console.log("📊 Joining dashboard room...");
       this.socket.emit("join_dashboard");
-      // Activities will be sent automatically after join_dashboard event is processed
     }
   }
 
@@ -248,7 +239,6 @@ class SocketService {
       console.log("👋 Leaving dashboard room...");
       this.socket.emit("leave_dashboard");
       this.hasJoinedDashboard = false;
-      this.hasRequestedInitialActivities = false;
     }
   }
 
@@ -271,14 +261,6 @@ class SocketService {
     }
   }
 
-  // Request user's own activities
-  requestMyActivities(): void {
-    if (this.socket && this.socket.connected) {
-      console.log("👤 Requesting my activities...");
-      this.socket.emit("get_my_activities");
-    }
-  }
-
   // Send ping to check connection
   ping(): void {
     if (this.socket && this.socket.connected) {
@@ -293,7 +275,6 @@ class SocketService {
       this.socket.removeAllListeners();
       this.socket.disconnect();
       this.socket = null;
-      this.hasRequestedInitialActivities = false;
       this.hasJoinedDashboard = false;
       store.dispatch(setConnectionStatus(false));
     }

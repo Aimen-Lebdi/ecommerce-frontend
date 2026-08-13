@@ -11,6 +11,7 @@ import {
 import { SectionCards } from "../../components/admin/dashboard/section-cards";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useSocketContext } from "../../socket/useSocket";
+import { fetchDashboardCards } from "../../features/analytics/analyticsSlice";
 import {
   fetchDashboardActivities,
   setQueryParams,
@@ -24,10 +25,6 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { socketService, isConnected } = useSocketContext();
-
-  // Track if we've joined dashboard in this session
-  const hasJoinedDashboardRef = React.useRef(false);
-  const dashboardJoinAttemptRef = React.useRef(false);
 
   // Helper function to get relative time
   const getRelativeTime = (timestamp: string) => {
@@ -229,9 +226,8 @@ export default function Dashboard() {
     dashboardLoading,
     dashboardError,
     currentQueryParams,
+    metricsActivityCount,
   } = useAppSelector((state) => state.activities);
-
-  const { user } = useAppSelector((state) => state.auth);
 
   // Combine dashboard activities with realtime activities
   const combinedActivities = React.useMemo(() => {
@@ -261,6 +257,16 @@ export default function Dashboard() {
     dispatch(fetchDashboardActivities());
   }, [dispatch]);
 
+  // FIXED (M6): Keep the dashboard cards live. When a realtime activity that
+  // affects the metrics arrives (e.g. an order is placed/updated or a user
+  // registers), refresh the analytics cards so revenue/orders/customers tick
+  // up in real time instead of only after a manual refresh.
+  React.useEffect(() => {
+    if (metricsActivityCount > 0) {
+      dispatch(fetchDashboardCards());
+    }
+  }, [metricsActivityCount, dispatch]);
+
   // Handle errors
   React.useEffect(() => {
     if (dashboardError) {
@@ -269,30 +275,10 @@ export default function Dashboard() {
     }
   }, [dashboardError, dispatch]);
 
-  // FIXED: Join dashboard room when socket is connected and user is admin
-  React.useEffect(() => {
-    if (isConnected && user?.role === "admin" && !hasJoinedDashboardRef.current && !dashboardJoinAttemptRef.current) {
-      dashboardJoinAttemptRef.current = true;
-      
-      console.log("📊 Admin connected, joining dashboard room...");
-      
-      // Small delay to ensure socket is fully ready
-      setTimeout(() => {
-        socketService.joinDashboard();
-        hasJoinedDashboardRef.current = true;
-        dashboardJoinAttemptRef.current = false;
-      }, 500);
-    }
-
-    // Cleanup on unmount or disconnect
-    return () => {
-      if (hasJoinedDashboardRef.current && socketService.isDashboardJoined()) {
-        console.log("👋 Leaving dashboard on unmount/disconnect");
-        socketService.leaveDashboard();
-        hasJoinedDashboardRef.current = false;
-      }
-    };
-  }, [isConnected, user?.role, socketService]);
+  // NOTE: Joining the dashboard room is handled by socketService (single
+  // source of truth) - it re-emits join_dashboard on every connect for admins,
+  // so the dashboard automatically re-joins after a reconnect. No local guard
+  // is needed here anymore.
 
   // Handle query parameter changes from the DataTable
   const handleQueryParamsChange = React.useCallback(
@@ -341,7 +327,7 @@ export default function Dashboard() {
 
           {/* Growth Rate Chart */}
           <div className="px-4 lg:px-6">
-            <ChartAreaInteractive />
+            <ChartAreaInteractive refreshSignal={metricsActivityCount} />
           </div>
 
           {/* Recent Activities Table */}
