@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  Search,
   ShoppingCart,
   Heart,
   User,
@@ -13,8 +12,8 @@ import {
   Shield,
 } from "lucide-react";
 import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
 import { Badge } from "../../ui/badge";
+import { SearchBox } from "./SearchBox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,7 +34,6 @@ import { signOut } from "../../../features/auth/authSlice";
 import { useTranslation } from "react-i18next";
 
 export function Header() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t, i18n } = useTranslation();
 
@@ -50,14 +48,6 @@ export function Header() {
   const handleSignOut = () => {
     dispatch(signOut());
     navigate("/sign-in");
-  };
-
-  // Handle search submission
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/shop?keyword=${encodeURIComponent(searchQuery.trim())}`);
-    }
   };
 
   // Language change handler
@@ -115,16 +105,7 @@ export function Header() {
 
           {/* Search Bar - Desktop */}
           <div className="hidden md:flex flex-1 max-w-lg mx-8">
-            <form onSubmit={handleSearch} className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder={t("header.searchPlaceholder")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4"
-              />
-            </form>
+            <SearchBox className="w-full" />
           </div>
 
           {/* Right Side Icons */}
@@ -330,16 +311,7 @@ export function Header() {
 
       {/* Search Bar - Mobile */}
       <div className="md:hidden border-t px-4 py-3">
-        <form onSubmit={handleSearch} className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder={t("header.searchPlaceholder")}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4"
-          />
-        </form>
+        <SearchBox />
       </div>
 
       {/* Navigation Menu */}
