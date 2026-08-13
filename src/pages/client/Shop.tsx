@@ -8,7 +8,7 @@ import {
   List,
   Heart,
   ShoppingCart,
-  Eye,
+  Package,
   X,
   SlidersHorizontal,
   ChevronLeft,
@@ -550,14 +550,17 @@ const ShopPage = () => {
         <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col cursor-pointer">
           <CardHeader className="p-0 flex-shrink-0">
             <div className="relative overflow-hidden rounded-t-lg">
-              <img
-                src={
-                  product.mainImage ||
-                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop"
-                }
-                alt={product.name}
-                className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
+              {product.mainImage ? (
+                <img
+                  src={product.mainImage}
+                  alt={product.name}
+                  className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-36 sm:h-40 md:h-48 bg-muted flex items-center justify-center">
+                  <Package className="h-8 w-8 text-muted-foreground" />
+                </div>
+              )}
               <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100 sm:group-hover:scale-110">
                 <Button
                   size="icon"
@@ -583,16 +586,6 @@ const ShopPage = () => {
                   }}
                 >
                   <Heart className="h-3 w-3" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-7 w-7 bg-white/90 hover:bg-white"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  <Eye className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -637,22 +630,25 @@ const ShopPage = () => {
 
   const ProductCardList = ({ product }) => {
     return (
-      <Card className="group hover:shadow-lg transition-all duration-300">
-        <CardContent className="p-4">
-          <div className="flex gap-4">
-            <div className="relative overflow-hidden rounded-lg flex-shrink-0">
-              <img
-                src={
-                  product.mainImage ||
-                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop"
-                }
-                alt={product.name}
-                className="w-24 h-24 sm:w-32 sm:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex-1 min-w-0">
+      <Link to={`/product/${product._id}`} className="block">
+        <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex gap-4">
+              <div className="relative overflow-hidden rounded-lg flex-shrink-0">
+                {product.mainImage ? (
+                  <img
+                    src={product.mainImage}
+                    alt={product.name}
+                    className="w-24 h-24 sm:w-32 sm:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-muted flex items-center justify-center">
+                    <Package className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="mb-2">
                   <div className="flex flex-wrap gap-1 mb-1">
                     {product.brand?.name && (
                       <Badge variant="outline" className="text-xs">
@@ -669,49 +665,31 @@ const ShopPage = () => {
                     {product.name}
                   </h3>
                 </div>
-                <div className="flex gap-1 sm:gap-2 ml-2">
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="h-7 w-7 sm:h-8 sm:w-8"
-                  >
-                    <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="h-7 w-7 sm:h-8 sm:w-8"
-                  >
-                    <Link to={`/product/${product._id}`}>
-                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg sm:text-xl font-bold">
-                      {product.price} DA
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg sm:text-xl font-bold">
+                        {product.price} DA
+                      </span>
+                    </div>
+                    <span
+                      className={`text-sm ${
+                        product.quantity > 0 ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
+                      {product.quantity > 0
+                        ? t("shop.product.inStock", {
+                            quantity: product.quantity,
+                          })
+                        : t("shop.product.outOfStock")}
                     </span>
                   </div>
-                  <span
-                    className={`text-sm ${
-                      product.quantity > 0 ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {product.quantity > 0
-                      ? t("shop.product.inStock", {
-                          quantity: product.quantity,
-                        })
-                      : t("shop.product.outOfStock")}
-                  </span>
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </Link>
     );
   };
 

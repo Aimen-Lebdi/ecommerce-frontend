@@ -6,7 +6,7 @@ import {
   ChevronRight,
   Star,
   Heart,
-  Eye,
+  Package,
   ArrowRight,
   Quote,
 } from "lucide-react";
@@ -19,7 +19,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "../../components/ui/avatar";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { fetchCategories } from "../../features/categories/categoriesSlice";
 import { fetchProducts } from "../../features/products/productsSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
@@ -324,14 +324,19 @@ const CategoriesSection = () => {
               <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full">
                 <CardContent className="p-4 text-center">
                   <div className="w-full h-32 mb-4 overflow-hidden rounded-lg">
-                    <img
-                      src={
-                        category.image ||
-                        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop"
-                      }
-                      alt={category.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
+                    {category.image ? (
+                      <img
+                        src={category.image}
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <span className="text-3xl font-bold text-muted-foreground">
+                          {category.name?.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <h3 className="font-semibold mb-1">{category.name}</h3>
                   <p className="text-sm text-muted-foreground">
@@ -363,7 +368,6 @@ const CategoriesSection = () => {
 const FeaturedProductsSection = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const { products, loading } = useSelector((state) => state.products);
 
@@ -449,14 +453,17 @@ const FeaturedProductsSection = () => {
               <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col">
                 <CardHeader className="p-0">
                   <div className="relative overflow-hidden rounded-t-lg">
-                    <img
-                      src={
-                        product.mainImage ||
-                        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop"
-                      }
-                      alt={product.name}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                    {product.mainImage ? (
+                      <img
+                        src={product.mainImage}
+                        alt={product.name}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-muted flex items-center justify-center">
+                        <Package className="h-10 w-10 text-muted-foreground" />
+                      </div>
+                    )}
                     <Badge
                       className="absolute top-3 left-3"
                       variant={badgeVariant}
@@ -474,18 +481,6 @@ const FeaturedProductsSection = () => {
                       >
                         <Heart className="h-4 w-4" />
                       </Button>
-                      <Button
-  size="icon"
-  variant="outline"
-  className="h-8 w-8 bg-white/80 hover:bg-white"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigate(`/product/${product._id}`);
-  }}
->
-  <Eye className="h-4 w-4" />
-</Button>
                     </div>
                   </div>
                 </CardHeader>
