@@ -31,6 +31,7 @@ import {
   type UpdateUserData,
 } from "../../features/users/usersSlice";
 import { useTranslation } from 'react-i18next';
+import { fetchCurrentUser } from "../../features/auth/authSlice";
 
 // Define the User entity type to match backend response
 export interface User {
@@ -127,6 +128,7 @@ const advancedFilterConfig = {
 export default function Users() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const { user: currentUser } = useAppSelector((state) => state.auth);
   const {
     users,
     pagination,
@@ -210,6 +212,12 @@ export default function Users() {
       ).unwrap();
       toast.success(t('users.messages.updateSuccess'));
       // Note: updateUser thunk automatically refetches data
+
+      // If the admin edited their own profile, refresh the current user so the
+      // sidebar/My Account avatar and name update live without re-login.
+      if (id === currentUser?._id) {
+        dispatch(fetchCurrentUser());
+      }
     } catch (error) {
       console.error("Failed to update user:", error);
       // Error toast is handled by the error useEffect above

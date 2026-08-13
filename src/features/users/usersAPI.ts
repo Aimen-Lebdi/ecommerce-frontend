@@ -151,7 +151,9 @@ export const updateLoggedUserDataAPI = async (
   }
   if (userData.image !== undefined) {
     if (userData.image === null) {
-      formData.append("image", "null");
+      // Use the "__NULL__" marker so the backend handleNullValues middleware
+      // converts it back to a real null (mirrors updateUserAPI).
+      formData.append("image", "__NULL__");
     } else {
       formData.append("image", userData.image);
     }

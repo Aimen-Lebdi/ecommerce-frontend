@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { 
   refreshToken, 
   handleTokenExpiration, 
-  signOut 
+  signOut,
+  fetchCurrentUser 
 } from "../features/auth/authSlice";
 
 export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
@@ -58,6 +59,13 @@ export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
         }
       }
       
+      // Bootstrap: pull fresh current-user data so profile/image changes made
+      // while logged in appear immediately (e.g. sidebar avatar, My Account).
+      // Errors are ignored — we never wipe auth state on a background refresh.
+      if (storedUser) {
+        dispatch(fetchCurrentUser());
+      }
+
       // Mark initialization as complete
       setIsInitializing(false);
     };

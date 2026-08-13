@@ -31,7 +31,7 @@ import {
   removeProductFromWishlist,
 } from "../../features/wishlist/wishlistSlice";
 import { addProductToCart } from "../../features/cart/cartSlice";
-import { signOut } from "../../features/auth/authSlice";
+import { signOut, fetchCurrentUser } from "../../features/auth/authSlice";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/button";
 import {
@@ -150,9 +150,8 @@ useEffect(() => {
   const userData = {
     name: user?.name || t('myAccount.guest'),
     email: user?.email || "",
-    profilePicture:
-      user?.image ||
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+    // Empty src makes Radix Avatar render the initials fallback when no image
+    profilePicture: user?.image || "",
     memberSince: user?.createdAt
       ? new Date(user.createdAt).toLocaleDateString("en-US", {
           month: "long",
@@ -260,6 +259,9 @@ useEffect(() => {
         })
       ).unwrap();
       
+      // Refresh the current user so sidebar + My Account avatars update immediately
+      dispatch(fetchCurrentUser());
+
       toast.success(t('myAccount.profileUpdated'));
       setIsEditingInfo(false);
       setSelectedImage(null);
@@ -369,7 +371,7 @@ useEffect(() => {
           <div className="flex items-center space-x-3 sm:space-x-4">
             <Avatar className="w-12 h-12 sm:w-16 sm:h-16">
               <AvatarImage src={userData.profilePicture} alt={userData.name} />
-              <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{userData.name.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
               <h2 className="text-xl sm:text-2xl font-semibold">
@@ -685,7 +687,7 @@ useEffect(() => {
               <div className="flex items-center space-x-4">
                 <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
                   <AvatarImage src={userData.profilePicture} alt={userData.name} />
-                  <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{userData.name.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-semibold text-base sm:text-lg">
@@ -712,7 +714,7 @@ useEffect(() => {
                       alt={tempPersonalInfo.name}
                     />
                     <AvatarFallback>
-                      {tempPersonalInfo.name.charAt(0)}
+                      {tempPersonalInfo.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex gap-2">
@@ -989,7 +991,7 @@ useEffect(() => {
                       src={userData.profilePicture}
                       alt={userData.name}
                     />
-                    <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{userData.name.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm sm:text-base truncate">

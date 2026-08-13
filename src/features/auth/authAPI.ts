@@ -1,4 +1,6 @@
 import axiosInstance from "../../utils/axiosInstance";
+import type { Address } from "../addresses/addressesAPI";
+import type { Phone } from "../phones/phonesAPI";
 
 // Interfaces
 export interface SignInData {
@@ -13,16 +15,24 @@ export interface SignUpData {
   passwordConfirm: string;
 }
 
+// The authenticated user document shape returned by the API
+// (also used by GET /api/users/getMe which returns the raw document)
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  image?: string;
+  role: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  phone?: string;
+  addresses?: Address[];
+  phones?: Phone[];
+}
+
 export interface AuthResponse {
-  data: {
-    _id: string;
-    name: string;
-    email: string;
-    role: string;
-    active: boolean;
-    createdAt: string;
-    updatedAt?: string;
-  };
+  data: User;
   accessToken: string;
 }
 
@@ -114,5 +124,13 @@ export const resetPasswordAPI = async (
     "/api/auth/resetPassword",
     resetPasswordData
   );
+  return response.data;
+};
+
+// Get current logged-in user API call
+// NOTE: getOneUser returns the raw document (NOT wrapped in { data }),
+// so we return response.data directly.
+export const getCurrentUserAPI = async (): Promise<User> => {
+  const response = await axiosInstance.get("/api/users/getMe");
   return response.data;
 };

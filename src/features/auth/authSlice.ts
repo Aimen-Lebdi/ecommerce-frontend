@@ -12,6 +12,7 @@ import {
   resetPasswordAPI,
   refreshTokenAPI,
   logOutAPI,
+  getCurrentUserAPI,
   type SignInData,
   type SignUpData,
   type ForgotPasswordData,
@@ -22,24 +23,12 @@ import {
   type ForgotPasswordResponse,
   type VerifyResetCodeResponse,
   type ResetPasswordResponse,
+  type User,
 } from "./authAPI";
-import type { Address } from "../addresses/addressesAPI";
-import type { Phone } from "../phones/phonesAPI";
 
-// Define the User type
-export interface User {
-  _id: string;
-  name: string;
-  email: string;
-  image?: string;
-  role: string;
-  active: boolean;
-  createdAt: string;
-  updatedAt?: string;
-  phone?: string;
-  addresses?: Address[];
-  phones?: Phone[];
-}
+// Re-export the User type for consumers that import from this slice
+// (e.g. nav-user.tsx)
+export type { User };
 
 // State interface for auth slice
 interface AuthState {
@@ -66,6 +55,11 @@ interface AuthState {
 const clearAuthStorage = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("user");
+};
+
+// Persist the current user snapshot to localStorage (single source of truth)
+const persistUser = (user: User) => {
+  localStorage.setItem("user", JSON.stringify(user));
 };
 
 // Get initial state from localStorage
@@ -123,36 +117,6 @@ const getInitialState = (): AuthState => {
 // Initial state
 const initialState: AuthState = getInitialState();
 
-// NEW: Async thunk to sync auth state with localStorage
-export const syncAuthState = createAsyncThunk(
-  'auth/syncState',
-  async (_, { rejectWithValue }) => {
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-      const userStr = localStorage.getItem("user");
-      
-      if (accessToken && userStr) {
-        const user = JSON.parse(userStr);
-        return {
-          user,
-          accessToken,
-          isAuthenticated: true,
-          tokenExpired: false
-        };
-      }
-      
-      return {
-        user: null,
-        accessToken: null,
-        isAuthenticated: false,
-        tokenExpired: false
-      };
-    } catch (error: any) {
-      return rejectWithValue("Failed to sync auth state");
-    }
-  }
-);
-
 // Async thunk to refresh token
 export const refreshToken = createAsyncThunk<
   RefreshTokenResponse,
@@ -168,6 +132,25 @@ export const refreshToken = createAsyncThunk<
   }
 });
 
+// Async thunk to fetch the current logged-in user (fresh data from the server).
+// Used to keep the auth snapshot in sync after profile/image changes so the
+// sidebar avatar and My Account update without requiring a re-login.
+export const fetchCurrentUser = createAsyncThunk<
+  User,
+  void,
+  { rejectValue: string }
+>("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
+  try {
+    const user = await getCurrentUserAPI();
+    return user;
+  } catch (err: any) {
+    // Ignore errors — never wipe auth state on a background refresh failure
+    const message =
+      err.response?.data?.message || err.message || "Failed to fetch user data";
+    return rejectWithValue(message);
+  }
+});
+
 // Async thunk to sign in user
 export const signIn = createAsyncThunk<
   AuthResponse,
@@ -179,7 +162,7 @@ export const signIn = createAsyncThunk<
 
     // Store tokens and user
     localStorage.setItem("accessToken", response.accessToken);
-    localStorage.setItem("user", JSON.stringify(response.data));
+    persistUser(response.data);
 
     return response;
   } catch (err: any) {
@@ -200,7 +183,7 @@ export const signUp = createAsyncThunk<
 
     // Store tokens and user
     localStorage.setItem("accessToken", response.accessToken);
-    localStorage.setItem("user", JSON.stringify(response.data));
+    persistUser(response.data);
 
     return response;
   } catch (err: any) {
@@ -335,7 +318,12 @@ const authSlice = createSlice({
       state.tokenExpired = false;
 
       localStorage.setItem("accessToken", action.payload.accessToken);
-      localStorage.setItem("user", JSON.stringify(action.payload.user));
+      persistUser(action.payload.user);
+    },
+    // Update just the user snapshot locally (e.g. after a local profile change)
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      persistUser(action.payload);
     },
     clearPasswordResetState: (state) => {
       state.forgotPasswordSuccess = false;
@@ -350,22 +338,15 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // NEW: Sync auth state
-      .addCase(syncAuthState.pending, (state) => {
-        state.loading = true;
+      // Fetch current user (fresh snapshot after profile/image changes)
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.error = null;
+        persistUser(action.payload);
       })
-      .addCase(syncAuthState.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
-        state.isAuthenticated = action.payload.isAuthenticated;
-        state.tokenExpired = action.payload.tokenExpired;
-      })
-      .addCase(syncAuthState.rejected, (state) => {
-        state.loading = false;
-        state.isAuthenticated = false;
-        state.user = null;
-        state.accessToken = null;
+      .addCase(fetchCurrentUser.rejected, (state) => {
+        // Ignore failures — keep the existing auth snapshot (no wipe)
+        state.error = null;
       })
       // Sign in
       .addCase(signIn.pending, (state) => {
@@ -542,6 +523,7 @@ export const {
   clearError,
   signOut,
   setAuthData,
+  setUser,
   handleTokenExpiration,
   clearPasswordResetState,
   setResetEmail,
