@@ -82,6 +82,8 @@ const [activeSection, setActiveSection] = useState(tabFromUrl);
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Tri-state for profile image: no-change / new-file / remove
+  const [imageRemoved, setImageRemoved] = useState(false);
 
   // Password State
   const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -237,6 +239,7 @@ useEffect(() => {
         return;
       }
       setSelectedImage(file);
+      setImageRemoved(false); // picking a new file cancels a staged removal
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -248,6 +251,7 @@ useEffect(() => {
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImagePreview(null);
+    setImageRemoved(true);
   };
 
   const handleUpdatePersonalInfo = async () => {
@@ -255,7 +259,10 @@ useEffect(() => {
       await dispatch(
         updateLoggedUserData({
           name: tempPersonalInfo.name,
-          image: selectedImage,
+          // undefined → API omits image → existing photo preserved
+          // null → API sends "__NULL__" → photo removed
+          // File → replace photo
+          image: imageRemoved ? null : (selectedImage ?? undefined),
         })
       ).unwrap();
       
@@ -266,6 +273,7 @@ useEffect(() => {
       setIsEditingInfo(false);
       setSelectedImage(null);
       setImagePreview(null);
+      setImageRemoved(false);
     } catch (error: any) {
       toast.error(error || t('myAccount.updateFailed'));
     }
@@ -278,6 +286,7 @@ useEffect(() => {
     setIsEditingInfo(false);
     setSelectedImage(null);
     setImagePreview(null);
+    setImageRemoved(false); // cancel restores the original photo
   };
 
   const validatePassword = () => {
@@ -710,7 +719,8 @@ useEffect(() => {
                 <div className="flex items-center gap-4">
                   <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
                     <AvatarImage
-                      src={imagePreview || userData.profilePicture}
+                      // Empty src → Radix Avatar shows the initials fallback while removal is staged
+                      src={imagePreview || (imageRemoved ? "" : userData.profilePicture)}
                       alt={tempPersonalInfo.name}
                     />
                     <AvatarFallback>
@@ -733,7 +743,7 @@ useEffect(() => {
                       onChange={handleImageChange}
                       className="hidden"
                     />
-                    {(imagePreview || selectedImage) && (
+                    {(imagePreview || selectedImage || (userData.profilePicture && !imageRemoved)) && (
                       <Button
                         type="button"
                         variant="outline"
