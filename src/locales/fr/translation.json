@@ -1443,6 +1443,56 @@
       "getHelp": "Obtenir de l'Aide"
     }
   },
+  "help": {
+    "title": "Aide de l'administration",
+    "subtitle": "Comment gérer votre boutique — produits, commandes et support.",
+    "sections": {
+      "operations": {
+        "title": "Gérer votre boutique",
+        "description": "Les tâches courantes expliquées en quelques étapes.",
+        "items": {
+          "addProduct": {
+            "q": "Comment ajouter un produit ?",
+            "a": "Allez dans Produits, cliquez sur Ajouter un produit, renseignez le nom, le prix, le stock, les images et la catégorie, puis enregistrez. Le produit est publié immédiatement."
+          },
+          "updateStock": {
+            "q": "Comment mettre à jour le stock ?",
+            "a": "Ouvrez le produit et modifiez le champ stock. Le changement est répercuté immédiatement sur la boutique."
+          },
+          "organizeProducts": {
+            "q": "Comment organiser les produits ?",
+            "a": "Chaque produit appartient à une catégorie et une sous-catégorie et peut être lié à une marque. Gérez cela depuis Catégories, Sous-catégories et Marques."
+          },
+          "handleOrder": {
+            "q": "Comment traiter une commande ?",
+            "a": "Ouvrez Commandes, sélectionnez une commande et faites avancer son statut dans l'ordre autorisé. Voir les statuts ci-dessous — les états terminaux sont verrouillés."
+          }
+        }
+      },
+      "orderStatuses": {
+        "title": "Statuts de commande",
+        "intro": "Les commandes avancent étape par étape. Une fois qu'une commande atteint un état terminal (terminée, annulée, échouée ou retournée), elle est verrouillée.",
+        "chain": "Flux : en attente → confirmée → expédiée → en transit → en cours de livraison → livrée → terminée",
+        "statuses": {
+          "pending": { "label": "En attente", "desc": "En attente du paiement ou de la confirmation." },
+          "confirmed": { "label": "Confirmée", "desc": "Paiement reçu ; la commande est préparée." },
+          "shipped": { "label": "Expédiée", "desc": "Remise au transporteur." },
+          "in_transit": { "label": "En transit", "desc": "En route vers le client." },
+          "out_for_delivery": { "label": "En cours de livraison", "desc": "Avec le livreur local, en cours de livraison." },
+          "delivered": { "label": "Livrée", "desc": "Livrée au client." },
+          "completed": { "label": "Terminée", "desc": "Commande terminée et clôturée (verrouillée)." },
+          "cancelled": { "label": "Annulée", "desc": "Commande annulée (verrouillée)." },
+          "failed": { "label": "Échouée", "desc": "Paiement ou exécution échoué (verrouillée)." },
+          "returned": { "label": "Retournée", "desc": "Le client a retourné la commande (verrouillée)." }
+        }
+      },
+      "support": {
+        "title": "Besoin d'aide ?",
+        "description": "Pour tout problème lié au panneau d'administration ou aux litiges clients, contactez l'équipe de support.",
+        "contactCta": "Aller à Nous contacter"
+      }
+    }
+  },
   "chart": {
     "growthRate": {
       "title": "Taux de Croissance",

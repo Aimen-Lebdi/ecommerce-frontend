@@ -1443,6 +1443,56 @@
       "getHelp": "Get Help"
     }
   },
+  "help": {
+    "title": "Admin Help",
+    "subtitle": "How to run your store — products, orders and support.",
+    "sections": {
+      "operations": {
+        "title": "Manage your store",
+        "description": "Everyday tasks explained in a few steps.",
+        "items": {
+          "addProduct": {
+            "q": "How do I add a product?",
+            "a": "Go to Products, click Add product, fill in the name, price, stock, images and category, then save. The product goes live in the store immediately."
+          },
+          "updateStock": {
+            "q": "How do I update stock?",
+            "a": "Open the product and edit the stock field. The change is reflected in the storefront instantly."
+          },
+          "organizeProducts": {
+            "q": "How are products organised?",
+            "a": "Each product belongs to a category and subcategory and can be linked to a brand. Manage these from Categories, Subcategories and Brands."
+          },
+          "handleOrder": {
+            "q": "How do I process an order?",
+            "a": "Open Orders, select an order and move its status forward in the allowed order. See the statuses below — terminal states are locked."
+          }
+        }
+      },
+      "orderStatuses": {
+        "title": "Order statuses",
+        "intro": "Orders move forward step by step. Once an order reaches a terminal state (completed, cancelled, failed or returned) it is locked.",
+        "chain": "Flow: pending → confirmed → shipped → in_transit → out_for_delivery → delivered → completed",
+        "statuses": {
+          "pending": { "label": "Pending", "desc": "Awaiting payment or confirmation." },
+          "confirmed": { "label": "Confirmed", "desc": "Payment received; order is being prepared." },
+          "shipped": { "label": "Shipped", "desc": "Handed over to the carrier." },
+          "in_transit": { "label": "In transit", "desc": "On its way to the customer." },
+          "out_for_delivery": { "label": "Out for delivery", "desc": "With the local courier, out for delivery." },
+          "delivered": { "label": "Delivered", "desc": "Delivered to the customer." },
+          "completed": { "label": "Completed", "desc": "Order finished and closed (locked)." },
+          "cancelled": { "label": "Cancelled", "desc": "Order cancelled (locked)." },
+          "failed": { "label": "Failed", "desc": "Payment or fulfilment failed (locked)." },
+          "returned": { "label": "Returned", "desc": "Customer returned the order (locked)." }
+        }
+      },
+      "support": {
+        "title": "Need more help?",
+        "description": "For issues with the admin panel or customer disputes, reach the store support team.",
+        "contactCta": "Go to Contact Us"
+      }
+    }
+  },
   "chart": {
     "growthRate": {
       "title": "Growth Rate",

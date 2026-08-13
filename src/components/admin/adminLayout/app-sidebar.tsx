@@ -27,17 +27,13 @@ import {
 } from "../../admin/adminLayout/sidebar";
 import { Link } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
+import { useAppSelector } from "../../../app/hooks";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
-  
+  const user = useAppSelector((state) => state.auth.user);
 
   const data = {
-    user: {
-      name: "shadcn",
-      email: "m@example.com",
-      avatar: "/avatars/shadcn.jpg",
-    },
     navMain: [
       {
         title: t('sidebar.nav.dashboard'),
@@ -83,7 +79,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: t('sidebar.nav.getHelp'),
-        url: "#",
+        url: "/admin/help",
         icon: IconHelp,
       },
     ],
@@ -111,7 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   );
