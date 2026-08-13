@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { io, Socket } from "socket.io-client";
 import { store } from "../app/Store";
+import { refreshTokenAPI } from "../features/auth/authAPI";
 import {
   setConnectionStatus,
   addRealtimeActivity,
@@ -9,6 +10,14 @@ import {
   type Activity,
   type ActivityStats,
 } from "../features/activities/activitiesSlice";
+
+// Single source of truth for the socket URL, token storage key and retry cap.
+const SOCKET_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+const TOKEN_STORAGE_KEY = "accessToken";
+const MAX_RECONNECTION_ATTEMPTS = 10;
+// Throttle token-refresh calls so a permanently-refused handshake does not
+// hammer the auth endpoint on every socket.io reconnection attempt.
+const AUTH_REFRESH_THROTTLE_MS = 10_000;
 
 interface SocketResponse {
   activities?: Activity[];
@@ -25,37 +34,48 @@ interface SocketResponse {
 
 class SocketService {
   private socket: Socket | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000;
+  private reconnectionAttempts = 0;
   private hasJoinedDashboard = false;
+  private authRefreshThrottledUntil = 0;
 
-  // Initialize socket connection with accessToken
-  async connect(accessToken: string): Promise<void> {
+  // B1: Read the latest access token from localStorage at (re)connect time so
+  // the socket always uses the freshest token (the axios silent refresh only
+  // writes localStorage, never Redux). The accessToken arg is kept for
+  // backward compatibility but is no longer the only source of truth.
+  async connect(accessToken?: string): Promise<void> {
+    const token = accessToken || localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!token) {
+      console.warn("🔌 Socket connect aborted: no access token available");
+      store.dispatch(setConnectionStatus(false));
+      return;
+    }
+
     try {
       // Disconnect existing connection if any
       if (this.socket) {
         this.disconnect();
       }
 
-      console.log('🔌 Connecting to socket with access token...');
+      console.log("🔌 Connecting to socket with access token...");
 
       // Create new socket connection
-      this.socket = io(import.meta.env.VITE_BASE_URL || "http://localhost:5000", {
+      this.socket = io(SOCKET_URL, {
         auth: {
-          token: accessToken // Use accessToken for authentication
+          token,
         },
         transports: ["websocket", "polling"],
         timeout: 20000,
         forceNew: true,
         reconnection: true,
-        reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: this.reconnectDelay,
+        // B3: Cap built-in reconnection attempts — socket.io is the single
+        // source of truth for retries (no manual reconnection loop).
+        reconnectionAttempts: MAX_RECONNECTION_ATTEMPTS,
+        reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
       });
 
       this.setupEventListeners();
-      
+
       return new Promise((resolve, reject) => {
         if (!this.socket) return reject(new Error("Socket not initialized"));
 
@@ -63,19 +83,25 @@ class SocketService {
           reject(new Error("Socket connection timeout"));
         }, 20000);
 
-        this.socket.on("connect", () => {
+        this.socket.once("connect", () => {
           clearTimeout(connectTimeout);
           console.log("✅ Socket connected successfully with ID:", this.socket?.id);
-          this.reconnectAttempts = 0;
+          this.reconnectionAttempts = 0;
           store.dispatch(setConnectionStatus(true));
           resolve();
         });
 
-        this.socket.on("connect_error", (error) => {
+        this.socket.once("connect_error", (error) => {
           clearTimeout(connectTimeout);
-          console.error("❌ Socket connection error:", error);
-          store.dispatch(setConnectionStatus(false));
-          reject(error);
+          if (this.isAuthError(error)) {
+            // B2: Auth errors self-heal (refresh + reconnect) — settle the
+            // promise so callers don't hang or show a premature failure toast.
+            console.warn("❌ Socket auth error:", error.message);
+            resolve();
+          } else {
+            console.error("❌ Socket connection error:", error.message);
+            reject(error);
+          }
         });
       });
     } catch (error) {
@@ -93,7 +119,8 @@ class SocketService {
     this.socket.on("connect", () => {
       console.log("✅ Socket connected with ID:", this.socket?.id);
       store.dispatch(setConnectionStatus(true));
-      this.reconnectAttempts = 0;
+      this.reconnectionAttempts = 0;
+      this.authRefreshThrottledUntil = 0;
       // Reset flags on (re)connection - a reconnected socket must re-join
       this.hasJoinedDashboard = false;
       // FIXED (M4): Auto (re)join the dashboard on every connect so admins
@@ -107,28 +134,35 @@ class SocketService {
       console.log("❌ Socket disconnected:", reason);
       this.hasJoinedDashboard = false;
       store.dispatch(setConnectionStatus(false));
-      
-      // Attempt to reconnect if disconnection was unexpected
-      if (reason === "io server disconnect") {
-        console.log("Server initiated disconnect - manual reconnection required");
-      } else {
-        this.handleReconnection();
-      }
+      // B3: No manual reconnection loop — socket.io's built-in reconnection
+      // (with a capped attempt count) handles network drops automatically.
     });
 
     this.socket.on("reconnect", (attemptNumber) => {
       console.log("🔄 Socket reconnected after", attemptNumber, "attempts");
       store.dispatch(setConnectionStatus(true));
-      this.reconnectAttempts = 0;
+      this.reconnectionAttempts = 0;
     });
 
-    this.socket.on("reconnect_error", (error) => {
-      console.error("⚠️ Socket reconnection error:", error);
-      this.reconnectAttempts++;
-      
-      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.error("❌ Max reconnection attempts reached");
-        store.dispatch(setConnectionStatus(false));
+    this.socket.on("reconnect_attempt", (attemptNumber) => {
+      this.reconnectionAttempts = attemptNumber;
+    });
+
+    this.socket.on("reconnect_failed", () => {
+      console.error("❌ Socket reconnection failed after max attempts");
+      store.dispatch(setConnectionStatus(false));
+      this.hasJoinedDashboard = false;
+      // C3: Notify the UI so it can surface a "live updates unavailable" toast.
+      window.dispatchEvent(new Event("socket_connection_failed"));
+    });
+
+    // B2: Distinguish auth rejections (refresh + self-heal) from network
+    // errors (socket.io built-in reconnection).
+    this.socket.on("connect_error", (error) => {
+      console.error("❌ Socket connection error:", error.message);
+      store.dispatch(setConnectionStatus(false));
+      if (this.isAuthError(error)) {
+        this.handleAuthError();
       }
     });
 
@@ -208,14 +242,51 @@ class SocketService {
     });
   }
 
-  // Handle reconnection logic
-  private handleReconnection(): void {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      setTimeout(() => {
-        console.log(`🔄 Attempting to reconnect... (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`);
-        this.socket?.connect();
-      }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
+  // B2: On an authentication connect_error, refresh the access token via the
+  // existing axios refresh flow, persist it, update the socket auth and
+  // reconnect. Throttled so a permanently-refused handshake doesn't hammer the
+  // refresh endpoint on every socket.io reconnection attempt.
+  private async handleAuthError(): Promise<void> {
+    const now = Date.now();
+    if (now < this.authRefreshThrottledUntil || !this.socket) return;
+
+    this.authRefreshThrottledUntil = now + AUTH_REFRESH_THROTTLE_MS;
+    console.log("🔄 Socket auth error — refreshing access token...");
+
+    try {
+      const { accessToken } = await refreshTokenAPI();
+      if (!accessToken) throw new Error("Refresh returned no token");
+
+      // Persist + update the socket auth for the next connection attempt.
+      localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+      this.updateAuthToken(accessToken);
+
+      console.log("✅ Socket access token refreshed — reconnecting...");
+      // Reconnect with the fresh token (no-op if socket.io is already retrying).
+      this.socket.connect();
+    } catch (error) {
+      // Refresh failed — go offline; socket.io's capped reconnection will
+      // keep retrying and reconnect_failed marks the final state.
+      console.error("❌ Socket token refresh failed:", error);
+      store.dispatch(setConnectionStatus(false));
     }
+  }
+
+  // B4: Update the auth token on the active socket. Useful for external callers
+  // that obtain a fresh token out-of-band (e.g. after a manual refresh).
+  updateAuthToken(token: string): void {
+    if (this.socket) {
+      this.socket.auth.token = token;
+    }
+  }
+
+  // Whether the connect_error came from the server's auth middleware
+  // (e.g. "Authentication error: Token expired").
+  private isAuthError(error: any): boolean {
+    return (
+      typeof error?.message === "string" &&
+      error.message.includes("Authentication error")
+    );
   }
 
   // FIXED (M4): Single source of truth for joining the dashboard room.

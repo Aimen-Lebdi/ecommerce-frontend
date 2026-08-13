@@ -82,6 +82,12 @@ axiosInstance.interceptors.response.use(
         // Update access token in localStorage
         localStorage.setItem("accessToken", accessToken);
 
+        // D1: Notify consumers (e.g. future socket/other services) that a
+        // silent refresh produced a new token — mirrors the tokenExpired event.
+        window.dispatchEvent(
+          new CustomEvent("tokenRefreshed", { detail: { accessToken } })
+        );
+
         // Add new token to the failed request and retry it
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         processQueue(null, accessToken);

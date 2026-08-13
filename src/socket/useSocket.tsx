@@ -18,51 +18,32 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  const { accessToken, user, isRefreshing } = useAppSelector((state) => state?.auth || {});
+  const { accessToken, user } = useAppSelector((state) => state?.auth || {});
   const { isConnected } = useAppSelector((state) => state?.activities || { isConnected: false });
-  
+
   const isConnecting = useRef(false);
-  const connectionAttempts = useRef(0);
-  const maxConnectionAttempts = 3;
-  const mountedRef = useRef(true);
+  // C3: Track whether we were previously connected so the "Reconnected" toast
+  // only fires after a real drop, not on the initial connection.
+  const wasConnectedRef = useRef(false);
+  // Only (re)connect when the token actually changes — avoids reconnect churn
+  // on user-snapshot updates (e.g. fetchCurrentUser after a profile edit).
   const lastAccessTokenRef = useRef<string | null>(null);
 
+  // C2: Minimal guard — require a user. The socket service reads the latest
+  // token from localStorage and self-heals on stale/expired tokens (B2), so
+  // there's no need to block on isRefreshing or isConnected here.
   const connect = async () => {
-    // Don't connect while refreshing or if no token
-    if (!accessToken || isConnecting.current || isConnected || isRefreshing) {
+    if (!accessToken || !user || isConnecting.current) {
       return;
     }
 
     try {
       isConnecting.current = true;
-      connectionAttempts.current++;
-      
-      console.log(`🔌 Connecting socket (attempt ${connectionAttempts.current}/${maxConnectionAttempts})...`);
-      
-      await socketService.connect(accessToken);
-      
-      console.log("✅ Socket connected successfully");
-      lastAccessTokenRef.current = accessToken;
-      connectionAttempts.current = 0;
-      
+      await socketService.connect();
     } catch (error) {
+      // Transient failures are retried by socket.io's built-in reconnection,
+      // and auth failures self-heal — so just log here.
       console.error("❌ Socket connection failed:", error);
-      
-      if (connectionAttempts.current >= maxConnectionAttempts) {
-        toast.error("Unable to connect to live updates. Please refresh the page.");
-        connectionAttempts.current = 0;
-      } else if (connectionAttempts.current < maxConnectionAttempts && mountedRef.current) {
-        // Exponential backoff retry
-        const retryDelay = 2000 * Math.pow(2, connectionAttempts.current - 1);
-        console.log(`🔄 Retrying in ${retryDelay}ms...`);
-        
-        setTimeout(() => {
-          if (mountedRef.current && accessToken && !isConnected && !isRefreshing) {
-            connect();
-          }
-        }, retryDelay);
-      }
-      
     } finally {
       isConnecting.current = false;
     }
@@ -71,74 +52,53 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const disconnect = () => {
     console.log("🔌 Disconnecting socket...");
     socketService.disconnect();
-    connectionAttempts.current = 0;
-    lastAccessTokenRef.current = null;
   };
 
-  // FIXED: Monitor isRefreshing flag - disconnect when refresh starts
+  // C1: Connect when authenticated; disconnect when the token is removed
+  // (logout / tokenExpired). No disconnect+reconnect churn on token changes —
+  // the socket service self-heals (reads localStorage, refreshes on auth error).
   useEffect(() => {
-    if (isRefreshing && isConnected) {
-      console.log("🔄 Token refresh in progress, disconnecting socket...");
+    if (accessToken && user) {
+      if (lastAccessTokenRef.current !== accessToken) {
+        lastAccessTokenRef.current = accessToken;
+        connect();
+      }
+    } else {
+      lastAccessTokenRef.current = null;
       disconnect();
     }
-  }, [isRefreshing, isConnected]);
-
-  // FIXED: Connect/reconnect when token changes and refresh is complete
-  useEffect(() => {
-    // Only proceed if we have all required data and not refreshing
-    if (!accessToken || !user || isRefreshing) {
-      return;
-    }
-
-    // If token changed, disconnect and reconnect
-    if (lastAccessTokenRef.current && lastAccessTokenRef.current !== accessToken) {
-      console.log("🔄 Access token changed, reconnecting socket...");
-      disconnect();
-      
-      // Small delay to ensure old connection is fully closed
-      setTimeout(() => {
-        if (mountedRef.current) {
-          connect();
-        }
-      }, 500);
-    } 
-    // If no previous token and not connected, connect
-    else if (!lastAccessTokenRef.current && !isConnected && !isConnecting.current) {
-      // Initial connection - add delay for token to settle
-      setTimeout(() => {
-        if (mountedRef.current && accessToken && !isRefreshing) {
-          console.log("🔄 Initial socket connection...");
-          connect();
-        }
-      }, 1000);
-    }
-  }, [accessToken, user, isRefreshing]);
-
-  // Disconnect when token is removed (logout)
-  useEffect(() => {
-    if (!accessToken && isConnected) {
-      console.log("🔓 No access token, disconnecting...");
-      disconnect();
-    }
-  }, [accessToken, isConnected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, user]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      mountedRef.current = false;
-      if (isConnected) {
-        disconnect();
-      }
+      socketService.disconnect();
     };
   }, []);
 
-  // Monitor connection status changes
+  // C3: Reconnect toast — fires when the connection drops and later returns.
   useEffect(() => {
-    if (isConnected && connectionAttempts.current > 0) {
-      toast.success("Reconnected to live updates");
-      connectionAttempts.current = 0;
+    if (isConnected) {
+      if (wasConnectedRef.current) {
+        toast.success("Reconnected to live updates");
+      }
+      wasConnectedRef.current = true;
+    } else {
+      wasConnectedRef.current = false;
     }
   }, [isConnected]);
+
+  // C3: Failure toast — surfaced when the socket gives up reconnecting.
+  useEffect(() => {
+    const handleSocketFailure = () => {
+      toast.error("Unable to connect to live updates. Please refresh the page.");
+    };
+    window.addEventListener("socket_connection_failed", handleSocketFailure);
+    return () => {
+      window.removeEventListener("socket_connection_failed", handleSocketFailure);
+    };
+  }, []);
 
   const contextValue: SocketContextType = {
     isConnected,
