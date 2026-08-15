@@ -26,7 +26,8 @@ export interface ProductsResponse {
 
 // Updated fetch products function with query parameters support
 export const fetchProductsAPI = async (
-  queryParams: ProductsQueryParams = {}
+  queryParams: ProductsQueryParams = {},
+  signal?: AbortSignal
 ): Promise<ProductsResponse> => {
   // Build query string from parameters
   const params = new URLSearchParams();
@@ -39,7 +40,7 @@ export const fetchProductsAPI = async (
   const queryString = params.toString();
   const url = queryString ? `/api/products?${queryString}` : "/api/products";
 
-  const response = await axiosInstance.get(url);
+  const response = await axiosInstance.get(url, { signal });
   return response.data;
 };
 

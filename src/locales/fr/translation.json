@@ -182,7 +182,12 @@
       "title": "Aucun produit trouvé",
       "message": "Essayez d'ajuster vos filtres pour voir plus de résultats",
       "clearFilters": "Effacer tous les filtres"
-    }
+    },
+    "errors": {
+      "loadingProductsFailed": "Échec du chargement des produits",
+      "loadingSubcategoriesFailed": "Échec du chargement des sous-catégories"
+    },
+    "retry": "Réessayer"
   },
   "productDetail": {
     "loadingProduct": "Chargement du produit...",

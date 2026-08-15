@@ -4,11 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
+  AlertTriangle,
   Grid3X3,
   List,
   Heart,
   ShoppingCart,
   Package,
+  RefreshCw,
   X,
   SlidersHorizontal,
   ChevronLeft,
@@ -56,7 +58,9 @@ const FiltersPanel = memo(
     selectedSubCategories,
     availableSubCategories,
     subcategoriesLoading,
+    subcategoriesError,
     onSubCategoryChange,
+    onRetrySubCategories,
     brands,
     brandsLoading,
     selectedBrands,
@@ -121,6 +125,19 @@ const FiltersPanel = memo(
                 <span className="text-sm text-muted-foreground">
                   {t("shop.loading")}
                 </span>
+              </div>
+            ) : subcategoriesError ? (
+              <div className="text-sm text-destructive space-y-2">
+                <p>{t("shop.errors.loadingSubcategoriesFailed")}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onRetrySubCategories}
+                  className="w-full"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  {t("shop.retry")}
+                </Button>
               </div>
             ) : availableSubCategories.length > 0 ? (
               <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
@@ -305,8 +322,8 @@ const ShopPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const sortOptions = [
-    { value: "createdAt", label: t("shop.sort.newestFirst") },
-    { value: "-createdAt", label: t("shop.sort.oldestFirst") },
+    { value: "-createdAt", label: t("shop.sort.newestFirst") },
+    { value: "createdAt", label: t("shop.sort.oldestFirst") },
     { value: "price", label: t("shop.sort.priceLowToHigh") },
     { value: "-price", label: t("shop.sort.priceHighToLow") },
     { value: "-sold", label: t("shop.sort.mostPopular") },
@@ -319,13 +336,16 @@ const ShopPage = () => {
     products,
     pagination,
     loading: productsLoading,
+    error: productsError,
   } = useSelector((state) => state.products);
   const { categories, loading: categoriesLoading } = useSelector(
     (state) => state.categories
   );
-  const { subcategories, loading: subcategoriesLoading } = useSelector(
-    (state) => state.subCategories
-  );
+  const {
+    subcategories,
+    loading: subcategoriesLoading,
+    error: subcategoriesError,
+  } = useSelector((state) => state.subCategories);
   const { brands, loading: brandsLoading } = useSelector(
     (state) => state.brands
   );
@@ -377,8 +397,8 @@ const ShopPage = () => {
     }
   }, [selectedCategories, dispatch]);
 
-  // Fetch products when filters change
-  useEffect(() => {
+  // Build products query params from current filters (shared by effect + retry)
+  const buildProductsQueryParams = useCallback(() => {
     const queryParams = {
       page: filters.page,
       limit: filters.limit,
@@ -413,14 +433,30 @@ const ShopPage = () => {
       queryParams["quantity[gt]"] = 0;
     }
 
-    dispatch(fetchProducts(queryParams));
-  }, [
-    filters,
-    selectedCategories,
-    selectedSubCategories,
-    selectedBrands,
-    dispatch,
-  ]);
+    return queryParams;
+  }, [filters, selectedCategories, selectedSubCategories, selectedBrands]);
+
+  // Fetch products when filters change (abort any in-flight request so the
+  // latest filter selection always wins)
+  useEffect(() => {
+    const fetchPromise = dispatch(fetchProducts(buildProductsQueryParams()));
+    return () => {
+      fetchPromise?.abort?.();
+    };
+  }, [buildProductsQueryParams, dispatch]);
+
+  // Retry products fetch after an error
+  const handleRetryProducts = useCallback(() => {
+    dispatch(fetchProducts(buildProductsQueryParams()));
+  }, [buildProductsQueryParams, dispatch]);
+
+  // Retry subcategories fetch after an error
+  const handleRetrySubCategories = useCallback(() => {
+    if (selectedCategories.length > 0) {
+      const categoryIds = selectedCategories.join(",");
+      dispatch(fetchSubCategories({ category: categoryIds, limit: 100 }));
+    }
+  }, [selectedCategories, dispatch]);
 
   // Count active filters
   useEffect(() => {
@@ -435,15 +471,31 @@ const ShopPage = () => {
   }, [selectedCategories, selectedSubCategories, selectedBrands, filters]);
 
   // Callbacks wrapped with useCallback
-  const handleCategoryChange = useCallback((categoryId) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((c) => c !== categoryId)
-        : [...prev, categoryId]
-    );
-    setSelectedSubCategories([]);
-    setFilters((prev) => ({ ...prev, page: 1 }));
-  }, []);
+  const handleCategoryChange = useCallback(
+    (categoryId) => {
+      const nextCategories = selectedCategories.includes(categoryId)
+        ? selectedCategories.filter((c) => c !== categoryId)
+        : [...selectedCategories, categoryId];
+
+      setSelectedCategories(nextCategories);
+
+      // Preserve subcategory selections that still belong to a selected category:
+      // adding a category keeps existing selections, removing one drops the
+      // subcategories of the removed category.
+      setSelectedSubCategories((prev) =>
+        prev.filter((subId) => {
+          const sub = subcategories.find((s) => s._id === subId);
+          if (!sub) return false;
+          const subCategoryId =
+            typeof sub.category === "object" ? sub.category._id : sub.category;
+          return nextCategories.includes(subCategoryId);
+        })
+      );
+
+      setFilters((prev) => ({ ...prev, page: 1 }));
+    },
+    [selectedCategories, subcategories]
+  );
 
   const handleSubCategoryChange = useCallback((subCategoryId) => {
     setSelectedSubCategories((prev) =>
@@ -769,7 +821,9 @@ const ShopPage = () => {
                 selectedSubCategories={selectedSubCategories}
                 availableSubCategories={availableSubCategories}
                 subcategoriesLoading={subcategoriesLoading}
+                subcategoriesError={subcategoriesError}
                 onSubCategoryChange={handleSubCategoryChange}
+                onRetrySubCategories={handleRetrySubCategories}
                 brands={brands}
                 brandsLoading={brandsLoading}
                 selectedBrands={selectedBrands}
@@ -818,7 +872,9 @@ const ShopPage = () => {
                       selectedSubCategories={selectedSubCategories}
                       availableSubCategories={availableSubCategories}
                       subcategoriesLoading={subcategoriesLoading}
+                      subcategoriesError={subcategoriesError}
                       onSubCategoryChange={handleSubCategoryChange}
+                      onRetrySubCategories={handleRetrySubCategories}
                       brands={brands}
                       brandsLoading={brandsLoading}
                       selectedBrands={selectedBrands}
@@ -984,8 +1040,27 @@ const ShopPage = () => {
             </div>
           )}
 
+          {/* Error State */}
+          {!productsLoading && productsError && (
+            <div className="text-center py-12">
+              <div className="mb-4">
+                <AlertTriangle className="h-12 w-12 mx-auto text-destructive" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">
+                {t("shop.errors.loadingProductsFailed")}
+              </h3>
+              <p className="text-muted-foreground mb-4 break-words">
+                {productsError}
+              </p>
+              <Button onClick={handleRetryProducts} variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {t("shop.retry")}
+              </Button>
+            </div>
+          )}
+
           {/* Products Grid/List */}
-          {!productsLoading && products && products.length > 0 ? (
+          {!productsLoading && !productsError && products && products.length > 0 ? (
             <>
               {viewMode === "grid" ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
@@ -1088,7 +1163,7 @@ const ShopPage = () => {
                 </div>
               )}
             </>
-          ) : !productsLoading ? (
+          ) : !productsLoading && !productsError ? (
             <div className="text-center py-12">
               <div className="mb-4">
                 <ShoppingCart className="h-12 w-12 mx-auto text-muted-foreground" />

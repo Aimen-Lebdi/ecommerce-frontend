@@ -182,7 +182,12 @@
       "title": "لم يتم العثور على منتجات",
       "message": "حاول تعديل الفلاتر لرؤية المزيد من النتائج",
       "clearFilters": "مسح كل الفلاتر"
-    }
+    },
+    "errors": {
+      "loadingProductsFailed": "فشل تحميل المنتجات",
+      "loadingSubcategoriesFailed": "فشل تحميل الفئات الفرعية"
+    },
+    "retry": "إعادة المحاولة"
   },
   "productDetail": {
     "loadingProduct": "جاري تحميل المنتج...",

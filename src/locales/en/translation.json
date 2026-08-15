@@ -182,7 +182,12 @@
       "title": "No products found",
       "message": "Try adjusting your filters to see more results",
       "clearFilters": "Clear all filters"
-    }
+    },
+    "errors": {
+      "loadingProductsFailed": "Failed to load products",
+      "loadingSubcategoriesFailed": "Failed to load subcategories"
+    },
+    "retry": "Retry"
   },
   "productDetail": {
     "loadingProduct": "Loading product...",

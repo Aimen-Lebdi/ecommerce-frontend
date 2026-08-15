@@ -119,9 +119,12 @@ export const fetchProducts = createAsyncThunk<
   { products: Product[]; pagination: PaginationMeta },
   ProductsQueryParams,
   { rejectValue: { message: string; status?: number } }
->("products/fetchProducts", async (queryParams, { rejectWithValue }) => {
+>("products/fetchProducts", async (queryParams, { rejectWithValue, signal }) => {
   try {
-    const response: ProductsResponse = await fetchProductsAPI(queryParams);
+    const response: ProductsResponse = await fetchProductsAPI(
+      queryParams,
+      signal
+    );
     return {
       products: response.documents,
       pagination: {
@@ -130,6 +133,11 @@ export const fetchProducts = createAsyncThunk<
       },
     };
   } catch (err: any) {
+    // Request aborted because a newer filter request superseded this one.
+    // Rethrow so RTK marks the thunk as aborted and we don't clobber state.
+    if (signal.aborted) {
+      throw err;
+    }
     const status = err.response?.status;
     const message = err.response?.data?.message || err.message;
     // Handle 404 as a special case - not really an "error" but no results
@@ -378,6 +386,10 @@ const productsSlice = createSlice({
         }
       )
       .addCase(fetchProducts.rejected, (state, action) => {
+        // Ignore aborted requests - a newer filter request superseded this one
+        if (action.meta.aborted) {
+          return;
+        }
         state.loading = false;
         state.error = action.payload?.message || "An error occurred";
         state.products = [];
