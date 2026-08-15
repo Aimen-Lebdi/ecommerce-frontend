@@ -784,6 +784,11 @@
         "created": "Créé le"
       }
     },
+    "filters": {
+      "productCount": "Nombre de produits",
+      "productCountPlaceholder": "Entrez le nombre de produits",
+      "createdDate": "Date de création"
+    },
     "messages": {
       "addSuccess": "Catégorie ajoutée avec succès",
       "updateSuccess": "Catégorie mise à jour avec succès",
@@ -805,6 +810,11 @@
       },
       "unknownCategory": "Inconnue"
     },
+    "filters": {
+      "productCount": "Nombre de produits",
+      "productCountPlaceholder": "Entrez le nombre de produits",
+      "createdDate": "Date de création"
+    },
     "messages": {
       "addSuccess": "Sous-catégorie ajoutée avec succès",
       "updateSuccess": "Sous-catégorie mise à jour avec succès",
@@ -823,6 +833,11 @@
         "products": "Produits",
         "created": "Créé le"
       }
+    },
+    "filters": {
+      "productCount": "Nombre de produits",
+      "productCountPlaceholder": "Entrez le nombre de produits",
+      "createdDate": "Date de création"
     },
     "messages": {
       "addSuccess": "Marque ajoutée avec succès",
@@ -1081,16 +1096,6 @@
       "time": "Heure"
     },
     "filters": {
-      "activityType": "Type d'activité",
-      "allTypes": "Tous les types",
-      "status": "Statut",
-      "allStatuses": "Tous les statuts",
-      "timeRange": "Période",
-      "allTime": "Tout le temps",
-      "lastHour": "Dernière heure",
-      "last24Hours": "Dernières 24 h",
-      "last7Days": "7 derniers jours",
-      "last30Days": "30 derniers jours",
       "amount": "Montant",
       "amountPlaceholder": "Entrez le montant",
       "createdDate": "Date de création"
@@ -1370,6 +1375,16 @@
     "maxValue": "Valeur maximale",
     "cancel": "Annuler",
     "applyFilters": "Appliquer les Filtres ({{count}})",
+    "operators": {
+      "eq": "Égal à",
+      "gt": "Supérieur à",
+      "gte": "Supérieur ou égal à",
+      "lt": "Inférieur à",
+      "lte": "Inférieur ou égal à",
+      "between": "Entre",
+      "before": "Avant",
+      "after": "Après"
+    },
     "filterDisplay": {
       "between": "{{label}} : {{operator}} {{value1}} et {{value2}}",
       "simple": "{{label}} : {{operator}} {{value}}"

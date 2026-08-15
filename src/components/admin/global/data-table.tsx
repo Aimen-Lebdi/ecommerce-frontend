@@ -91,28 +91,17 @@ import {
   AlertDialogTrigger,
 } from "../../ui/alert-dialog";
 
-import { AdvancedFilter, type AdvancedFilters } from "./AdvancedFilter";
+import {
+  AdvancedFilter,
+  type AdvancedFilters,
+  type FilterConfig,
+} from "./AdvancedFilter";
 
 // Generic data type that all entities must extend
 export interface BaseEntity {
   id?: number | string;
   _id?: string;
   [key: string]: any;
-}
-
-// Filter configuration interface
-interface FilterConfig {
-  numeric: {
-    [key: string]: {
-      label: string;
-      placeholder: string;
-    };
-  };
-  date: {
-    [key: string]: {
-      label: string;
-    };
-  };
 }
 
 // Server-side query parameters interface
@@ -706,28 +695,32 @@ function convertAdvancedFiltersToQueryParams(
       const { column, operator, value, value2 } = filter;
 
       switch (operator) {
-        case "eq":
-          const startOfDay = new Date(value);
-          const endOfDay = new Date(value);
-          endOfDay.setHours(23, 59, 59, 999);
+        // Build the day window in LOCAL time: the date input yields a
+        // "YYYY-MM-DD" string, so appending the local time-of-day keeps the
+        // ISO range aligned with the local calendar day (matching the
+        // client-side toDateString() comparison).
+        case "eq": {
+          const startOfDay = new Date(`${value}T00:00:00`);
+          const endOfDay = new Date(`${value}T23:59:59.999`);
           params[`${column}[gte]`] = startOfDay.toISOString();
           params[`${column}[lte]`] = endOfDay.toISOString();
           break;
+        }
         case "before":
-          params[`${column}[lt]`] = new Date(value).toISOString();
+          params[`${column}[lt]`] = new Date(`${value}T00:00:00`).toISOString();
           break;
         case "after":
-          params[`${column}[gt]`] = new Date(value).toISOString();
+          params[`${column}[gt]`] = new Date(`${value}T23:59:59.999`).toISOString();
           break;
-        case "between":
+        case "between": {
           if (value2 !== null) {
-            const startDate = new Date(value);
-            const endDate = new Date(value2);
-            endDate.setHours(23, 59, 59, 999);
+            const startDate = new Date(`${value}T00:00:00`);
+            const endDate = new Date(`${value2}T23:59:59.999`);
             params[`${column}[gte]`] = startDate.toISOString();
             params[`${column}[lte]`] = endDate.toISOString();
           }
           break;
+        }
       }
     }
   });
@@ -797,13 +790,37 @@ export function DataTable<TData extends BaseEntity>({
       date: [],
     }
   );
+  // Tracks the last filters actually applied to the server so stale filter
+  // keys are cleaned deterministically regardless of render timing.
+  const prevAdvancedFiltersRef = React.useRef<AdvancedFilters>({
+    numeric: [],
+    date: [],
+  });
 
   const hasActiveSearchOrFilter = React.useMemo(() => {
     if (serverSide) {
-      return !!currentQueryParams?.keyword;
+      if (!!currentQueryParams?.keyword) return true;
+      if (!currentQueryParams) return false;
+
+      // Advanced filters emit bracket keys (price[gt], createdAt[gte]) and
+      // bare-column keys for `eq` — treat any as an active search so an
+      // empty result set shows "No results" instead of "No data".
+      const advancedColumnKeys = new Set<string>();
+      advancedFilters.numeric.forEach((f) => advancedColumnKeys.add(f.column));
+      advancedFilters.date.forEach((f) => advancedColumnKeys.add(f.column));
+
+      return Object.keys(currentQueryParams).some(
+        (key) => key.includes("[") || advancedColumnKeys.has(key)
+      );
     }
     return !!globalFilter || columnFilters.length > 0;
-  }, [serverSide, currentQueryParams, globalFilter, columnFilters]);
+  }, [
+    serverSide,
+    currentQueryParams,
+    globalFilter,
+    columnFilters,
+    advancedFilters,
+  ]);
 
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
@@ -1026,7 +1043,7 @@ export function DataTable<TData extends BaseEntity>({
       if (serverSide) {
         const cleanedParams = cleanQueryParams(
           currentQueryParams,
-          advancedFilters
+          prevAdvancedFiltersRef.current
         );
 
         const filterParams = convertAdvancedFiltersToQueryParams(filters);
@@ -1043,10 +1060,11 @@ export function DataTable<TData extends BaseEntity>({
           }
         });
 
+        prevAdvancedFiltersRef.current = filters;
         onQueryParamsChange?.(newParams);
       }
     },
-    [serverSide, currentQueryParams, advancedFilters, onQueryParamsChange]
+    [serverSide, currentQueryParams, onQueryParamsChange]
   );
 
   const handleRowUpdate = React.useCallback(

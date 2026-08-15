@@ -91,23 +91,24 @@ const categoriesColumns: ColumnDef<Category>[] = [
   },
 ];
 
-// Advanced filter configuration for categories
-const advancedFilterConfig = {
-  numeric: {
-    productCount: {
-      label: "Product Count",
-      placeholder: "Enter number of products",
-    },
-  },
-  date: {
-    createdAt: {
-      label: "Created Date",
-    },
-  },
-};
-
 export default function Categories() {
   const { t } = useTranslation();
+
+  // Advanced filter configuration for categories
+  const advancedFilterConfig = {
+    numeric: {
+      productCount: {
+        label: t('categories.filters.productCount'),
+        placeholder: t('categories.filters.productCountPlaceholder'),
+      },
+    },
+    date: {
+      createdAt: {
+        label: t('categories.filters.createdDate'),
+      },
+    },
+  };
+
   const dispatch = useAppDispatch();
   const {
     categories,

@@ -172,40 +172,6 @@ export default function Dashboard() {
 
   // Advanced filter configuration for activities
   const advancedFilterConfig = {
-    select: {
-      type: {
-        label: t('dashboard.filters.activityType'),
-        options: [
-          { value: "all", label: t('dashboard.filters.allTypes') },
-          { value: "order", label: t('dashboard.activityTypes.order') },
-          { value: "user", label: t('dashboard.activityTypes.user') },
-          { value: "product", label: t('dashboard.activityTypes.product') },
-          { value: "category", label: t('dashboard.activityTypes.category') },
-          { value: "subcategory", label: t('dashboard.activityTypes.subcategory') },
-          { value: "brand", label: t('dashboard.activityTypes.brand') },
-          { value: "cart", label: t('dashboard.activityTypes.cart') },
-        ],
-      },
-      status: {
-        label: t('dashboard.filters.status'),
-        options: [
-          { value: "all", label: t('dashboard.filters.allStatuses') },
-          { value: "success", label: t('dashboard.statuses.success') },
-          { value: "pending", label: t('dashboard.statuses.pending') },
-          { value: "failed", label: t('dashboard.statuses.failed') },
-        ],
-      },
-      timeframe: {
-        label: t('dashboard.filters.timeRange'),
-        options: [
-          { value: "all", label: t('dashboard.filters.allTime') },
-          { value: "1h", label: t('dashboard.filters.lastHour') },
-          { value: "24h", label: t('dashboard.filters.last24Hours') },
-          { value: "7d", label: t('dashboard.filters.last7Days') },
-          { value: "30d", label: t('dashboard.filters.last30Days') },
-        ],
-      },
-    },
     numeric: {
       amount: {
         label: t('dashboard.filters.amount'),
@@ -284,26 +250,9 @@ export default function Dashboard() {
   const handleQueryParamsChange = React.useCallback(
     (params: ServerQueryParams) => {
       dispatch(setQueryParams(params));
-
-      if (params.type || params.timeframe) {
-        const filters: { type?: string; timeframe?: string } = {};
-
-        if (params.type && params.type !== "all") {
-          filters.type = params.type as string;
-        }
-
-        if (params.timeframe && params.timeframe !== "all") {
-          filters.timeframe = params.timeframe as string;
-        }
-
-        if (isConnected && Object.keys(filters).length > 0) {
-          socketService.filterActivities(filters);
-        }
-      }
-
       dispatch(fetchDashboardActivities());
     },
-    [dispatch, isConnected, socketService]
+    [dispatch]
   );
 
   // Handle refresh button

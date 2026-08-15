@@ -313,17 +313,6 @@ class SocketService {
     }
   }
 
-  // Filter activities
-  filterActivities(filters: {
-    type?: string;
-    timeframe?: string;
-  }): void {
-    if (this.socket && this.socket.connected) {
-      console.log("🔍 Requesting filtered activities:", filters);
-      this.socket.emit("filter_activities", filters);
-    }
-  }
-
   // Request activity statistics
   requestActivityStats(): void {
     if (this.socket && this.socket.connected) {

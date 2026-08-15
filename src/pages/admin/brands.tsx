@@ -92,23 +92,24 @@ const brandsColumns: ColumnDef<Brand>[] = [
   },
 ];
 
-// Advanced filter configuration for brands
-const advancedFilterConfig = {
-  numeric: {
-    productCount: {
-      label: "Product Count",
-      placeholder: "Enter number of products",
-    },
-  },
-  date: {
-    createdAt: {
-      label: "Created Date",
-    },
-  },
-};
-
 export default function Brands() {
   const { t } = useTranslation();
+
+  // Advanced filter configuration for brands
+  const advancedFilterConfig = {
+    numeric: {
+      productCount: {
+        label: t('brands.filters.productCount'),
+        placeholder: t('brands.filters.productCountPlaceholder'),
+      },
+    },
+    date: {
+      createdAt: {
+        label: t('brands.filters.createdDate'),
+      },
+    },
+  };
+
   const dispatch = useAppDispatch();
   const {
     brands,

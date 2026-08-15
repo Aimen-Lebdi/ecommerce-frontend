@@ -784,6 +784,11 @@
         "created": "تاريخ الإنشاء"
       }
     },
+    "filters": {
+      "productCount": "عدد المنتجات",
+      "productCountPlaceholder": "أدخل عدد المنتجات",
+      "createdDate": "تاريخ الإنشاء"
+    },
     "messages": {
       "addSuccess": "تم إضافة الفئة بنجاح",
       "updateSuccess": "تم تحديث الفئة بنجاح",
@@ -805,6 +810,11 @@
       },
       "unknownCategory": "غير معروف"
     },
+    "filters": {
+      "productCount": "عدد المنتجات",
+      "productCountPlaceholder": "أدخل عدد المنتجات",
+      "createdDate": "تاريخ الإنشاء"
+    },
     "messages": {
       "addSuccess": "تم إضافة الفئة الفرعية بنجاح",
       "updateSuccess": "تم تحديث الفئة الفرعية بنجاح",
@@ -823,6 +833,11 @@
         "products": "المنتجات",
         "created": "تاريخ الإنشاء"
       }
+    },
+    "filters": {
+      "productCount": "عدد المنتجات",
+      "productCountPlaceholder": "أدخل عدد المنتجات",
+      "createdDate": "تاريخ الإنشاء"
     },
     "messages": {
       "addSuccess": "تم إضافة العلامة التجارية بنجاح",
@@ -1081,16 +1096,6 @@
       "time": "الوقت"
     },
     "filters": {
-      "activityType": "نوع النشاط",
-      "allTypes": "جميع الأنواع",
-      "status": "الحالة",
-      "allStatuses": "جميع الحالات",
-      "timeRange": "الفترة الزمنية",
-      "allTime": "كل الوقت",
-      "lastHour": "آخر ساعة",
-      "last24Hours": "آخر 24 ساعة",
-      "last7Days": "آخر 7 أيام",
-      "last30Days": "آخر 30 يوم",
       "amount": "المبلغ",
       "amountPlaceholder": "أدخل المبلغ",
       "createdDate": "تاريخ الإنشاء"
@@ -1370,6 +1375,16 @@
     "maxValue": "أقصى قيمة",
     "cancel": "إلغاء",
     "applyFilters": "تطبيق الفلاتر ({{count}})",
+    "operators": {
+      "eq": "يساوي",
+      "gt": "أكبر من",
+      "gte": "أكبر من أو يساوي",
+      "lt": "أقل من",
+      "lte": "أقل من أو يساوي",
+      "between": "بين",
+      "before": "قبل",
+      "after": "بعد"
+    },
     "filterDisplay": {
       "between": "{{label}}: {{operator}} {{value1}} و {{value2}}",
       "simple": "{{label}}: {{operator}} {{value}}"

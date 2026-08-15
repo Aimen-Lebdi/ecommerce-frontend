@@ -34,7 +34,7 @@ export interface AdvancedFilters {
   date: DateFilter[];
 }
 
-interface FilterConfig {
+export interface FilterConfig {
   numeric: {
     [key: string]: {
       label: string;
@@ -54,21 +54,16 @@ interface AdvancedFilterProps {
   initialFilters?: AdvancedFilters;
 }
 
-const numericOperators = [
-  { value: "eq", label: "Equal to" },
-  { value: "gt", label: "Greater than" },
-  { value: "gte", label: "Greater than or equal" },
-  { value: "lt", label: "Less than" },
-  { value: "lte", label: "Less than or equal" },
-  { value: "between", label: "Between" },
-];
+const numericOperatorValues = [
+  "eq",
+  "gt",
+  "gte",
+  "lt",
+  "lte",
+  "between",
+] as const;
 
-const dateOperators = [
-  { value: "eq", label: "On" },
-  { value: "before", label: "Before" },
-  { value: "after", label: "After" },
-  { value: "between", label: "Between" },
-];
+const dateOperatorValues = ["eq", "before", "after", "between"] as const;
 
 export function AdvancedFilter({
   config,
@@ -81,8 +76,31 @@ export function AdvancedFilter({
   );
   const [open, setOpen] = React.useState(false);
 
+  // Columns already in use — used to prevent duplicate filters per type
+  const usedNumericColumns = React.useMemo(
+    () => new Set(filters.numeric.map((f) => f.column)),
+    [filters.numeric]
+  );
+  const usedDateColumns = React.useMemo(
+    () => new Set(filters.date.map((f) => f.column)),
+    [filters.date]
+  );
+
+  // A filter is "active" only when it produces server params (between needs both values)
+  const isFilterActive = React.useCallback(
+    (filter: NumericFilter | DateFilter): boolean => {
+      if (filter.value === null) return false;
+      if (filter.operator === "between" && filter.value2 === null) return false;
+      return true;
+    },
+    []
+  );
+
   const addNumericFilter = () => {
-    const firstColumn = Object.keys(config.numeric)[0];
+    const available = Object.keys(config.numeric).filter(
+      (key) => !usedNumericColumns.has(key)
+    );
+    const firstColumn = available[0];
     if (!firstColumn) return;
 
     const newFilter: NumericFilter = {
@@ -98,7 +116,10 @@ export function AdvancedFilter({
   };
 
   const addDateFilter = () => {
-    const firstColumn = Object.keys(config.date)[0];
+    const available = Object.keys(config.date).filter(
+      (key) => !usedDateColumns.has(key)
+    );
+    const firstColumn = available[0];
     if (!firstColumn) return;
 
     const newFilter: DateFilter = {
@@ -134,34 +155,25 @@ export function AdvancedFilter({
     }));
   };
 
-  // FIXED: Remove numeric filter and immediately trigger change
+  // Remove numeric filter (staged — only applied via the Apply button)
   const removeNumericFilter = (index: number) => {
-    const newFilters = {
-      ...filters,
-      numeric: filters.numeric.filter((_, i) => i !== index),
-    };
-    setFilters(newFilters);
-    // Immediately trigger the change to update the server
-    onFiltersChange(newFilters);
+    setFilters((prev) => ({
+      ...prev,
+      numeric: prev.numeric.filter((_, i) => i !== index),
+    }));
   };
 
-  // FIXED: Remove date filter and immediately trigger change
+  // Remove date filter (staged — only applied via the Apply button)
   const removeDateFilter = (index: number) => {
-    const newFilters = {
-      ...filters,
-      date: filters.date.filter((_, i) => i !== index),
-    };
-    setFilters(newFilters);
-    // Immediately trigger the change to update the server
-    onFiltersChange(newFilters);
+    setFilters((prev) => ({
+      ...prev,
+      date: prev.date.filter((_, i) => i !== index),
+    }));
   };
 
-  // FIXED: Clear all filters and immediately trigger change
+  // Clear all filters (staged — only applied via the Apply button)
   const clearAllFilters = () => {
-    const emptyFilters = { numeric: [], date: [] };
-    setFilters(emptyFilters);
-    // Immediately trigger the change to update the server
-    onFiltersChange(emptyFilters);
+    setFilters({ numeric: [], date: [] });
   };
 
   const applyFilters = () => {
@@ -169,10 +181,16 @@ export function AdvancedFilter({
     setOpen(false);
   };
 
+  // Cancel reverts any staged (unapplied) changes back to the last applied filters
+  const handleCancel = () => {
+    setFilters(initialFilters || { numeric: [], date: [] });
+    setOpen(false);
+  };
+
   const getActiveFilterCount = () => {
     return (
-      filters.numeric.filter((f) => f.value !== null).length +
-      filters.date.filter((f) => f.value !== null).length
+      filters.numeric.filter(isFilterActive).length +
+      filters.date.filter(isFilterActive).length
     );
   };
 
@@ -182,12 +200,11 @@ export function AdvancedFilter({
     const column_config = config_key[filter.column];
 
     if (!column_config || filter.value === null) return null;
+    if (filter.operator === "between" && filter.value2 === null) return null;
 
-    const operatorLabel = isNumeric
-      ? numericOperators.find((op) => op.value === filter.operator)?.label
-      : dateOperators.find((op) => op.value === filter.operator)?.label;
+    const operatorLabel = t(`advancedFilter.operators.${filter.operator}`);
 
-    if (filter.operator === "between" && filter.value2 !== null) {
+    if (filter.operator === "between") {
       return t('advancedFilter.filterDisplay.between', {
         label: column_config.label,
         operator: operatorLabel,
@@ -204,8 +221,8 @@ export function AdvancedFilter({
   };
 
   const activeFilters = [
-    ...filters.numeric.filter((f) => f.value !== null),
-    ...filters.date.filter((f) => f.value !== null),
+    ...filters.numeric.filter(isFilterActive),
+    ...filters.date.filter(isFilterActive),
   ];
 
   return (
@@ -249,6 +266,10 @@ export function AdvancedFilter({
                       variant="outline"
                       size="sm"
                       onClick={addNumericFilter}
+                      disabled={
+                        Object.keys(config.numeric).length > 0 &&
+                        usedNumericColumns.size >= Object.keys(config.numeric).length
+                      }
                     >
                       {t('advancedFilter.addFilter')}
                     </Button>
@@ -287,7 +308,14 @@ export function AdvancedFilter({
                             <SelectContent>
                               {Object.entries(config.numeric).map(
                                 ([key, config]) => (
-                                  <SelectItem key={key} value={key}>
+                                  <SelectItem
+                                    key={key}
+                                    value={key}
+                                    disabled={
+                                      usedNumericColumns.has(key) &&
+                                      key !== filter.column
+                                    }
+                                  >
                                     {config.label}
                                   </SelectItem>
                                 )
@@ -308,9 +336,9 @@ export function AdvancedFilter({
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {numericOperators.map((op) => (
-                                <SelectItem key={op.value} value={op.value}>
-                                  {op.label}
+                              {numericOperatorValues.map((op) => (
+                                <SelectItem key={op} value={op}>
+                                  {t(`advancedFilter.operators.${op}`)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -328,7 +356,7 @@ export function AdvancedFilter({
                               config.numeric[filter.column]?.placeholder ||
                               t('advancedFilter.enterValue')
                             }
-                            value={filter.value || ""}
+                            value={filter.value ?? ""}
                             onChange={(e) =>
                               updateNumericFilter(index, {
                                 value: e.target.value
@@ -346,7 +374,7 @@ export function AdvancedFilter({
                               type="number"
                               className="h-8"
                               placeholder={t('advancedFilter.maxValue')}
-                              value={filter.value2 || ""}
+                              value={filter.value2 ?? ""}
                               onChange={(e) =>
                                 updateNumericFilter(index, {
                                   value2: e.target.value
@@ -376,6 +404,10 @@ export function AdvancedFilter({
                         variant="outline"
                         size="sm"
                         onClick={addDateFilter}
+                        disabled={
+                          Object.keys(config.date).length > 0 &&
+                          usedDateColumns.size >= Object.keys(config.date).length
+                        }
                       >
                         {t('advancedFilter.addFilter')}
                       </Button>
@@ -414,7 +446,14 @@ export function AdvancedFilter({
                               <SelectContent>
                                 {Object.entries(config.date).map(
                                   ([key, config]) => (
-                                    <SelectItem key={key} value={key}>
+                                    <SelectItem
+                                      key={key}
+                                      value={key}
+                                      disabled={
+                                        usedDateColumns.has(key) &&
+                                        key !== filter.column
+                                      }
+                                    >
                                       {config.label}
                                     </SelectItem>
                                   )
@@ -435,9 +474,9 @@ export function AdvancedFilter({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {dateOperators.map((op) => (
-                                  <SelectItem key={op.value} value={op.value}>
-                                    {op.label}
+                                {dateOperatorValues.map((op) => (
+                                  <SelectItem key={op} value={op}>
+                                    {t(`advancedFilter.operators.${op}`)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -451,7 +490,7 @@ export function AdvancedFilter({
                             <Input
                               type="date"
                               className="h-8"
-                              value={filter.value || ""}
+                              value={filter.value ?? ""}
                               onChange={(e) =>
                                 updateDateFilter(index, {
                                   value: e.target.value || null,
@@ -466,7 +505,7 @@ export function AdvancedFilter({
                               <Input
                                 type="date"
                                 className="h-8"
-                                value={filter.value2 || ""}
+                                value={filter.value2 ?? ""}
                                 onChange={(e) =>
                                   updateDateFilter(index, {
                                     value2: e.target.value || null,
@@ -486,7 +525,7 @@ export function AdvancedFilter({
             <Separator />
 
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setOpen(false)}>
+              <Button variant="outline" onClick={handleCancel}>
                 {t('advancedFilter.cancel')}
               </Button>
               <Button onClick={applyFilters}>

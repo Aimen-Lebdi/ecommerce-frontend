@@ -111,22 +111,19 @@ const getUsersColumns = (t: (key: string) => string): ColumnDef<User>[] => [
   },
 ];
 
-// Advanced filter configuration for users
-const advancedFilterConfig = {
-  numeric: {
-    createdAt: {
-      label: "Created Date",
-    },
-  },
-  date: {
-    createdAt: {
-      label: "Created Date",
-    },
-  },
-};
-
 export default function Users() {
   const { t } = useTranslation();
+
+  // Advanced filter configuration for users (no numeric fields on the User model)
+  const advancedFilterConfig = {
+    numeric: {},
+    date: {
+      createdAt: {
+        label: t('users.filters.createdDate'),
+      },
+    },
+  };
+
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const {

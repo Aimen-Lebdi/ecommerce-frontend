@@ -116,23 +116,24 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   },
 ];
 
-// Advanced filter configuration for subcategories
-const advancedFilterConfig = {
-  numeric: {
-    productCount: {
-      label: "Product Count",
-      placeholder: "Enter number of products",
-    },
-  },
-  date: {
-    createdAt: {
-      label: "Created Date",
-    },
-  },
-};
-
 export default function SubCategories() {
   const { t } = useTranslation();
+
+  // Advanced filter configuration for subcategories
+  const advancedFilterConfig = {
+    numeric: {
+      productCount: {
+        label: t('subCategories.filters.productCount'),
+        placeholder: t('subCategories.filters.productCountPlaceholder'),
+      },
+    },
+    date: {
+      createdAt: {
+        label: t('subCategories.filters.createdDate'),
+      },
+    },
+  };
+
   const dispatch = useAppDispatch();
   const {
     subcategories,

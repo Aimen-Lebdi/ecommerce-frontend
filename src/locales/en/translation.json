@@ -784,6 +784,11 @@
         "created": "Created"
       }
     },
+    "filters": {
+      "productCount": "Product Count",
+      "productCountPlaceholder": "Enter number of products",
+      "createdDate": "Created Date"
+    },
     "messages": {
       "addSuccess": "Category added successfully",
       "updateSuccess": "Category updated successfully",
@@ -805,6 +810,11 @@
       },
       "unknownCategory": "Unknown"
     },
+    "filters": {
+      "productCount": "Product Count",
+      "productCountPlaceholder": "Enter number of products",
+      "createdDate": "Created Date"
+    },
     "messages": {
       "addSuccess": "Subcategory added successfully",
       "updateSuccess": "Subcategory updated successfully",
@@ -823,6 +833,11 @@
         "products": "Products",
         "created": "Created"
       }
+    },
+    "filters": {
+      "productCount": "Product Count",
+      "productCountPlaceholder": "Enter number of products",
+      "createdDate": "Created Date"
     },
     "messages": {
       "addSuccess": "Brand added successfully",
@@ -1081,16 +1096,6 @@
       "time": "Time"
     },
     "filters": {
-      "activityType": "Activity Type",
-      "allTypes": "All Types",
-      "status": "Status",
-      "allStatuses": "All Statuses",
-      "timeRange": "Time Range",
-      "allTime": "All Time",
-      "lastHour": "Last Hour",
-      "last24Hours": "Last 24 Hours",
-      "last7Days": "Last 7 Days",
-      "last30Days": "Last 30 Days",
       "amount": "Amount",
       "amountPlaceholder": "Enter amount",
       "createdDate": "Created Date"
@@ -1370,6 +1375,16 @@
     "maxValue": "Max value",
     "cancel": "Cancel",
     "applyFilters": "Apply Filters ({{count}})",
+    "operators": {
+      "eq": "Equal to",
+      "gt": "Greater than",
+      "gte": "Greater than or equal",
+      "lt": "Less than",
+      "lte": "Less than or equal",
+      "between": "Between",
+      "before": "Before",
+      "after": "After"
+    },
     "filterDisplay": {
       "between": "{{label}}: {{operator}} {{value1}} and {{value2}}",
       "simple": "{{label}}: {{operator}} {{value}}"
