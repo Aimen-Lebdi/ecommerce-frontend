@@ -204,6 +204,17 @@
     right: auto;
   }
 
+  /* Admin sidebar mobile Sheet: it is already positioned on the right via the
+     [dir="rtl"] .left-0 override above, so flip the slide animation so it
+     opens/closes from the right in Arabic instead of the left.
+     Note: the SheetContent renders data-slot="sidebar" (its data-slot prop
+     overrides the default "sheet-content"), so target data-mobile="true"
+     which uniquely marks the admin sidebar's mobile sheet. */
+  [data-mobile="true"] {
+    --tw-enter-translate-x: 100%;
+    --tw-exit-translate-x: 100%;
+  }
+
   /* Adjust dropdown menu positioning */
   [data-align="end"] {
     left: 0;

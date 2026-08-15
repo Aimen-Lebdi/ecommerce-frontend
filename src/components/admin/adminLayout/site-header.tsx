@@ -4,10 +4,11 @@ import { ModeToggle } from "../../mode-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
 import { Button } from "../../ui/button";
 import { ChevronDown, Globe } from "lucide-react";
-import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 
 export function SiteHeader() {
+  const { i18n } = useTranslation();
 
   // Language change handler
   const changeLanguage = (lng: string) => {
