@@ -9,9 +9,20 @@ import {
   type ServerQueryParams,
 } from "../../components/admin/global/data-table";
 import { SectionCards } from "../../components/admin/dashboard/section-cards";
+import { DateRangePicker } from "../../components/admin/dashboard/date-range-picker";
+import { ExportButton } from "../../components/admin/dashboard/export-button";
+import { QuickActions } from "../../components/admin/dashboard/quick-actions";
+import { OrderStatusChart } from "../../components/admin/dashboard/order-status-chart";
+import { CategoryBrandChart } from "../../components/admin/dashboard/category-brand-chart";
+import { LowStockList } from "../../components/admin/dashboard/low-stock-list";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useSocketContext } from "../../socket/useSocket";
-import { fetchDashboardCards } from "../../features/analytics/analyticsSlice";
+import {
+  fetchDashboardCards,
+  fetchLowStock,
+  fetchSalesBy,
+  fetchDashboardTables,
+} from "../../features/analytics/analyticsSlice";
 import {
   fetchDashboardActivities,
   setQueryParams,
@@ -219,19 +230,22 @@ export default function Dashboard() {
 
   // Load initial dashboard activities on component mount
   React.useEffect(() => {
-    console.log("📊 Dashboard mounted, fetching initial activities...");
     dispatch(fetchDashboardActivities());
   }, [dispatch]);
 
   // FIXED (M6): Keep the dashboard cards live. When a realtime activity that
   // affects the metrics arrives (e.g. an order is placed/updated or a user
   // registers), refresh the analytics cards so revenue/orders/customers tick
-  // up in real time instead of only after a manual refresh.
+  // up in real time instead of only after a manual refresh. The current global
+  // date range is passed through so the live refresh respects the filter.
+  const dateRange = useAppSelector((state) => state.analytics.dateRange);
+  const salesByGroupBy = useAppSelector((state) => state.analytics.salesByGroupBy);
+
   React.useEffect(() => {
     if (metricsActivityCount > 0) {
-      dispatch(fetchDashboardCards());
+      dispatch(fetchDashboardCards(dateRange || undefined));
     }
-  }, [metricsActivityCount, dispatch]);
+  }, [metricsActivityCount, dispatch, dateRange]);
 
   // Handle errors
   React.useEffect(() => {
@@ -257,26 +271,58 @@ export default function Dashboard() {
 
   // Handle refresh button
   const handleRefresh = React.useCallback(() => {
-    console.log("🔄 Refreshing dashboard data...");
+    // M3: Refetch every dashboard widget, not just the activities table.
     dispatch(fetchDashboardActivities());
+
+    dispatch(fetchLowStock());
+    dispatch(fetchSalesBy({ groupBy: salesByGroupBy, range: dateRange || undefined }));
+    dispatch(fetchDashboardTables(dateRange || undefined));
 
     if (isConnected) {
       socketService.requestActivityStats();
     }
 
     toast.success(t('dashboard.refreshSuccess'));
-  }, [dispatch, isConnected, socketService, t]);
+  }, [dispatch, isConnected, socketService, t, salesByGroupBy, dateRange]);
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          {/* Dashboard Cards - Revenue, Customers, Orders, Top Product */}
+          {/* Page header: title + export + global date range picker (M1/M6) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 lg:px-6">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+              <p className="text-sm text-muted-foreground">{t('dashboard.subtitle')}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ExportButton />
+              <DateRangePicker />
+            </div>
+          </div>
+
+          {/* Quick actions (M6) */}
+          <div className="px-4 lg:px-6">
+            <QuickActions />
+          </div>
+
+          {/* Dashboard Cards - Revenue, Customers, Orders, Top Product, AOV, Conversion */}
           <SectionCards />
 
           {/* Growth Rate Chart */}
           <div className="px-4 lg:px-6">
             <ChartAreaInteractive refreshSignal={metricsActivityCount} />
+          </div>
+
+          {/* Order status + payment method donuts (M3) */}
+          <div className="px-4 lg:px-6">
+            <OrderStatusChart refreshSignal={metricsActivityCount} />
+          </div>
+
+          {/* Category/brand revenue + low-stock alerts (M4/M5) */}
+          <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2">
+            <CategoryBrandChart />
+            <LowStockList />
           </div>
 
           {/* Recent Activities Table */}

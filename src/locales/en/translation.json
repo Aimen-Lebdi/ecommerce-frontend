@@ -1072,6 +1072,8 @@
     "userPlural": "users"
   },
   "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of your store's performance",
     "time": {
       "justNow": "Just now",
       "minutesAgo": "{{minutes}}m ago",
@@ -1573,11 +1575,90 @@
     },
     "topProduct": {
       "title": "Top Product",
-      "changeText": "{{percentage}}% this month",
+      "changeText": "{{percentage}}% vs previous period",
       "noSales": "No sales yet"
+    },
+    "aov": {
+      "title": "Average Order Value",
+      "changeText": "{{percentage}}% vs previous period"
+    },
+    "conversion": {
+      "title": "Orders per New User",
+      "changeText": "{{percentage}}% vs previous period"
     },
     "noChange": "No change",
     "noData": "No data"
+  },
+  "dateRange": {
+    "title": "Date Range",
+    "selectRange": "Select range",
+    "today": "Today",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last90Days": "Last 90 days",
+    "custom": "Custom",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "clear": "Clear",
+    "apply": "Apply"
+  },
+  "charts": {
+    "orderStatus": {
+      "title": "Order Status",
+      "totalLabel": "Orders",
+      "empty": "No orders in this period",
+      "buckets": {
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "failedReturned": "Failed / Returned",
+        "cancelled": "Cancelled"
+      }
+    },
+    "paymentMethods": {
+      "title": "Payment Methods",
+      "totalLabel": "Payments",
+      "empty": "No payments in this period",
+      "card": "Card",
+      "cash": "Cash"
+    },
+    "salesBy": {
+      "title": "Revenue by Group",
+      "category": "Category",
+      "brand": "Brand",
+      "empty": "No sales data in this period"
+    }
+  },
+  "lowStock": {
+    "title": "Low Stock Alerts",
+    "thresholdLabel": "Threshold",
+    "save": "Save",
+    "saving": "Saving...",
+    "empty": "No low-stock products",
+    "headers": {
+      "product": "Product",
+      "qty": "Qty",
+      "sold": "Sold",
+      "price": "Price"
+    },
+    "toasts": {
+      "invalidThreshold": "Threshold must be a non-negative number",
+      "saveSuccess": "Threshold updated",
+      "saveError": "Failed to update threshold"
+    }
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "addProduct": "Add Product",
+    "viewOrders": "View Orders",
+    "manageStock": "Manage Stock"
+  },
+  "export": {
+    "button": "Export CSV",
+    "sheets": {
+      "bestOrders": "Best Orders",
+      "topCustomers": "Top Customers",
+      "bestProducts": "Best Products"
+    }
   },
   "header": {
     "logo": "CLICON",

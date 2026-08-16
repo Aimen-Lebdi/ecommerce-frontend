@@ -1072,6 +1072,8 @@
     "userPlural": "مستخدمين"
   },
   "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "نظرة عامة على أداء متجرك",
     "time": {
       "justNow": "الآن",
       "minutesAgo": "منذ {{minutes}} دقيقة",
@@ -1573,11 +1575,90 @@
     },
     "topProduct": {
       "title": "أفضل منتج",
-      "changeText": "{{percentage}}% هذا الشهر",
+      "changeText": "{{percentage}}% مقارنة بالفترة السابقة",
       "noSales": "لا توجد مبيعات بعد"
+    },
+    "aov": {
+      "title": "متوسط قيمة الطلب",
+      "changeText": "{{percentage}}% مقارنة بالفترة السابقة"
+    },
+    "conversion": {
+      "title": "الطلبات لكل مستخدم جديد",
+      "changeText": "{{percentage}}% مقارنة بالفترة السابقة"
     },
     "noChange": "لا يوجد تغيير",
     "noData": "لا توجد بيانات"
+  },
+  "dateRange": {
+    "title": "نطاق التاريخ",
+    "selectRange": "اختر النطاق",
+    "today": "اليوم",
+    "last7Days": "آخر 7 أيام",
+    "last30Days": "آخر 30 يوم",
+    "last90Days": "آخر 90 يوم",
+    "custom": "مخصص",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "clear": "مسح",
+    "apply": "تطبيق"
+  },
+  "charts": {
+    "orderStatus": {
+      "title": "حالة الطلبات",
+      "totalLabel": "الطلبات",
+      "empty": "لا توجد طلبات في هذه الفترة",
+      "buckets": {
+        "inProgress": "قيد التنفيذ",
+        "completed": "مكتملة",
+        "failedReturned": "فاشلة / مرتجعة",
+        "cancelled": "ملغاة"
+      }
+    },
+    "paymentMethods": {
+      "title": "طرق الدفع",
+      "totalLabel": "المدفوعات",
+      "empty": "لا توجد مدفوعات في هذه الفترة",
+      "card": "بطاقة",
+      "cash": "نقداً"
+    },
+    "salesBy": {
+      "title": "الإيرادات حسب المجموعة",
+      "category": "الفئة",
+      "brand": "العلامة التجارية",
+      "empty": "لا توجد بيانات مبيعات في هذه الفترة"
+    }
+  },
+  "lowStock": {
+    "title": "تنبيهات انخفاض المخزون",
+    "thresholdLabel": "الحد الأدنى",
+    "save": "حفظ",
+    "saving": "جاري الحفظ...",
+    "empty": "لا توجد منتجات منخفضة المخزون",
+    "headers": {
+      "product": "المنتج",
+      "qty": "الكمية",
+      "sold": "المباع",
+      "price": "السعر"
+    },
+    "toasts": {
+      "invalidThreshold": "يجب أن يكون الحد الأدنى رقماً غير سالب",
+      "saveSuccess": "تم تحديث الحد الأدنى",
+      "saveError": "فشل تحديث الحد الأدنى"
+    }
+  },
+  "quickActions": {
+    "title": "إجراءات سريعة",
+    "addProduct": "إضافة منتج",
+    "viewOrders": "عرض الطلبات",
+    "manageStock": "إدارة المخزون"
+  },
+  "export": {
+    "button": "تصدير CSV",
+    "sheets": {
+      "bestOrders": "أفضل الطلبات",
+      "topCustomers": "أفضل العملاء",
+      "bestProducts": "أفضل المنتجات"
+    }
   },
   "header": {
     "logo": "CLICON",

@@ -59,22 +59,32 @@ function CardSkeleton() {
 export function SectionCards() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { revenue, customers, orders, topProduct, cardsLoading, cardsError } = 
+  const { revenue, customers, orders, topProduct, aov, conversion, cardsLoading, cardsError, dateRange } = 
     useAppSelector((state) => state.analytics);
 
+  // Refetch whenever the global date range changes, passing the range through
+  // so the backend filters all cards by the selected period (M1/M2).
   useEffect(() => {
-    dispatch(fetchDashboardCards());
-  }, [dispatch]);
+    dispatch(fetchDashboardCards(dateRange || undefined));
+  }, [dispatch, dateRange]);
 
   // FIXED (M6): Only show skeletons on the very first load. During live
   // refreshes (triggered by realtime activity) keep the last known values
   // visible instead of flickering to skeletons.
   const isInitialLoading =
-    cardsLoading && !revenue && !orders && !customers && !topProduct;
+    cardsLoading &&
+    !revenue &&
+    !orders &&
+    !customers &&
+    !topProduct &&
+    !aov &&
+    !conversion;
 
   if (isInitialLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+        <CardSkeleton />
+        <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
@@ -84,7 +94,7 @@ export function SectionCards() {
   }
 
   // Only show the error state when there is nothing to display yet.
-  if (cardsError && !revenue && !orders && !customers && !topProduct) {
+  if (cardsError && !revenue && !orders && !customers && !topProduct && !aov && !conversion) {
     return (
       <div className="grid grid-cols-1 gap-4 px-4 lg:px-6">
         <Card className="border-destructive">
@@ -100,9 +110,11 @@ export function SectionCards() {
   const customersData = generateMiniChartData(customers?.trend || "neutral");
   const ordersData = generateMiniChartData(orders?.trend || "neutral");
   const productData = generateMiniChartData(topProduct?.trend || "neutral");
+  const aovData = generateMiniChartData(aov?.trend || "neutral");
+  const conversionData = generateMiniChartData(conversion?.trend || "neutral");
 
   return (
-    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
       {/* Total Revenue */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -227,6 +239,72 @@ export function SectionCards() {
           <MiniChart 
             data={productData} 
             color={topProduct?.trend === "up" ? "#f59e0b" : topProduct?.trend === "down" ? "#ef4444" : "#6b7280"} 
+          />
+        </CardContent>
+      </Card>
+
+      {/* Average Order Value (M2) */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-sm font-medium">{t('cards.aov.title')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            ${aov?.total.toLocaleString() || "0"}
+          </div>
+          <p className={`text-xs flex items-center gap-1 ${
+            aov?.trend === "up" ? "text-green-500" : 
+            aov?.trend === "down" ? "text-red-500" : 
+            "text-muted-foreground"
+          }`}>
+            {aov?.trend === "up" ? (
+              <IconTrendingUp className="w-4 h-4" />
+            ) : aov?.trend === "down" ? (
+              <IconTrendingDown className="w-4 h-4" />
+            ) : null}
+            {aov?.percentageChange !== undefined 
+              ? t('cards.aov.changeText', { 
+                  percentage: aov.percentageChange > 0 ? `+${aov.percentageChange}` : aov.percentageChange.toString()
+                })
+              : t('cards.noChange')}
+          </p>
+          <MiniChart 
+            data={aovData} 
+            color={aov?.trend === "up" ? "#22c55e" : aov?.trend === "down" ? "#ef4444" : "#6b7280"} 
+          />
+        </CardContent>
+      </Card>
+
+      {/* Conversion (M2) — orders per registered user in the selected range */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-sm font-medium">{t('cards.conversion.title')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {conversion?.total !== undefined && conversion?.total !== null
+              ? conversion.total.toFixed(2)
+              : "0.00"}
+          </div>
+          <p className={`text-xs flex items-center gap-1 ${
+            conversion?.trend === "up" ? "text-green-500" : 
+            conversion?.trend === "down" ? "text-red-500" : 
+            "text-muted-foreground"
+          }`}>
+            {conversion?.trend === "up" ? (
+              <IconTrendingUp className="w-4 h-4" />
+            ) : conversion?.trend === "down" ? (
+              <IconTrendingDown className="w-4 h-4" />
+            ) : null}
+            {conversion?.percentageChange !== undefined 
+              ? t('cards.conversion.changeText', { 
+                  percentage: conversion.percentageChange > 0 ? `+${conversion.percentageChange}` : conversion.percentageChange.toString()
+                })
+              : t('cards.noChange')}
+          </p>
+          <MiniChart 
+            data={conversionData} 
+            color={conversion?.trend === "up" ? "#22c55e" : conversion?.trend === "down" ? "#ef4444" : "#6b7280"} 
           />
         </CardContent>
       </Card>

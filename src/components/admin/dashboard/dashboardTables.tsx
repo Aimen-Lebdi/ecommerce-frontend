@@ -50,12 +50,15 @@ export function DashboardTables() {
     topCustomers, 
     bestProducts, 
     tablesLoading, 
-    tablesError 
+    tablesError,
+    dateRange,
   } = useAppSelector((state) => state.analytics);
 
+  // Refetch whenever the global date range changes, passing the range through
+  // so all three tables reflect the selected period (M1).
   useEffect(() => {
-    dispatch(fetchDashboardTables());
-  }, [dispatch]);
+    dispatch(fetchDashboardTables(dateRange || undefined));
+  }, [dispatch, dateRange]);
 
   if (tablesError) {
     return (

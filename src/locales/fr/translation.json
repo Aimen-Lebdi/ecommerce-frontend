@@ -1072,6 +1072,8 @@
     "userPlural": "utilisateurs"
   },
   "dashboard": {
+    "title": "Tableau de Bord",
+    "subtitle": "Aperçu des performances de votre boutique",
     "time": {
       "justNow": "À l'instant",
       "minutesAgo": "Il y a {{minutes}} min",
@@ -1573,11 +1575,90 @@
     },
     "topProduct": {
       "title": "Meilleur Produit",
-      "changeText": "{{percentage}}% ce mois-ci",
+      "changeText": "{{percentage}}% vs période précédente",
       "noSales": "Aucune vente pour le moment"
+    },
+    "aov": {
+      "title": "Panier Moyen",
+      "changeText": "{{percentage}}% vs période précédente"
+    },
+    "conversion": {
+      "title": "Commandes par Nouvel Utilisateur",
+      "changeText": "{{percentage}}% vs période précédente"
     },
     "noChange": "Aucun changement",
     "noData": "Aucune donnée"
+  },
+  "dateRange": {
+    "title": "Période",
+    "selectRange": "Choisir une période",
+    "today": "Aujourd'hui",
+    "last7Days": "7 derniers jours",
+    "last30Days": "30 derniers jours",
+    "last90Days": "90 derniers jours",
+    "custom": "Personnalisée",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "clear": "Effacer",
+    "apply": "Appliquer"
+  },
+  "charts": {
+    "orderStatus": {
+      "title": "Statut des Commandes",
+      "totalLabel": "Commandes",
+      "empty": "Aucune commande sur cette période",
+      "buckets": {
+        "inProgress": "En cours",
+        "completed": "Terminées",
+        "failedReturned": "Échouées / Retournées",
+        "cancelled": "Annulées"
+      }
+    },
+    "paymentMethods": {
+      "title": "Moyens de Paiement",
+      "totalLabel": "Paiements",
+      "empty": "Aucun paiement sur cette période",
+      "card": "Carte",
+      "cash": "Espèces"
+    },
+    "salesBy": {
+      "title": "Revenus par Groupe",
+      "category": "Catégorie",
+      "brand": "Marque",
+      "empty": "Aucune donnée de vente sur cette période"
+    }
+  },
+  "lowStock": {
+    "title": "Alertes de Stock Faible",
+    "thresholdLabel": "Seuil",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "empty": "Aucun produit en stock faible",
+    "headers": {
+      "product": "Produit",
+      "qty": "Qté",
+      "sold": "Vendus",
+      "price": "Prix"
+    },
+    "toasts": {
+      "invalidThreshold": "Le seuil doit être un nombre non négatif",
+      "saveSuccess": "Seuil mis à jour",
+      "saveError": "Échec de la mise à jour du seuil"
+    }
+  },
+  "quickActions": {
+    "title": "Actions Rapides",
+    "addProduct": "Ajouter un Produit",
+    "viewOrders": "Voir les Commandes",
+    "manageStock": "Gérer le Stock"
+  },
+  "export": {
+    "button": "Exporter CSV",
+    "sheets": {
+      "bestOrders": "Meilleures Commandes",
+      "topCustomers": "Meilleurs Clients",
+      "bestProducts": "Meilleurs Produits"
+    }
   },
   "header": {
     "logo": "CLICON",
