@@ -5,7 +5,6 @@ import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -17,17 +16,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "../../ui/chart"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "../../ui/toggle-group"
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
 import { fetchGrowthRate } from "../../../features/analytics/analyticsSlice"
 import { Skeleton } from "../../ui/skeleton"
@@ -50,25 +38,13 @@ export function ChartAreaInteractive({
   const { growthRateData, growthRateLoading, growthRateError, dateRange } = 
     useAppSelector((state) => state.analytics)
   
-  const [timeRange, setTimeRange] = React.useState("90d")
-
-  // The global date range (M1) takes precedence over the internal 7/30/90d
-  // toggle. When a global range is active, fetch the chart for that period;
-  // otherwise fall back to the internal rolling window.
-  const hasGlobalRange = Boolean(dateRange?.startDate && dateRange?.endDate)
-
-  // Fetch growth rate data when the component mounts, the time range changes,
-  // the global date range changes, or a live activity arrives (refreshSignal).
+  // Fetch growth rate data when the component mounts, the global date range
+  // changes, or a live activity arrives (refreshSignal). The global date range
+  // (M1) is the single source of truth for the period; when none is selected we
+  // fall back to a default rolling 90-day window.
   React.useEffect(() => {
-    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90
-    dispatch(fetchGrowthRate({ days, range: dateRange || undefined }))
-  }, [timeRange, refreshSignal, dispatch, dateRange])
-
-  const handleTimeRangeChange = (value: string) => {
-    if (value) {
-      setTimeRange(value)
-    }
-  }
+    dispatch(fetchGrowthRate({ days: 90, range: dateRange || undefined }))
+  }, [refreshSignal, dispatch, dateRange])
 
   // Calculate total revenue for the period
   const totalRevenue = React.useMemo(() => {
@@ -118,43 +94,6 @@ export function ChartAreaInteractive({
             ${totalRevenue.toLocaleString()}
           </span>
         </CardDescription>
-        <CardAction>
-          {!hasGlobalRange && (
-            <>
-              <ToggleGroup
-                type="single"
-                value={timeRange}
-                onValueChange={handleTimeRangeChange}
-                variant="outline"
-                className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
-              >
-                <ToggleGroupItem value="90d">{t('chart.timeRange.last3Months')}</ToggleGroupItem>
-                <ToggleGroupItem value="30d">{t('chart.timeRange.last30Days')}</ToggleGroupItem>
-                <ToggleGroupItem value="7d">{t('chart.timeRange.last7Days')}</ToggleGroupItem>
-              </ToggleGroup>
-              <Select value={timeRange} onValueChange={handleTimeRangeChange}>
-                <SelectTrigger
-                  className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
-                  size="sm"
-                  aria-label={t('chart.timeRange.selectAriaLabel')}
-                >
-                  <SelectValue placeholder={t('chart.timeRange.last3Months')} />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  <SelectItem value="90d" className="rounded-lg">
-                    {t('chart.timeRange.last3Months')}
-                  </SelectItem>
-                  <SelectItem value="30d" className="rounded-lg">
-                    {t('chart.timeRange.last30Days')}
-                  </SelectItem>
-                  <SelectItem value="7d" className="rounded-lg">
-                    {t('chart.timeRange.last7Days')}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </>
-          )}
-        </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer

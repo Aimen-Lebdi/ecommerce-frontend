@@ -5,41 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchDashboardCards } from "../../../features/analytics/analyticsSlice";
 import { Skeleton } from "../../../components/ui/skeleton";
 import { useTranslation } from 'react-i18next';
-
-// Generate mini chart data based on trend
-const generateMiniChartData = (trend: "up" | "down" | "neutral") => {
-  const baseValues = trend === "up" 
-    ? [20, 45, 30, 70, 50]
-    : trend === "down"
-    ? [60, 30, 50, 20, 40]
-    : [40, 45, 40, 45, 40];
-  
-  return baseValues.map(value => ({ value }));
-};
-
-function MiniChart({ data, color }: { data: unknown[]; color: string }) {
-  return (
-    <div className="h-[80px] mt-4">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={color}
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
 
 function CardSkeleton() {
   return (
@@ -49,8 +19,7 @@ function CardSkeleton() {
       </CardHeader>
       <CardContent>
         <Skeleton className="h-8 w-32 mb-2" />
-        <Skeleton className="h-4 w-40 mb-4" />
-        <Skeleton className="h-[80px] w-full" />
+        <Skeleton className="h-4 w-40" />
       </CardContent>
     </Card>
   );
@@ -106,13 +75,6 @@ export function SectionCards() {
     );
   }
 
-  const revenueData = generateMiniChartData(revenue?.trend || "neutral");
-  const customersData = generateMiniChartData(customers?.trend || "neutral");
-  const ordersData = generateMiniChartData(orders?.trend || "neutral");
-  const productData = generateMiniChartData(topProduct?.trend || "neutral");
-  const aovData = generateMiniChartData(aov?.trend || "neutral");
-  const conversionData = generateMiniChartData(conversion?.trend || "neutral");
-
   return (
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
       {/* Total Revenue */}
@@ -140,10 +102,6 @@ export function SectionCards() {
                 })
               : t('cards.noChange')}
           </p>
-          <MiniChart 
-            data={revenueData} 
-            color={revenue?.trend === "up" ? "#22c55e" : revenue?.trend === "down" ? "#ef4444" : "#6b7280"} 
-          />
         </CardContent>
       </Card>
 
@@ -172,10 +130,6 @@ export function SectionCards() {
                 })
               : t('cards.noChange')}
           </p>
-          <MiniChart 
-            data={customersData} 
-            color={customers?.trend === "up" ? "#22c55e" : customers?.trend === "down" ? "#ef4444" : "#6b7280"} 
-          />
         </CardContent>
       </Card>
 
@@ -204,10 +158,6 @@ export function SectionCards() {
                 })
               : t('cards.orders.steadyFlow')}
           </p>
-          <MiniChart 
-            data={ordersData} 
-            color={orders?.trend === "up" ? "#22c55e" : orders?.trend === "down" ? "#ef4444" : "#6b7280"} 
-          />
         </CardContent>
       </Card>
 
@@ -236,10 +186,6 @@ export function SectionCards() {
                 })
               : t('cards.noData')}
           </p>
-          <MiniChart 
-            data={productData} 
-            color={topProduct?.trend === "up" ? "#f59e0b" : topProduct?.trend === "down" ? "#ef4444" : "#6b7280"} 
-          />
         </CardContent>
       </Card>
 
@@ -268,10 +214,6 @@ export function SectionCards() {
                 })
               : t('cards.noChange')}
           </p>
-          <MiniChart 
-            data={aovData} 
-            color={aov?.trend === "up" ? "#22c55e" : aov?.trend === "down" ? "#ef4444" : "#6b7280"} 
-          />
         </CardContent>
       </Card>
 
@@ -302,10 +244,6 @@ export function SectionCards() {
                 })
               : t('cards.noChange')}
           </p>
-          <MiniChart 
-            data={conversionData} 
-            color={conversion?.trend === "up" ? "#22c55e" : conversion?.trend === "down" ? "#ef4444" : "#6b7280"} 
-          />
         </CardContent>
       </Card>
     </div>
