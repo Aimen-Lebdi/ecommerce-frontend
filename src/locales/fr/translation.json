@@ -28,7 +28,7 @@
     "features": {
       "freeShipping": {
         "title": "Livraison Gratuite",
-        "description": "Livraison gratuite pour toutes les commandes de plus de 50$"
+        "description": "Livraison gratuite pour toutes les commandes de plus de 10,000 DZD"
       },
       "easyReturns": {
         "title": "Retours Faciles",
@@ -212,7 +212,7 @@
       "category": "Catégorie"
     },
     "features": {
-      "freeShipping": "✅ Livraison Gratuite dès 50$",
+      "freeShipping": "✅ Livraison Gratuite dès 10,000 DZD",
       "securePayment": "🔒 Paiement Sécurisé",
       "returns": "↩ Retours sous 30 jours"
     },
@@ -359,7 +359,7 @@
       "confirmationSentTo": "Nous avons envoyé un email de confirmation à <strong>{{email}}</strong>"
     },
     "codBanner": {
-      "prepareCash": "Veuillez préparer <strong>${{amount}}</strong> en espèces pour le paiement à la livraison."
+      "prepareCash": "Veuillez préparer <strong>{{amount}} DZD</strong> en espèces pour le paiement à la livraison."
     },
     "items": {
       "title": "Articles Commandés",
@@ -381,7 +381,7 @@
       "statusLabel": "Statut : ",
       "paid": "Payé",
       "pending": "En Attente",
-      "amountToPay": "Montant à payer à la livraison : ${{amount}}",
+      "amountToPay": "Montant à payer à la livraison : {{amount}} DZD",
       "paidOn": "Payé le : {{date}}"
     },
     "summary": {
@@ -1241,7 +1241,7 @@
       "brand": "Marque",
       "productName": "Nom du Produit",
       "description": "Description",
-      "price": "Prix ($)",
+      "price": "Prix (DZD)",
       "quantity": "Quantité",
       "colors": "Couleurs (séparées par des virgules)",
       "mainImage": "Image Principale du Produit",
@@ -1684,7 +1684,7 @@
     "trustBadges": {
       "freeShipping": {
         "title": "Livraison Gratuite",
-        "description": "Commandes de plus de 50$"
+        "description": "Commandes de plus de 10,000 DZD"
       },
       "easyReturns": {
         "title": "Retours Faciles",

@@ -358,7 +358,7 @@ const OrderTracking = () => {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('orderTracking.totalAmount')}</span>
                   <span className="font-semibold">
-                    {order.totalOrderPrice.toFixed(2)} DA
+                    {order.totalOrderPrice.toFixed(2)} DZD
                   </span>
                 </div>
                 <div className="flex justify-between">

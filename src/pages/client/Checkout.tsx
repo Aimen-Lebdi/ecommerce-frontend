@@ -519,7 +519,7 @@ const Checkout = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-bold">
-                            DA{total.toFixed(2)}
+                            {total.toFixed(2)} DZD
                           </span>
                           {isOrderSummaryOpen ? (
                             <ChevronUp className="h-4 w-4" />
@@ -557,7 +557,7 @@ const Checkout = () => {
                             )}
                           </div>
                           <div className="text-sm font-semibold">
-                            DA{(item.price * item.quantity).toFixed(2)}
+                            {(item.price * item.quantity).toFixed(2)} DZD
                           </div>
                         </div>
                       ))}
@@ -565,16 +565,16 @@ const Checkout = () => {
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span>{t('checkout.subtotal')}</span>
-                          <span>DA{subtotal.toFixed(2)}</span>
+                          <span>{subtotal.toFixed(2)} DZD</span>
                         </div>
                         <div className="flex justify-between">
                           <span>{t('checkout.shipping')}</span>
-                          <span>DA{shippingCost.toFixed(2)}</span>
+                          <span>{shippingCost.toFixed(2)} DZD</span>
                         </div>
                         <Separator />
                         <div className="flex justify-between font-bold">
                           <span>{t('checkout.total')}</span>
-                          <span>DA{total.toFixed(2)}</span>
+                          <span>{total.toFixed(2)} DZD</span>
                         </div>
                       </div>
                     </CardContent>
@@ -1051,7 +1051,7 @@ const Checkout = () => {
       {t('checkout.businessDays')}
     </p>
   </div>
-  <span className="font-semibold">500 DA</span>
+  <span className="font-semibold">500 DZD</span>
 </div>
 
               </CardContent>
@@ -1130,7 +1130,7 @@ const Checkout = () => {
                           </p>
                         )}
                         <p className="text-sm font-semibold">
-                          {(item.price * item.quantity).toFixed(2)} DA
+                          {(item.price * item.quantity).toFixed(2)} DZD
                         </p>
                       </div>
                     </div>
@@ -1141,16 +1141,16 @@ const Checkout = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>{t('checkout.subtotal')}</span>
-                      <span>{subtotal.toFixed(2)} DA</span>
+                      <span>{subtotal.toFixed(2)} DZD</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>{t('checkout.shipping')}</span>
-                      <span>{shippingCost.toFixed(2)} DA</span>
+                      <span>{shippingCost.toFixed(2)} DZD</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>{t('checkout.total')}</span>
-                      <span>{total.toFixed(2)} DA</span>
+                      <span>{total.toFixed(2)} DZD</span>
                     </div>
                   </div>
                 </CardContent>
@@ -1207,7 +1207,7 @@ const Checkout = () => {
             ) : (
               <>
                 <Lock className="h-4 w-4 mr-2" />
-                {t('checkout.placeOrder')} • DA{total.toFixed(2)}
+                {t('checkout.placeOrder')} • {total.toFixed(2)} DZD
               </>
             )}
           </Button>
@@ -1230,7 +1230,7 @@ const Checkout = () => {
       ) : (
         <>
           <Lock className="h-4 w-4 mr-2" />
-          {t('checkout.placeOrder')} • DA{total.toFixed(2)}
+          {t('checkout.placeOrder')} • {total.toFixed(2)} DZD
         </>
       )}
     </Button>

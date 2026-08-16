@@ -276,8 +276,8 @@ const FiltersPanel = memo(
           </Button>
           {(filters.minPrice || filters.maxPrice) && (
             <div className="text-xs text-muted-foreground text-center">
-              {t("shop.filters.active")}: ${filters.minPrice || "0"} - $
-              {filters.maxPrice || "∞"}
+              {t("shop.filters.active")}: {filters.minPrice || "0"} DZD -{" "}
+              {filters.maxPrice || "∞"} DZD
             </div>
           )}
         </div>
@@ -660,7 +660,7 @@ const ShopPage = () => {
             </h3>
             <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
               <span className="text-base sm:text-lg font-bold">
-                {product.price} DA
+                {product.price} DZD
               </span>
             </div>
             <div className="flex items-center justify-between mt-auto">
@@ -721,7 +721,7 @@ const ShopPage = () => {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg sm:text-xl font-bold">
-                        {product.price} DA
+                        {product.price} DZD
                       </span>
                     </div>
                     <span

@@ -360,7 +360,7 @@ const OrderConfirmationPage = () => {
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="font-semibold text-gray-900 text-sm sm:text-base">
-                        {item.price.toFixed(2)} DA
+                        {item.price.toFixed(2)} DZD
                       </p>
                     </div>
                   </div>
@@ -544,26 +544,26 @@ const OrderConfirmationPage = () => {
                   <span className="text-gray-600">
                     {t("orderConfirmation.summary.subtotal")}
                   </span>
-                  <span className="text-gray-900">{subtotal.toFixed(2)} DA</span>
+                  <span className="text-gray-900">{subtotal.toFixed(2)} DZD</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">
                     {t("orderConfirmation.summary.shipping")}
                   </span>
-                  <span className="text-gray-900">{shipping.toFixed(2)} DA</span>
+                  <span className="text-gray-900">{shipping.toFixed(2)} DZD</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">
                     {t("orderConfirmation.summary.tax")}
                   </span>
-                  <span className="text-gray-900">{tax.toFixed(2)} DA</span>
+                  <span className="text-gray-900">{tax.toFixed(2)} DZD</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-base sm:text-lg font-semibold">
                   <span className="text-gray-900">
                     {t("orderConfirmation.summary.total")}
                   </span>
-                  <span className="text-gray-900">{total.toFixed(2)} DA</span>
+                  <span className="text-gray-900">{total.toFixed(2)} DZD</span>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t text-xs text-gray-500">

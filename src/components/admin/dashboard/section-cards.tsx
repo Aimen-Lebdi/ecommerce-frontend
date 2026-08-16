@@ -84,7 +84,7 @@ export function SectionCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            ${revenue?.total.toLocaleString() || "0"}
+            {revenue?.total.toLocaleString() || "0"} DZD
           </div>
           <p className={`text-xs flex items-center gap-1 ${
             revenue?.trend === "up" ? "text-green-500" : 
@@ -196,7 +196,7 @@ export function SectionCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            ${aov?.total.toLocaleString() || "0"}
+            {aov?.total.toLocaleString() || "0"} DZD
           </div>
           <p className={`text-xs flex items-center gap-1 ${
             aov?.trend === "up" ? "text-green-500" : 

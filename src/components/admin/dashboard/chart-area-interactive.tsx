@@ -88,10 +88,10 @@ export function ChartAreaInteractive({
         <CardTitle>{t('chart.growthRate.title')}</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
-            {t('chart.growthRate.totalRevenue')}: ${totalRevenue.toLocaleString()}
+            {t('chart.growthRate.totalRevenue')}: {totalRevenue.toLocaleString()} DZD
           </span>
           <span className="@[540px]/card:hidden">
-            ${totalRevenue.toLocaleString()}
+            {totalRevenue.toLocaleString()} DZD
           </span>
         </CardDescription>
       </CardHeader>

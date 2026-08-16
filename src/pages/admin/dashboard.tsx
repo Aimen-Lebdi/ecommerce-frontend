@@ -162,7 +162,7 @@ export default function Dashboard() {
               amount < 0 ? "text-red-600" : "text-green-600"
             }`}
           >
-            {amount < 0 ? "-" : ""}${Math.abs(amount).toFixed(2)}
+            {(amount < 0 ? "-" : "") + Math.abs(amount).toFixed(2)} DZD
           </div>
         );
       },

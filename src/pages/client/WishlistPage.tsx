@@ -229,7 +229,7 @@ const WishlistPage = () => {
                   {/* Price */}
                   <div className="flex items-center gap-2">
                     <span className="text-base md:text-lg font-bold">
-                      ${product.price.toFixed(2)}
+                      {product.price.toFixed(2)} DZD
                     </span>
                   </div>
 

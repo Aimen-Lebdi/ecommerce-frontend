@@ -28,7 +28,7 @@
     "features": {
       "freeShipping": {
         "title": "Free Shipping",
-        "description": "Free shipping on all orders over $50"
+        "description": "Free shipping on all orders over 10,000 DZD"
       },
       "easyReturns": {
         "title": "Easy Returns",
@@ -212,7 +212,7 @@
       "category": "Category"
     },
     "features": {
-      "freeShipping": "✅ Free Shipping on orders over $50",
+      "freeShipping": "✅ Free Shipping on orders over 10,000 DZD",
       "securePayment": "🔒 Secure Payment",
       "returns": "↩ 30-day returns"
     },
@@ -359,7 +359,7 @@
       "confirmationSentTo": "We've sent a confirmation email to <strong>{{email}}</strong>"
     },
     "codBanner": {
-      "prepareCash": "Please prepare <strong>${{amount}}</strong> in cash for payment upon delivery."
+      "prepareCash": "Please prepare <strong>{{amount}} DZD</strong> in cash for payment upon delivery."
     },
     "items": {
       "title": "Order Items",
@@ -381,7 +381,7 @@
       "statusLabel": "Status: ",
       "paid": "Paid",
       "pending": "Pending",
-      "amountToPay": "Amount to pay on delivery: ${{amount}}",
+      "amountToPay": "Amount to pay on delivery: {{amount}} DZD",
       "paidOn": "Paid on: {{date}}"
     },
     "summary": {
@@ -1241,7 +1241,7 @@
       "brand": "Brand",
       "productName": "Product Name",
       "description": "Description",
-      "price": "Price ($)",
+      "price": "Price (DZD)",
       "quantity": "Quantity",
       "colors": "Colors (comma separated)",
       "mainImage": "Main Product Image",
@@ -1684,7 +1684,7 @@
     "trustBadges": {
       "freeShipping": {
         "title": "Free Shipping",
-        "description": "On orders over $50"
+        "description": "On orders over 10,000 DZD"
       },
       "easyReturns": {
         "title": "Easy Returns",

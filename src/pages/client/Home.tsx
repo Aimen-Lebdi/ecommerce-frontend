@@ -490,7 +490,7 @@ const FeaturedProductsSection = () => {
                   </h3>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-xl font-bold">
-                      {product.price} DA
+                      {product.price} DZD
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-auto">

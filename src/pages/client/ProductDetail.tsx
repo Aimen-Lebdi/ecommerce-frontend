@@ -242,7 +242,7 @@ const ProductDetails = () => {
           {/* Price */}
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-2xl md:text-3xl font-bold">
-              {product.price.toFixed(2)} DA
+              {product.price.toFixed(2)} DZD
             </span>
           </div>
 
@@ -457,7 +457,7 @@ const ProductDetails = () => {
                       {t('productDetail.specs.price')}:
                     </span>
                     <span className="text-sm font-medium">
-                      {product.price.toFixed(2)} DA
+                      {product.price.toFixed(2)} DZD
                     </span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
@@ -514,7 +514,7 @@ const ProductDetails = () => {
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm md:text-base font-bold">
-                        {rp.price.toFixed(2)} DA
+                        {rp.price.toFixed(2)} DZD
                       </span>
                     </div>
                   </Link>

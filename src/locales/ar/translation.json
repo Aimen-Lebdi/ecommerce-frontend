@@ -28,7 +28,7 @@
     "features": {
       "freeShipping": {
         "title": "شحن مجاني",
-        "description": "شحن مجاني لجميع الطلبات فوق 50 دولار"
+        "description": "شحن مجاني لجميع الطلبات فوق 10,000 DZD"
       },
       "easyReturns": {
         "title": "إرجاع سهل",
@@ -212,7 +212,7 @@
       "category": "الفئة"
     },
     "features": {
-      "freeShipping": "✅ شحن مجاني للطلبات فوق 50 دولار",
+      "freeShipping": "✅ شحن مجاني للطلبات فوق 10,000 DZD",
       "securePayment": "🔒 دفع آمن",
       "returns": "↩ إرجاع خلال 30 يوماً"
     },
@@ -359,7 +359,7 @@
       "confirmationSentTo": "لقد أرسلنا بريد تأكيد إلى <strong>{{email}}</strong>"
     },
     "codBanner": {
-      "prepareCash": "الرجاء إعداد <strong>${{amount}}</strong> نقداً للدفع عند الاستلام."
+      "prepareCash": "الرجاء إعداد <strong>{{amount}} DZD</strong> نقداً للدفع عند الاستلام."
     },
     "items": {
       "title": "عناصر الطلب",
@@ -381,7 +381,7 @@
       "statusLabel": "الحالة: ",
       "paid": "مدفوع",
       "pending": "قيد الانتظار",
-      "amountToPay": "المبلغ المطلوب دفعه عند الاستلام: ${{amount}}",
+      "amountToPay": "المبلغ المطلوب دفعه عند الاستلام: {{amount}} DZD",
       "paidOn": "تم الدفع في: {{date}}"
     },
     "summary": {
@@ -1241,7 +1241,7 @@
       "brand": "العلامة التجارية",
       "productName": "اسم المنتج",
       "description": "الوصف",
-      "price": "السعر ($)",
+      "price": "السعر (DZD)",
       "quantity": "الكمية",
       "colors": "الألوان (مفصولة بفواصل)",
       "mainImage": "الصورة الرئيسية للمنتج",
@@ -1684,7 +1684,7 @@
     "trustBadges": {
       "freeShipping": {
         "title": "شحن مجاني",
-        "description": "للطلبات فوق 50 دولار"
+        "description": "للطلبات فوق 10,000 DZD"
       },
       "easyReturns": {
         "title": "إرجاع سهل",

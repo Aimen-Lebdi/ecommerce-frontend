@@ -221,7 +221,7 @@ const Cart = () => {
                       {/* Price */}
                       <div className="text-right">
                         <div className="font-semibold text-sm md:text-base">
-                          {item.price.toFixed(2)} DA
+                          {item.price.toFixed(2)} DZD
                         </div>
                       </div>
                     </div>
@@ -291,7 +291,7 @@ const Cart = () => {
                     {/* Subtotal */}
                     <div className="text-right mt-2">
                       <span className="text-sm font-semibold">
-                        {t('cart.subtotal')}: {(item.price * item.quantity).toFixed(2)} DA
+                        {t('cart.subtotal')}: {(item.price * item.quantity).toFixed(2)} DZD
                       </span>
                     </div>
                   </div>
@@ -311,7 +311,7 @@ const Cart = () => {
             <CardContent className="space-y-4">
               <div className="flex justify-between text-sm">
                 <span>{t('cart.subtotal')}</span>
-                <span>{subtotal.toFixed(2)} DA</span>
+                <span>{subtotal.toFixed(2)} DZD</span>
               </div>
 
               {/* Shipping Options */}
@@ -337,19 +337,19 @@ const Cart = () => {
 
               <div className="flex justify-between text-sm">
                 <span>{t('cart.shipping')}</span>
-                <span>{shippingCost.toFixed(2)} DA</span>
+                <span>{shippingCost.toFixed(2)} DZD</span>
               </div>
 
               <div className="flex justify-between text-sm">
                 <span>{t('cart.tax')}</span>
-                <span>{taxAmount.toFixed(2)} DA</span>
+                <span>{taxAmount.toFixed(2)} DZD</span>
               </div>
 
               <Separator />
 
               <div className="flex justify-between text-lg font-semibold">
                 <span>{t('cart.total')}</span>
-                <span>{total.toFixed(2)} DA</span>
+                <span>{total.toFixed(2)} DZD</span>
               </div>
 
               {/* Estimated Delivery */}

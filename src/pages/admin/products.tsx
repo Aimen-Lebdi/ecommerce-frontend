@@ -119,7 +119,7 @@ export default function Products() {
       header: t('products.columns.price'),
       cell: ({ row }) => {
         const price = row.getValue("price") as number;
-        return `$${price.toFixed(2)}`;
+        return `${price.toFixed(2)} DZD`;
       },
     },
     {
