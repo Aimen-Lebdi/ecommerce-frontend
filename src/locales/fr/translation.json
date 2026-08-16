@@ -1562,16 +1562,15 @@
   "cards": {
     "revenue": {
       "title": "Revenu Total",
-      "changeText": "{{percentage}}% par rapport au mois dernier"
+      "changeText": "{{percentage}}% vs période précédente"
     },
     "customers": {
       "title": "Nouveaux Clients",
-      "changeText": "{{percentage}}% cette période"
+      "changeText": "{{percentage}}% vs période précédente"
     },
     "orders": {
       "title": "Commandes Totales",
-      "changeText": "{{percentage}}% de flux de commandes ce mois-ci",
-      "steadyFlow": "Flux de commandes stable"
+      "changeText": "{{percentage}}% vs période précédente"
     },
     "topProduct": {
       "title": "Meilleur Produit",
@@ -1586,7 +1585,7 @@
       "title": "Commandes par Nouvel Utilisateur",
       "changeText": "{{percentage}}% vs période précédente"
     },
-    "noChange": "Aucun changement",
+    "new": "Nouveau",
     "noData": "Aucune donnée"
   },
   "dateRange": {

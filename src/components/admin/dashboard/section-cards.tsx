@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
-import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
+import { KpiChange } from "./kpi-change";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchDashboardCards } from "../../../features/analytics/analyticsSlice";
 import { Skeleton } from "../../../components/ui/skeleton";
@@ -86,22 +86,12 @@ export function SectionCards() {
           <div className="text-2xl font-bold">
             {revenue?.total.toLocaleString() || "0"} DZD
           </div>
-          <p className={`text-xs flex items-center gap-1 ${
-            revenue?.trend === "up" ? "text-green-500" : 
-            revenue?.trend === "down" ? "text-red-500" : 
-            "text-muted-foreground"
-          }`}>
-            {revenue?.trend === "up" ? (
-              <IconTrendingUp className="w-4 h-4" />
-            ) : revenue?.trend === "down" ? (
-              <IconTrendingDown className="w-4 h-4" />
-            ) : null}
-            {revenue?.percentageChange !== undefined 
-              ? t('cards.revenue.changeText', { 
-                  percentage: revenue.percentageChange > 0 ? `+${revenue.percentageChange}` : revenue.percentageChange.toString()
-                })
-              : t('cards.noChange')}
-          </p>
+          <KpiChange
+            total={revenue?.total ?? 0}
+            percentageChange={revenue?.percentageChange}
+            trend={revenue?.trend ?? "neutral"}
+            changeTextKey="cards.revenue.changeText"
+          />
         </CardContent>
       </Card>
 
@@ -114,22 +104,12 @@ export function SectionCards() {
           <div className="text-2xl font-bold">
             {customers?.total.toLocaleString() || "0"}
           </div>
-          <p className={`text-xs flex items-center gap-1 ${
-            customers?.trend === "up" ? "text-green-500" : 
-            customers?.trend === "down" ? "text-red-500" : 
-            "text-muted-foreground"
-          }`}>
-            {customers?.trend === "up" ? (
-              <IconTrendingUp className="w-4 h-4" />
-            ) : customers?.trend === "down" ? (
-              <IconTrendingDown className="w-4 h-4" />
-            ) : null}
-            {customers?.percentageChange !== undefined 
-              ? t('cards.customers.changeText', { 
-                  percentage: customers.percentageChange > 0 ? `+${customers.percentageChange}` : customers.percentageChange.toString()
-                })
-              : t('cards.noChange')}
-          </p>
+          <KpiChange
+            total={customers?.total ?? 0}
+            percentageChange={customers?.percentageChange}
+            trend={customers?.trend ?? "neutral"}
+            changeTextKey="cards.customers.changeText"
+          />
         </CardContent>
       </Card>
 
@@ -142,22 +122,12 @@ export function SectionCards() {
           <div className="text-2xl font-bold">
             {orders?.total.toLocaleString() || "0"}
           </div>
-          <p className={`text-xs flex items-center gap-1 ${
-            orders?.trend === "up" ? "text-green-500" : 
-            orders?.trend === "down" ? "text-red-500" : 
-            "text-muted-foreground"
-          }`}>
-            {orders?.trend === "up" ? (
-              <IconTrendingUp className="w-4 h-4" />
-            ) : orders?.trend === "down" ? (
-              <IconTrendingDown className="w-4 h-4" />
-            ) : null}
-            {orders?.percentageChange !== undefined 
-              ? t('cards.orders.changeText', { 
-                  percentage: orders.percentageChange > 0 ? `+${orders.percentageChange}` : orders.percentageChange.toString()
-                })
-              : t('cards.orders.steadyFlow')}
-          </p>
+          <KpiChange
+            total={orders?.total ?? 0}
+            percentageChange={orders?.percentageChange}
+            trend={orders?.trend ?? "neutral"}
+            changeTextKey="cards.orders.changeText"
+          />
         </CardContent>
       </Card>
 
@@ -170,22 +140,12 @@ export function SectionCards() {
           <div className="text-2xl font-bold truncate" title={topProduct?.name}>
             {topProduct?.name || t('cards.topProduct.noSales')}
           </div>
-          <p className={`text-xs flex items-center gap-1 ${
-            topProduct?.trend === "up" ? "text-green-500" : 
-            topProduct?.trend === "down" ? "text-red-500" : 
-            "text-muted-foreground"
-          }`}>
-            {topProduct?.trend === "up" ? (
-              <IconTrendingUp className="w-4 h-4" />
-            ) : topProduct?.trend === "down" ? (
-              <IconTrendingDown className="w-4 h-4" />
-            ) : null}
-            {topProduct?.percentageChange !== undefined 
-              ? t('cards.topProduct.changeText', { 
-                  percentage: topProduct.percentageChange > 0 ? `+${topProduct.percentageChange}` : topProduct.percentageChange.toString()
-                })
-              : t('cards.noData')}
-          </p>
+          <KpiChange
+            total={topProduct?.totalRevenue ?? 0}
+            percentageChange={topProduct?.percentageChange}
+            trend={topProduct?.trend ?? "neutral"}
+            changeTextKey="cards.topProduct.changeText"
+          />
         </CardContent>
       </Card>
 
@@ -198,22 +158,12 @@ export function SectionCards() {
           <div className="text-2xl font-bold">
             {aov?.total.toLocaleString() || "0"} DZD
           </div>
-          <p className={`text-xs flex items-center gap-1 ${
-            aov?.trend === "up" ? "text-green-500" : 
-            aov?.trend === "down" ? "text-red-500" : 
-            "text-muted-foreground"
-          }`}>
-            {aov?.trend === "up" ? (
-              <IconTrendingUp className="w-4 h-4" />
-            ) : aov?.trend === "down" ? (
-              <IconTrendingDown className="w-4 h-4" />
-            ) : null}
-            {aov?.percentageChange !== undefined 
-              ? t('cards.aov.changeText', { 
-                  percentage: aov.percentageChange > 0 ? `+${aov.percentageChange}` : aov.percentageChange.toString()
-                })
-              : t('cards.noChange')}
-          </p>
+          <KpiChange
+            total={aov?.total ?? 0}
+            percentageChange={aov?.percentageChange}
+            trend={aov?.trend ?? "neutral"}
+            changeTextKey="cards.aov.changeText"
+          />
         </CardContent>
       </Card>
 
@@ -228,22 +178,12 @@ export function SectionCards() {
               ? conversion.total.toFixed(2)
               : "0.00"}
           </div>
-          <p className={`text-xs flex items-center gap-1 ${
-            conversion?.trend === "up" ? "text-green-500" : 
-            conversion?.trend === "down" ? "text-red-500" : 
-            "text-muted-foreground"
-          }`}>
-            {conversion?.trend === "up" ? (
-              <IconTrendingUp className="w-4 h-4" />
-            ) : conversion?.trend === "down" ? (
-              <IconTrendingDown className="w-4 h-4" />
-            ) : null}
-            {conversion?.percentageChange !== undefined 
-              ? t('cards.conversion.changeText', { 
-                  percentage: conversion.percentageChange > 0 ? `+${conversion.percentageChange}` : conversion.percentageChange.toString()
-                })
-              : t('cards.noChange')}
-          </p>
+          <KpiChange
+            total={conversion?.total ?? 0}
+            percentageChange={conversion?.percentageChange}
+            trend={conversion?.trend ?? "neutral"}
+            changeTextKey="cards.conversion.changeText"
+          />
         </CardContent>
       </Card>
     </div>

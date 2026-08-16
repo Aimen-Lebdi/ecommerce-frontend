@@ -1562,16 +1562,15 @@
   "cards": {
     "revenue": {
       "title": "إجمالي الإيرادات",
-      "changeText": "{{percentage}}% مقارنة بالشهر الماضي"
+      "changeText": "{{percentage}}% مقارنة بالفترة السابقة"
     },
     "customers": {
       "title": "عملاء جدد",
-      "changeText": "{{percentage}}% هذه الفترة"
+      "changeText": "{{percentage}}% مقارنة بالفترة السابقة"
     },
     "orders": {
       "title": "إجمالي الطلبات",
-      "changeText": "{{percentage}}% تدفق الطلبات هذا الشهر",
-      "steadyFlow": "تدفق طلبات مستقر"
+      "changeText": "{{percentage}}% مقارنة بالفترة السابقة"
     },
     "topProduct": {
       "title": "أفضل منتج",
@@ -1586,7 +1585,7 @@
       "title": "الطلبات لكل مستخدم جديد",
       "changeText": "{{percentage}}% مقارنة بالفترة السابقة"
     },
-    "noChange": "لا يوجد تغيير",
+    "new": "جديد",
     "noData": "لا توجد بيانات"
   },
   "dateRange": {

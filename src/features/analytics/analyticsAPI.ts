@@ -43,7 +43,8 @@ export const getPresetRange = (
 // Interface for dashboard cards data
 export interface DashboardCard {
   total: number;
-  percentageChange: number;
+  // null when the previous period had no data to compare against
+  percentageChange: number | null;
   trend: "up" | "down" | "neutral";
 }
 
