@@ -1087,7 +1087,10 @@
       "category": "فئة",
       "subcategory": "فئة فرعية",
       "brand": "علامة تجارية",
-      "cart": "سلة"
+      "payment": "دفع",
+      "stock": "مخزون",
+      "auth": "مصادقة",
+      "delivery": "توصيل"
     },
     "columns": {
       "type": "النوع",
@@ -1100,7 +1103,8 @@
     "filters": {
       "amount": "المبلغ",
       "amountPlaceholder": "أدخل المبلغ",
-      "createdDate": "تاريخ الإنشاء"
+      "createdDate": "تاريخ الإنشاء",
+      "status": "الحالة"
     },
     "statuses": {
       "success": "نجح",
@@ -1123,7 +1127,17 @@
       "live": "مباشر",
       "offline": "غير متصل"
     },
-    "filterPlaceholder": "تصفية حسب نوع النشاط..."
+    "filterPlaceholder": "تصفية حسب نوع النشاط...",
+    "metadata": {
+      "orderId": "الطلب",
+      "customer": "العميل",
+      "paymentMethod": "طريقة الدفع",
+      "product": "المنتج",
+      "email": "البريد الإلكتروني",
+      "ip": "العنوان IP",
+      "stock": "المخزون",
+      "items": "العناصر"
+    }
   },
   "categoryDialog": {
     "titles": {
@@ -1365,6 +1379,8 @@
     "clearAll": "مسح الكل",
     "numericFilters": "فلاتر رقمية",
     "dateFilters": "فلاتر تاريخية",
+    "selectFilters": "فلاتر اختيار",
+    "selectValue": "اختر قيمة",
     "addFilter": "إضافة فلتر",
     "filterNumber": "الفلتر {{number}}",
     "column": "العمود",

@@ -1087,7 +1087,10 @@
       "category": "Category",
       "subcategory": "SubCategory",
       "brand": "Brand",
-      "cart": "Cart"
+      "payment": "Payment",
+      "stock": "Stock",
+      "auth": "Auth",
+      "delivery": "Delivery"
     },
     "columns": {
       "type": "Type",
@@ -1100,7 +1103,8 @@
     "filters": {
       "amount": "Amount",
       "amountPlaceholder": "Enter amount",
-      "createdDate": "Created Date"
+      "createdDate": "Created Date",
+      "status": "Status"
     },
     "statuses": {
       "success": "Success",
@@ -1123,7 +1127,17 @@
       "live": "Live",
       "offline": "Offline"
     },
-    "filterPlaceholder": "Filter by activity type..."
+    "filterPlaceholder": "Filter by activity type...",
+    "metadata": {
+      "orderId": "Order",
+      "customer": "Customer",
+      "paymentMethod": "Payment",
+      "product": "Product",
+      "email": "Email",
+      "ip": "IP",
+      "stock": "Stock",
+      "items": "Items"
+    }
   },
   "categoryDialog": {
     "titles": {
@@ -1365,6 +1379,8 @@
     "clearAll": "Clear All",
     "numericFilters": "Numeric Filters",
     "dateFilters": "Date Filters",
+    "selectFilters": "Select Filters",
+    "selectValue": "Select a value",
     "addFilter": "Add Filter",
     "filterNumber": "Filter {{number}}",
     "column": "Column",

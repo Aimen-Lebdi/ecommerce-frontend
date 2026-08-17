@@ -53,6 +53,9 @@ export interface ActivityStats {
   totalActivities: number;
   typeStats: Array<{ _id: string; count: number }>;
   dailyStats: Array<{ _id: string; count: number }>;
+  // M9: status breakdown (success/failed/pending counts + failure rate)
+  statusStats?: Array<{ _id: string; count: number }>;
+  failureRate?: number;
 }
 
 // Activity types that directly drive the dashboard cards/chart (revenue,
@@ -364,6 +367,8 @@ const activitiesSlice = createSlice({
           payload.totalActivities ?? state.stats?.totalActivities ?? 0,
         typeStats: payload.typeStats ?? state.stats?.typeStats ?? [],
         dailyStats: payload.dailyStats ?? state.stats?.dailyStats ?? [],
+        statusStats: payload.statusStats ?? state.stats?.statusStats ?? [],
+        failureRate: payload.failureRate ?? state.stats?.failureRate ?? 0,
       };
     },
   },

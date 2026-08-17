@@ -29,9 +29,15 @@ export interface DateFilter {
   value2?: string | null; // For between operator
 }
 
+export interface SelectFilter {
+  column: string;
+  value: string | null;
+}
+
 export interface AdvancedFilters {
   numeric: NumericFilter[];
   date: DateFilter[];
+  select: SelectFilter[];
 }
 
 export interface FilterConfig {
@@ -44,6 +50,12 @@ export interface FilterConfig {
   date: {
     [key: string]: {
       label: string;
+    };
+  };
+  select?: {
+    [key: string]: {
+      label: string;
+      options: { value: string; label: string }[];
     };
   };
 }
@@ -72,7 +84,7 @@ export function AdvancedFilter({
 }: AdvancedFilterProps) {
   const { t } = useTranslation();
   const [filters, setFilters] = React.useState<AdvancedFilters>(
-    initialFilters || { numeric: [], date: [] }
+    initialFilters || { numeric: [], date: [], select: [] }
   );
   const [open, setOpen] = React.useState(false);
 
@@ -85,12 +97,16 @@ export function AdvancedFilter({
     () => new Set(filters.date.map((f) => f.column)),
     [filters.date]
   );
+  const usedSelectColumns = React.useMemo(
+    () => new Set(filters.select.map((f) => f.column)),
+    [filters.select]
+  );
 
   // A filter is "active" only when it produces server params (between needs both values)
   const isFilterActive = React.useCallback(
-    (filter: NumericFilter | DateFilter): boolean => {
+    (filter: NumericFilter | DateFilter | SelectFilter): boolean => {
       if (filter.value === null) return false;
-      if (filter.operator === "between" && filter.value2 === null) return false;
+      if ("operator" in filter && filter.operator === "between" && "value2" in filter && filter.value2 === null) return false;
       return true;
     },
     []
@@ -171,9 +187,47 @@ export function AdvancedFilter({
     }));
   };
 
+  const addSelectFilter = () => {
+    const selectConfig = config.select || {};
+    const available = Object.keys(selectConfig).filter(
+      (key) => !usedSelectColumns.has(key)
+    );
+    const firstColumn = available[0];
+    if (!firstColumn) return;
+
+    const newFilter: SelectFilter = {
+      column: firstColumn,
+      value: null,
+    };
+
+    setFilters((prev) => ({
+      ...prev,
+      select: [...prev.select, newFilter],
+    }));
+  };
+
+  const updateSelectFilter = (
+    index: number,
+    updates: Partial<SelectFilter>
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      select: prev.select.map((filter, i) =>
+        i === index ? { ...filter, ...updates } : filter
+      ),
+    }));
+  };
+
+  const removeSelectFilter = (index: number) => {
+    setFilters((prev) => ({
+      ...prev,
+      select: prev.select.filter((_, i) => i !== index),
+    }));
+  };
+
   // Clear all filters (staged — only applied via the Apply button)
   const clearAllFilters = () => {
-    setFilters({ numeric: [], date: [] });
+    setFilters({ numeric: [], date: [], select: [] });
   };
 
   const applyFilters = () => {
@@ -183,46 +237,59 @@ export function AdvancedFilter({
 
   // Cancel reverts any staged (unapplied) changes back to the last applied filters
   const handleCancel = () => {
-    setFilters(initialFilters || { numeric: [], date: [] });
+    setFilters(initialFilters || { numeric: [], date: [], select: [] });
     setOpen(false);
   };
 
   const getActiveFilterCount = () => {
     return (
       filters.numeric.filter(isFilterActive).length +
-      filters.date.filter(isFilterActive).length
+      filters.date.filter(isFilterActive).length +
+      filters.select.filter(isFilterActive).length
     );
   };
 
-  const formatFilterDisplay = (filter: NumericFilter | DateFilter) => {
-    const isNumeric = "value" in filter && typeof filter.value === "number";
+  const formatFilterDisplay = (filter: NumericFilter | DateFilter | SelectFilter) => {
+    // Handle SelectFilter (has no "operator" property)
+    if (!("operator" in filter)) {
+      const selFilter = filter as SelectFilter;
+      const selectConfig = config.select?.[selFilter.column];
+      if (!selectConfig || selFilter.value === null) return null;
+      const optionLabel = selectConfig.options.find(o => o.value === selFilter.value)?.label || selFilter.value;
+      return `${selectConfig.label}: ${optionLabel}`;
+    }
+
+    // Handle NumericFilter / DateFilter
+    const numOrDateFilter = filter as NumericFilter | DateFilter;
+    const isNumeric = "value" in numOrDateFilter && typeof numOrDateFilter.value === "number";
     const config_key = isNumeric ? config.numeric : config.date;
-    const column_config = config_key[filter.column];
+    const column_config = config_key[numOrDateFilter.column];
 
-    if (!column_config || filter.value === null) return null;
-    if (filter.operator === "between" && filter.value2 === null) return null;
+    if (!column_config || numOrDateFilter.value === null) return null;
+    if (numOrDateFilter.operator === "between" && numOrDateFilter.value2 === null) return null;
 
-    const operatorLabel = t(`advancedFilter.operators.${filter.operator}`);
+    const operatorLabel = t(`advancedFilter.operators.${numOrDateFilter.operator}`);
 
-    if (filter.operator === "between") {
+    if (numOrDateFilter.operator === "between") {
       return t('advancedFilter.filterDisplay.between', {
         label: column_config.label,
         operator: operatorLabel,
-        value1: filter.value,
-        value2: filter.value2
+        value1: numOrDateFilter.value,
+        value2: numOrDateFilter.value2
       });
     }
 
     return t('advancedFilter.filterDisplay.simple', {
       label: column_config.label,
       operator: operatorLabel,
-      value: filter.value
+      value: numOrDateFilter.value
     });
   };
 
   const activeFilters = [
     ...filters.numeric.filter(isFilterActive),
     ...filters.date.filter(isFilterActive),
+    ...filters.select.filter(isFilterActive),
   ];
 
   return (
@@ -517,6 +584,106 @@ export function AdvancedFilter({
                         </div>
                       </div>
                     ))}
+                  </div>
+                </>
+              )}
+
+              {/* Select Filters */}
+              {config.select && Object.keys(config.select).length > 0 && (
+                <>
+                  {(Object.keys(config.numeric).length > 0 || Object.keys(config.date).length > 0) && <Separator />}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">
+                        {t('advancedFilter.selectFilters')}
+                      </Label>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={addSelectFilter}
+                        disabled={
+                          usedSelectColumns.size >= Object.keys(config.select).length
+                        }
+                      >
+                        {t('advancedFilter.addFilter')}
+                      </Button>
+                    </div>
+
+                    {filters.select.map((filter, index) => {
+                      const selectConfig = config.select?.[filter.column];
+                      return (
+                        <div
+                          key={index}
+                          className="space-y-2 p-3 border rounded-md bg-muted/30"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">
+                              {t('advancedFilter.filterNumber', { number: index + 1 })}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeSelectFilter(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs">{t('advancedFilter.column')}</Label>
+                              <Select
+                                value={filter.column}
+                                onValueChange={(value) =>
+                                  updateSelectFilter(index, { column: value })
+                                }
+                              >
+                                <SelectTrigger className="h-8">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Object.entries(config.select || {}).map(
+                                    ([key, selConfig]) => (
+                                      <SelectItem
+                                        key={key}
+                                        value={key}
+                                        disabled={
+                                          usedSelectColumns.has(key) &&
+                                          key !== filter.column
+                                        }
+                                      >
+                                        {selConfig.label}
+                                      </SelectItem>
+                                    )
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div>
+                              <Label className="text-xs">{t('advancedFilter.value')}</Label>
+                              <Select
+                                value={filter.value ?? ""}
+                                onValueChange={(value) =>
+                                  updateSelectFilter(index, { value })
+                                }
+                              >
+                                <SelectTrigger className="h-8">
+                                  <SelectValue placeholder={t('advancedFilter.selectValue')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {selectConfig?.options.map((option) => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </>
               )}

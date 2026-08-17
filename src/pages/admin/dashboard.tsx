@@ -64,7 +64,10 @@ export default function Dashboard() {
       category: { variant: "secondary" as const, label: t('dashboard.activityTypes.category') },
       subcategory: { variant: "secondary" as const, label: t('dashboard.activityTypes.subcategory') },
       brand: { variant: "default" as const, label: t('dashboard.activityTypes.brand') },
-      cart: { variant: "secondary" as const, label: t('dashboard.activityTypes.cart') },
+      payment: { variant: "default" as const, label: t('dashboard.activityTypes.payment') },
+      stock: { variant: "secondary" as const, label: t('dashboard.activityTypes.stock') },
+      auth: { variant: "destructive" as const, label: t('dashboard.activityTypes.auth') },
+      delivery: { variant: "default" as const, label: t('dashboard.activityTypes.delivery') },
     };
 
     return (
@@ -108,12 +111,38 @@ export default function Dashboard() {
       header: t('dashboard.columns.activity'),
       cell: ({ row }) => {
         const activity = row.original;
+        const metadata = activity.metadata;
+        
+        // Build metadata details to display
+        const metadataDetails: { label: string; value: string }[] = [];
+        if (metadata) {
+          if (metadata.orderShortId) metadataDetails.push({ label: t('dashboard.metadata.orderId'), value: `#${metadata.orderShortId}` });
+          if (metadata.customerName) metadataDetails.push({ label: t('dashboard.metadata.customer'), value: metadata.customerName });
+          if (metadata.paymentMethod) metadataDetails.push({ label: t('dashboard.metadata.paymentMethod'), value: metadata.paymentMethod });
+          if (metadata.productTitle) metadataDetails.push({ label: t('dashboard.metadata.product'), value: metadata.productTitle });
+          if (metadata.targetUserEmail) metadataDetails.push({ label: t('dashboard.metadata.email'), value: metadata.targetUserEmail });
+          if (metadata.ipAddress) metadataDetails.push({ label: t('dashboard.metadata.ip'), value: metadata.ipAddress });
+          if (metadata.quantityBefore !== undefined && metadata.quantityAfter !== undefined) {
+            metadataDetails.push({ label: t('dashboard.metadata.stock'), value: `${metadata.quantityBefore} → ${metadata.quantityAfter}` });
+          }
+          if (metadata.itemsCount) metadataDetails.push({ label: t('dashboard.metadata.items'), value: String(metadata.itemsCount) });
+        }
+
         return (
           <div>
             <div className="font-medium text-sm">{activity.activity}</div>
             <div className="text-xs text-muted-foreground line-clamp-1">
               {activity.description}
             </div>
+            {metadataDetails.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {metadataDetails.slice(0, 3).map((detail, i) => (
+                  <span key={i} className="text-[10px] text-muted-foreground bg-muted px-1 py-0.5 rounded">
+                    {detail.label}: {detail.value}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         );
       },
@@ -192,6 +221,16 @@ export default function Dashboard() {
     date: {
       createdAt: {
         label: t('dashboard.filters.createdDate'),
+      },
+    },
+    select: {
+      status: {
+        label: t('dashboard.filters.status'),
+        options: [
+          { value: "success", label: t('dashboard.statuses.success') },
+          { value: "pending", label: t('dashboard.statuses.pending') },
+          { value: "failed", label: t('dashboard.statuses.failed') },
+        ],
       },
     },
   };

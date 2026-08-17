@@ -1087,7 +1087,10 @@
       "category": "Catégorie",
       "subcategory": "Sous-catégorie",
       "brand": "Marque",
-      "cart": "Panier"
+      "payment": "Paiement",
+      "stock": "Stock",
+      "auth": "Authentification",
+      "delivery": "Livraison"
     },
     "columns": {
       "type": "Type",
@@ -1100,7 +1103,8 @@
     "filters": {
       "amount": "Montant",
       "amountPlaceholder": "Entrez le montant",
-      "createdDate": "Date de création"
+      "createdDate": "Date de création",
+      "status": "Statut"
     },
     "statuses": {
       "success": "Réussi",
@@ -1123,7 +1127,17 @@
       "live": "En direct",
       "offline": "Hors ligne"
     },
-    "filterPlaceholder": "Filtrer par type d'activité..."
+    "filterPlaceholder": "Filtrer par type d'activité...",
+    "metadata": {
+      "orderId": "Commande",
+      "customer": "Client",
+      "paymentMethod": "Paiement",
+      "product": "Produit",
+      "email": "Email",
+      "ip": "Adresse IP",
+      "stock": "Stock",
+      "items": "Articles"
+    }
   },
   "categoryDialog": {
     "titles": {
@@ -1365,6 +1379,8 @@
     "clearAll": "Tout Effacer",
     "numericFilters": "Filtres Numériques",
     "dateFilters": "Filtres de Date",
+    "selectFilters": "Filtres de Sélection",
+    "selectValue": "Sélectionner une valeur",
     "addFilter": "Ajouter un Filtre",
     "filterNumber": "Filtre {{number}}",
     "column": "Colonne",

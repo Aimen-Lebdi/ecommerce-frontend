@@ -636,6 +636,10 @@ function getAdvancedFilterKeys(filters: AdvancedFilters): string[] {
     keys.add(`${filter.column}[lte]`);
   });
 
+  filters.select?.forEach((filter) => {
+    keys.add(filter.column);
+  });
+
   return Array.from(keys);
 }
 
@@ -725,6 +729,12 @@ function convertAdvancedFiltersToQueryParams(
     }
   });
 
+  filters.select?.forEach((filter) => {
+    if (filter.value !== null && filter.value !== "") {
+      params[filter.column] = filter.value;
+    }
+  });
+
   return params;
 }
 
@@ -788,6 +798,7 @@ export function DataTable<TData extends BaseEntity>({
     {
       numeric: [],
       date: [],
+      select: [],
     }
   );
   // Tracks the last filters actually applied to the server so stale filter
@@ -795,6 +806,7 @@ export function DataTable<TData extends BaseEntity>({
   const prevAdvancedFiltersRef = React.useRef<AdvancedFilters>({
     numeric: [],
     date: [],
+    select: [],
   });
 
   const hasActiveSearchOrFilter = React.useMemo(() => {
@@ -853,7 +865,7 @@ export function DataTable<TData extends BaseEntity>({
     (data: TData[], filters: AdvancedFilters): TData[] => {
       if (
         serverSide ||
-        (filters.numeric.length === 0 && filters.date.length === 0)
+        (filters.numeric.length === 0 && filters.date.length === 0 && (filters.select?.length ?? 0) === 0)
       ) {
         return data;
       }
@@ -919,7 +931,12 @@ export function DataTable<TData extends BaseEntity>({
           }
         });
 
-        return numericMatch && dateMatch;
+        const selectMatch = (filters.select ?? []).every((filter) => {
+          if (filter.value === null || filter.value === "") return true;
+          return String(row[filter.column]) === filter.value;
+        });
+
+        return numericMatch && dateMatch && selectMatch;
       });
     },
     [serverSide]

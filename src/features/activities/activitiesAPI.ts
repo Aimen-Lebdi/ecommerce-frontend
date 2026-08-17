@@ -35,6 +35,9 @@ export interface ActivityStatsResponse {
   totalActivities: number;
   typeStats: Array<{ _id: string; count: number }>;
   dailyStats: Array<{ _id: string; count: number }>;
+  // M9: status breakdown (success/failed/pending counts)
+  statusStats?: Array<{ _id: string; count: number }>;
+  failureRate?: number;
 }
 
 // Fetch all activities with query parameters support
