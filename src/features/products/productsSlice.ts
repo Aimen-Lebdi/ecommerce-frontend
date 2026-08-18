@@ -16,71 +16,20 @@ import {
   type ProductsResponse,
 } from "./productsAPI";
 
-// Define the Product type to match backend response
-export interface Product {
-  _id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  mainImage: string;
-  images?: string[];
-  colors?: string[];
-  quantity: number;
-  sold: number;
-  category: {
-    _id: string;
-    name: string;
-  };
-  subCategory?: {
-    _id: string;
-    name: string;
-  } | null;
-  brand?: {
-    _id: string;
-    name: string;
-  } | null;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Define interface for creating product
-export interface CreateProductData {
-  name: string;
-  description: string;
-  price: number;
-  mainImage?: File;
-  images?: File[];
-  colors?: string[];
-  quantity: number;
-  category: string;
-  subCategory?: string;
-  brand?: string;
-}
-
-// Define interface for updating product
-export interface UpdateProductData {
-  name?: string;
-  description?: string;
-  price?: number;
-  mainImage?: File;
-  images?: File[];
-  colors?: string[];
-  quantity?: number;
-  category?: string;
-  subCategory?: string;
-  brand?: string;
-}
-
-// Pagination metadata interface
-export interface PaginationMeta {
-  currentPage: number;
-  limit: number;
-  numberOfPages: number;
-  nextPage?: number;
-  previousPage?: number;
-  totalResults: number;
-}
+// Shared types from central definitions
+import type {
+  Product,
+  CreateProductData,
+  UpdateProductData,
+  PaginationMeta,
+} from "@/types";
+// Re-export for backward compatibility
+export type {
+  Product,
+  CreateProductData,
+  UpdateProductData,
+  PaginationMeta,
+};
 
 // State interface for products slice
 interface ProductsState {

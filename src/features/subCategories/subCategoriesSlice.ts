@@ -15,44 +15,20 @@ import {
   type SubCategoriesResponse,
 } from "./subCategoriesAPI";
 
-// Define the SubCategory type to match backend response
-export interface SubCategory {
-  _id: string;
-  name: string;
-  slug: string;
-  image?: string;
-  category: {
-    _id: string;
-    name: string;
-  } | string; // Can be populated object or just ID
-  productCount: number;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Define interface for creating subcategory
-export interface CreateSubCategoryData {
-  name: string;
-  category: string; // Category ID
-  image?: File;
-}
-
-// Define interface for updating subcategory
-export interface UpdateSubCategoryData {
-  name?: string;
-  category?: string; // Category ID
-  image?: File;
-}
-
-// Pagination metadata interface
-export interface PaginationMeta {
-  currentPage: number;
-  limit: number;
-  numberOfPages: number;
-  nextPage?: number;
-  previousPage?: number;
-  totalResults: number;
-}
+// Shared types from central definitions
+import type {
+  SubCategory,
+  CreateSubCategoryData,
+  UpdateSubCategoryData,
+  PaginationMeta,
+} from "@/types";
+// Re-export for backward compatibility
+export type {
+  SubCategory,
+  CreateSubCategoryData,
+  UpdateSubCategoryData,
+  PaginationMeta,
+};
 
 // State interface for subcategories slice
 interface SubCategoriesState {

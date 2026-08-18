@@ -15,38 +15,20 @@ import {
   type CategoriesResponse,
 } from "./categoriesAPI";
 
-// Define the Category type to match backend response
-export interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-  image?: string;
-  productCount: number;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Define interface for creating category
-export interface CreateCategoryData {
-  name: string;
-  image?: File;
-}
-
-// Define interface for updating category
-export interface UpdateCategoryData {
-  name?: string;
-  image?: File | null; // null indicates removal of image
-}
-
-// Pagination metadata interface
-export interface PaginationMeta {
-  currentPage: number;
-  limit: number;
-  numberOfPages: number;
-  nextPage?: number;
-  previousPage?: number;
-  totalResults: number;
-}
+// Shared types from central definitions
+import type {
+  Category,
+  CreateCategoryData,
+  UpdateCategoryData,
+  PaginationMeta,
+} from "@/types";
+// Re-export for backward compatibility
+export type {
+  Category,
+  CreateCategoryData,
+  UpdateCategoryData,
+  PaginationMeta,
+};
 
 // State interface for categories slice
 interface CategoriesState {

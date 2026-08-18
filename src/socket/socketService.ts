@@ -34,7 +34,6 @@ interface SocketResponse {
 
 class SocketService {
   private socket: Socket | null = null;
-  private reconnectionAttempts = 0;
   private hasJoinedDashboard = false;
   private authRefreshThrottledUntil = 0;
 
@@ -86,7 +85,6 @@ class SocketService {
         this.socket.once("connect", () => {
           clearTimeout(connectTimeout);
           console.log("✅ Socket connected successfully with ID:", this.socket?.id);
-          this.reconnectionAttempts = 0;
           store.dispatch(setConnectionStatus(true));
           resolve();
         });
@@ -119,7 +117,6 @@ class SocketService {
     this.socket.on("connect", () => {
       console.log("✅ Socket connected with ID:", this.socket?.id);
       store.dispatch(setConnectionStatus(true));
-      this.reconnectionAttempts = 0;
       this.authRefreshThrottledUntil = 0;
       // Reset flags on (re)connection - a reconnected socket must re-join
       this.hasJoinedDashboard = false;
@@ -141,11 +138,10 @@ class SocketService {
     this.socket.on("reconnect", (attemptNumber) => {
       console.log("🔄 Socket reconnected after", attemptNumber, "attempts");
       store.dispatch(setConnectionStatus(true));
-      this.reconnectionAttempts = 0;
     });
 
-    this.socket.on("reconnect_attempt", (attemptNumber) => {
-      this.reconnectionAttempts = attemptNumber;
+    this.socket.on("reconnect_attempt", (_attemptNumber) => {
+      // socket.io manages reconnection internally; no local tracking needed
     });
 
     this.socket.on("reconnect_failed", () => {
@@ -276,7 +272,7 @@ class SocketService {
   // that obtain a fresh token out-of-band (e.g. after a manual refresh).
   updateAuthToken(token: string): void {
     if (this.socket) {
-      this.socket.auth.token = token;
+      (this.socket.auth as Record<string, string>).token = token;
     }
   }
 

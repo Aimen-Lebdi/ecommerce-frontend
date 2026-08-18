@@ -2,16 +2,16 @@
 
 import * as React from "react";
 import {
-  LayoutDashboard,
-  List,
-  Package,
-  ShoppingCart,
-  Users,
-  Boxes,
-  TagIcon,
-  ShoppingCartIcon,
-} from "lucide-react";
-import { IconHelp } from "@tabler/icons-react";
+  IconLayoutDashboard,
+  IconList,
+  IconPackage,
+  IconShoppingCart,
+  IconUsers,
+  IconBox,
+  IconTag,
+  IconHelp,
+  IconHome,
+} from "@tabler/icons-react";
 
 import { NavMain } from "../../ui/nav-main";
 import { NavSecondary } from "../../ui/nav-secondary";
@@ -38,44 +38,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: t('sidebar.nav.dashboard'),
         url: "/admin",
-        icon: LayoutDashboard,
+        icon: IconLayoutDashboard,
       },
       {
         title: t('sidebar.nav.categories'),
         url: "/admin/categories",
-        icon: List,
+        icon: IconList,
       },
       {
         title: t('sidebar.nav.subcategories'),
         url: "/admin/sub-categories",
-        icon: Boxes,
+        icon: IconBox,
       },
       {
         title: t('sidebar.nav.brands'),
         url: "/admin/brands",
-        icon: TagIcon,
+        icon: IconTag,
       },
       {
         title: t('sidebar.nav.products'),
         url: "/admin/products",
-        icon: Package,
+        icon: IconPackage,
       },
       {
         title: t('sidebar.nav.orders'),
         url: "/admin/orders",
-        icon: ShoppingCart,
+        icon: IconShoppingCart,
       },
       {
         title: t('sidebar.nav.users'),
         url: "/admin/users",
-        icon: Users,
+        icon: IconUsers,
       },
     ],
     navSecondary: [
       {
         title: t('sidebar.nav.backToStore'),
         url: "/",
-        icon: ShoppingCartIcon,
+        icon: IconHome,
       },
       {
         title: t('sidebar.nav.getHelp'),

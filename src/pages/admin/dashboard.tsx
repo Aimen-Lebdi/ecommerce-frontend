@@ -416,7 +416,6 @@ export default function Dashboard() {
               filterColumn="type"
               filterPlaceholder={t('dashboard.filterPlaceholder')}
               pageSize={10}
-              showRowActions={false}
             />
           </div>
 

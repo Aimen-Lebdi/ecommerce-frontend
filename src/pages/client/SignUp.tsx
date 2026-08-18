@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Check, X, Shield, Lock, Mail, User, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Checkbox } from '../../components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
 import { Alert, AlertDescription } from '../../components/ui/alert';
@@ -37,7 +35,7 @@ export default function SignUpPage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [passwordStrength, setPasswordStrength] = useState(0);
 
   // Clear errors when component mounts or when user starts typing
@@ -71,7 +69,7 @@ export default function SignUpPage() {
   }
 
   // Password strength calculation
-  const calculatePasswordStrength = (password) => {
+  const calculatePasswordStrength = (password: string) => {
     let score = 0;
     if (password.length >= 8) score++;
     if (/[a-z]/.test(password)) score++;
@@ -82,11 +80,11 @@ export default function SignUpPage() {
   };
 
   // Email validation
-  const isValidEmail = (email) => {
+  const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleInputChange = (name, value) => {
+  const handleInputChange = (name: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -106,13 +104,13 @@ export default function SignUpPage() {
     }
 
     // Update password strength in real-time
-    if (name === 'password') {
+    if (name === 'password' && typeof value === 'string') {
       setPasswordStrength(calculatePasswordStrength(value));
     }
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
 
     // Required fields - use firstName as name for backend
     if (!formData.firstName.trim()) newErrors.firstName = t('signUp.errors.nameRequired');

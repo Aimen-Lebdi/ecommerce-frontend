@@ -25,34 +25,7 @@ import {
   type UpdateProductData,
 } from "../../features/products/productsSlice";
 import { useTranslation } from 'react-i18next';
-
-// Define the Product entity type to match backend response
-export interface Product {
-  _id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  mainImage: string;
-  images?: string[];
-  colors?: string[];
-  quantity: number;
-  sold: number;
-  category: {
-    _id: string;
-    name: string;
-  };
-  subCategory?: {
-    _id: string;
-    name: string;
-  };
-  brand?: {
-    _id: string;
-    name: string;
-  };
-  createdAt: string;
-  updatedAt?: string;
-}
+import type { Product } from '../../types';
 
 export default function Products() {
   const { t } = useTranslation();
@@ -230,21 +203,31 @@ export default function Products() {
 
   // Handle adding new product
   const handleAddProduct = async (productData: {
-    name: string;
-    description: string;
-    price: number;
+    name?: string;
+    description?: string;
+    price?: number;
     mainImage?: File;
     images?: File[];
     colors?: string[];
-    quantity: number;
-    category: string;
-    subCategories?: string[];
+    quantity?: number;
+    category?: string;
+    subCategory?: string;
     brand?: string;
   }) => {
     try {
-      await dispatch(
-        createProduct(productData as CreateProductData)
-      ).unwrap();
+      const payload: CreateProductData = {
+        name: productData.name ?? '',
+        description: productData.description ?? '',
+        price: productData.price ?? 0,
+        quantity: productData.quantity ?? 0,
+        mainImage: productData.mainImage,
+        images: productData.images,
+        colors: productData.colors,
+        category: productData.category ?? '',
+        subCategory: productData.subCategory,
+        brand: productData.brand,
+      };
+      await dispatch(createProduct(payload)).unwrap();
       toast.success(t('products.toasts.addSuccess'));
       // Note: createProduct thunk automatically refetches data
     } catch (error) {
@@ -270,9 +253,19 @@ export default function Products() {
     }
   ) => {
     try {
-      await dispatch(
-        updateProduct({ id, productData: productData as UpdateProductData })
-      ).unwrap();
+      const payload: UpdateProductData = {
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        mainImage: productData.mainImage,
+        images: productData.images,
+        colors: productData.colors,
+        quantity: productData.quantity,
+        category: productData.category,
+        subCategory: productData.subCategory,
+        brand: productData.brand,
+      };
+      await dispatch(updateProduct({ id, productData: payload })).unwrap();
       toast.success(t('products.toasts.updateSuccess'));
       // Note: updateProduct thunk automatically refetches data
     } catch (error) {
@@ -333,22 +326,13 @@ export default function Products() {
             error={error}
             columns={productsColumns}
             dialogComponent={
-              <ProductDialog onSubmit={handleAddProduct} isSubmitting={isCreating} />
+              <ProductDialog onSubmit={handleAddProduct as (data: { name?: string; description?: string; price?: number; mainImage?: File; images?: File[]; colors?: string[]; quantity?: number; category?: string; subCategory?: string; brand?: string }) => Promise<void>} isSubmitting={isCreating} />
             }
             editDialogComponent={(rowData: Product) =>
               createEditProductDialog(
                 rowData,
                 async(updatedData) => {
-                  const id = rowData._id;
-                  const {
-                    _id,
-                    slug,
-                    createdAt,
-                    updatedAt,
-                    sold,
-                    ...productUpdateData
-                  } = updatedData;
-                  await handleUpdateProduct(id, productUpdateData);
+                  await handleUpdateProduct(rowData._id, updatedData);
                 },
                 isUpdating
               )

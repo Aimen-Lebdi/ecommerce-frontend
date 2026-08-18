@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Phone, Mail, MapPin, Clock, ArrowRight } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
 import { SupportInfo } from "../../components/client/SupportInfo";
 
 // Hero Section

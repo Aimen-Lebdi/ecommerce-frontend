@@ -28,19 +28,7 @@ import {
   type CreateSubCategoryData,
   type UpdateSubCategoryData,
 } from "../../features/subCategories/subCategoriesSlice";
-
-// Define the SubCategory entity type to match backend response
-export interface SubCategory {
-  _id: string;
-  name: string;
-  image?: string;
-  category: {
-    _id: string;
-    name: string;
-  } | string; // 
-  productCount: number;
-  createdAt: string;
-}
+import type { SubCategory } from "../../types";
 
 // Define columns specific to SubCategories
 const subCategoriesColumns: ColumnDef<SubCategory>[] = [
@@ -181,14 +169,17 @@ export default function SubCategories() {
 
   // Handle adding new subcategory
   const handleAddSubCategory = async (subCategoryData: {
-    name: string;
-    category: string;
-    image?: File;
+    name?: string;
+    category?: string;
+    image?: File | null;
   }) => {
     try {
-      await dispatch(
-        createSubCategory(subCategoryData as CreateSubCategoryData)
-      ).unwrap();
+      const payload: CreateSubCategoryData = {
+        name: subCategoryData.name ?? '',
+        category: subCategoryData.category ?? '',
+        image: subCategoryData.image ?? undefined,
+      };
+      await dispatch(createSubCategory(payload)).unwrap();
       toast.success(t('subCategories.messages.addSuccess'));
       // Note: createSubCategory thunk automatically refetches data
     } catch (error) {
@@ -200,12 +191,15 @@ export default function SubCategories() {
   // Handle updating existing subcategory
   const handleUpdateSubCategory = async (
     id: string,
-    subCategoryData: { name?: string; category?: string; image?: File }
+    subCategoryData: { name?: string; category?: string; image?: File | null }
   ) => {
     try {
-      await dispatch(
-        updateSubCategory({ id, subCategoryData: subCategoryData as UpdateSubCategoryData })
-      ).unwrap();
+      const payload: UpdateSubCategoryData = {
+        name: subCategoryData.name,
+        category: subCategoryData.category,
+        image: subCategoryData.image ?? undefined,
+      };
+      await dispatch(updateSubCategory({ id, subCategoryData: payload })).unwrap();
       toast.success(t('subCategories.messages.updateSuccess'));
       // Note: updateSubCategory thunk automatically refetches data
     } catch (error) {
@@ -275,15 +269,7 @@ export default function SubCategories() {
               createEditSubCategoryDialog(
                 rowData,
                 async (updatedData) => {
-                  // Handle the subcategory update by extracting ID and calling update handler
-                  const id = rowData._id;
-                  const {
-                    _id,
-                    createdAt,
-                    productCount,
-                    ...subCategoryUpdateData
-                  } = updatedData;
-                  await handleUpdateSubCategory(id, subCategoryUpdateData);
+                  await handleUpdateSubCategory(rowData._id, updatedData);
                 },
                 isUpdating // Pass the loading state
               )

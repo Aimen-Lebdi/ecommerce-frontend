@@ -177,14 +177,21 @@ export default function Users() {
 
   // Handle adding new user
   const handleAddUser = async (userData: {
-    name: string;
-    email: string;
-    password: string;
+    name?: string;
+    email?: string;
+    password?: string;
     role?: "admin" | "user";
-    image?: File;
+    image?: File | null;
   }) => {
     try {
-      await dispatch(createUser(userData as CreateUserData)).unwrap();
+      const payload: CreateUserData = {
+        name: userData.name ?? '',
+        email: userData.email ?? '',
+        password: userData.password ?? '',
+        role: userData.role,
+        image: userData.image ?? undefined,
+      };
+      await dispatch(createUser(payload)).unwrap();
       toast.success(t('users.messages.addSuccess'));
       // Note: createUser thunk automatically refetches data
     } catch (error) {
@@ -200,12 +207,18 @@ export default function Users() {
       name?: string;
       email?: string;
       role?: "admin" | "user";
-      image?: File;
+      image?: File | null;
     }
   ) => {
     try {
+      const payload: UpdateUserData = {
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        image: userData.image ?? undefined,
+      };
       await dispatch(
-        updateUser({ id, userData: userData as UpdateUserData })
+        updateUser({ id, userData: payload })
       ).unwrap();
       toast.success(t('users.messages.updateSuccess'));
       // Note: updateUser thunk automatically refetches data
@@ -319,26 +332,7 @@ export default function Users() {
               createEditUserDialog(
                 rowData,
                 async (updatedData) => {
-                  // Handle the user update by extracting ID and calling update handler
-                  const id = updatedData._id || rowData._id; // Fallback to rowData._id if needed
-                  // Remove the _id from the update data since it's not needed in the payload
-                  const { _id, ...userUpdateData } = updatedData;
-                  console.log(
-                    "Users page received update data:",
-                    userUpdateData
-                  );
-                  console.log("User ID being used for update:", id);
-
-                  if (!id) {
-                    console.error("No user ID found!", {
-                      updatedData,
-                      rowData,
-                    });
-                    toast.error(t('users.messages.missingIdError'));
-                    return;
-                  }
-
-                  await handleUpdateUser(id, userUpdateData);
+                  await handleUpdateUser(rowData._id, updatedData);
                 },
                 isUpdating // Pass the loading state
               )

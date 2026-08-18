@@ -18,58 +18,37 @@ import {
   banManyUsersAPI,
   unbanUserAPI,
   unbanManyUsersAPI,
+  type UpdateLoggedUserData,
 } from "./usersAPI";
-import type { Address } from "../addresses/addressesAPI";
-import type { Phone } from "../phones/phonesAPI";
 
-// Define the User type to match backend response
-export interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: "admin" | "user";
-  active: boolean;
-  image?: string;
-  createdAt: string;
-  updatedAt?: string;
-  phone?: string;
-  addresses?: Address[];
-  phones?: Phone[];
-}
+// Shared types from central definitions
+import type {
+  User,
+  CreateUserData,
+  UpdateUserData,
+  UpdateUserPasswordData,
+  PaginationMeta,
+  UserRole,
+} from "@/types";
 
-// Define interface for creating user
-export interface CreateUserData {
-  name: string;
-  email: string;
-  password: string;
-  role?: "admin" | "user";
-  image?: File;
-}
-
-// Define interface for updating user
-export interface UpdateUserData {
-  name?: string;
-  email?: string;
-  role?: "admin" | "user";
-  image?: File | null;
-}
-
-// Define interface for updating user password
-export interface UpdateUserPasswordData {
+// Inline type for logged user password update (matches API signature)
+type UpdateLoggedUserPasswordData = {
   currentPassword: string;
   password: string;
   passwordConfirm: string;
-}
+};
 
-// Pagination metadata interface
-export interface PaginationMeta {
-  currentPage: number;
-  limit: number;
-  numberOfPages: number;
-  nextPage?: number;
-  previousPage?: number;
-  totalResults: number;
-}
+// Re-export for backward compatibility
+export type {
+  User,
+  CreateUserData,
+  UpdateUserData,
+  UpdateUserPasswordData,
+  UpdateLoggedUserData,
+  UpdateLoggedUserPasswordData,
+  PaginationMeta,
+  UserRole,
+};
 
 // State interface for users slice
 interface UsersState {
@@ -87,18 +66,6 @@ interface UsersState {
   currentQueryParams: UsersQueryParams;
   isUpdatingLoggedUser: boolean;
   isUpdatingLoggedPassword: boolean;
-}
-
-// Add these interfaces at the top
-export interface UpdateLoggedUserData {
-  name?: string;
-  image?: File | null;
-}
-
-export interface UpdateLoggedUserPasswordData {
-  currentPassword: string;
-  password: string;
-  passwordConfirm: string;
 }
 
 // Initial state

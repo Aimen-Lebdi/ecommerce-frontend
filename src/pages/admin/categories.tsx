@@ -27,15 +27,7 @@ import {
   type CreateCategoryData,
   type UpdateCategoryData,
 } from "../../features/categories/categoriesSlice";
-
-// Define the Category entity type to match backend response
-export interface Category {
-  _id: string;
-  name: string;
-  image?: string;
-  createdAt: string;
-  productCount?: number;
-}
+import type { Category } from "../../types";
 
 // Define columns specific to Categories
 const categoriesColumns: ColumnDef<Category>[] = [
@@ -156,13 +148,15 @@ export default function Categories() {
 
   // Handle adding new category
   const handleAddCategory = async (categoryData: {
-    name: string;
-    image?: File;
+    name?: string;
+    image?: File | null;
   }) => {
     try {
-      await dispatch(
-        createCategory(categoryData as CreateCategoryData)
-      ).unwrap();
+      const payload: CreateCategoryData = {
+        name: categoryData.name ?? '',
+        image: categoryData.image ?? undefined,
+      };
+      await dispatch(createCategory(payload)).unwrap();
       toast.success(t('categories.messages.addSuccess'));
       // Note: createCategory thunk automatically refetches data
     } catch (error) {
@@ -174,12 +168,14 @@ export default function Categories() {
   // Handle updating existing category
   const handleUpdateCategory = async (
     id: string,
-    categoryData: { name?: string; image?: File }
+    categoryData: { name?: string; image?: File | null }
   ) => {
     try {
-      await dispatch(
-        updateCategory({ id, categoryData: categoryData as UpdateCategoryData })
-      ).unwrap();
+      const payload: UpdateCategoryData = {
+        name: categoryData.name,
+        image: categoryData.image ?? undefined,
+      };
+      await dispatch(updateCategory({ id, categoryData: payload })).unwrap();
       toast.success(t('categories.messages.updateSuccess'));
       // Note: updateCategory thunk automatically refetches data
     } catch (error) {
@@ -249,15 +245,7 @@ export default function Categories() {
               createEditCategoryDialog(
                 rowData,
                 async (updatedData) => {
-                  // Handle the category update by extracting ID and calling update handler
-                  const id = rowData._id;
-                  const {
-                    _id,
-                    createdAt,
-                    productCount,
-                    ...categoryUpdateData
-                  } = updatedData;
-                  await handleUpdateCategory(id, categoryUpdateData);
+                  await handleUpdateCategory(rowData._id, updatedData);
                 },
                 isUpdating // Pass the loading state
               )

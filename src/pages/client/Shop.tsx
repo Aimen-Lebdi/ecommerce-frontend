@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, memo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useTranslation } from "react-i18next";
+import type { Product, Category, SubCategory, Brand, ProductsQueryParams } from "@/types";
 import { useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
@@ -47,10 +47,54 @@ import { fetchBrands } from "../../features/brands/brandsSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
 
+// ─── Shop Filters Types ───────────────────────────────────────────────────────
+
+interface TempPriceRange {
+  minPrice: string;
+  maxPrice: string;
+}
+
+interface ShopFilters {
+  page: number;
+  limit: number;
+  sort: string;
+  category: string;
+  subCategory: string;
+  brand: string;
+  minPrice: string;
+  maxPrice: string;
+  inStock: boolean;
+  keyword: string;
+}
+
+interface FiltersPanelProps {
+  isMobile?: boolean;
+  categories: Category[];
+  categoriesLoading: boolean;
+  selectedCategories: string[];
+  onCategoryChange: (categoryId: string) => void;
+  selectedSubCategories: string[];
+  availableSubCategories: SubCategory[];
+  subcategoriesLoading: boolean;
+  subcategoriesError: string | null;
+  onSubCategoryChange: (subCategoryId: string) => void;
+  onRetrySubCategories: () => void;
+  brands: Brand[];
+  brandsLoading: boolean;
+  selectedBrands: string[];
+  onBrandChange: (brandId: string) => void;
+  tempPriceRange: TempPriceRange;
+  onTempPriceChange: (field: string, value: string) => void;
+  onApplyPriceFilter: () => void;
+  filters: ShopFilters;
+  onFiltersChange: (filters: ShopFilters) => void;
+  activeFilters: number;
+  onClearFilters: () => void;
+}
+
 // FiltersPanel component - MOVED OUTSIDE ShopPage
-const FiltersPanel = memo(
+const FiltersPanel = memo<FiltersPanelProps>(
   ({
-    isMobile = false,
     categories,
     categoriesLoading,
     selectedCategories,
@@ -293,7 +337,7 @@ const FiltersPanel = memo(
                 id="in-stock"
                 checked={filters.inStock}
                 onCheckedChange={(checked) =>
-                  onFiltersChange({ ...filters, inStock: checked, page: 1 })
+                  onFiltersChange({ ...filters, inStock: checked === true, page: 1 })
                 }
               />
               <Label htmlFor="in-stock" className="text-sm font-normal">
@@ -317,7 +361,7 @@ const FiltersPanel = memo(
 FiltersPanel.displayName = "FiltersPanel";
 
 const ShopPage = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -337,22 +381,22 @@ const ShopPage = () => {
     pagination,
     loading: productsLoading,
     error: productsError,
-  } = useSelector((state) => state.products);
-  const { categories, loading: categoriesLoading } = useSelector(
+  } = useAppSelector((state) => state.products);
+  const { categories, loading: categoriesLoading } = useAppSelector(
     (state) => state.categories
   );
   const {
     subcategories,
     loading: subcategoriesLoading,
     error: subcategoriesError,
-  } = useSelector((state) => state.subCategories);
-  const { brands, loading: brandsLoading } = useSelector(
+  } = useAppSelector((state) => state.subCategories);
+  const { brands, loading: brandsLoading } = useAppSelector(
     (state) => state.brands
   );
 
   // Local state
   const [viewMode, setViewMode] = useState("grid");
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<ShopFilters>({
     page: 1,
     limit: 12,
     sort: "-sold",
@@ -364,11 +408,11 @@ const ShopPage = () => {
     inStock: false,
     keyword: "",
   });
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
-  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [activeFilters, setActiveFilters] = useState(0);
-  const [tempPriceRange, setTempPriceRange] = useState({
+  const [tempPriceRange, setTempPriceRange] = useState<TempPriceRange>({
     minPrice: "",
     maxPrice: "",
   });
@@ -383,8 +427,8 @@ const ShopPage = () => {
 
   // Fetch initial data
   useEffect(() => {
-    dispatch(fetchCategories());
-    dispatch(fetchBrands());
+    dispatch(fetchCategories({}));
+    dispatch(fetchBrands({}));
   }, [dispatch]);
 
   // Fetch subcategories when categories change
@@ -398,8 +442,8 @@ const ShopPage = () => {
   }, [selectedCategories, dispatch]);
 
   // Build products query params from current filters (shared by effect + retry)
-  const buildProductsQueryParams = useCallback(() => {
-    const queryParams = {
+  const buildProductsQueryParams = useCallback((): ProductsQueryParams => {
+    const queryParams: ProductsQueryParams = {
       page: filters.page,
       limit: filters.limit,
       sort: filters.sort,
@@ -423,10 +467,10 @@ const ShopPage = () => {
     }
 
     if (filters.minPrice) {
-      queryParams["price[gte]"] = filters.minPrice;
+      queryParams["price[gte]"] = Number(filters.minPrice);
     }
     if (filters.maxPrice) {
-      queryParams["price[lte]"] = filters.maxPrice;
+      queryParams["price[lte]"] = Number(filters.maxPrice);
     }
 
     if (filters.inStock) {
@@ -472,7 +516,7 @@ const ShopPage = () => {
 
   // Callbacks wrapped with useCallback
   const handleCategoryChange = useCallback(
-    (categoryId) => {
+    (categoryId: string) => {
       const nextCategories = selectedCategories.includes(categoryId)
         ? selectedCategories.filter((c) => c !== categoryId)
         : [...selectedCategories, categoryId];
@@ -497,7 +541,7 @@ const ShopPage = () => {
     [selectedCategories, subcategories]
   );
 
-  const handleSubCategoryChange = useCallback((subCategoryId) => {
+  const handleSubCategoryChange = useCallback((subCategoryId: string) => {
     setSelectedSubCategories((prev) =>
       prev.includes(subCategoryId)
         ? prev.filter((s) => s !== subCategoryId)
@@ -506,7 +550,7 @@ const ShopPage = () => {
     setFilters((prev) => ({ ...prev, page: 1 }));
   }, []);
 
-  const handleBrandChange = useCallback((brandId) => {
+  const handleBrandChange = useCallback((brandId: string) => {
     setSelectedBrands((prev) =>
       prev.includes(brandId)
         ? prev.filter((b) => b !== brandId)
@@ -515,7 +559,7 @@ const ShopPage = () => {
     setFilters((prev) => ({ ...prev, page: 1 }));
   }, []);
 
-  const handleTempPriceChange = useCallback((field, value) => {
+  const handleTempPriceChange = useCallback((field: string, value: string) => {
     setTempPriceRange((prev) => ({ ...prev, [field]: value }));
   }, []);
 
@@ -528,15 +572,15 @@ const ShopPage = () => {
     }));
   }, [tempPriceRange]);
 
-  const handleFiltersChange = useCallback((newFilters) => {
+  const handleFiltersChange = useCallback((newFilters: ShopFilters) => {
     setFilters(newFilters);
   }, []);
 
-  const handleSortChange = (sortValue) => {
+  const handleSortChange = (sortValue: string) => {
     setFilters((prev) => ({ ...prev, sort: sortValue, page: 1 }));
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setFilters((prev) => ({ ...prev, page }));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -558,16 +602,16 @@ const ShopPage = () => {
     setSearchParams({});
   }, [setSearchParams]);
 
-  const clearSpecificFilter = (type, value) => {
+  const clearSpecificFilter = (type: string, value?: string) => {
     switch (type) {
       case "category":
-        handleCategoryChange(value);
+        handleCategoryChange(value!);
         break;
       case "subcategory":
-        handleSubCategoryChange(value);
+        handleSubCategoryChange(value!);
         break;
       case "brand":
-        handleBrandChange(value);
+        handleBrandChange(value!);
         break;
       case "price":
         setTempPriceRange({ minPrice: "", maxPrice: "" });
@@ -596,7 +640,7 @@ const ShopPage = () => {
     return selectedCategories.includes(subCategoryId);
   });
 
-  const ProductCard = ({ product }) => {
+  const ProductCard = ({ product }: { product: Product }) => {
     return (
       <Link to={`/product/${product._id}`} className="block h-full">
         <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col cursor-pointer">
@@ -680,7 +724,7 @@ const ShopPage = () => {
     );
   };
 
-  const ProductCardList = ({ product }) => {
+  const ProductCardList = ({ product }: { product: Product }) => {
     return (
       <Link to={`/product/${product._id}`} className="block">
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
@@ -1127,7 +1171,7 @@ const ShopPage = () => {
                               : "outline"
                           }
                           size="sm"
-                          onClick={() => handlePageChange(page)}
+                          onClick={() => handlePageChange(Number(page))}
                           className="min-w-[40px]"
                         >
                           {page}

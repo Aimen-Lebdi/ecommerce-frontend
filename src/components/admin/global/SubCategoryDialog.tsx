@@ -26,26 +26,13 @@ import {
 } from "@tabler/icons-react";
 import { useAppSelector, useAppDispatch } from "../../../app/hooks";
 import { fetchCategories } from "../../../features/categories/categoriesSlice";
+import type { SubCategory } from "../../../types";
 
 type Errors = {
   category?: string;
   name?: string;
   image?: string;
 };
-
-interface SubCategory {
-  _id: string;
-  name: string;
-  slug: string;
-  image?: string;
-  category: {
-    _id: string;
-    name: string;
-  } | string;
-  productCount: number;
-  createdAt: string;
-  updatedAt?: string;
-}
 
 interface SubCategoryDialogProps {
   mode?: "add" | "edit";

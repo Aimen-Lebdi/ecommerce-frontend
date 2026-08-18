@@ -17,21 +17,12 @@ import {
 } from "../../ui/dialog";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
+import type { Brand } from "../../../types";
 
 type Errors = {
   name?: string;
   image?: string;
 };
-
-// Updated Brand interface to match backend structure
-interface Brand {
-  _id: string;
-  name: string;
-  slug: string;
-  image?: string;
-  productCount: number;
-  createdAt: string;
-}
 
 interface BrandDialogProps {
   mode?: "add" | "edit";

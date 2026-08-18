@@ -3,11 +3,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { Mail, ArrowLeft, CheckCircle2, X } from "lucide-react";
+import { Mail, ArrowLeft, X } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { forgotPassword, clearError, setResetEmail } from "../../features/auth/authSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Alert, AlertDescription } from "../../components/ui/alert";
 import { useTranslation } from 'react-i18next';
 
 export default function ForgotPasswordPage() {

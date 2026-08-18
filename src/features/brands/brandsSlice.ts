@@ -15,38 +15,20 @@ import {
   type BrandsResponse,
 } from "./brandsAPI";
 
-// Define the Brand type to match backend response
-export interface Brand {
-  _id: string;
-  name: string;
-  slug: string;
-  image?: string;
-  productCount: number;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Define interface for creating brand
-export interface CreateBrandData {
-  name: string;
-  image?: File;
-}
-
-// Define interface for updating brand
-export interface UpdateBrandData {
-  name?: string;
-  image?: File;
-}
-
-// Pagination metadata interface
-export interface PaginationMeta {
-  currentPage: number;
-  limit: number;
-  numberOfPages: number;
-  nextPage?: number;
-  previousPage?: number;
-  totalResults: number;
-}
+// Shared types from central definitions
+import type {
+  Brand,
+  CreateBrandData,
+  UpdateBrandData,
+  PaginationMeta,
+} from "@/types";
+// Re-export for backward compatibility
+export type {
+  Brand,
+  CreateBrandData,
+  UpdateBrandData,
+  PaginationMeta,
+};
 
 // State interface for brands slice
 interface BrandsState {

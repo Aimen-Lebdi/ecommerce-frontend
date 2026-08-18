@@ -17,6 +17,7 @@ import {
 } from "../../ui/dialog";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
+import type { Category } from "../../../types";
 
 
 type Errors = {
@@ -24,15 +25,6 @@ type Errors = {
   description?: string;
   image?: string;
 };
-
-interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-  image?: string;
-  productCount: number;
-  createdAt: string;
-}
 
 interface CategoryDialogProps {
   mode?: "add" | "edit";

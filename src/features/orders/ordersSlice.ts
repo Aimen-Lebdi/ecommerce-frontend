@@ -25,86 +25,26 @@ import {
   fetchMyOrdersAPI,
 } from "./ordersAPI";
 
-// Define the Order type to match backend response
-export interface Order {
-  _id: string;
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    image?: string;
-  };
-  cartItems: {
-    _id: string;
-    product: {
-      _id: string;
-      name: string;
-      mainImage?: string;
-    };
-    quantity: number;
-    color?: string;
-    price: number;
-  }[];
-  taxPrice: number;
-  shippingAddress: {
-    baladiya: string;
-    phone: string;
-    dayra: string;
-    wilaya: string;
-  };
-  shippingPrice: number;
-  totalOrderPrice: number;
-  paymentMethodType: "card" | "cash";
-  deliveryStatus:
-    | "pending"
-    | "confirmed"
-    | "shipped"
-    | "in_transit"
-    | "out_for_delivery"
-    | "delivered"
-    | "completed"
-    | "failed"
-    | "returned"
-    | "cancelled";
-  paymentStatus:
-    | "pending"
-    | "authorized"
-    | "failed"
-    | "confirmed"
-    | "refunded"
-    | "partially_refunded"
-    | "completed"
-    | "cancelled";
-  trackingNumber?: string;
-  codAmount?: number;
-  statusHistory: Array<{
-    status: string;
-    timestamp: Date;
-    note: string;
-    updatedBy: string;
-  }>;
-  deliveryAgency?: {
-    name: string;
-    apiResponse?: any;
-  };
-  isPaid: boolean;
-  paidAt?: string;
-  isDelivered: boolean;
-  deliveredAt?: string;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Pagination metadata interface
-export interface PaginationMeta {
-  currentPage: number;
-  limit: number;
-  numberOfPages: number;
-  nextPage?: number;
-  previousPage?: number;
-  totalResults: number;
-}
+// Shared types from central definitions
+import type {
+  Order,
+  PaginationMeta,
+  DeliveryStatus,
+  PaymentStatus,
+  PaymentMethodType,
+  OrderCartItem,
+  StatusHistoryEntry,
+} from "@/types";
+// Re-export for backward compatibility
+export type {
+  Order,
+  PaginationMeta,
+  DeliveryStatus,
+  PaymentStatus,
+  PaymentMethodType,
+  OrderCartItem,
+  StatusHistoryEntry,
+};
 
 // State interface for orders slice
 interface OrdersState {

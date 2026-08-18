@@ -43,33 +43,7 @@ type Errors = {
   images?: string;
 };
 
-// Backend Product interface matching your API
-interface Product {
-  _id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  mainImage: string;
-  images?: string[];
-  colors?: string[];
-  quantity: number;
-  sold: number;
-  category: {
-    _id: string;
-    name: string;
-  };
-  subCategory?: {
-    _id: string;
-    name: string;
-  };
-  brand?: {
-    _id: string;
-    name: string;
-  };
-  createdAt: string;
-  updatedAt?: string;
-}
+import type { Product } from "../../../types";
 
 interface ProductDialogProps {
   mode?: "add" | "edit";

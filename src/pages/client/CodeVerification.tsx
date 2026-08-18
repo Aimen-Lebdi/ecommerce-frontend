@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Mail, Smartphone, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Smartphone, AlertCircle } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { verifyResetCode, clearError, setResetEmail } from '../../features/auth/authSlice';
+import { verifyResetCode, clearError } from '../../features/auth/authSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -245,7 +245,7 @@ const CodeVerificationPage = () => {
               {code.map((digit, index) => (
                 <input
                   key={index}
-                  ref={el => inputRefs.current[index] = el}
+                  ref={el => { inputRefs.current[index] = el; }}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}

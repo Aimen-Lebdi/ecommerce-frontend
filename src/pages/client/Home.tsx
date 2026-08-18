@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import type { Category, Product } from "@/types";
 import {
   ChevronLeft,
   ChevronRight,
@@ -223,12 +224,12 @@ const HeroSection = () => {
 // Categories Section with Slider
 const CategoriesSection = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const scrollContainerRef = useRef(null);
+  const dispatch = useAppDispatch();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const { categories, loading } = useSelector((state) => state.categories);
+  const { categories, loading } = useAppSelector((state) => state.categories);
 
   useEffect(() => {
     dispatch(fetchCategories({ limit: 100 }));
@@ -256,7 +257,7 @@ const CategoriesSection = () => {
     }
   }, [categories]);
 
-  const scroll = (direction) => {
+  const scroll = (direction: string) => {
     if (scrollContainerRef.current) {
       const scrollAmount = 300;
       const newScrollLeft =
@@ -315,7 +316,7 @@ const CategoriesSection = () => {
           className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {categories?.map((category) => (
+          {categories?.map((category: Category) => (
             <Link
               key={category._id}
               to={`/shop?category=${category._id}`}
@@ -367,16 +368,16 @@ const CategoriesSection = () => {
 // Featured Products Section with Real Data
 const FeaturedProductsSection = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const { products, loading } = useSelector((state) => state.products);
+  const { products, loading } = useAppSelector((state) => state.products);
 
   useEffect(() => {
     // Fetch top 4 products sorted by sold (most popular)
     dispatch(fetchProducts({ limit: 4, sort: "-sold" }));
   }, [dispatch]);
 
-  const handleAddToWishlist = async (e, productId, productName) => {
+  const handleAddToWishlist = async (e: React.MouseEvent, productId: string, productName: string) => {
     e.preventDefault();
     e.stopPropagation();
     try {
@@ -386,8 +387,9 @@ const FeaturedProductsSection = () => {
           productName: productName,
         })
       );
-    } catch (err) {
-      toast.error(err || t("shop.product.failedToAddToWishlist"));
+    } catch (err: unknown) {
+      const message = typeof err === "string" ? err : t("shop.product.failedToAddToWishlist");
+      toast.error(message);
     }
   };
 
@@ -428,10 +430,10 @@ const FeaturedProductsSection = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {products?.slice(0, 4).map((product, index) => {
+        {products?.slice(0, 4).map((product: Product, index: number) => {
           // Determine badge based on index and product properties
           let badge = "home.products.badges.bestSeller";
-          let badgeVariant = "secondary";
+          let badgeVariant: "secondary" | "default" = "secondary";
 
           if (index === 0) {
             badge = "home.products.badges.bestSeller";

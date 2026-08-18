@@ -17,46 +17,18 @@ import {
   // type ActivityStatsResponse,
 } from "./activitiesAPI";
 
-// Define the Activity type to match backend response
-export interface Activity {
-  _id: string;
-  type: string;
-  activity: string;
-  user: {
-    name: string;
-    id: string;
-    role: string;
-  };
-  description: string;
-  status: "success" | "failed" | "pending";
-  amount?: number;
-  relatedId: string;
-  relatedModel: string;
-  metadata: any;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Pagination metadata interface
-export interface PaginationMeta {
-  currentPage: number;
-  limit: number;
-  numberOfPages: number;
-  nextPage?: number;
-  previousPage?: number;
-  totalResults: number;
-}
-
-// Activity stats interface
-export interface ActivityStats {
-  timeframe: string;
-  totalActivities: number;
-  typeStats: Array<{ _id: string; count: number }>;
-  dailyStats: Array<{ _id: string; count: number }>;
-  // M9: status breakdown (success/failed/pending counts + failure rate)
-  statusStats?: Array<{ _id: string; count: number }>;
-  failureRate?: number;
-}
+// Shared types from central definitions
+import type {
+  Activity,
+  PaginationMeta,
+  ActivityStats,
+} from "@/types";
+// Re-export for backward compatibility
+export type {
+  Activity,
+  PaginationMeta,
+  ActivityStats,
+};
 
 // Activity types that directly drive the dashboard cards/chart (revenue,
 // orders, customers, top product). Only these should trigger a live metrics

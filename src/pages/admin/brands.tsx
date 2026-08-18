@@ -27,16 +27,7 @@ import {
   type CreateBrandData,
   type UpdateBrandData,
 } from "../../features/brands/brandsSlice";
-
-// Define the Brand entity type to match backend response
-export interface Brand {
-  _id: string;
-  name: string;
-  slug: string;
-  image?: string;
-  createdAt: string;
-  productCount?: number;
-}
+import type { Brand } from "../../types";
 
 // Define columns specific to Brands
 const brandsColumns: ColumnDef<Brand>[] = [
@@ -157,13 +148,15 @@ export default function Brands() {
 
   // Handle adding new brand
   const handleAddBrand = async (brandData: {
-    name: string;
-    image?: File;
+    name?: string;
+    image?: File | null;
   }) => {
     try {
-      await dispatch(
-        createBrand(brandData as CreateBrandData)
-      ).unwrap();
+      const payload: CreateBrandData = {
+        name: brandData.name ?? '',
+        image: brandData.image ?? undefined,
+      };
+      await dispatch(createBrand(payload)).unwrap();
       toast.success(t('brands.messages.addSuccess'));
       // Note: createBrand thunk automatically refetches data
     } catch (error) {
@@ -175,12 +168,14 @@ export default function Brands() {
   // Handle updating existing brand
   const handleUpdateBrand = async (
     id: string,
-    brandData: { name?: string; image?: File }
+    brandData: { name?: string; image?: File | null }
   ) => {
     try {
-      await dispatch(
-        updateBrand({ id, brandData: brandData as UpdateBrandData })
-      ).unwrap();
+      const payload: UpdateBrandData = {
+        name: brandData.name,
+        image: brandData.image ?? undefined,
+      };
+      await dispatch(updateBrand({ id, brandData: payload })).unwrap();
       toast.success(t('brands.messages.updateSuccess'));
       // Note: updateBrand thunk automatically refetches data
     } catch (error) {
@@ -250,15 +245,7 @@ export default function Brands() {
               createEditBrandDialog(
                 rowData,
                 async(updatedData) => {
-                  // Handle the brand update by extracting ID and calling update handler
-                  const id = rowData._id;
-                  const {
-                    _id,
-                    createdAt,
-                    productCount,
-                    ...brandUpdateData
-                  } = updatedData;
-                  await handleUpdateBrand(id, brandUpdateData);
+                  await handleUpdateBrand(rowData._id, updatedData);
                 },
                 isUpdating // Pass the loading state
               )

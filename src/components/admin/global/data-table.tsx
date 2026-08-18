@@ -209,23 +209,23 @@ function ActionsCellComponent<TData extends BaseEntity>({
   const { t } = useTranslation();
 
   const handleDeleteClick = () => {
-    if (onRowDelete && (row.original._id || row.original.id)) {
-      const id = row.original._id || row.original.id;
-      onRowDelete(id.toString());
+    if (onRowDelete) {
+      const id = row.original._id ?? row.original.id;
+      if (id != null) onRowDelete(id.toString());
     }
   };
 
   const handleBanClick = () => {
-    if (onRowBan && (row.original._id || row.original.id)) {
-      const id = row.original._id || row.original.id;
-      onRowBan(id.toString());
+    if (onRowBan) {
+      const id = row.original._id ?? row.original.id;
+      if (id != null) onRowBan(id.toString());
     }
   };
 
   const handleUnbanClick = () => {
-    if (onRowUnban && (row.original._id || row.original.id)) {
-      const id = row.original._id || row.original.id;
-      onRowUnban(id.toString());
+    if (onRowUnban) {
+      const id = row.original._id ?? row.original.id;
+      if (id != null) onRowUnban(id.toString());
     }
   };
 
@@ -317,7 +317,7 @@ export function DragColumn<TData extends BaseEntity>() {
   return {
     id: "drag",
     header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
+    cell: ({ row }) => <DragHandle id={row.original.id ?? row.original._id ?? ''} />,
     enableSorting: false,
     enableHiding: false,
   } as ColumnDef<TData>;
@@ -593,7 +593,7 @@ function BulkDeleteButton<TData extends BaseEntity>({
 
 function DraggableRow<TData extends BaseEntity>({ row }: { row: Row<TData> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.original.id,
+    id: row.original.id ?? row.original._id ?? '',
   });
 
   return (
@@ -847,7 +847,7 @@ export function DataTable<TData extends BaseEntity>({
   );
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => (Array.isArray(data) ? data.map((item) => item.id || item._id) : []),
+    () => (Array.isArray(data) ? data.map((item) => (item.id ?? item._id ?? '') as UniqueIdentifier) : []),
     [data]
   );
 
@@ -890,7 +890,7 @@ export function DataTable<TData extends BaseEntity>({
               return rowValue <= filter.value;
             case "between":
               return (
-                filter.value2 !== null &&
+                filter.value2 != null &&
                 rowValue >= filter.value &&
                 rowValue <= filter.value2
               );
@@ -919,7 +919,7 @@ export function DataTable<TData extends BaseEntity>({
             case "after":
               return rowDateOnly.getTime() > filterDateOnly.getTime();
             case "between":
-              if (filter.value2 === null) return false;
+              if (filter.value2 == null) return false;
               const filterDate2 = new Date(filter.value2);
               const filterDate2Only = new Date(filterDate2.toDateString());
               return (
@@ -972,7 +972,10 @@ export function DataTable<TData extends BaseEntity>({
   );
 
   const handlePaginationChange = React.useCallback(
-    (newPagination: { pageIndex: number; pageSize: number }) => {
+    (updaterOrValue: React.SetStateAction<{ pageIndex: number; pageSize: number }>) => {
+      const newPagination = typeof updaterOrValue === 'function'
+        ? updaterOrValue(pagination)
+        : updaterOrValue;
       if (serverSide) {
         updateServerQueryParams({
           page: newPagination.pageIndex + 1,
@@ -982,7 +985,7 @@ export function DataTable<TData extends BaseEntity>({
         setPagination(newPagination);
       }
     },
-    [serverSide, updateServerQueryParams]
+    [serverSide, updateServerQueryParams, pagination]
   );
 
   const handleGlobalFilterChange = React.useCallback(
@@ -1000,7 +1003,10 @@ export function DataTable<TData extends BaseEntity>({
   );
 
   const handleColumnFiltersChange = React.useCallback(
-    (newColumnFilters: ColumnFiltersState) => {
+    (updaterOrValue: React.SetStateAction<ColumnFiltersState>) => {
+      const newColumnFilters = typeof updaterOrValue === 'function'
+        ? updaterOrValue(columnFilters)
+        : updaterOrValue;
       setColumnFilters(newColumnFilters);
 
       if (serverSide) {
@@ -1019,24 +1025,27 @@ export function DataTable<TData extends BaseEntity>({
         });
       }
     },
-    [serverSide, updateServerQueryParams, filterColumn]
+    [serverSide, updateServerQueryParams, filterColumn, columnFilters]
   );
 
   const handleColumnVisibilityChange = React.useCallback(
-    (newVisibility: VisibilityState) => {
+    (updaterOrValue: React.SetStateAction<VisibilityState>) => {
+      const newVisibility = typeof updaterOrValue === 'function'
+        ? updaterOrValue(columnVisibility)
+        : updaterOrValue;
       setColumnVisibility(newVisibility);
 
       if (serverSide) {
         const visibleColumns = columns
           .filter((col) => {
-            if ("accessorKey" in col && col.accessorKey) {
-              const columnId = col.accessorKey as string;
+            if ("accessorKey" in col && (col as { accessorKey?: string }).accessorKey) {
+              const columnId = (col as { accessorKey: string }).accessorKey;
               return newVisibility[columnId] !== false;
             }
             return true;
           })
-          .map((col) => col.accessorKey as string)
-          .filter(Boolean);
+          .map((col) => ("accessorKey" in col ? (col as { accessorKey: string }).accessorKey : undefined))
+          .filter(Boolean) as string[];
 
         const essentialFields = ["_id", "name", "slug", "mainImage", "image"];
         const allRequiredFields = [
@@ -1050,7 +1059,7 @@ export function DataTable<TData extends BaseEntity>({
         }
       }
     },
-    [serverSide, updateServerQueryParams, columns]
+    [serverSide, updateServerQueryParams, columns, columnVisibility]
   );
 
   const handleAdvancedFiltersChange = React.useCallback(
@@ -1065,7 +1074,7 @@ export function DataTable<TData extends BaseEntity>({
 
         const filterParams = convertAdvancedFiltersToQueryParams(filters);
 
-        const newParams = {
+        const newParams: Record<string, any> = {
           ...cleanedParams,
           ...filterParams,
           page: 1,
@@ -1199,7 +1208,7 @@ export function DataTable<TData extends BaseEntity>({
       pagination: tablePagination,
       globalFilter,
     },
-    getRowId: (row) => (row.id || row._id).toString(),
+    getRowId: (row) => (row.id ?? row._id ?? '').toString(),
     enableRowSelection: enableRowSelection,
     onRowSelectionChange: setRowSelection,
     onSortingChange: handleSortingChange,
@@ -1612,7 +1621,7 @@ export function DataTable<TData extends BaseEntity>({
       {editDialogComponent &&
         editingRow &&
         React.cloneElement(
-          editDialogComponent(editingRow, handleEditSave) as React.ReactElement,
+          editDialogComponent(editingRow, handleEditSave) as React.ReactElement<Record<string, unknown>>,
           {
             open: true,
             onOpenChange: (isOpen: boolean) => {

@@ -34,8 +34,7 @@ import {
   CollapsibleTrigger,
 } from "../../ui/collapsible";
 import { Separator } from "../../ui/separator";
-import type { Address } from "../../../features/addresses/addressesAPI";
-import type { Phone } from "../../../features/phones/phonesAPI";
+import type { User } from "../../../types";
 
 type Errors = {
   name?: string;
@@ -45,19 +44,6 @@ type Errors = {
   role?: string;
   image?: string;
 };
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: "admin" | "user";
-  active: boolean;
-  image?: string;
-  createdAt: string;
-  updatedAt?: string;
-  phones?: Phone[];
-  addresses?: Address[];
-}
 
 interface UserDialogProps {
   mode?: "add" | "edit";
@@ -89,7 +75,6 @@ export function UserDialog({
   const [name, setName] = React.useState("");
   const [originalName, setOriginalName] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [originalEmail, setOriginalEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [role, setRole] = React.useState<"admin" | "user">("user");
@@ -127,7 +112,6 @@ export function UserDialog({
       setName(existingData.name || "");
       setOriginalName(existingData.name || "");
       setEmail(existingData.email || "");
-      setOriginalEmail(existingData.email || "");
       setRole(existingData.role || "user");
       setOriginalRole(existingData.role || "user");
       if (existingData.image) {
@@ -173,7 +157,6 @@ export function UserDialog({
     setName("");
     setOriginalName("");
     setEmail("");
-    setOriginalEmail("");
     setPassword("");
     setConfirmPassword("");
     setRole("user");
@@ -629,20 +612,20 @@ export function UserDialog({
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditUserDialog(
   rowData: User,
-  onSave: (updatedData: { _id: string; [key: string]: any }) => Promise<void>,
+  onSave: (updatedData: {
+    name?: string;
+    email?: string;
+    password?: string;
+    role?: "admin" | "user";
+    image?: File | null;
+  }) => Promise<void>,
   isLoading: boolean = false
 ) {
   return (
     <UserDialog
       mode="edit"
       existingData={rowData}
-      onSave={async (userData) => {
-        const updatePayload = {
-          _id: rowData._id,
-          ...userData,
-        };
-        await onSave(updatePayload);
-      }}
+      onSave={onSave}
       isLoading={isLoading}
       onOpenChange={() => {}}
     />
