@@ -1,5 +1,6 @@
-/* Import Arabic font - Noto Sans Arabic (Google Fonts) */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+/* Noto Sans Arabic is loaded via the combined Google Fonts <link> in
+   index.html (non-blocking, preloaded). A CSS @import here would duplicate
+   that request and serialize it behind this stylesheet's download. */
 
 @import "tailwindcss";
 @import "tw-animate-css";

@@ -4,9 +4,17 @@ import { Outlet } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
 import RouteFocus from '../components/RouteFocus';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
+import { prefetchLikelyClientRoutes } from '../routes/prefetchRoutes';
 
 const ClientLayout = () => {
   const { t } = useTranslation();
+
+  // Warm the most-likely next page chunks while the browser is idle so the
+  // first navigation feels instant (skipped for Save-Data / 2G users).
+  useEffect(() => {
+    prefetchLikelyClientRoutes();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

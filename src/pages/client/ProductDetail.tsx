@@ -29,6 +29,13 @@ import { addProductToCart } from "../../features/cart/cartSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
 import { getErrorMessage } from "../../utils/errorMessage";
+import { responsiveImageProps } from "../../utils/responsiveImage";
+
+// Gallery candidates: the main image renders at up to ~600px CSS width
+// (half the container) and is the page's LCP candidate; thumbnails render
+// at ~140px in a 4-up strip.
+const DETAIL_MAIN_WIDTHS = [400, 600, 800, 1200, 1600];
+const DETAIL_THUMB_WIDTHS = [120, 200, 280];
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -185,8 +192,13 @@ const ProductDetails = () => {
           <Card>
             <CardContent className="p-3 md:p-4">
               <img
-                src={productImages[selectedImageIndex] || "/placeholder.png"}
+                {...responsiveImageProps(
+                  productImages[selectedImageIndex],
+                  DETAIL_MAIN_WIDTHS,
+                  "(max-width: 1024px) calc(100vw - 2rem), calc(50vw - 3rem)"
+                )}
                 alt={product.name}
+                fetchPriority="high"
                 className="w-full h-64 md:h-96 lg:h-[400px] object-cover rounded-lg"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "/placeholder.png";
@@ -224,7 +236,11 @@ const ProductDetails = () => {
                 >
                   <CardContent className="p-2">
                     <img
-                      src={image || "/placeholder.png"}
+                      {...responsiveImageProps(
+                        image,
+                        DETAIL_THUMB_WIDTHS,
+                        "(max-width: 768px) 23vw, 140px"
+                      )}
                       alt={`${product.name} ${index + 1}`}
                       loading="lazy"
                       decoding="async"

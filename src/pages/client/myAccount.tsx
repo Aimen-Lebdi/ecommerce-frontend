@@ -31,6 +31,7 @@ import {
 import { addProductToCart } from "../../features/cart/cartSlice";
 import { signOut, fetchCurrentUser } from "../../features/auth/authSlice";
 import { toast } from "sonner";
+import { responsiveImageProps } from "../../utils/responsiveImage";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -575,7 +576,11 @@ useEffect(() => {
                 className="block relative aspect-square"
               >
                 <img
-                  src={item.image}
+                  {...responsiveImageProps(
+                    item.image,
+                    [200, 320, 480, 640],
+                    "(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+                  )}
                   alt={item.name}
                   loading="lazy"
                   decoding="async"

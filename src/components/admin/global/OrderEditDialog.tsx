@@ -595,6 +595,8 @@ export function OrderEditDialog({
                       <img
                         src={item.mainImage}
                         alt={item.name}
+                        loading="lazy"
+                        decoding="async"
                         className="h-16 w-16 rounded object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "/placeholder.png";

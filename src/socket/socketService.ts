@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { io, Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
 import { store } from "../app/Store";
 import { refreshTokenAPI } from "../features/auth/authAPI";
 import {
@@ -10,6 +10,13 @@ import {
   type Activity,
   type ActivityStats,
 } from "../features/activities/activitiesSlice";
+
+// socket.io-client is lazy-loaded on first connect: only authenticated
+// sessions ever open a socket, so anonymous storefront visitors should not
+// download it as part of the entry bundle.
+let ioLoader: Promise<typeof import("socket.io-client")["io"]> | null = null;
+const loadIo = () =>
+  (ioLoader ??= import("socket.io-client").then((m) => m.io));
 
 // Single source of truth for the socket URL, token storage key and retry cap.
 const SOCKET_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
@@ -56,6 +63,10 @@ class SocketService {
       }
 
       console.log("🔌 Connecting to socket with access token...");
+
+      // Resolve the lazily-imported client factory before opening the
+      // connection (first call fetches the chunk, later calls reuse it).
+      const io = await loadIo();
 
       // Create new socket connection
       this.socket = io(SOCKET_URL, {

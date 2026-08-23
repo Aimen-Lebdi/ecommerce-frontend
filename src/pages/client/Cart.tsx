@@ -38,6 +38,7 @@ import {
 } from "../../features/cart/cartSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
+import { responsiveImageProps } from "../../utils/responsiveImage";
 
 const Cart = () => {
   const { t } = useTranslation();
@@ -180,7 +181,11 @@ const Cart = () => {
                     className="flex-shrink-0"
                   >
                     <img
-                      src={item.product.mainImage}
+                      {...responsiveImageProps(
+                        item.product.mainImage,
+                        [64, 96, 144, 192],
+                        "96px"
+                      )}
                       alt={item.product.name}
                       loading="lazy"
                       decoding="async"

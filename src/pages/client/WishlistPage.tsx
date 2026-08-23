@@ -19,6 +19,7 @@ import {
 } from "../../features/wishlist/wishlistSlice";
 import { addProductToCart } from "../../features/cart/cartSlice";
 import { toast } from "sonner";
+import { responsiveImageProps } from "../../utils/responsiveImage";
 import { useTranslation } from "react-i18next";
 import { getErrorMessage } from "../../utils/errorMessage";
 
@@ -157,7 +158,11 @@ const WishlistPage = () => {
                 <div className="relative overflow-hidden rounded-lg mb-3">
                   <Link to={`/product/${product._id}`}>
                     <img
-                      src={product.mainImage || "/placeholder.png"}
+                      {...responsiveImageProps(
+                        product.mainImage,
+                        [200, 320, 480, 640, 800],
+                        "(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), 350px"
+                      )}
                       alt={product.name}
                       loading="lazy"
                       decoding="async"

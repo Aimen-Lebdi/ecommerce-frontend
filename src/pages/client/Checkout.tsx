@@ -37,6 +37,7 @@ import {
   CollapsibleTrigger,
 } from "../../components/ui/collapsible";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { responsiveImageProps } from "../../utils/responsiveImage";
 import { fetchCart, resetCart } from "../../features/cart/cartSlice";
 import {
   createCashOrder,
@@ -287,94 +288,103 @@ const Checkout = () => {
     };
 
     try {
-      // Persist an inline label for a selected saved address that lacked one
-      // (also unblocks the My Account hard gate).
-      if (selectedAddressId !== "new") {
-        const selectedAddress = addresses.find(
-          (a) => a._id === selectedAddressId
-        );
-        if (
-          selectedAddress &&
-          !(selectedAddress.label && selectedAddress.label.trim()) &&
-          inlineAddressLabel.trim()
-        ) {
-          try {
-            await dispatch(
-              updateAddress({
-                addressId: selectedAddressId,
-                label: inlineAddressLabel.trim(),
-              })
-            ).unwrap();
-            toast.success(t('checkout.labelSaved'));
-          } catch (saveError) {
-            toast.error(
-              getErrorMessage(saveError, t('checkout.labelSaveFailed'))
-            );
-            console.error("Failed to save address label:", saveError);
+      // Address-label/create and phone-label/create touch independent profile
+      // domains, so run them concurrently — placing the order then waits on
+      // one round-trip instead of two. Each task keeps its own error handling.
+      const persistAddressProfile = async () => {
+        // Persist an inline label for a selected saved address that lacked one
+        // (also unblocks the My Account hard gate).
+        if (selectedAddressId !== "new") {
+          const selectedAddress = addresses.find(
+            (a) => a._id === selectedAddressId
+          );
+          if (
+            selectedAddress &&
+            !(selectedAddress.label && selectedAddress.label.trim()) &&
+            inlineAddressLabel.trim()
+          ) {
+            try {
+              await dispatch(
+                updateAddress({
+                  addressId: selectedAddressId,
+                  label: inlineAddressLabel.trim(),
+                })
+              ).unwrap();
+              toast.success(t('checkout.labelSaved'));
+            } catch (saveError) {
+              toast.error(
+                getErrorMessage(saveError, t('checkout.labelSaveFailed'))
+              );
+              console.error("Failed to save address label:", saveError);
+            }
           }
         }
-      }
 
-      // Save a brand-new address to the profile when requested
-      if (saveAddressToProfile && selectedAddressId === "new") {
-        try {
-          await dispatch(
-            createAddress({
-              label: newAddressLabel.trim(),
-              wilaya: shippingAddress.wilaya,
-              dayra: shippingAddress.dayra,
-              baladiya: shippingAddress.baladiya,
-            })
-          ).unwrap();
-        } catch (saveError) {
-          toast.error(
-            getErrorMessage(saveError, t('checkout.saveToProfileFailed'))
-          );
-          console.error("Failed to save address:", saveError);
-        }
-      }
-
-      // Persist an inline label for a selected saved phone that lacked one
-      if (selectedPhoneId !== "new") {
-        const selectedPhone = phones.find((p) => p._id === selectedPhoneId);
-        if (
-          selectedPhone &&
-          !(selectedPhone.label && selectedPhone.label.trim()) &&
-          inlinePhoneLabel.trim()
-        ) {
+        // Save a brand-new address to the profile when requested
+        if (saveAddressToProfile && selectedAddressId === "new") {
           try {
             await dispatch(
-              updatePhone({
-                phoneId: selectedPhoneId,
-                label: inlinePhoneLabel.trim(),
+              createAddress({
+                label: newAddressLabel.trim(),
+                wilaya: shippingAddress.wilaya,
+                dayra: shippingAddress.dayra,
+                baladiya: shippingAddress.baladiya,
               })
             ).unwrap();
-            toast.success(t('checkout.labelSaved'));
           } catch (saveError) {
             toast.error(
-              getErrorMessage(saveError, t('checkout.labelSaveFailed'))
+              getErrorMessage(saveError, t('checkout.saveToProfileFailed'))
             );
-            console.error("Failed to save phone label:", saveError);
+            console.error("Failed to save address:", saveError);
           }
         }
-      }
+      };
 
-      // Save a brand-new phone to the profile when requested
-      if (savePhoneToProfile && selectedPhoneId === "new") {
-        try {
-          await dispatch(
-            createPhone({
-              phone: phoneToLocalDigits(shippingAddress.phone),
-              label: newPhoneLabel.trim(),
-            })
-          ).unwrap();
-        } catch (saveError) {
-          toast.error(
-            getErrorMessage(saveError, t('checkout.saveToProfileFailed'))
-          );
-          console.error("Failed to save phone:", saveError);
+      const persistPhoneProfile = async () => {
+        // Persist an inline label for a selected saved phone that lacked one
+        if (selectedPhoneId !== "new") {
+          const selectedPhone = phones.find((p) => p._id === selectedPhoneId);
+          if (
+            selectedPhone &&
+            !(selectedPhone.label && selectedPhone.label.trim()) &&
+            inlinePhoneLabel.trim()
+          ) {
+            try {
+              await dispatch(
+                updatePhone({
+                  phoneId: selectedPhoneId,
+                  label: inlinePhoneLabel.trim(),
+                })
+              ).unwrap();
+              toast.success(t('checkout.labelSaved'));
+            } catch (saveError) {
+              toast.error(
+                getErrorMessage(saveError, t('checkout.labelSaveFailed'))
+              );
+              console.error("Failed to save phone label:", saveError);
+            }
+          }
         }
-      }
+
+        // Save a brand-new phone to the profile when requested
+        if (savePhoneToProfile && selectedPhoneId === "new") {
+          try {
+            await dispatch(
+              createPhone({
+                phone: phoneToLocalDigits(shippingAddress.phone),
+                label: newPhoneLabel.trim(),
+              })
+            ).unwrap();
+          } catch (saveError) {
+            toast.error(
+              getErrorMessage(saveError, t('checkout.saveToProfileFailed'))
+            );
+            console.error("Failed to save phone:", saveError);
+          }
+        }
+      };
+
+      await Promise.all([persistAddressProfile(), persistPhoneProfile()]);
 
       if (paymentMethod === "cash") {
         const order = await dispatch(
@@ -536,7 +546,11 @@ const Checkout = () => {
                         <div key={item._id} className="flex gap-3">
                           <div className="relative">
                             <img
-                              src={item.product.mainImage}
+                              {...responsiveImageProps(
+                                item.product.mainImage,
+                                [48, 72, 96],
+                                "48px"
+                              )}
                               alt={item.product.name}
                               loading="lazy"
                               decoding="async"
@@ -1174,7 +1188,11 @@ const Checkout = () => {
                     <div key={item._id} className="flex gap-3">
                       <div className="relative">
                         <img
-                          src={item.product.mainImage}
+                          {...responsiveImageProps(
+                            item.product.mainImage,
+                            [64, 96, 128],
+                            "64px"
+                          )}
                           alt={item.product.name}
                           loading="lazy"
                           decoding="async"

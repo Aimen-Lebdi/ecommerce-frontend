@@ -20,6 +20,17 @@ import { fetchCategories } from "../../features/categories/categoriesSlice";
 import { fetchProducts } from "../../features/products/productsSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
+import { responsiveImageProps } from "../../utils/responsiveImage";
+
+// Category rail cards run 2-up on phones down to 6-up on desktops.
+const CATEGORY_WIDTHS = [160, 240, 360, 540, 720];
+const CATEGORY_SIZES =
+  "(max-width: 640px) calc(50vw - 8px), (max-width: 1024px) calc(33.333vw - 11px), calc(16.666vw - 14px)";
+// Home product cards mirror the shop grid: 1 column on phones up to 4 on
+// large screens.
+const PRODUCT_CARD_WIDTHS = [200, 320, 480, 640, 800];
+const PRODUCT_CARD_SIZES =
+  "(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), calc(25vw - 1.75rem)";
 
 // Mock data for hero slides
 const heroSlides = [
@@ -111,7 +122,12 @@ const HeroSection = () => {
                 sizes="100vw"
                 alt={t(slide.title)}
                 className="w-full h-full object-cover"
-                fetchPriority="high"
+                // Only the visible slide competes for bandwidth: the LCP
+                // candidate loads eagerly at high priority, hidden slides
+                // defer until they are about to be shown.
+                {...(index === currentSlide
+                  ? { fetchPriority: "high" as const }
+                  : { loading: "lazy" as const, decoding: "async" as const })}
               />
               <div className="absolute inset-0 bg-black/40" />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -230,11 +246,22 @@ const CategoriesSection = () => {
     checkScrollButtons();
     const container = scrollContainerRef.current;
     if (container) {
-      container.addEventListener("scroll", checkScrollButtons);
-      window.addEventListener("resize", checkScrollButtons);
+      // The handler only flips arrow visibility, so it never needs to block
+      // scrolling: register passive and coalesce frames with rAF.
+      let rafId = 0;
+      const scheduleCheck = () => {
+        if (rafId) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = 0;
+          checkScrollButtons();
+        });
+      };
+      container.addEventListener("scroll", scheduleCheck, { passive: true });
+      window.addEventListener("resize", scheduleCheck);
       return () => {
-        container.removeEventListener("scroll", checkScrollButtons);
-        window.removeEventListener("resize", checkScrollButtons);
+        if (rafId) cancelAnimationFrame(rafId);
+        container.removeEventListener("scroll", scheduleCheck);
+        window.removeEventListener("resize", scheduleCheck);
       };
     }
   }, [categories]);
@@ -310,7 +337,11 @@ const CategoriesSection = () => {
                   <div className="w-full h-32 mb-4 overflow-hidden rounded-lg">
                     {category.image ? (
                       <img
-                        src={category.image}
+                        {...responsiveImageProps(
+                          category.image,
+                          CATEGORY_WIDTHS,
+                          CATEGORY_SIZES
+                        )}
                         alt={category.name}
                         loading="lazy"
                         decoding="async"
@@ -444,7 +475,11 @@ const FeaturedProductsSection = () => {
                   <div className="relative overflow-hidden rounded-t-lg">
                     {product.mainImage ? (
                       <img
-                        src={product.mainImage}
+                        {...responsiveImageProps(
+                          product.mainImage,
+                          PRODUCT_CARD_WIDTHS,
+                          PRODUCT_CARD_SIZES
+                        )}
                         alt={product.name}
                         loading="lazy"
                         decoding="async"

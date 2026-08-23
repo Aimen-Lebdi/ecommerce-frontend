@@ -26,6 +26,7 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 import { toast } from "sonner";
+import { responsiveImageProps } from "../../utils/responsiveImage";
 import { format } from "date-fns";
 import { downloadInvoiceAPI } from "../../features/orders/ordersAPI";
 import {
@@ -291,7 +292,11 @@ const OrderConfirmationPage = () => {
                     className="flex space-x-3 sm:space-x-4 rtl:space-x-reverse p-3 sm:p-4 bg-muted/50 rounded-lg"
                   >
                     <img
-                      src={item.product.mainImage}
+                      {...responsiveImageProps(
+                        item.product.mainImage,
+                        [48, 64, 96, 128],
+                        "64px"
+                      )}
                       alt={item.product.name}
                       loading="lazy"
                       decoding="async"
