@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { useTranslation } from 'react-i18next';
 import {
@@ -45,23 +44,26 @@ type Errors = {
 
 import type { Product } from "../../../types";
 
+// Payload shape accepted by the product form's save handler.
+export interface ProductFormPayload {
+  name?: string;
+  description?: string;
+  price?: number;
+  mainImage?: File;
+  images?: File[] | null;
+  colors?: string[];
+  quantity?: number;
+  category?: string;
+  subCategory?: string | null;
+  brand?: string | null;
+}
+
 interface ProductDialogProps {
   mode?: "add" | "edit";
   existingData?: Product;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSubmit?: (data: {
-    name?: string;
-    description?: string;
-    price?: number;
-    mainImage?: File;
-    images?: File[];
-    colors?: string[];
-    quantity?: number;
-    category?: string;
-    subCategory?: string;
-    brand?: string;
-  }) => Promise<void>;
+  onSubmit?: (data: ProductFormPayload) => Promise<void>;
   isSubmitting?: boolean;
 }
 
@@ -274,7 +276,7 @@ export function ProductDialog({
   const handleSave = async () => {
     if (!validate()) return;
 
-    const productData: any = {};
+    const productData: ProductFormPayload = {};
 
     if (mode === "add") {
       // For add mode, include all required fields
@@ -455,13 +457,13 @@ if (otherImages.length > 0) {
       <div className="grid gap-4 py-4">
         {/* Category */}
         <div className="grid gap-2">
-          <Label>{t('productDialog.labels.category')}</Label>
+          <Label htmlFor="pd-category">{t('productDialog.labels.category')}</Label>
           <Select
             value={category}
             onValueChange={handleCategoryChange}
             disabled={loading}
           >
-            <SelectTrigger className={errors.category ? "border-red-500" : ""}>
+            <SelectTrigger id="pd-category" className={errors.category ? "border-destructive" : ""}>
               <SelectValue
                 placeholder={
                   loading ? t('productDialog.placeholders.loadingCategories') : t('productDialog.placeholders.chooseCategory')
@@ -477,13 +479,13 @@ if (otherImages.length > 0) {
             </SelectContent>
           </Select>
           {errors.category && (
-            <p className="text-sm text-red-600">{errors.category}</p>
+            <p role="alert" className="text-sm text-destructive">{errors.category}</p>
           )}
         </div>
 
         {/* Subcategory */}
         <div className="grid gap-2">
-          <Label>
+          <Label htmlFor="pd-subcategory">
             {t('productDialog.labels.subcategory')}{" "}
             <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
           </Label>
@@ -501,7 +503,8 @@ if (otherImages.length > 0) {
             disabled={!category || loading}
           >
             <SelectTrigger
-              className={errors.subcategory ? "border-red-500" : ""}
+              id="pd-subcategory"
+              className={errors.subcategory ? "border-destructive" : ""}
             >
               <SelectValue
                 placeholder={
@@ -533,7 +536,7 @@ if (otherImages.length > 0) {
             </SelectContent>
           </Select>
           {errors.subcategory && (
-            <p className="text-sm text-red-600">{errors.subcategory}</p>
+            <p role="alert" className="text-sm text-destructive">{errors.subcategory}</p>
           )}
 
           {/* Show helper text based on category selection */}
@@ -546,7 +549,7 @@ if (otherImages.length > 0) {
 
         {/* Brand */}
         <div className="grid gap-2">
-          <Label>
+          <Label htmlFor="pd-brand">
             {t('productDialog.labels.brand')}{" "}
             <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
           </Label>
@@ -563,7 +566,7 @@ if (otherImages.length > 0) {
             }}
             disabled={loading}
           >
-            <SelectTrigger className={errors.brand ? "border-red-500" : ""}>
+            <SelectTrigger id="pd-brand" className={errors.brand ? "border-destructive" : ""}>
               <SelectValue
                 placeholder={
                   loading ? t('productDialog.placeholders.loadingBrands') : t('productDialog.placeholders.chooseBrand')
@@ -584,14 +587,15 @@ if (otherImages.length > 0) {
             </SelectContent>
           </Select>
           {errors.brand && (
-            <p className="text-sm text-red-600">{errors.brand}</p>
+            <p role="alert" className="text-sm text-destructive">{errors.brand}</p>
           )}
         </div>
 
         {/* Product Name */}
         <div className="grid gap-2">
-          <Label>{t('productDialog.labels.productName')}</Label>
+          <Label htmlFor="pd-name">{t('productDialog.labels.productName')}</Label>
           <Input
+            id="pd-name"
             placeholder={t('productDialog.placeholders.productName')}
             value={name}
             onChange={(e) => {
@@ -600,15 +604,17 @@ if (otherImages.length > 0) {
                 setErrors((prev) => ({ ...prev, name: undefined }));
               }
             }}
-            className={errors.name ? "border-red-500" : ""}
+            aria-invalid={Boolean(errors.name)}
+            className={errors.name ? "border-destructive" : ""}
           />
-          {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+          {errors.name && <p role="alert" className="text-sm text-destructive">{errors.name}</p>}
         </div>
 
         {/* Description */}
         <div className="grid gap-2">
-          <Label>{t('productDialog.labels.description')}</Label>
+          <Label htmlFor="pd-description">{t('productDialog.labels.description')}</Label>
           <Textarea
+            id="pd-description"
             placeholder={t('productDialog.placeholders.description')}
             value={description}
             onChange={(e) => {
@@ -617,19 +623,21 @@ if (otherImages.length > 0) {
                 setErrors((prev) => ({ ...prev, description: undefined }));
               }
             }}
-            className={errors.description ? "border-red-500" : ""}
+            aria-invalid={Boolean(errors.description)}
+            className={errors.description ? "border-destructive" : ""}
             rows={3}
           />
           {errors.description && (
-            <p className="text-sm text-red-600">{errors.description}</p>
+            <p role="alert" className="text-sm text-destructive">{errors.description}</p>
           )}
         </div>
 
         {/* Price, Discount Price & Quantity */}
         <div className="grid grid-cols-3 gap-4">
           <div className="grid gap-2">
-            <Label>{t('productDialog.labels.price')}</Label>
+            <Label htmlFor="pd-price">{t('productDialog.labels.price')}</Label>
             <Input
+              id="pd-price"
               type="number"
               placeholder={t('productDialog.placeholders.price')}
               value={price}
@@ -643,17 +651,19 @@ if (otherImages.length > 0) {
                   setErrors((prev) => ({ ...prev, price: undefined }));
                 }
               }}
-              className={errors.price ? "border-red-500" : ""}
+              aria-invalid={Boolean(errors.price)}
+              className={errors.price ? "border-destructive" : ""}
               step="0.01"
               min="0"
             />
             {errors.price && (
-              <p className="text-sm text-red-600">{errors.price}</p>
+              <p role="alert" className="text-sm text-destructive">{errors.price}</p>
             )}
           </div>
           <div className="grid gap-2">
-            <Label>{t('productDialog.labels.quantity')}</Label>
+            <Label htmlFor="pd-quantity">{t('productDialog.labels.quantity')}</Label>
             <Input
+              id="pd-quantity"
               type="number"
               placeholder={t('productDialog.placeholders.quantity')}
               value={quantity}
@@ -667,19 +677,21 @@ if (otherImages.length > 0) {
                   setErrors((prev) => ({ ...prev, quantity: undefined }));
                 }
               }}
-              className={errors.quantity ? "border-red-500" : ""}
+              aria-invalid={Boolean(errors.quantity)}
+              className={errors.quantity ? "border-destructive" : ""}
               min="0"
             />
             {errors.quantity && (
-              <p className="text-sm text-red-600">{errors.quantity}</p>
+              <p role="alert" className="text-sm text-destructive">{errors.quantity}</p>
             )}
           </div>
         </div>
 
         {/* Colors */}
         <div className="grid gap-2">
-          <Label>{t('productDialog.labels.colors')}</Label>
+          <Label htmlFor="pd-colors">{t('productDialog.labels.colors')}</Label>
           <Input
+            id="pd-colors"
             placeholder={t('productDialog.placeholders.colors')}
             value={colors}
             onChange={(e) => {
@@ -688,28 +700,38 @@ if (otherImages.length > 0) {
                 setErrors((prev) => ({ ...prev, colors: undefined }));
               }
             }}
-            className={errors.colors ? "border-red-500" : ""}
+            aria-invalid={Boolean(errors.colors)}
+            className={errors.colors ? "border-destructive" : ""}
           />
           {errors.colors && (
-            <p className="text-sm text-red-600">{errors.colors}</p>
+            <p role="alert" className="text-sm text-destructive">{errors.colors}</p>
           )}
         </div>
 
         {/* Main Image Upload */}
         <div className="grid gap-2">
-          <Label>{t('productDialog.labels.mainImage')}</Label>
+          <Label htmlFor="main-image">{t('productDialog.labels.mainImage')}</Label>
           <div
-            className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
+            role="button"
+            tabIndex={0}
+            aria-label={t('productDialog.labels.mainImage')}
+            className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
               ${
                 dragActiveMain
-                  ? "border-blue-500 bg-blue-50 text-blue-500"
+                  ? "border-primary bg-primary/10 text-primary"
                   : errors.mainImage
-                  ? "border-red-500 text-red-500"
-                  : "border-gray-300 bg-gray-50 text-gray-500 hover:border-blue-500 hover:text-blue-500"
+                  ? "border-destructive text-destructive"
+                  : "border-border bg-muted/50 text-muted-foreground hover:border-primary hover:text-primary"
               }`}
             onClick={() =>
               !previewMain && document.getElementById("main-image")?.click()
             }
+            onKeyDown={(e) => {
+              if ((e.key === "Enter" || e.key === " ") && !previewMain) {
+                e.preventDefault();
+                document.getElementById("main-image")?.click();
+              }
+            }}
             onDragOver={(e) => {
               e.preventDefault();
               setDragActiveMain(true);
@@ -739,7 +761,7 @@ if (otherImages.length > 0) {
                     e.stopPropagation();
                     handleRemoveMain();
                   }}
-                  className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                  className="absolute top-2 right-2 rounded-full bg-destructive p-1 text-white hover:bg-destructive/90"
                 >
                   <IconX size={16} />
                 </button>
@@ -749,7 +771,7 @@ if (otherImages.length > 0) {
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
                   {t('productDialog.uploadArea.dragDropMain')}{" "}
-                  <span className="text-blue-600 hover:underline">
+                  <span className="text-primary hover:underline">
                     {t('productDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
@@ -764,10 +786,10 @@ if (otherImages.length > 0) {
             onChange={handleMainFileChange}
           />
           {errors.mainImage && (
-            <p className="text-sm text-red-600 mt-1">{errors.mainImage}</p>
+            <p role="alert" className="text-sm text-destructive mt-1">{errors.mainImage}</p>
           )}
           {mainImage && !errors.mainImage && (
-            <p className="mt-2 text-xs text-green-600">
+            <p className="mt-2 text-xs text-success">
               {t('productDialog.uploadArea.selected')} {mainImage.name}
             </p>
           )}
@@ -775,20 +797,29 @@ if (otherImages.length > 0) {
 
         {/* Other Images Upload */}
         <div className="grid gap-2">
-          <Label>
+          <Label htmlFor="other-images">
             {t('productDialog.labels.additionalImages')}{" "}
             <span className="text-muted-foreground text-sm">{t('productDialog.labels.optional')}</span>
           </Label>
           <div
-            className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
+            role="button"
+            tabIndex={0}
+            aria-label={t('productDialog.labels.additionalImages')}
+            className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
               ${
                 dragActiveOthers
-                  ? "border-blue-500 bg-blue-50 text-blue-500"
+                  ? "border-primary bg-primary/10 text-primary"
                   : errors.images
-                  ? "border-red-500 text-red-500"
-                  : "border-gray-300 bg-gray-50 text-gray-500 hover:border-blue-500 hover:text-blue-500"
+                  ? "border-destructive text-destructive"
+                  : "border-border bg-muted/50 text-muted-foreground hover:border-primary hover:text-primary"
               }`}
             onClick={() => document.getElementById("other-images")?.click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                document.getElementById("other-images")?.click();
+              }
+            }}
             onDragOver={(e) => {
               e.preventDefault();
               setDragActiveOthers(true);
@@ -820,7 +851,7 @@ if (otherImages.length > 0) {
                         e.stopPropagation();
                         handleRemoveOther(idx);
                       }}
-                      className="absolute top-1 right-1 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                      className="absolute top-1 right-1 rounded-full bg-destructive p-1 text-white hover:bg-destructive/90"
                     >
                       <IconX size={14} />
                     </button>
@@ -832,7 +863,7 @@ if (otherImages.length > 0) {
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
                   {t('productDialog.uploadArea.dragDropOthers')}{" "}
-                  <span className="text-blue-600 hover:underline">
+                  <span className="text-primary hover:underline">
                     {t('productDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
@@ -850,10 +881,10 @@ if (otherImages.length > 0) {
             }}
           />
           {errors.images && (
-            <p className="text-sm text-red-600 mt-1">{errors.images}</p>
+            <p className="text-sm text-destructive mt-1">{errors.images}</p>
           )}
           {otherImages.length > 0 && !errors.images && (
-            <p className="mt-2 text-xs text-green-600">
+            <p className="mt-2 text-xs text-success">
               {t('productDialog.uploadArea.selectedImages', { count: otherImages.length })}
             </p>
           )}
@@ -913,18 +944,7 @@ export function AddProductDialog() {
 // eslint-disable-next-line react-refresh/only-export-components
 export function createEditProductDialog(
   rowData: Product,
-  onSave: (updatedData: {
-    name?: string;
-    description?: string;
-    price?: number;
-    mainImage?: File;
-    images?: File[];
-    colors?: string[];
-    quantity?: number;
-    category?: string;
-    subCategory?: string;
-    brand?: string;
-  }) => Promise<void>,
+  onSave: (updatedData: ProductFormPayload) => Promise<void>,
   isSubmitting: boolean = false
 ) {
   return (

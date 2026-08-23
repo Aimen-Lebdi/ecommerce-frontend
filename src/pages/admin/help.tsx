@@ -54,9 +54,9 @@ export default function AdminHelp() {
               <CardContent className="flex flex-col gap-4">
                 {faqKeys.map((key) => (
                   <div key={key} className="grid gap-1">
-                    <h3 className="font-medium">
+                    <h2 className="font-medium">
                       {t(`help.sections.operations.items.${key}.q`)}
-                    </h3>
+                    </h2>
                     <p className="text-muted-foreground text-sm">
                       {t(`help.sections.operations.items.${key}.a`)}
                     </p>

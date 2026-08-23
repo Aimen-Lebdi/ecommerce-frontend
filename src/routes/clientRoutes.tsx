@@ -1,50 +1,67 @@
+import { lazy, Suspense } from "react";
 import UserLayout from "../layouts/clientLayout";
 import ProtectedRoute from "./protectedRoute";
+import RouteFallback from "../components/RouteFallback";
 
-import Home from "../pages/client/Home";
-import About from "../pages/client/About";
-import ContactUs from "../pages/client/ContactUs";
-import ShopPage from "../pages/client/Shop";
-import ProductDetails from "../pages/client/ProductDetail";
-import Cart from "../pages/client/Cart";
-import Checkout from "../pages/client/Checkout";
-import OrderConfirmationPage from "../pages/client/orderConfirmation";
-import MyAccountDashboard from "../pages/client/myAccount";
-import SignUpPage from "../pages/client/SignUp";
-import SignInPage from "../pages/client/SignIn";
-import ForgotPasswordPage from "../pages/client/ForgetPassword";
-import CodeVerificationPage from "../pages/client/CodeVerification";
-import ResetPasswordPage from "../pages/client/ResetPassword";
-import WishlistPage from "../pages/client/WishlistPage";
-import OrderTracking from "../pages/client/orderTracking";
+// Route-level code splitting: each page ships as its own chunk so the
+// storefront entry bundle stays lean (admin console, charts, and editor
+// dependencies never load until their route is visited).
+const Home = lazy(() => import("../pages/client/Home"));
+const About = lazy(() => import("../pages/client/About"));
+const ContactUs = lazy(() => import("../pages/client/ContactUs"));
+const ShopPage = lazy(() => import("../pages/client/Shop"));
+const ProductDetails = lazy(() => import("../pages/client/ProductDetail"));
+const Cart = lazy(() => import("../pages/client/Cart"));
+const Checkout = lazy(() => import("../pages/client/Checkout"));
+const OrderConfirmationPage = lazy(
+  () => import("../pages/client/orderConfirmation")
+);
+const MyAccountDashboard = lazy(() => import("../pages/client/myAccount"));
+const SignUpPage = lazy(() => import("../pages/client/SignUp"));
+const SignInPage = lazy(() => import("../pages/client/SignIn"));
+const ForgotPasswordPage = lazy(() => import("../pages/client/ForgetPassword"));
+const CodeVerificationPage = lazy(
+  () => import("../pages/client/CodeVerification")
+);
+const ResetPasswordPage = lazy(() => import("../pages/client/ResetPassword"));
+const WishlistPage = lazy(() => import("../pages/client/WishlistPage"));
+const OrderTracking = lazy(() => import("../pages/client/orderTracking"));
+
+/** Wrap a lazily-loaded page in a Suspense boundary with the shared fallback. */
+const page = (element: React.ReactNode) => (
+  <Suspense fallback={<RouteFallback />}>{element}</Suspense>
+);
 
 const UserRoutes = {
   path: "/",
   element: <UserLayout />,
   children: [
     // Public routes
-    { index: true, element: <Home /> },
-    { path: "about", element: <About /> },
-    { path: "contact", element: <ContactUs /> },
-    { path: "shop", element: <ShopPage /> },
-    { path: "product/:id", element: <ProductDetails /> },
-    { path: "sign-up", element: <SignUpPage /> },
-    { path: "sign-in", element: <SignInPage /> },
-    { path: "forgot-password", element: <ForgotPasswordPage /> },
-    { path: "verify-reset-code", element: <CodeVerificationPage /> },
-    { path: "reset-password", element: <ResetPasswordPage /> },
+    { index: true, element: page(<Home />) },
+    { path: "about", element: page(<About />) },
+    { path: "contact", element: page(<ContactUs />) },
+    { path: "shop", element: page(<ShopPage />) },
+    { path: "product/:id", element: page(<ProductDetails />) },
+    { path: "sign-up", element: page(<SignUpPage />) },
+    { path: "sign-in", element: page(<SignInPage />) },
+    { path: "forgot-password", element: page(<ForgotPasswordPage />) },
+    { path: "verify-reset-code", element: page(<CodeVerificationPage />) },
+    { path: "reset-password", element: page(<ResetPasswordPage />) },
 
     // Protected routes (require authentication)
     {
       element: <ProtectedRoute role="user" />,
       children: [
-        { path: "wishlist", element: <WishlistPage /> },
-        { path: "cart", element: <Cart /> },
-        { path: "/checkout", element: <Checkout /> },
-        { path: "/order-confirmation/:id", element: <OrderConfirmationPage /> },
-        { path: "/order-confirmation", element: <OrderConfirmationPage /> },
-        { path: "/orders/:id/tracking", element: <OrderTracking /> },
-        { path: "my-account", element: <MyAccountDashboard /> },
+        { path: "wishlist", element: page(<WishlistPage />) },
+        { path: "cart", element: page(<Cart />) },
+        { path: "/checkout", element: page(<Checkout />) },
+        {
+          path: "/order-confirmation/:id",
+          element: page(<OrderConfirmationPage />),
+        },
+        { path: "/order-confirmation", element: page(<OrderConfirmationPage />) },
+        { path: "/orders/:id/tracking", element: page(<OrderTracking />) },
+        { path: "my-account", element: page(<MyAccountDashboard />) },
       ],
     },
   ],

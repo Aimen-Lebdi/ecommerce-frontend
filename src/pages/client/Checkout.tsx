@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
@@ -63,6 +62,7 @@ import {
   phoneToLocalDigits,
 } from "../../utils/phoneFormat";
 import { toast } from "sonner";
+import { getErrorMessage } from "../../utils/errorMessage";
 
 const Checkout = () => {
   const { t } = useTranslation();
@@ -306,9 +306,9 @@ const Checkout = () => {
               })
             ).unwrap();
             toast.success(t('checkout.labelSaved'));
-          } catch (saveError: any) {
+          } catch (saveError) {
             toast.error(
-              saveError.response?.data?.message || t('checkout.labelSaveFailed')
+              getErrorMessage(saveError, t('checkout.labelSaveFailed'))
             );
             console.error("Failed to save address label:", saveError);
           }
@@ -326,10 +326,9 @@ const Checkout = () => {
               baladiya: shippingAddress.baladiya,
             })
           ).unwrap();
-        } catch (saveError: any) {
+        } catch (saveError) {
           toast.error(
-            saveError.response?.data?.message ||
-              t('checkout.saveToProfileFailed')
+            getErrorMessage(saveError, t('checkout.saveToProfileFailed'))
           );
           console.error("Failed to save address:", saveError);
         }
@@ -351,9 +350,9 @@ const Checkout = () => {
               })
             ).unwrap();
             toast.success(t('checkout.labelSaved'));
-          } catch (saveError: any) {
+          } catch (saveError) {
             toast.error(
-              saveError.response?.data?.message || t('checkout.labelSaveFailed')
+              getErrorMessage(saveError, t('checkout.labelSaveFailed'))
             );
             console.error("Failed to save phone label:", saveError);
           }
@@ -369,10 +368,9 @@ const Checkout = () => {
               label: newPhoneLabel.trim(),
             })
           ).unwrap();
-        } catch (saveError: any) {
+        } catch (saveError) {
           toast.error(
-            saveError.response?.data?.message ||
-              t('checkout.saveToProfileFailed')
+            getErrorMessage(saveError, t('checkout.saveToProfileFailed'))
           );
           console.error("Failed to save phone:", saveError);
         }
@@ -400,8 +398,8 @@ const Checkout = () => {
           })
         ).unwrap();
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || t('checkout.orderCreationFailed'));
+    } catch (error) {
+      toast.error(getErrorMessage(error, t('checkout.orderCreationFailed')));
       console.error("Order creation failed:", error);
     }
   };
@@ -484,7 +482,7 @@ const Checkout = () => {
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4 text-green-600" />
+              <Lock className="h-4 w-4 text-success" />
               <h1 className="text-xl md:text-2xl font-bold">{t('checkout.secureCheckout')}</h1>
             </div>
           </div>
@@ -540,6 +538,8 @@ const Checkout = () => {
                             <img
                               src={item.product.mainImage}
                               alt={item.product.name}
+                              loading="lazy"
+                              decoding="async"
                               className="w-12 h-12 rounded object-cover"
                             />
                             <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
@@ -722,8 +722,8 @@ const Checkout = () => {
                       return null;
                     }
                     return (
-                      <div className="space-y-2 rounded-lg border border-amber-300/70 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-                        <p className="text-xs text-amber-700 dark:text-amber-300">
+                      <div className="space-y-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
+                        <p className="text-xs text-muted-foreground">
                           {t('checkout.labelNeededPrompt')}
                         </p>
                         <Label htmlFor="inline-phone-label">
@@ -736,17 +736,31 @@ const Checkout = () => {
                           placeholder={t('checkout.labelPlaceholder')}
                           maxLength={30}
                           disabled={isProcessing}
+                          aria-invalid={Boolean(labelErrors.phone)}
+                          aria-describedby={
+                            labelErrors.phone
+                              ? "inline-phone-label-error"
+                              : undefined
+                          }
                           className={
                             labelErrors.phone ? "border-destructive" : ""
                           }
                         />
                         {labelErrors.phone === "required" && (
-                          <p className="text-xs text-destructive">
+                          <p
+                            id="inline-phone-label-error"
+                            role="alert"
+                            className="text-xs text-destructive"
+                          >
                             {t('checkout.labelRequired')}
                           </p>
                         )}
                         {labelErrors.phone === "tooLong" && (
-                          <p className="text-xs text-destructive">
+                          <p
+                            id="inline-phone-label-error"
+                            role="alert"
+                            className="text-xs text-destructive"
+                          >
                             {t('checkout.labelMaxLength')}
                           </p>
                         )}
@@ -763,6 +777,8 @@ const Checkout = () => {
                       id="phone"
                       type="tel"
                       className={`pl-10 ${phoneError ? "border-destructive" : ""}`}
+                      aria-invalid={phoneError}
+                      aria-describedby={phoneError ? "phone-error" : undefined}
                       value={shippingAddress.phone}
                       onChange={(e) => {
                         setPhoneError(false);
@@ -776,7 +792,11 @@ const Checkout = () => {
                     />
                   </div>
                   {phoneError && (
-                    <p className="text-xs text-destructive">
+                    <p
+                      id="phone-error"
+                      role="alert"
+                      className="text-xs text-destructive"
+                    >
                       {t('checkout.phoneInvalid')}
                     </p>
                   )}
@@ -818,17 +838,31 @@ const Checkout = () => {
                           placeholder={t('checkout.labelPlaceholder')}
                           maxLength={30}
                           disabled={isProcessing}
+                          aria-invalid={Boolean(labelErrors.phone)}
+                          aria-describedby={
+                            labelErrors.phone
+                              ? "new-phone-label-error"
+                              : undefined
+                          }
                           className={
                             labelErrors.phone ? "border-destructive" : ""
                           }
                         />
                         {labelErrors.phone === "required" && (
-                          <p className="text-xs text-destructive">
+                          <p
+                            id="new-phone-label-error"
+                            role="alert"
+                            className="text-xs text-destructive"
+                          >
                             {t('checkout.labelRequired')}
                           </p>
                         )}
                         {labelErrors.phone === "tooLong" && (
-                          <p className="text-xs text-destructive">
+                          <p
+                            id="new-phone-label-error"
+                            role="alert"
+                            className="text-xs text-destructive"
+                          >
                             {t('checkout.labelMaxLength')}
                           </p>
                         )}
@@ -931,8 +965,8 @@ const Checkout = () => {
                       return null;
                     }
                     return (
-                      <div className="space-y-2 rounded-lg border border-amber-300/70 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-                        <p className="text-xs text-amber-700 dark:text-amber-300">
+                      <div className="space-y-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
+                        <p className="text-xs text-muted-foreground">
                           {t('checkout.labelNeededPrompt')}
                         </p>
                         <Label htmlFor="inline-address-label">
@@ -947,17 +981,31 @@ const Checkout = () => {
                           placeholder={t('checkout.labelPlaceholder')}
                           maxLength={30}
                           disabled={isProcessing}
+                          aria-invalid={Boolean(labelErrors.address)}
+                          aria-describedby={
+                            labelErrors.address
+                              ? "inline-address-label-error"
+                              : undefined
+                          }
                           className={
                             labelErrors.address ? "border-destructive" : ""
                           }
                         />
                         {labelErrors.address === "required" && (
-                          <p className="text-xs text-destructive">
+                          <p
+                            id="inline-address-label-error"
+                            role="alert"
+                            className="text-xs text-destructive"
+                          >
                             {t('checkout.labelRequired')}
                           </p>
                         )}
                         {labelErrors.address === "tooLong" && (
-                          <p className="text-xs text-destructive">
+                          <p
+                            id="inline-address-label-error"
+                            role="alert"
+                            className="text-xs text-destructive"
+                          >
                             {t('checkout.labelMaxLength')}
                           </p>
                         )}
@@ -1009,17 +1057,31 @@ const Checkout = () => {
                           placeholder={t('checkout.labelPlaceholder')}
                           maxLength={30}
                           disabled={isProcessing}
+                          aria-invalid={Boolean(labelErrors.address)}
+                          aria-describedby={
+                            labelErrors.address
+                              ? "new-address-label-error"
+                              : undefined
+                          }
                           className={
                             labelErrors.address ? "border-destructive" : ""
                           }
                         />
                         {labelErrors.address === "required" && (
-                          <p className="text-xs text-destructive">
+                          <p
+                            id="new-address-label-error"
+                            role="alert"
+                            className="text-xs text-destructive"
+                          >
                             {t('checkout.labelRequired')}
                           </p>
                         )}
                         {labelErrors.address === "tooLong" && (
-                          <p className="text-xs text-destructive">
+                          <p
+                            id="new-address-label-error"
+                            role="alert"
+                            className="text-xs text-destructive"
+                          >
                             {t('checkout.labelMaxLength')}
                           </p>
                         )}
@@ -1114,6 +1176,8 @@ const Checkout = () => {
                         <img
                           src={item.product.mainImage}
                           alt={item.product.name}
+                          loading="lazy"
+                          decoding="async"
                           className="w-16 h-16 rounded object-cover"
                         />
                         <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
@@ -1160,15 +1224,15 @@ const Checkout = () => {
               <Card>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center gap-2 text-sm">
-                    <Shield className="h-4 w-4 text-green-600" />
+                    <Shield className="h-4 w-4 text-success" />
                     <span>{t('checkout.sslSecured')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-blue-600" />
+                    <CheckCircle className="h-4 w-4 text-info" />
                     <span>{t('checkout.moneyBackGuarantee')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <Truck className="h-4 w-4 text-purple-600" />
+                    <Truck className="h-4 w-4 text-info" />
                     <span>{t('checkout.freeReturns')}</span>
                   </div>
                 </CardContent>

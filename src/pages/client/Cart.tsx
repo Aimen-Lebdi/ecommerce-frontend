@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useTranslation } from 'react-i18next';
-import {
+import { useTranslation } from 'react-i18next';import { getErrorMessage } from "../../utils/errorMessage";import {
   Minus,
   Plus,
   Trash2,
@@ -90,7 +87,7 @@ const Cart = () => {
         updateCartItemQuantity({ itemId, quantity: newQuantity })
       ).unwrap();
       toast.success(t('cart.cartUpdated'));
-    } catch (err) {
+    } catch {
       // Error handled by slice
     }
   };
@@ -99,7 +96,7 @@ const Cart = () => {
     try {
       await dispatch(removeCartItem(itemId)).unwrap();
       toast.success(t('cart.itemRemoved'));
-    } catch (err) {
+    } catch {
       // Error handled by slice
     }
   };
@@ -113,8 +110,8 @@ const Cart = () => {
       await dispatch(addProductToWishlist(productId)).unwrap();
       await dispatch(removeCartItem(itemId)).unwrap();
       toast.success(t('cart.movedToWishlist', { productName }));
-    } catch (err: any) {
-      toast.error(err || t('cart.moveToWishlistFailed'));
+    } catch (err) {
+      toast.error(getErrorMessage(err, t('cart.moveToWishlistFailed')));
     }
   };
 
@@ -185,6 +182,8 @@ const Cart = () => {
                     <img
                       src={item.product.mainImage}
                       alt={item.product.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-lg"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.png";
@@ -233,7 +232,10 @@ const Cart = () => {
                         <Button
                           variant="outline"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
+                          aria-label={t("cart.decreaseQuantity", {
+                            productName: item.product.name,
+                          })}
                           onClick={() =>
                             updateQuantity(item._id, item.quantity - 1)
                           }
@@ -247,7 +249,10 @@ const Cart = () => {
                         <Button
                           variant="outline"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
+                          aria-label={t("cart.increaseQuantity", {
+                            productName: item.product.name,
+                          })}
                           onClick={() =>
                             updateQuantity(item._id, item.quantity + 1)
                           }
@@ -376,15 +381,15 @@ const Cart = () => {
           <Card>
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-sm">
-                <Shield className="h-4 w-4 text-green-600" />
+                <Shield className="h-4 w-4 text-success" />
                 <span>{t('cart.secureEncryption')}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <CreditCard className="h-4 w-4 text-blue-600" />
+                <CreditCard className="h-4 w-4 text-info" />
                 <span>{t('cart.multiplePaymentOptions')}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <Truck className="h-4 w-4 text-purple-600" />
+                <Truck className="h-4 w-4 text-info" />
                 <span>{t('cart.freeReturns')}</span>
               </div>
             </CardContent>

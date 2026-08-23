@@ -6,6 +6,7 @@ import {
   Award,
   Heart,
   ArrowRight,
+  ArrowLeft,
   Truck,
   Shield,
   RotateCcw,
@@ -101,16 +102,16 @@ const HeroSection = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="relative py-20 md:py-32 bg-gradient-to-br from-primary via-primary/50 to-purple-600 dark:from-primary dark:via-purple-700 dark:to-blue-900 rounded-2xl mb-16">
+    <section className="relative py-20 md:py-32 bg-gradient-to-br from-primary to-primary/70 rounded-2xl mb-16">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-block px-4 py-2 bg-white/25 dark:bg-white/35 text-white rounded-full text-sm font-medium mb-4 backdrop-blur-md">
+          <div className="inline-block px-4 py-2 bg-white/25 text-white rounded-full text-sm font-medium mb-4 backdrop-blur-md">
             {t("about.hero.badge")}
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
             {t("about.hero.title")}
           </h1>
-          <p className="text-lg md:text-xl text-white/95 dark:text-white mb-8">
+          <p className="text-lg md:text-xl text-white/95 mb-8">
             {t("about.hero.subtitle")}
           </p>
         </div>
@@ -142,17 +143,22 @@ const StorySection = () => {
             </p>
             <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors">
               {t("about.story.cta")}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 rtl:hidden" />
+              <ArrowLeft className="h-4 w-4 ltr:hidden" />
             </button>
           </div>
           <div className="relative">
             <img
               src="https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=600&h=600&fit=crop"
+              srcSet="https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=400&h=400&fit=crop 400w, https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=600&h=600&fit=crop 600w, https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=900&h=900&fit=crop 900w"
+              sizes="(min-width: 1024px) 50vw, 100vw"
               alt="Our Story"
-              className="rounded-2xl shadow-2xl w-full object-cover h-[400px]"
+              loading="lazy"
+              decoding="async"
+              className="rounded-2xl shadow-md w-full object-cover h-[400px]"
             />
-            <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-primary to-purple-600 rounded-full opacity-60" />
-            <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-blue-500 to-primary rounded-full opacity-40" />
+            <div className="absolute -bottom-8 -left-8 rtl:left-auto rtl:-right-8 w-24 h-24 bg-primary/20 rounded-full" />
+            <div className="absolute -top-4 -right-4 rtl:right-auto rtl:-left-4 w-32 h-32 bg-primary/10 rounded-full" />
           </div>
         </div>
       </div>
@@ -165,7 +171,7 @@ const StatsSection = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950 rounded-2xl mb-16">
+    <section className="py-16 md:py-24 bg-muted/50 rounded-2xl mb-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -177,12 +183,12 @@ const StatsSection = () => {
           {stats.map((stat) => (
             <div
               key={stat.id}
-              className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-slate-200 dark:border-slate-700"
+              className="text-center p-6 bg-card rounded-xl shadow-sm hover:shadow-md transition-shadow border border-border"
             >
-              <div className="text-3xl md:text-4xl font-bold text-primary dark:text-blue-400 mb-2">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
                 {t(stat.number)}
               </div>
-              <p className="text-slate-700 dark:text-slate-300 font-medium">
+              <p className="text-muted-foreground font-medium">
                 {t(stat.label)}
               </p>
             </div>
@@ -215,15 +221,15 @@ const ValuesSection = () => {
             return (
               <div
                 key={value.id}
-                className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-blue-400"
+                className="hover:shadow-md transition-all duration-300 hover:-translate-y-1 group p-6 bg-card rounded-xl border border-border hover:border-primary/50"
               >
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/60 transition-colors">
-                  <Icon className="h-6 w-6 text-primary dark:text-blue-400" />
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-3 text-slate-900 dark:text-white">
+                <h3 className="font-semibold text-lg mb-3 text-foreground">
                   {t(value.title)}
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="text-muted-foreground">
                   {t(value.description)}
                 </p>
               </div>
@@ -284,16 +290,16 @@ const WhyChooseUsSection = () => {
             return (
               <div
                 key={reason.id}
-                className="flex gap-6 items-start p-6 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-blue-400"
+                className="flex gap-6 items-start p-6 bg-muted/50 rounded-xl hover:bg-muted transition-colors border border-border hover:border-primary/50"
               >
-                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Icon className="h-8 w-8 text-primary dark:text-blue-400" />
+                <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Icon className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-2 text-slate-900 dark:text-white">
+                  <h3 className="font-semibold text-lg mb-2 text-foreground">
                     {t(reason.title)}
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p className="text-muted-foreground">
                     {t(reason.description)}
                   </p>
                 </div>
@@ -326,22 +332,24 @@ const TeamSection = () => {
           {teamMembers.map((member) => (
             <div
               key={member.id}
-              className="text-center group hover:shadow-lg p-6 rounded-xl transition-all duration-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-blue-400"
+              className="text-center group hover:shadow-md p-6 rounded-xl transition-all duration-300 bg-card border border-border hover:border-primary/50"
             >
               <div className="mb-4 overflow-hidden rounded-xl">
                 <img
                   src={member.image}
                   alt={t(member.name)}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h3 className="font-semibold text-lg mb-1 text-slate-900 dark:text-white">
+              <h3 className="font-semibold text-lg mb-1 text-foreground">
                 {t(member.name)}
               </h3>
-              <p className="text-primary dark:text-blue-400 font-medium mb-2">
+              <p className="text-primary font-medium mb-2">
                 {t(member.role)}
               </p>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 {t(member.bio)}
               </p>
             </div>

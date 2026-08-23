@@ -61,9 +61,9 @@ export function LowStockList() {
     try {
       await dispatch(saveLowStockThreshold(value)).unwrap();
       toast.success(t("lowStock.toasts.saveSuccess"));
-    } catch (error: any) {
+    } catch (error) {
       toast.error(
-        error?.message || t("lowStock.toasts.saveError")
+        (error as { message?: string })?.message || t("lowStock.toasts.saveError")
       );
     } finally {
       setSaving(false);

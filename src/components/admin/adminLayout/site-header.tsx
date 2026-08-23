@@ -5,14 +5,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "../../ui/button";
 import { ChevronDown, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { setLanguage } from "../../../i18n";
 import { useEffect } from "react";
 
 export function SiteHeader() {
   const { i18n } = useTranslation();
 
   // Language change handler
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
+    setLanguage(lng);
     // Update HTML dir and lang attributes
     const htmlElement = document.documentElement;
     if (lng === "ar") {
@@ -36,7 +38,6 @@ export function SiteHeader() {
       document.documentElement.setAttribute("dir", "rtl");
       document.documentElement.setAttribute("lang", "ar");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changeLanguage, i18n.language]);
 
   // Get current language code

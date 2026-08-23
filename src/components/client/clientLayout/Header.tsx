@@ -32,6 +32,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { signOut } from "../../../features/auth/authSlice";
 import { useTranslation } from "react-i18next";
+import { setLanguage } from "../../../i18n";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -53,7 +54,7 @@ export function Header() {
   // Language change handler
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
+    setLanguage(lng);
     // Update HTML dir and lang attributes
     const htmlElement = document.documentElement;
     if (lng === "ar") {
@@ -95,7 +96,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" aria-label={t("header.goHome")} className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg flex items-center justify-center">
                   <img src="/logo.png" alt="" />
               </div>
@@ -140,6 +141,7 @@ export function Header() {
               variant="ghost"
               size="sm"
               className="relative"
+              aria-label={t("header.cart")}
               onClick={() => {
                 if (!isAuthenticated) {
                   navigate('/sign-in', { state: { from: { pathname: '/cart' } } });
@@ -159,7 +161,7 @@ export function Header() {
             {/* User Account */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" aria-label={t("header.userMenu")}>
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -245,7 +247,7 @@ export function Header() {
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="md:hidden">
+                <Button variant="ghost" size="sm" className="md:hidden" aria-label={t("header.openMenu")}>
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>

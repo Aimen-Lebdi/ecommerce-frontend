@@ -89,7 +89,7 @@ const getInitialState = (): AuthState => {
         isRefreshing: false,
       };
     }
-  } catch (error) {
+  } catch {
     clearAuthStorage();
   }
 
@@ -126,7 +126,7 @@ export const refreshToken = createAsyncThunk<
   try {
     const response = await refreshTokenAPI();
     return response;
-  } catch (error: any) {
+  } catch {
     clearAuthStorage();
     return rejectWithValue("Failed to refresh token");
   }
@@ -441,7 +441,7 @@ const authSlice = createSlice({
       })
       .addCase(
         forgotPassword.fulfilled,
-        (state, _action: PayloadAction<ForgotPasswordResponse>) => {
+        (state) => {
           state.isForgotPassword = false;
           state.forgotPasswordSuccess = true;
           state.error = null;
@@ -460,7 +460,7 @@ const authSlice = createSlice({
       })
       .addCase(
         verifyResetCode.fulfilled,
-        (state, _action: PayloadAction<VerifyResetCodeResponse>) => {
+        (state) => {
           state.isVerifyingResetCode = false;
           state.verifyResetCodeSuccess = true;
           state.error = null;

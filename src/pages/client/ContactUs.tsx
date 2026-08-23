@@ -7,7 +7,7 @@ const HeroSection = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="relative py-20 md:py-32 bg-gradient-to-br from-primary via-primary/50 to-purple-600 dark:from-primary dark:via-purple-700 dark:to-blue-900 rounded-2xl mb-16">
+    <section className="relative py-20 md:py-32 bg-gradient-to-br from-primary via-primary/80 to-primary/60 dark:from-secondary dark:via-secondary/90 dark:to-secondary/70 rounded-2xl mb-16">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto">
           <div className="inline-block px-4 py-2 bg-white/25 dark:bg-white/35 text-white rounded-full text-sm font-medium mb-4 backdrop-blur-md">
@@ -51,8 +51,8 @@ const ContactInfoSection = () => {
           </div>
 
           <div className="bg-card rounded-xl p-8 text-center border shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-14 h-14 bg-chart-2/10 rounded-xl flex items-center justify-center mx-auto mb-5">
-              <Mail className="w-7 h-7 text-chart-2" />
+            <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-5">
+              <Mail className="w-7 h-7 text-primary" />
             </div>
             <h3 className="font-semibold text-lg mb-2">{t("contact.info.email")}</h3>
             <p className="text-muted-foreground">{t("contact.info.emailValue")}</p>
@@ -60,8 +60,8 @@ const ContactInfoSection = () => {
           </div>
 
           <div className="bg-card rounded-xl p-8 text-center border shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-14 h-14 bg-orange-500/10 rounded-xl flex items-center justify-center mx-auto mb-5">
-              <MapPin className="w-7 h-7 text-orange-500" />
+            <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-5">
+              <MapPin className="w-7 h-7 text-primary" />
             </div>
             <h3 className="font-semibold text-lg mb-2">{t("contact.info.address")}</h3>
             <p className="text-muted-foreground">{t("contact.info.addressValue")}</p>

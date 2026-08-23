@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-case-declarations */
 import * as React from "react";
 import { useTranslation } from 'react-i18next';
 import {
@@ -46,6 +43,7 @@ import {
   getSortedRowModel,
   type Row,
   type SortingState,
+  type Table as TanstackTable,
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
@@ -101,6 +99,9 @@ import {
 export interface BaseEntity {
   id?: number | string;
   _id?: string;
+  // Dynamic entity bag: entity fields vary per resource, so this index
+  // signature intentionally accepts any value.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -111,6 +112,8 @@ export interface ServerQueryParams {
   sort?: string;
   keyword?: string;
   fields?: string;
+  // Bracket keys (price[gte], createdAt[gte], …) are built dynamically.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -324,7 +327,7 @@ export function DragColumn<TData extends BaseEntity>() {
 }
 
 // Separate component for Selection Header Cell
-function SelectionHeaderCell({ table }: { table: any }) {
+function SelectionHeaderCell<TData>({ table }: { table: TanstackTable<TData> }) {
   const { t } = useTranslation();
   
   return (
@@ -342,7 +345,7 @@ function SelectionHeaderCell({ table }: { table: any }) {
 }
 
 // Separate component for Selection Row Cell
-function SelectionRowCell({ row }: { row: any }) {
+function SelectionRowCell<TData>({ row }: { row: Row<TData> }) {
   const { t } = useTranslation();
   
   return (
@@ -661,8 +664,8 @@ function cleanQueryParams(
 // Convert advanced filters to server query parameters
 function convertAdvancedFiltersToQueryParams(
   filters: AdvancedFilters
-): Record<string, any> {
-  const params: Record<string, any> = {};
+): Record<string, string | number | boolean | undefined> {
+  const params: Record<string, string | number | boolean | undefined> = {};
 
   filters.numeric.forEach((filter) => {
     if (filter.value !== null) {
@@ -780,10 +783,10 @@ export function DataTable<TData extends BaseEntity>({
     () => initialData || []
   );
 
-  const currentQueryParams = externalQueryParams || {
-    page: 1,
-    limit: pageSize,
-  };
+  const currentQueryParams = React.useMemo(
+    () => externalQueryParams || { page: 1, limit: pageSize },
+    [externalQueryParams, pageSize]
+  );
 
   const [rowSelection, setRowSelection] = React.useState({});
   const [editingRow, setEditingRow] = React.useState<TData | null>(null);
@@ -811,7 +814,7 @@ export function DataTable<TData extends BaseEntity>({
 
   const hasActiveSearchOrFilter = React.useMemo(() => {
     if (serverSide) {
-      if (!!currentQueryParams?.keyword) return true;
+      if (currentQueryParams?.keyword) return true;
       if (!currentQueryParams) return false;
 
       // Advanced filters emit bracket keys (price[gt], createdAt[gte]) and
@@ -902,7 +905,7 @@ export function DataTable<TData extends BaseEntity>({
         const dateMatch = filters.date.every((filter) => {
           if (filter.value === null) return true;
 
-          const rowDate = new Date(row[filter.column]);
+          const rowDate = new Date(row[filter.column] as string | number);
           const filterDate = new Date(filter.value);
 
           if (isNaN(rowDate.getTime()) || isNaN(filterDate.getTime()))
@@ -918,7 +921,7 @@ export function DataTable<TData extends BaseEntity>({
               return rowDateOnly.getTime() < filterDateOnly.getTime();
             case "after":
               return rowDateOnly.getTime() > filterDateOnly.getTime();
-            case "between":
+            case "between": {
               if (filter.value2 == null) return false;
               const filterDate2 = new Date(filter.value2);
               const filterDate2Only = new Date(filterDate2.toDateString());
@@ -926,6 +929,7 @@ export function DataTable<TData extends BaseEntity>({
                 rowDateOnly.getTime() >= filterDateOnly.getTime() &&
                 rowDateOnly.getTime() <= filterDate2Only.getTime()
               );
+            }
             default:
               return true;
           }
@@ -1013,10 +1017,10 @@ export function DataTable<TData extends BaseEntity>({
         const filterValue = newColumnFilters.find(
           (f) => f.id === filterColumn
         )?.value;
-        const filterParams: Record<string, any> = {};
+        const filterParams: Record<string, string | number | boolean> = {};
 
         if (filterValue) {
-          filterParams[filterColumn] = filterValue;
+          filterParams[filterColumn] = filterValue as string | number | boolean;
         }
 
         updateServerQueryParams({
@@ -1074,7 +1078,7 @@ export function DataTable<TData extends BaseEntity>({
 
         const filterParams = convertAdvancedFiltersToQueryParams(filters);
 
-        const newParams: Record<string, any> = {
+        const newParams: Record<string, string | number | boolean | undefined> = {
           ...cleanedParams,
           ...filterParams,
           page: 1,

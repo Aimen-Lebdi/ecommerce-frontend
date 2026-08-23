@@ -113,7 +113,7 @@ export function DashboardTables() {
                     <TableCell className="font-medium">
                       {order.customer}
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-green-600">
+                    <TableCell className="text-right font-semibold text-success">
                       {order.total}
                     </TableCell>
                     <TableCell className="text-right text-sm text-muted-foreground">
@@ -134,8 +134,8 @@ export function DashboardTables() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <IconTrophy className="w-5 h-5 text-blue-500" />
+            <div className="p-2 rounded-lg bg-info/10">
+              <IconTrophy className="w-5 h-5 text-info" />
             </div>
             <CardTitle className="text-lg font-semibold">{t('tables.topCustomers.title')}</CardTitle>
           </div>
@@ -173,7 +173,7 @@ export function DashboardTables() {
                         {customer.products}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-green-600">
+                    <TableCell className="text-right font-semibold text-success">
                       {customer.revenue}
                     </TableCell>
                   </TableRow>
@@ -188,8 +188,8 @@ export function DashboardTables() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-orange-500/10">
-              <IconPackage className="w-5 h-5 text-orange-500" />
+            <div className="p-2 rounded-lg bg-warning/10">
+              <IconPackage className="w-5 h-5 text-warning" />
             </div>
             <CardTitle className="text-lg font-semibold">{t('tables.bestProducts.title')}</CardTitle>
           </div>
@@ -216,7 +216,7 @@ export function DashboardTables() {
                   <TableRow key={index}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-500/10 text-xs font-semibold">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-warning/20 to-warning/10 text-xs font-semibold">
                           {index + 1}
                         </div>
                         <span className="truncate max-w-[150px]" title={product.name}>
@@ -229,7 +229,7 @@ export function DashboardTables() {
                         {product.sold}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-green-600">
+                    <TableCell className="text-right font-semibold text-success">
                       {product.revenue}
                     </TableCell>
                   </TableRow>

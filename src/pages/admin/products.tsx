@@ -11,7 +11,11 @@ import {
   DataTable,
   type ServerQueryParams,
 } from "../../components/admin/global/data-table";
-import { createEditProductDialog, ProductDialog } from "../../components/admin/global/ProductDialog";
+import {
+  createEditProductDialog,
+  ProductDialog,
+  type ProductFormPayload,
+} from "../../components/admin/global/ProductDialog";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchProducts,
@@ -202,18 +206,7 @@ export default function Products() {
   );
 
   // Handle adding new product
-  const handleAddProduct = async (productData: {
-    name?: string;
-    description?: string;
-    price?: number;
-    mainImage?: File;
-    images?: File[];
-    colors?: string[];
-    quantity?: number;
-    category?: string;
-    subCategory?: string;
-    brand?: string;
-  }) => {
+  const handleAddProduct = async (productData: ProductFormPayload) => {
     try {
       const payload: CreateProductData = {
         name: productData.name ?? '',
@@ -221,11 +214,11 @@ export default function Products() {
         price: productData.price ?? 0,
         quantity: productData.quantity ?? 0,
         mainImage: productData.mainImage,
-        images: productData.images,
+        images: productData.images ?? undefined,
         colors: productData.colors,
         category: productData.category ?? '',
-        subCategory: productData.subCategory,
-        brand: productData.brand,
+        subCategory: productData.subCategory ?? undefined,
+        brand: productData.brand ?? undefined,
       };
       await dispatch(createProduct(payload)).unwrap();
       toast.success(t('products.toasts.addSuccess'));
@@ -239,18 +232,7 @@ export default function Products() {
   // Handle updating existing product
   const handleUpdateProduct = async (
     id: string,
-    productData: {
-      name?: string;
-      description?: string;
-      price?: number;
-      mainImage?: File;
-      images?: File[];
-      colors?: string[];
-      quantity?: number;
-      category?: string;
-      subCategory?: string;
-      brand?: string;
-    }
+    productData: ProductFormPayload
   ) => {
     try {
       const payload: UpdateProductData = {
@@ -326,7 +308,7 @@ export default function Products() {
             error={error}
             columns={productsColumns}
             dialogComponent={
-              <ProductDialog onSubmit={handleAddProduct as (data: { name?: string; description?: string; price?: number; mainImage?: File; images?: File[]; colors?: string[]; quantity?: number; category?: string; subCategory?: string; brand?: string }) => Promise<void>} isSubmitting={isCreating} />
+              <ProductDialog onSubmit={handleAddProduct} isSubmitting={isCreating} />
             }
             editDialogComponent={(rowData: Product) =>
               createEditProductDialog(

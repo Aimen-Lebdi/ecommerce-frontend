@@ -24,17 +24,14 @@ import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchSalesBy } from "../../../features/analytics/analyticsSlice";
 import { useTranslation } from "react-i18next";
 
+// The five-hue data-viz palette from DESIGN.md (charts only):
+// Ember / Lagoon / Steel / Gold / Rust — never migrate into chrome.
 const COLORS = [
-  "#3b82f6",
-  "#22c55e",
-  "#f59e0b",
-  "#8b5cf6",
-  "#ef4444",
-  "#06b6d4",
-  "#ec4899",
-  "#84cc16",
-  "#f97316",
-  "#14b8a6",
+  "oklch(0.646 0.222 41.116)", // ember
+  "oklch(0.6 0.118 184.704)", // lagoon
+  "oklch(0.398 0.07 227.392)", // steel
+  "oklch(0.828 0.189 84.429)", // gold
+  "oklch(0.769 0.188 70.08)", // rust
 ];
 
 /**

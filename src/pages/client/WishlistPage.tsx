@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -21,9 +19,12 @@ import {
 } from "../../features/wishlist/wishlistSlice";
 import { addProductToCart } from "../../features/cart/cartSlice";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { getErrorMessage } from "../../utils/errorMessage";
 
 const WishlistPage = () => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   const { wishlistItems, numOfWishlistItems, loading, error, isRemoving } =
     useAppSelector((state) => state.wishlist);
@@ -53,8 +54,8 @@ const WishlistPage = () => {
   const handleRemove = async (productId: string) => {
     try {
       await dispatch(removeProductFromWishlist(productId)).unwrap();
-      toast.success("Product removed from wishlist");
-    } catch (err) {
+      toast.success(t("myAccount.removedFromWishlist"));
+    } catch {
       // Error handled by slice
     }
   };
@@ -77,12 +78,12 @@ const WishlistPage = () => {
         })
       ).unwrap();
 
-      toast.success(`${productName} added to cart`);
+      toast.success(t("myAccount.addedToCart", { productName }));
 
       // Optionally remove from wishlist after adding to cart
       // await dispatch(removeProductFromWishlist(productId)).unwrap();
-    } catch (err: any) {
-      toast.error(err || "Failed to add to cart");
+    } catch (err) {
+      toast.error(getErrorMessage(err, t("myAccount.addToCartFailed")));
     } finally {
       setAddingToCartId(null);
     }
@@ -107,14 +108,14 @@ const WishlistPage = () => {
         <div className="max-w-2xl mx-auto text-center space-y-6">
           <Heart className="h-16 w-16 mx-auto text-muted-foreground" />
           <div>
-            <h1 className="text-2xl font-bold">Your wishlist is empty</h1>
+            <h1 className="text-2xl font-bold">{t("wishlist.empty")}</h1>
             <p className="text-muted-foreground mt-2">
-              Save your favorite items here to purchase them later.
+              {t("wishlist.emptyDescription")}
             </p>
           </div>
           <Link to="/shop">
             <Button size="lg" className="mt-4">
-              Start Shopping
+              {t("wishlist.startShopping")}
             </Button>
           </Link>
         </div>
@@ -128,14 +129,15 @@ const WishlistPage = () => {
       <div className="flex items-center gap-4 mb-6 md:mb-8">
         <Link
           to="/shop"
+          aria-label={t("wishlist.backToShop")}
           className="text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
         </Link>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">My Wishlist</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">{t("wishlist.title")}</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            {numOfWishlistItems} {numOfWishlistItems === 1 ? "item" : "items"}
+            {t("wishlist.itemCount", { count: numOfWishlistItems })}
           </p>
         </div>
       </div>
@@ -157,6 +159,8 @@ const WishlistPage = () => {
                     <img
                       src={product.mainImage || "/placeholder.png"}
                       alt={product.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.png";
@@ -167,8 +171,8 @@ const WishlistPage = () => {
                   {/* Badges */}
                   <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                     {!inStock && (
-                      <Badge className="bg-gray-600 hover:bg-gray-700 text-xs px-1.5 py-0.5">
-                        Out of Stock
+                      <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                        {t("wishlist.outOfStock")}
                       </Badge>
                     )}
                   </div>
@@ -178,20 +182,26 @@ const WishlistPage = () => {
                     <Button
                       size="icon"
                       variant="outline"
-                      className="h-7 w-7 bg-white/90 hover:bg-white"
+                      className="h-11 w-11 bg-background/90 hover:bg-background"
+                      aria-label={t("wishlist.removeProduct", {
+                        productName: product.name,
+                      })}
                       onClick={() => handleRemove(product._id)}
                       disabled={isRemoving}
                     >
-                      <Trash2 className="h-3 w-3 text-red-600" />
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                     <Button
                       size="icon"
                       variant="outline"
-                      className="h-7 w-7 bg-white/90 hover:bg-white"
+                      className="h-11 w-11 bg-background/90 hover:bg-background"
+                      aria-label={t("wishlist.viewProduct", {
+                        productName: product.name,
+                      })}
                       asChild
                     >
                       <Link to={`/product/${product._id}`}>
-                        <Eye className="h-3 w-3" />
+                        <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
                   </div>
@@ -236,12 +246,12 @@ const WishlistPage = () => {
                   {/* Stock Status */}
                   <div className="text-xs">
                     {inStock ? (
-                      <span className="text-green-600 font-medium">
-                        In Stock ({product.quantity})
+                      <span className="text-success font-medium">
+                        {t("wishlist.inStock", { quantity: product.quantity })}
                       </span>
                     ) : (
-                      <span className="text-red-600 font-medium">
-                        Out of Stock
+                      <span className="text-destructive font-medium">
+                        {t("wishlist.outOfStock")}
                       </span>
                     )}
                   </div>
@@ -262,12 +272,12 @@ const WishlistPage = () => {
                     {addingToCartId === product._id ? (
                       <>
                         <Loader2 className="h-3 w-3 mr-2 animate-spin" />
-                        Adding...
+                        {t("wishlist.adding")}
                       </>
                     ) : (
                       <>
                         <ShoppingCart className="h-3 w-3 mr-2" />
-                        {inStock ? "Add to Cart" : "Out of Stock"}
+                        {inStock ? t("wishlist.addToCart") : t("wishlist.outOfStock")}
                       </>
                     )}
                   </Button>

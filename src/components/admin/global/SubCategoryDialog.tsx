@@ -249,7 +249,7 @@ if (image instanceof File) {
             <SelectTrigger
               id="category"
               aria-invalid={!!errors.category}
-              className={errors.category ? "border-red-500" : ""}
+              className={errors.category ? "border-destructive" : ""}
             >
               <SelectValue placeholder={t('subCategoryDialog.placeholders.category')} />
             </SelectTrigger>
@@ -262,7 +262,7 @@ if (image instanceof File) {
             </SelectContent>
           </Select>
           {errors.category && (
-            <p className="text-sm text-red-600 mt-1">{errors.category}</p>
+            <p className="text-sm text-destructive mt-1">{errors.category}</p>
           )}
         </div>
 
@@ -279,10 +279,10 @@ if (image instanceof File) {
                 setErrors((prev) => ({ ...prev, name: undefined }));
               }
             }}
-            className={errors.name ? "border-red-500" : ""}
+            className={errors.name ? "border-destructive" : ""}
           />
           {errors.name && (
-            <p className="text-sm text-red-600 mt-1">{errors.name}</p>
+            <p className="text-sm text-destructive mt-1">{errors.name}</p>
           )}
         </div>
 
@@ -290,17 +290,26 @@ if (image instanceof File) {
         <div className="grid gap-2">
           <Label htmlFor="upload-images">{t('subCategoryDialog.labels.uploadImage')}</Label>
           <div
-            className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
+            role="button"
+            tabIndex={0}
+            aria-label={t('subCategoryDialog.labels.uploadImage')}
+            className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
               ${
                 dragActive
-                  ? "border-blue-500 bg-blue-50 text-blue-500"
+                  ? "border-primary bg-primary/10 text-primary"
                   : errors.image
-                  ? "border-red-500 text-red-500"
-                  : "border-gray-300 bg-gray-50 text-gray-500 hover:border-blue-500 hover:text-blue-500"
+                  ? "border-destructive text-destructive"
+                  : "border-border bg-muted/50 text-muted-foreground hover:border-primary hover:text-primary"
               }`}
             onClick={() =>
               !preview && document.getElementById("subcat-image")?.click()
             }
+            onKeyDown={(e) => {
+              if ((e.key === "Enter" || e.key === " ") && !preview) {
+                e.preventDefault();
+                document.getElementById("subcat-image")?.click();
+              }
+            }}
             onDragOver={(e) => {
               e.preventDefault();
               setDragActive(true);
@@ -330,7 +339,7 @@ if (image instanceof File) {
                     e.stopPropagation();
                     handleRemoveImage();
                   }}
-                  className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                  className="absolute top-2 right-2 rounded-full bg-destructive p-1 text-white hover:bg-destructive/90"
                 >
                   <IconX size={16} />
                 </button>
@@ -340,7 +349,7 @@ if (image instanceof File) {
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
                   {t('subCategoryDialog.uploadArea.dragDrop')}{" "}
-                  <span className="text-blue-600 hover:underline">
+                  <span className="text-primary hover:underline">
                     {t('subCategoryDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
@@ -355,10 +364,10 @@ if (image instanceof File) {
             onChange={handleFileChange}
           />
           {errors.image && (
-            <p className="text-sm text-red-600 mt-1">{errors.image}</p>
+            <p className="text-sm text-destructive mt-1">{errors.image}</p>
           )}
           {image && !errors.image && (
-            <p className="mt-2 text-xs text-green-600">
+            <p className="mt-2 text-xs text-success">
               {t('subCategoryDialog.uploadArea.selected')} {image.name}
             </p>
           )}

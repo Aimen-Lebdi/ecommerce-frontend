@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Shield, Lock, Mail, ArrowLeft } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -83,8 +82,9 @@ export default function SignInPage() {
   const storedAccessToken = localStorage.getItem("accessToken");
   const storedUser = localStorage.getItem("user");
   if (isAuthenticated && user && !tokenExpired && !loading && !isSigningIn && storedAccessToken && storedUser) {
-    const from = (location.state as any)?.from?.pathname || 
-                 (user?.role === "admin" ? "/admin" : "/");
+    const from =
+      (location.state as { from?: { pathname?: string } } | null)?.from
+        ?.pathname || (user?.role === "admin" ? "/admin" : "/");
     return <Navigate to={from} replace />;
   }
 
@@ -93,7 +93,7 @@ export default function SignInPage() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleInputChange = (name: string, value: any) => {
+  const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -156,7 +156,7 @@ export default function SignInPage() {
       });
 
       // Navigation will be handled by the useEffect above
-    } catch (error: any) {
+    } catch (error) {
       // Error will be handled by the auth slice and displayed via toast
       console.error("Sign in failed:", error);
     }

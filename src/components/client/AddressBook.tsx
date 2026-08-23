@@ -299,15 +299,15 @@ const AddressBook = () => {
           <>
             {/* Hard-gate banner: some entries are missing labels */}
             {entriesNeedingLabels > 0 && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-300/70 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+              <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-foreground">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-warning" />
                 <div className="space-y-1">
                   <p className="font-medium">
                     {t("myAccount.addresses.labelsNeeded", {
                       count: entriesNeedingLabels,
                     })}
                   </p>
-                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                  <p className="text-xs text-muted-foreground">
                     {t("myAccount.addresses.labelsNeededHint")}
                   </p>
                 </div>

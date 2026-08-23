@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
@@ -29,6 +28,7 @@ import {
 import { addProductToCart } from "../../features/cart/cartSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
+import { getErrorMessage } from "../../utils/errorMessage";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -103,8 +103,8 @@ const ProductDetails = () => {
       // Reset quantity and color after adding
       setQuantity(1);
       setSelectedColor(null);
-    } catch (error: any) {
-      toast.error(error || t('productDetail.failedToAddToCart'));
+    } catch (error) {
+      toast.error(getErrorMessage(error, t('productDetail.failedToAddToCart')));
     } finally {
       setIsAddingToCart(false);
     }
@@ -197,19 +197,37 @@ const ProductDetails = () => {
 
           {/* Thumbnail Images - Only show if there are multiple images */}
           {productImages.length > 1 && (
-            <div className="grid grid-cols-4 gap-2 md:gap-3">
+            <div
+              className="grid grid-cols-4 gap-2 md:gap-3"
+              role="tablist"
+              aria-label={t("productDetail.gallery")}
+            >
               {productImages.map((image, index) => (
                 <Card
                   key={index}
-                  className={`cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary ${
+                  role="tab"
+                  aria-selected={selectedImageIndex === index}
+                  tabIndex={selectedImageIndex === index ? 0 : -1}
+                  aria-label={t("productDetail.viewImage", {
+                    number: index + 1,
+                  })}
+                  className={`cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                     selectedImageIndex === index ? "ring-2 ring-primary" : ""
                   }`}
                   onClick={() => setSelectedImageIndex(index)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedImageIndex(index);
+                    }
+                  }}
                 >
                   <CardContent className="p-2">
                     <img
                       src={image || "/placeholder.png"}
                       alt={`${product.name} ${index + 1}`}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-16 md:h-20 object-cover rounded"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.png";
@@ -343,8 +361,8 @@ const ProductDetails = () => {
                   try {
                     await dispatch(addProductToWishlist(product._id)).unwrap();
                     toast.success(t('productDetail.addedToWishlist', { productName: product.name }));
-                  } catch (err: any) {
-                    toast.error(err || t('productDetail.failedToAddToWishlist'));
+                  } catch (err) {
+                    toast.error(getErrorMessage(err, t('productDetail.failedToAddToWishlist')));
                   }
                 }}
               >
@@ -502,6 +520,8 @@ const ProductDetails = () => {
                       <img
                         src={rp.mainImage || "/placeholder.png"}
                         alt={rp.name}
+                        loading="lazy"
+                        decoding="async"
                         className="rounded-lg mb-2 w-full h-32 md:h-40 object-cover group-hover:scale-105 transition-transform duration-200"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =

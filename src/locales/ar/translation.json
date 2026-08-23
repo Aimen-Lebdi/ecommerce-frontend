@@ -1,4 +1,7 @@
 {
+  "a11y": {
+    "skipToContent": "الانتقال إلى المحتوى"
+  },
   "home": {
     "hero": {
       "slides": {
@@ -23,7 +26,12 @@
           "cta": "استكشف الألعاب",
           "badge": "أسبوع الألعاب"
         }
-      }
+      },
+      "prevSlide": "الشريحة السابقة",
+      "nextSlide": "الشريحة التالية",
+      "goToSlide": "الانتقال إلى الشريحة {{number}}",
+      "pauseCarousel": "إيقاف العرض التلقائي مؤقتاً",
+      "resumeCarousel": "استئناف العرض التلقائي"
     },
     "features": {
       "freeShipping": {
@@ -57,7 +65,14 @@
       "cameras": "الكاميرات",
       "camerasCount": "+85 عنصر",
       "smartHome": "المنزل الذكي",
-      "smartHomeCount": "+75 عنصر"
+      "smartHomeCount": "+75 عنصر",
+      "scrollLeft": "تمرير الفئات إلى اليسار",
+      "scrollRight": "تمرير الفئات إلى اليمين",
+      "itemCount_one": "عنصر واحد",
+      "itemCount_two": "عنصران",
+      "itemCount_few": "{{count}} عناصر",
+      "itemCount_many": "{{count}} عنصراً",
+      "itemCount_other": "{{count}} عنصر"
     },
     "products": {
       "title": "منتجات مميزة",
@@ -70,7 +85,8 @@
       },
       "inStock": "متوفر",
       "outOfStock": "غير متوفر",
-      "addToCart": "أضف إلى السلة"
+      "addToCart": "أضف إلى السلة",
+      "addToWishlist": "أضف {{productName}} إلى قائمة الرغبات"
     },
     "testimonials": {
       "title": "ماذا يقول عملاؤنا",
@@ -192,6 +208,8 @@
   "productDetail": {
     "loadingProduct": "جاري تحميل المنتج...",
     "productNotFound": "المنتج غير موجود",
+    "gallery": "صور المنتج",
+    "viewImage": "عرض الصورة {{number}}",
     "backToShop": "العودة إلى المتجر",
     "addedToCart": "تمت إضافة {{productName}} إلى سلة التسوق",
     "failedToAddToCart": "فشل إضافة المنتج إلى السلة",
@@ -266,7 +284,27 @@
     "secureEncryption": "تشفير آمن 256-bit SSL",
     "multiplePaymentOptions": "خيارات دفع متعددة",
     "freeReturns": "إرجاع مجاني خلال 30 يوماً",
-    "weAccept": "نقبل"
+    "weAccept": "نقبل",
+    "increaseQuantity": "زيادة كمية {{productName}}",
+    "decreaseQuantity": "تقليل كمية {{productName}}"
+  },
+  "wishlist": {
+    "title": "قائمة رغباتي",
+    "backToShop": "العودة إلى المتجر",
+    "itemCount_one": "عنصر واحد",
+    "itemCount_two": "عنصران",
+    "itemCount_few": "{{count}} عناصر",
+    "itemCount_many": "{{count}} عنصراً",
+    "itemCount_other": "{{count}} عنصر",
+    "empty": "قائمة رغباتك فارغة",
+    "emptyDescription": "احفظ منتجاتك المفضلة هنا لشرائها لاحقاً.",
+    "startShopping": "ابدأ التسوق",
+    "removeProduct": "إزالة {{productName}} من قائمة الرغبات",
+    "viewProduct": "عرض {{productName}}",
+    "outOfStock": "غير متوفر",
+    "inStock": "متوفر ({{quantity}})",
+    "addToCart": "أضف إلى السلة",
+    "adding": "جارٍ الإضافة..."
   },
   "checkout": {
     "cartEmpty": "سلة التسوق فارغة",
@@ -405,6 +443,7 @@
     },
     "support": {
       "title": "تحتاج مساعدة؟",
+      "description": "لديك أسئلة حول طلبك؟ فريقنا سعيد بمساعدتك.",
       "customerSupport": "دعم العملاء",
       "emailSupport": "الدعم عبر البريد"
     },
@@ -1693,7 +1732,11 @@
       "deals": "العروض",
       "about": "من نحن",
       "contact": "اتصل بنا"
-    }
+    },
+    "cart": "سلة التسوق",
+    "userMenu": "قائمة حساب المستخدم",
+    "openMenu": "فتح قائمة التنقل",
+    "goHome": "الانتقال إلى الصفحة الرئيسية"
   },
   "footer": {
     "trustBadges": {

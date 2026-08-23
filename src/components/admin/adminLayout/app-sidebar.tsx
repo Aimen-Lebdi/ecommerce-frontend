@@ -94,7 +94,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link to="/admin" className="flex items-center gap-2">
+              <Link to="/admin" className="flex items-center gap-2" aria-label={t("header.goHome")}>
                 <img src="/logo.png" alt="" className="!size-5" />
                 <img src="/shopName.png" alt="" className="h-7" />
               </Link>

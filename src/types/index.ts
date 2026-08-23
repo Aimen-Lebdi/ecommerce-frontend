@@ -46,7 +46,7 @@ export interface ProductsQueryParams extends BaseQueryParams {
 }
 
 /** Categories list query params. */
-export interface CategoriesQueryParams extends BaseQueryParams {}
+export type CategoriesQueryParams = BaseQueryParams;
 
 /** SubCategories list query params (adds category filter). */
 export interface SubCategoriesQueryParams extends BaseQueryParams {
@@ -54,7 +54,7 @@ export interface SubCategoriesQueryParams extends BaseQueryParams {
 }
 
 /** Brands list query params. */
-export interface BrandsQueryParams extends BaseQueryParams {}
+export type BrandsQueryParams = BaseQueryParams;
 
 /** Orders list query params (adds status filters). */
 export interface OrdersQueryParams extends BaseQueryParams {
@@ -157,12 +157,15 @@ export interface UpdateProductData {
   description?: string;
   price?: number;
   mainImage?: File;
-  images?: File[];
+  /** null clears the gallery on the server. */
+  images?: File[] | null;
   colors?: string[];
   quantity?: number;
   category?: string;
-  subCategory?: string;
-  brand?: string;
+  /** null detaches the subcategory on the server. */
+  subCategory?: string | null;
+  /** null detaches the brand on the server. */
+  brand?: string | null;
 }
 
 // ── Category ──────────────────────────────────────────────────────────────────

@@ -563,10 +563,10 @@ export function OrderEditDialog({
                       setPhone(maskPhoneChange(e.target.value))
                     }
                     placeholder={t("orders.editDialog.placeholders.phone")}
-                    className={errors.phone ? "border-red-500" : ""}
+                    className={errors.phone ? "border-destructive" : ""}
                   />
                   {errors.phone && (
-                    <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                    <p className="mt-1 text-sm text-destructive">{errors.phone}</p>
                   )}
                 </div>
               </>
@@ -607,7 +607,7 @@ export function OrderEditDialog({
                           {item.price.toFixed(2)} DZD
                         </p>
                         {errors.items?.[item.key] && (
-                          <p className="mt-1 text-sm text-red-600">
+                          <p className="mt-1 text-sm text-destructive">
                             {errors.items[item.key]}
                           </p>
                         )}
@@ -625,7 +625,7 @@ export function OrderEditDialog({
                           onChange={(e) =>
                             handleQuantityChange(item.key, e.target.value)
                           }
-                          className={`w-20 ${errors.items?.[item.key] ? "border-red-500" : ""}`}
+                          className={`w-20 ${errors.items?.[item.key] ? "border-destructive" : ""}`}
                         />
                       </div>
                       <div className="grid gap-1">
@@ -678,13 +678,13 @@ export function OrderEditDialog({
                       step="0.01"
                       value={shippingPrice}
                       onChange={(e) => setShippingPrice(e.target.value)}
-                      className={`w-32 text-right ${errors.shippingPrice ? "border-red-500" : ""}`}
+                      className={`w-32 text-right ${errors.shippingPrice ? "border-destructive" : ""}`}
                     />
                     <span className="text-sm text-muted-foreground">DZD</span>
                   </div>
                 </div>
                 {errors.shippingPrice && (
-                  <p className="text-sm text-red-600">
+                  <p className="text-sm text-destructive">
                     {errors.shippingPrice}
                   </p>
                 )}

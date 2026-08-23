@@ -20,16 +20,19 @@ import {
 } from "../../../features/analytics/analyticsSlice";
 import { useTranslation } from "react-i18next";
 
+// Five-hue data-viz palette from DESIGN.md, mapped semantically:
+// steel = in motion, lagoon = settled/positive, gold = attention,
+// rust = ended badly, ember = card payments.
 const STATUS_COLORS: Record<string, string> = {
-  inProgress: "#3b82f6",
-  completed: "#22c55e",
-  failedReturned: "#f59e0b",
-  cancelled: "#ef4444",
+  inProgress: "oklch(0.398 0.07 227.392)", // steel
+  completed: "oklch(0.6 0.118 184.704)", // lagoon
+  failedReturned: "oklch(0.828 0.189 84.429)", // gold
+  cancelled: "oklch(0.769 0.188 70.08)", // rust
 };
 
 const METHOD_COLORS: Record<string, string> = {
-  card: "#8b5cf6",
-  cash: "#06b6d4",
+  card: "oklch(0.646 0.222 41.116)", // ember
+  cash: "oklch(0.6 0.118 184.704)", // lagoon
 };
 
 interface DonutSlice {

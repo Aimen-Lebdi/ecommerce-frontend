@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
@@ -240,12 +239,12 @@ export default function Users() {
     try {
       await dispatch(banUser(id)).unwrap();
       toast.success(t('users.messages.banSuccess'));
-    } catch (error: any) {
-      const errorMessage =
-        error?.message || typeof error === "string"
-          ? error
-          : t('users.messages.bulkBanError');
-      toast.error(errorMessage);
+    } catch (error) {
+      const message =
+        (typeof error === "string" && error) ||
+        (error as { message?: string })?.message ||
+        t('users.messages.bulkBanError');
+      toast.error(message);
       console.error("Failed to ban user:", error);
     }
   };
@@ -255,12 +254,12 @@ export default function Users() {
     try {
       await dispatch(unbanUser(id)).unwrap();
       toast.success(t('users.messages.unbanSuccess'));
-    } catch (error: any) {
-      const errorMessage =
-        error?.message || typeof error === "string"
-          ? error
-          : t('users.messages.bulkUnbanError');
-      toast.error(errorMessage);
+    } catch (error) {
+      const message =
+        (typeof error === "string" && error) ||
+        (error as { message?: string })?.message ||
+        t('users.messages.bulkUnbanError');
+      toast.error(message);
       console.error("Failed to unban user:", error);
     }
   };

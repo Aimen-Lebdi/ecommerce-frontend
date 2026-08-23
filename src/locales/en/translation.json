@@ -1,4 +1,7 @@
 {
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
   "home": {
     "hero": {
       "slides": {
@@ -23,7 +26,12 @@
           "cta": "Explore Gaming",
           "badge": "Gaming Week"
         }
-      }
+      },
+      "prevSlide": "Previous slide",
+      "nextSlide": "Next slide",
+      "goToSlide": "Go to slide {{number}}",
+      "pauseCarousel": "Pause automatic slideshow",
+      "resumeCarousel": "Resume automatic slideshow"
     },
     "features": {
       "freeShipping": {
@@ -57,7 +65,11 @@
       "cameras": "Cameras",
       "camerasCount": "85+ items",
       "smartHome": "Smart Home",
-      "smartHomeCount": "75+ items"
+      "smartHomeCount": "75+ items",
+      "scrollLeft": "Scroll categories left",
+      "scrollRight": "Scroll categories right",
+      "itemCount_one": "{{count}} item",
+      "itemCount_other": "{{count}} items"
     },
     "products": {
       "title": "Featured Products",
@@ -70,7 +82,8 @@
       },
       "inStock": "In Stock",
       "outOfStock": "Out of Stock",
-      "addToCart": "Add to Cart"
+      "addToCart": "Add to Cart",
+      "addToWishlist": "Add {{productName}} to wishlist"
     },
     "testimonials": {
       "title": "What Our Customers Say",
@@ -192,6 +205,8 @@
   "productDetail": {
     "loadingProduct": "Loading product...",
     "productNotFound": "Product not found",
+    "gallery": "Product images",
+    "viewImage": "View image {{number}}",
     "backToShop": "Back to Shop",
     "addedToCart": "{{productName}} has been added to your cart",
     "failedToAddToCart": "Failed to add product to cart",
@@ -266,7 +281,24 @@
     "secureEncryption": "Secure 256-bit SSL encryption",
     "multiplePaymentOptions": "Multiple payment options",
     "freeReturns": "Free returns within 30 days",
-    "weAccept": "We Accept"
+    "weAccept": "We Accept",
+    "increaseQuantity": "Increase quantity of {{productName}}",
+    "decreaseQuantity": "Decrease quantity of {{productName}}"
+  },
+  "wishlist": {
+    "title": "My Wishlist",
+    "backToShop": "Back to shop",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "empty": "Your wishlist is empty",
+    "emptyDescription": "Save your favorite items here to purchase them later.",
+    "startShopping": "Start Shopping",
+    "removeProduct": "Remove {{productName}} from wishlist",
+    "viewProduct": "View {{productName}}",
+    "outOfStock": "Out of Stock",
+    "inStock": "In Stock ({{quantity}})",
+    "addToCart": "Add to Cart",
+    "adding": "Adding..."
   },
   "checkout": {
     "cartEmpty": "Your cart is empty",
@@ -405,6 +437,7 @@
     },
     "support": {
       "title": "Need Help?",
+      "description": "Questions about your order? Our team is happy to help.",
       "customerSupport": "Customer Support",
       "emailSupport": "Email Support"
     },
@@ -1693,7 +1726,11 @@
       "deals": "Deals",
       "about": "About",
       "contact": "Contact Us"
-    }
+    },
+    "cart": "Shopping cart",
+    "userMenu": "User account menu",
+    "openMenu": "Open navigation menu",
+    "goHome": "Go to homepage"
   },
   "footer": {
     "trustBadges": {

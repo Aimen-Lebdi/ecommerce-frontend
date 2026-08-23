@@ -1,4 +1,7 @@
 {
+  "a11y": {
+    "skipToContent": "Aller au contenu"
+  },
   "home": {
     "hero": {
       "slides": {
@@ -23,7 +26,12 @@
           "cta": "Découvrir le Gaming",
           "badge": "Semaine Gaming"
         }
-      }
+      },
+      "prevSlide": "Diapositive précédente",
+      "nextSlide": "Diapositive suivante",
+      "goToSlide": "Aller à la diapositive {{number}}",
+      "pauseCarousel": "Mettre en pause le diaporama automatique",
+      "resumeCarousel": "Reprendre le diaporama automatique"
     },
     "features": {
       "freeShipping": {
@@ -57,7 +65,11 @@
       "cameras": "Appareils Photo",
       "camerasCount": "85+ articles",
       "smartHome": "Maison Connectée",
-      "smartHomeCount": "75+ articles"
+      "smartHomeCount": "75+ articles",
+      "scrollLeft": "Faire défiler les catégories vers la gauche",
+      "scrollRight": "Faire défiler les catégories vers la droite",
+      "itemCount_one": "{{count}} article",
+      "itemCount_other": "{{count}} articles"
     },
     "products": {
       "title": "Produits en Vedette",
@@ -70,7 +82,8 @@
       },
       "inStock": "En Stock",
       "outOfStock": "Rupture de Stock",
-      "addToCart": "Ajouter au Panier"
+      "addToCart": "Ajouter au Panier",
+      "addToWishlist": "Ajouter {{productName}} à la liste de souhaits"
     },
     "testimonials": {
       "title": "Avis Clients",
@@ -192,6 +205,8 @@
   "productDetail": {
     "loadingProduct": "Chargement du produit...",
     "productNotFound": "Produit non trouvé",
+    "gallery": "Images du produit",
+    "viewImage": "Voir l'image {{number}}",
     "backToShop": "Retour à la Boutique",
     "addedToCart": "{{productName}} a été ajouté à votre panier",
     "failedToAddToCart": "Échec de l'ajout du produit au panier",
@@ -266,7 +281,24 @@
     "secureEncryption": "Chiffrement SSL 256-bit sécurisé",
     "multiplePaymentOptions": "Options de paiement multiples",
     "freeReturns": "Retours gratuits sous 30 jours",
-    "weAccept": "Nous Acceptons"
+    "weAccept": "Nous Acceptons",
+    "increaseQuantity": "Augmenter la quantité de {{productName}}",
+    "decreaseQuantity": "Diminuer la quantité de {{productName}}"
+  },
+  "wishlist": {
+    "title": "Ma Liste de Souhaits",
+    "backToShop": "Retour à la boutique",
+    "itemCount_one": "{{count}} article",
+    "itemCount_other": "{{count}} articles",
+    "empty": "Votre liste de souhaits est vide",
+    "emptyDescription": "Enregistrez vos articles préférés ici pour les acheter plus tard.",
+    "startShopping": "Commencer les Achats",
+    "removeProduct": "Retirer {{productName}} de la liste de souhaits",
+    "viewProduct": "Voir {{productName}}",
+    "outOfStock": "Rupture de Stock",
+    "inStock": "En Stock ({{quantity}})",
+    "addToCart": "Ajouter au Panier",
+    "adding": "Ajout..."
   },
   "checkout": {
     "cartEmpty": "Votre panier est vide",
@@ -405,6 +437,7 @@
     },
     "support": {
       "title": "Besoin d'Aide ?",
+      "description": "Des questions sur votre commande ? Notre équipe se fera un plaisir de vous aider.",
       "customerSupport": "Service Client",
       "emailSupport": "Support Email"
     },
@@ -1693,7 +1726,11 @@
       "deals": "Promotions",
       "about": "À Propos",
       "contact": "Contactez-nous"
-    }
+    },
+    "cart": "Panier",
+    "userMenu": "Menu du compte utilisateur",
+    "openMenu": "Ouvrir le menu de navigation",
+    "goHome": "Aller à la page d'accueil"
   },
   "footer": {
     "trustBadges": {

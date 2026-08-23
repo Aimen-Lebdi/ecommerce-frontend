@@ -140,9 +140,8 @@ class SocketService {
       store.dispatch(setConnectionStatus(true));
     });
 
-    this.socket.on("reconnect_attempt", (_attemptNumber) => {
-      // socket.io manages reconnection internally; no local tracking needed
-    });
+    // socket.io manages reconnection attempts internally; no local tracking
+    // needed for "reconnect_attempt".
 
     this.socket.on("reconnect_failed", () => {
       console.error("❌ Socket reconnection failed after max attempts");

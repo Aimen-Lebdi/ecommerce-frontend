@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -26,9 +25,11 @@ import {
 } from "../../features/orders/ordersSlice";
 import { IconEye } from "@tabler/icons-react";
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 // Status badge helper functions
-const getDeliveryStatusBadge = (status: string, t: any) => {
+const getDeliveryStatusBadge = (status: string, t: TFunction) => {
   const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
     pending: { label: t('orders.status.pending'), variant: "secondary" },
     confirmed: { label: t('orders.status.confirmed'), variant: "default" },
@@ -44,7 +45,7 @@ const getDeliveryStatusBadge = (status: string, t: any) => {
   return statusConfig[status] || statusConfig.pending;
 };
 
-const getPaymentStatusBadge = (status: string, t: any) => {
+const getPaymentStatusBadge = (status: string, t: TFunction) => {
   const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
     pending: { label: t('orders.paymentStatus.pending'), variant: "secondary" },
     authorized: { label: t('orders.paymentStatus.authorized'), variant: "default" },
@@ -275,10 +276,7 @@ export default function Orders() {
       dispatch(fetchOrders(currentQueryParams));
     } catch (err) {
       console.error("Failed to update order:", err);
-      const message =
-        typeof err === "string"
-          ? err
-          : (err as any)?.message || t('orders.toasts.updateError');
+      const message = getErrorMessage(err, t('orders.toasts.updateError'));
       toast.error(message);
       // Re-throw so the dialog stays open and the seller can retry.
       throw err;

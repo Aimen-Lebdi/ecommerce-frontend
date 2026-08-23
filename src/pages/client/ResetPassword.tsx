@@ -27,13 +27,16 @@ export default function ResetPasswordPage() {
   const [localErrors, setLocalErrors] = useState<{ [key: string]: string }>({});
 
   // Get email from state
-  const email = resetEmail || (location.state as any)?.email;
+  const email =
+    resetEmail || (location.state as { email?: string } | null)?.email;
 
   // Clear errors when component mounts
   useEffect(() => {
     if (error) {
       dispatch(clearError());
     }
+    // Mount-only: wipe stale errors carried from the previous page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   // Redirect if no email in state
@@ -68,7 +71,7 @@ export default function ResetPasswordPage() {
   const canSubmit = passwordValid && passwordsMatch && !isResettingPassword;
 
   const getStrength = () => {
-    let passed = passwordRequirements.filter((r) => r.test(newPassword)).length;
+    const passed = passwordRequirements.filter((r) => r.test(newPassword)).length;
     if (!newPassword) return "";
     if (passed <= 2) return t('resetPassword.passwordStrength.weak');
     if (passed === 3) return t('resetPassword.passwordStrength.medium');
@@ -155,8 +158,8 @@ export default function ResetPasswordPage() {
         <Card className="w-full max-w-md shadow-lg">
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+              <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-8 h-8 text-success" />
               </div>
               <h2 className="text-2xl font-semibold text-card-foreground mb-2">
                 {t('resetPassword.successTitle')}
@@ -210,7 +213,7 @@ export default function ResetPasswordPage() {
                 {passwordRequirements.map((req, i) => (
                   <li key={i} className="flex items-center gap-1">
                     {req.test(newPassword) ? (
-                      <CheckCircle2 size={14} className="text-green-600" />
+                      <CheckCircle2 size={14} className="text-success" />
                     ) : (
                       <XCircle size={14} className="text-destructive" />
                     )}
@@ -246,7 +249,7 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
               {confirmPassword && passwordsMatch && (
-                <p className="text-sm text-green-600 flex items-center gap-1">
+                <p className="text-sm text-success flex items-center gap-1">
                   <CheckCircle2 size={14} />
                   {t('resetPassword.passwordsMatch')}
                 </p>

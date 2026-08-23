@@ -25,7 +25,7 @@ export function KpiChange({
   if (percentageChange == null) {
     if (total > 0) {
       return (
-        <p className="text-xs flex items-center gap-1 text-green-500">
+        <p className="text-xs flex items-center gap-1 text-success">
           <IconTrendingUp className="w-4 h-4" />
           {t("cards.new")}
         </p>
@@ -41,9 +41,9 @@ export function KpiChange({
   const isUp = trend === "up";
   const isDown = trend === "down";
   const color = isUp
-    ? "text-green-500"
+    ? "text-success"
     : isDown
-      ? "text-red-500"
+      ? "text-destructive"
       : "text-muted-foreground";
   const percentageLabel =
     percentageChange > 0 ? `+${percentageChange}` : String(percentageChange);

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
@@ -60,6 +58,8 @@ import {
   AvatarImage,
 } from "../../components/ui/avatar";
 import { updateLoggedUserData, updateLoggedUserPassword } from "../../features/users/usersSlice";
+import { orderStatusChipClass } from "../../utils/orderStatusStyles";
+import { getErrorMessage } from "../../utils/errorMessage";
 
 const MyAccountDashboard = () => {
   const { t } = useTranslation();
@@ -210,7 +210,7 @@ useEffect(() => {
     try {
       await dispatch(removeProductFromWishlist(productId)).unwrap();
       toast.success(t('myAccount.removedFromWishlist'));
-    } catch (error) {
+    } catch {
       toast.error(t('myAccount.removeFailed'));
     }
   };
@@ -222,8 +222,8 @@ useEffect(() => {
         addProductToCart({ productId, color: "default" })
       ).unwrap();
       toast.success(t('myAccount.addedToCart', { productName }));
-    } catch (error: any) {
-      toast.error(error || t('myAccount.addToCartFailed'));
+    } catch (error) {
+      toast.error(getErrorMessage(error, t('myAccount.addToCartFailed')));
     } finally {
       setAddingToCartId(null);
     }
@@ -274,8 +274,8 @@ useEffect(() => {
       setSelectedImage(null);
       setImagePreview(null);
       setImageRemoved(false);
-    } catch (error: any) {
-      toast.error(error || t('myAccount.updateFailed'));
+    } catch (error) {
+      toast.error(getErrorMessage(error, t('myAccount.updateFailed')));
     }
   };
 
@@ -334,8 +334,8 @@ useEffect(() => {
       if (result.token) {
         localStorage.setItem("token", result.token);
       }
-    } catch (error: any) {
-      toast.error(error || t('myAccount.passwordUpdateFailed'));
+    } catch (error) {
+      toast.error(getErrorMessage(error, t('myAccount.passwordUpdateFailed')));
     }
   };
 
@@ -347,29 +347,6 @@ useEffect(() => {
     });
     setIsEditingPassword(false);
     setPasswordErrors({});
-  };
-
-  const getStatusColor = (status: string) => {
-    const statusLower = status.toLowerCase();
-    if (
-      statusLower.includes("delivered") ||
-      statusLower.includes("completed")
-    ) {
-      return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-    }
-    if (statusLower.includes("shipped") || statusLower.includes("transit")) {
-      return "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20";
-    }
-    if (
-      statusLower.includes("confirmed") ||
-      statusLower.includes("processing")
-    ) {
-      return "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
-    }
-    if (statusLower.includes("cancelled") || statusLower.includes("failed")) {
-      return "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-    }
-    return "text-muted-foreground bg-muted";
   };
 
   const renderOverview = () => (
@@ -468,7 +445,7 @@ useEffect(() => {
                       <p className="font-medium text-sm">
                         #{order.orderNumber.slice(-8)}
                       </p>
-                      <Badge className={getStatusColor(order.status)}>
+                      <Badge className={orderStatusChipClass(order.status)}>
                         {order.status}
                       </Badge>
                     </div>
@@ -528,7 +505,7 @@ useEffect(() => {
                     </p>
                   </div>
                   <Badge
-                    className={`${getStatusColor(
+                    className={`${orderStatusChipClass(
                       order.deliveryStatus
                     )} self-start sm:self-auto`}
                   >
@@ -600,6 +577,8 @@ useEffect(() => {
                 <img
                   src={item.image}
                   alt={item.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = "/placeholder.png";
@@ -969,6 +948,7 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <h1 className="sr-only">{t('myAccount.sidebar.overview')}</h1>
         {/* Mobile Menu Button */}
         <div className="lg:hidden mb-4">
           <Button

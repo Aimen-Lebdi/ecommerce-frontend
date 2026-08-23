@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
 import { toast } from "sonner";
@@ -30,14 +31,11 @@ import {
 } from "../../features/subCategories/subCategoriesSlice";
 import type { SubCategory } from "../../types";
 
-// Define columns specific to SubCategories
-const subCategoriesColumns: ColumnDef<SubCategory>[] = [
+// Define columns specific to SubCategories (t injected so hooks stay in components)
+const getSubCategoriesColumns = (t: TFunction): ColumnDef<SubCategory>[] => [
   {
     accessorKey: "name",
-    header: () => {
-      const { t } = useTranslation();
-      return t('subCategories.table.headers.subcategory');
-    },
+    header: () => t('subCategories.table.headers.subcategory'),
     cell: ({ row }) => {
       const subcategory = row.original;
       return (
@@ -58,12 +56,8 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   },
   {
     accessorKey: "category",
-    header: () => {
-      const { t } = useTranslation();
-      return t('subCategories.table.headers.category');
-    },
+    header: () => t('subCategories.table.headers.category'),
     cell: ({ row }) => {
-      const { t } = useTranslation();
       const category = row.original.category;
       const categoryName = 
         category && typeof category === 'object' 
@@ -78,10 +72,7 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   },
   {
     accessorKey: "productCount",
-    header: () => {
-      const { t } = useTranslation();
-      return t('subCategories.table.headers.products');
-    },
+    header: () => t('subCategories.table.headers.products'),
     cell: ({ row }) => {
       const count = row.original.productCount || 0;
       return (
@@ -91,10 +82,7 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: () => {
-      const { t } = useTranslation();
-      return t('subCategories.table.headers.created');
-    },
+    header: () => t('subCategories.table.headers.created'),
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
@@ -106,6 +94,10 @@ const subCategoriesColumns: ColumnDef<SubCategory>[] = [
 
 export default function SubCategories() {
   const { t } = useTranslation();
+  const subCategoriesColumns = React.useMemo(
+    () => getSubCategoriesColumns(t),
+    [t]
+  );
 
   // Advanced filter configuration for subcategories
   const advancedFilterConfig = {

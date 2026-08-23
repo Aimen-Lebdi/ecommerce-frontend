@@ -19,7 +19,9 @@ export default function ForgotPasswordPage() {
     (state) => state.auth
   );
 
-  const [email, setEmail] = useState((location.state as any)?.email || "");
+  const [email, setEmail] = useState(
+    (location.state as { email?: string } | null)?.email || ""
+  );
   const [localError, setLocalError] = useState("");
 
   // Clear errors when component mounts
@@ -27,6 +29,8 @@ export default function ForgotPasswordPage() {
     if (error) {
       dispatch(clearError());
     }
+    // Mount-only: wipe stale errors carried from the previous page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   // Redirect to verification page on success

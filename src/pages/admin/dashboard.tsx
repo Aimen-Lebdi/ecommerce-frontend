@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../components/ui/badge";
@@ -188,7 +187,7 @@ export default function Dashboard() {
         return (
           <div
             className={`text-center font-medium text-sm ${
-              amount < 0 ? "text-red-600" : "text-green-600"
+              amount < 0 ? "text-destructive" : "text-success"
             }`}
           >
             {(amount < 0 ? "-" : "") + Math.abs(amount).toFixed(2)} DZD
@@ -369,7 +368,7 @@ export default function Dashboard() {
             <div className="px-4 lg:px-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold">{t('dashboard.recentActivities.title')}</h3>
+                  <h2 className="text-lg font-semibold">{t('dashboard.recentActivities.title')}</h2>
                   <div className="flex items-center gap-2">
                     <p className="text-sm text-muted-foreground">
                       {t('dashboard.recentActivities.subtitle')}
@@ -377,13 +376,13 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2">
                       {isConnected ? (
                         <div className="flex items-center gap-1">
-                          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-xs text-green-600">{t('dashboard.status.live')}</span>
+                          <div className="h-2 w-2 bg-success rounded-full animate-pulse"></div>
+                          <span className="text-xs text-success">{t('dashboard.status.live')}</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
-                          <div className="h-2 w-2 bg-red-500 rounded-full"></div>
-                          <span className="text-xs text-red-600">{t('dashboard.status.offline')}</span>
+                          <div className="h-2 w-2 bg-destructive rounded-full"></div>
+                          <span className="text-xs text-destructive">{t('dashboard.status.offline')}</span>
                         </div>
                       )}
                     </div>

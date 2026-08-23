@@ -650,6 +650,8 @@ const ShopPage = () => {
                 <img
                   src={product.mainImage}
                   alt={product.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (
@@ -657,11 +659,14 @@ const ShopPage = () => {
                   <Package className="h-8 w-8 text-muted-foreground" />
                 </div>
               )}
-              <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100 sm:group-hover:scale-110">
+              <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 <Button
                   size="icon"
                   variant="outline"
-                  className="h-7 w-7 bg-white/90 hover:bg-white"
+                  className="h-11 w-11 bg-white/90 hover:bg-white"
+                  aria-label={t("home.products.addToWishlist", {
+                    productName: product.name,
+                  })}
                   onClick={async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -674,9 +679,10 @@ const ShopPage = () => {
                           productName: product.name,
                         })
                       );
-                    } catch (err: any) {
+                    } catch (err) {
                       toast.error(
-                        err || t("shop.product.failedToAddToWishlist")
+                        (err as string) ||
+                          t("shop.product.failedToAddToWishlist")
                       );
                     }
                   }}
@@ -710,7 +716,7 @@ const ShopPage = () => {
             <div className="flex items-center justify-between mt-auto">
               <span
                 className={`text-xs ${
-                  product.quantity > 0 ? "text-green-600" : "text-red-600"
+                  product.quantity > 0 ? "text-success" : "text-destructive"
                 }`}
               >
                 {product.quantity > 0
@@ -735,6 +741,8 @@ const ShopPage = () => {
                   <img
                     src={product.mainImage}
                     alt={product.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-24 h-24 sm:w-32 sm:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
@@ -770,7 +778,7 @@ const ShopPage = () => {
                     </div>
                     <span
                       className={`text-sm ${
-                        product.quantity > 0 ? "text-green-600" : "text-red-600"
+                        product.quantity > 0 ? "text-success" : "text-destructive"
                       }`}
                     >
                       {product.quantity > 0

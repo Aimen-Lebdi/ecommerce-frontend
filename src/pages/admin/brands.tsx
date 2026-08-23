@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { type ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import {
@@ -29,14 +30,11 @@ import {
 } from "../../features/brands/brandsSlice";
 import type { Brand } from "../../types";
 
-// Define columns specific to Brands
-const brandsColumns: ColumnDef<Brand>[] = [
+// Define columns specific to Brands (t injected so hooks stay in components)
+const getBrandsColumns = (t: TFunction): ColumnDef<Brand>[] => [
   {
     accessorKey: "name",
-    header: () => {
-      const { t } = useTranslation();
-      return t('brands.table.headers.brand');
-    },
+    header: () => t('brands.table.headers.brand'),
     cell: ({ row }) => {
       const brand = row.original;
       return (
@@ -57,10 +55,7 @@ const brandsColumns: ColumnDef<Brand>[] = [
   },
   {
     accessorKey: "productCount",
-    header: () => {
-      const { t } = useTranslation();
-      return t('brands.table.headers.products');
-    },
+    header: () => t('brands.table.headers.products'),
     cell: ({ row }) => {
       const count = row.original.productCount || 0;
       return (
@@ -70,10 +65,7 @@ const brandsColumns: ColumnDef<Brand>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: () => {
-      const { t } = useTranslation();
-      return t('brands.table.headers.created');
-    },
+    header: () => t('brands.table.headers.created'),
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
@@ -85,6 +77,7 @@ const brandsColumns: ColumnDef<Brand>[] = [
 
 export default function Brands() {
   const { t } = useTranslation();
+  const brandsColumns = React.useMemo(() => getBrandsColumns(t), [t]);
 
   // Advanced filter configuration for brands
   const advancedFilterConfig = {

@@ -11,12 +11,14 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg", "robots.txt", "apple-touch-icon.png"],
+      includeAssets: ["favicon.svg", "robots.txt"],
       manifest: {
-        name: "My eCommerce App",
-        short_name: "ShopApp",
-        description: "A full-featured eCommerce platform",
-        theme_color: "#0f172a", // Tailwind's default slate-900
+        name: "Cliqo",
+        short_name: "Cliqo",
+        description:
+          "COD-first Algerian marketplace: shop, pay cash on delivery or card, and track your order.",
+        // Ink from DESIGN.md — oklch(0.208 0.042 265.755) in hex form
+        theme_color: "#0f172a",
         icons: [
           {
             src: "pwa-192x192.png",
@@ -41,6 +43,49 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Split stable vendor libraries into cached chunks so app-code changes
+        // don't invalidate the whole bundle on deploy.
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) return undefined;
+          const segments = id
+            .slice(id.indexOf("node_modules") + "node_modules".length + 1)
+            .split("/");
+          const pkg = segments[0].startsWith("@")
+            ? `${segments[0]}/${segments[1]}`
+            : segments[0];
+
+          if (
+            pkg === "react" ||
+            pkg === "react-dom" ||
+            pkg === "scheduler" ||
+            pkg.startsWith("react-router")
+          ) {
+            return "react-vendor";
+          }
+          if (
+            pkg === "@reduxjs/toolkit" ||
+            pkg === "react-redux" ||
+            pkg === "redux" ||
+            pkg === "reselect" ||
+            pkg === "immer" ||
+            pkg === "redux-thunk"
+          ) {
+            return "state-vendor";
+          }
+          if (pkg === "recharts" || pkg.startsWith("d3-") || pkg === "victory-vendor") {
+            return "charts-vendor";
+          }
+          if (pkg === "lucide-react" || pkg === "@tabler/icons-react") {
+            return "icons-vendor";
+          }
+          return undefined;
+        },
+      },
     },
   },
 });

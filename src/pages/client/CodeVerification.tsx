@@ -22,7 +22,7 @@ const CodeVerificationPage = () => {
   const [localError, setLocalError] = useState('');
   const [contactMethod] = useState({ 
     type: 'email', 
-    value: resetEmail || (location.state as any)?.email || t('codeVerification.yourEmail')
+    value: resetEmail || (location.state as { email?: string } | null)?.email || t('codeVerification.yourEmail')
   });
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -32,11 +32,13 @@ const CodeVerificationPage = () => {
     if (error) {
       dispatch(clearError());
     }
+    // Mount-only: wipe stale errors carried from the previous page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   // Redirect if no email in state
   useEffect(() => {
-    if (!resetEmail && !(location.state as any)?.email) {
+    if (!resetEmail && !(location.state as { email?: string } | null)?.email) {
       navigate('/forgot-password', { replace: true });
     }
   }, [resetEmail, location.state, navigate]);
@@ -75,7 +77,7 @@ const CodeVerificationPage = () => {
     }, 1000);
 
     return () => clearInterval(expiryInterval);
-  }, []);
+  }, [t]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -195,7 +197,7 @@ const CodeVerificationPage = () => {
     
     // Navigate back to forgot password to resend
     navigate('/forgot-password', { 
-      state: { email: resetEmail || (location.state as any)?.email } 
+      state: { email: resetEmail || (location.state as { email?: string } | null)?.email } 
     });
   };
 

@@ -43,6 +43,8 @@ export default function SignUpPage() {
     if (error) {
       dispatch(clearError());
     }
+    // Mount-only: wipe stale errors carried from the previous page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   // Redirect if already authenticated
@@ -63,8 +65,9 @@ export default function SignUpPage() {
   const storedAccessToken = localStorage.getItem("accessToken");
   const storedUser = localStorage.getItem("user");
   if (isAuthenticated && user && !tokenExpired && !loading && !isSigningUp && storedAccessToken && storedUser) {
-    const from = (location.state as any)?.from?.pathname || 
-                (user?.role === "admin" ? "/admin" : "/");
+    const from =
+      (location.state as { from?: { pathname?: string } } | null)?.from
+        ?.pathname || (user?.role === "admin" ? "/admin" : "/");
     return <Navigate to={from} replace />;
   }
 
@@ -154,10 +157,10 @@ export default function SignUpPage() {
 
   const getPasswordStrengthColor = () => {
     if (passwordStrength <= 1) return 'bg-destructive';
-    if (passwordStrength <= 2) return 'bg-orange-500';
-    if (passwordStrength <= 3) return 'bg-yellow-500';
-    if (passwordStrength <= 4) return 'bg-blue-500';
-    return 'bg-green-500';
+    if (passwordStrength <= 2) return 'bg-warning/60';
+    if (passwordStrength <= 3) return 'bg-warning';
+    if (passwordStrength <= 4) return 'bg-info';
+    return 'bg-success';
   };
 
   const getPasswordStrengthText = () => {
@@ -324,7 +327,7 @@ export default function SignUpPage() {
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className={`flex items-center gap-1 ${formData.password.length >= 8 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      <div className={`flex items-center gap-1 ${formData.password.length >= 8 ? 'text-success' : 'text-muted-foreground'}`}>
                         {formData.password.length >= 6 ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         {t('signUp.passwordRequirements.characters')}
                       </div>
@@ -369,7 +372,7 @@ export default function SignUpPage() {
                   </Button>
                 </div>
                 {formData.confirmPassword && formData.password === formData.confirmPassword && !errors.confirmPassword && (
-                  <p className="text-xs text-green-600 flex items-center gap-1">
+                  <p className="text-xs text-success flex items-center gap-1">
                     <Check className="h-3 w-3" />
                     {t('signUp.passwordsMatch')}
                   </p>

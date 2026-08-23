@@ -29,6 +29,7 @@ import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { statusToneClass } from "../../utils/orderStatusStyles";
 
 const OrderTracking = () => {
   const { t } = useTranslation();
@@ -115,28 +116,6 @@ const OrderTracking = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
-      case "confirmed":
-        return "text-blue-600 bg-blue-50 border-blue-200";
-      case "shipped":
-      case "in_transit":
-      case "out_for_delivery":
-        return "text-purple-600 bg-purple-50 border-purple-200";
-      case "delivered":
-      case "completed":
-        return "text-green-600 bg-green-50 border-green-200";
-      case "failed":
-      case "returned":
-      case "cancelled":
-        return "text-red-600 bg-red-50 border-red-200";
-      default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
-    }
-  };
-
   const statusSteps = [
     { key: "pending", label: t('orderTracking.statusSteps.orderPlaced') },
     { key: "confirmed", label: t('orderTracking.statusSteps.confirmed') },
@@ -172,7 +151,7 @@ const OrderTracking = () => {
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div
-                className={`p-3 sm:p-4 rounded-full ${getStatusColor(
+                className={`p-3 sm:p-4 rounded-full ${statusToneClass(
                   order.deliveryStatus
                 )}`}
               >
@@ -219,7 +198,7 @@ const OrderTracking = () => {
             <CardContent>
               <div className="relative">
                 {/* Progress Line */}
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 hidden sm:block" />
+                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border hidden sm:block" />
 
                 <div className="space-y-4 sm:space-y-6">
                   {statusSteps.map((step, index) => {
@@ -236,13 +215,13 @@ const OrderTracking = () => {
                           className={`relative z-10 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 ${
                             isCompleted
                               ? "bg-primary border-primary text-primary-foreground"
-                              : "bg-background border-gray-300 text-gray-400"
+                              : "bg-background border-border text-muted-foreground"
                           }`}
                         >
                           {isCompleted ? (
                             <CheckCircle className="w-4 h-4" />
                           ) : (
-                            <div className="w-2 h-2 rounded-full bg-gray-300" />
+                            <div className="w-2 h-2 rounded-full bg-border" />
                           )}
                         </div>
 

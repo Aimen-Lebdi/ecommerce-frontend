@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { useTranslation } from 'react-i18next';
 import {
@@ -307,10 +306,10 @@ export function UserDialog({
                 setErrors((prev) => ({ ...prev, name: undefined }));
               }
             }}
-            className={errors.name ? "border-red-500" : ""}
+            className={errors.name ? "border-destructive" : ""}
           />
           {errors.name && (
-            <p className="text-sm text-red-600 mt-1">{errors.name}</p>
+            <p className="text-sm text-destructive mt-1">{errors.name}</p>
           )}
         </div>
 
@@ -329,10 +328,10 @@ export function UserDialog({
                 setErrors((prev) => ({ ...prev, email: undefined }));
               }
             }}
-            className={errors.email ? "border-red-500" : ""}
+            className={errors.email ? "border-destructive" : ""}
           />
           {errors.email && (
-            <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+            <p className="text-sm text-destructive mt-1">{errors.email}</p>
           )}
         </div>
 
@@ -352,10 +351,10 @@ export function UserDialog({
                     setErrors((prev) => ({ ...prev, password: undefined }));
                   }
                 }}
-                className={errors.password ? "border-red-500" : ""}
+                className={errors.password ? "border-destructive" : ""}
               />
               {errors.password && (
-                <p className="text-sm text-red-600 mt-1">{errors.password}</p>
+                <p className="text-sm text-destructive mt-1">{errors.password}</p>
               )}
             </div>
 
@@ -374,10 +373,10 @@ export function UserDialog({
                     setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
                   }
                 }}
-                className={errors.confirmPassword ? "border-red-500" : ""}
+                className={errors.confirmPassword ? "border-destructive" : ""}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-red-600 mt-1">
+                <p className="text-sm text-destructive mt-1">
                   {errors.confirmPassword}
                 </p>
               )}
@@ -404,7 +403,7 @@ export function UserDialog({
             </SelectContent>
           </Select>
           {errors.role && (
-            <p className="text-sm text-red-600 mt-1">{errors.role}</p>
+            <p className="text-sm text-destructive mt-1">{errors.role}</p>
           )}
         </div>
 
@@ -412,17 +411,26 @@ export function UserDialog({
         <div className="grid gap-2">
           <Label htmlFor="upload-user-image">{t('userDialog.labels.uploadUserImage')}</Label>
           <div
-            className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors
+            role="button"
+            tabIndex={0}
+            aria-label={t('userDialog.labels.uploadUserImage')}
+            className={`relative flex min-h-[16rem] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
               ${
                 dragActive
-                  ? "border-blue-500 bg-blue-50 text-blue-500"
+                  ? "border-primary bg-primary/10 text-primary"
                   : errors.image
-                  ? "border-red-500 text-red-500"
-                  : "border-gray-300 bg-gray-50 text-gray-500 hover:border-blue-500 hover:text-blue-500"
+                  ? "border-destructive text-destructive"
+                  : "border-border bg-muted/50 text-muted-foreground hover:border-primary hover:text-primary"
               }`}
             onClick={() =>
               !preview && document.getElementById("user-image")?.click()
             }
+            onKeyDown={(e) => {
+              if ((e.key === "Enter" || e.key === " ") && !preview) {
+                e.preventDefault();
+                document.getElementById("user-image")?.click();
+              }
+            }}
             onDragOver={(e) => {
               e.preventDefault();
               setDragActive(true);
@@ -452,7 +460,7 @@ export function UserDialog({
                     e.stopPropagation();
                     handleRemoveImage();
                   }}
-                  className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                  className="absolute top-2 right-2 rounded-full bg-destructive p-1 text-white hover:bg-destructive/90"
                 >
                   <IconX size={16} />
                 </button>
@@ -462,7 +470,7 @@ export function UserDialog({
                 <IconCloudUpload className="h-10 w-10" />
                 <p className="mt-2 text-sm">
                   {t('userDialog.uploadArea.dragDrop')}{" "}
-                  <span className="text-blue-600 hover:underline">
+                  <span className="text-primary hover:underline">
                     {t('userDialog.uploadArea.clickToBrowse')}
                   </span>
                 </p>
@@ -477,10 +485,10 @@ export function UserDialog({
             onChange={handleFileChange}
           />
           {errors.image && (
-            <p className="text-sm text-red-600 mt-1">{errors.image}</p>
+            <p className="text-sm text-destructive mt-1">{errors.image}</p>
           )}
           {image && !errors.image && (
-            <p className="mt-2 text-xs text-green-600">
+            <p className="mt-2 text-xs text-success">
               {t('userDialog.uploadArea.selected')} {image.name}
             </p>
           )}

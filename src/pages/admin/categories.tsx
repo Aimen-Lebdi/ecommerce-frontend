@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { type ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import {
@@ -29,14 +30,11 @@ import {
 } from "../../features/categories/categoriesSlice";
 import type { Category } from "../../types";
 
-// Define columns specific to Categories
-const categoriesColumns: ColumnDef<Category>[] = [
+// Define columns specific to Categories (t injected so hooks stay in components)
+const getCategoriesColumns = (t: TFunction): ColumnDef<Category>[] => [
   {
     accessorKey: "name",
-    header: () => {
-      const { t } = useTranslation();
-      return t('categories.table.headers.category');
-    },
+    header: () => t('categories.table.headers.category'),
     cell: ({ row }) => {
       const category = row.original;
       return (
@@ -57,10 +55,7 @@ const categoriesColumns: ColumnDef<Category>[] = [
   },
   {
     accessorKey: "productCount",
-    header: () => {
-      const { t } = useTranslation();
-      return t('categories.table.headers.products');
-    },
+    header: () => t('categories.table.headers.products'),
     cell: ({ row }) => {
       const count = row.original.productCount || 0;
       return (
@@ -70,10 +65,7 @@ const categoriesColumns: ColumnDef<Category>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: () => {
-      const { t } = useTranslation();
-      return t('categories.table.headers.created');
-    },
+    header: () => t('categories.table.headers.created'),
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
@@ -85,6 +77,7 @@ const categoriesColumns: ColumnDef<Category>[] = [
 
 export default function Categories() {
   const { t } = useTranslation();
+  const categoriesColumns = React.useMemo(() => getCategoriesColumns(t), [t]);
 
   // Advanced filter configuration for categories
   const advancedFilterConfig = {
