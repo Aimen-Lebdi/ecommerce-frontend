@@ -271,10 +271,13 @@ class SocketService {
       // Reconnect with the fresh token (no-op if socket.io is already retrying).
       this.socket.connect();
     } catch (error) {
-      // Refresh failed — go offline; socket.io's capped reconnection will
-      // keep retrying and reconnect_failed marks the final state.
       console.error("❌ Socket token refresh failed:", error);
-      store.dispatch(setConnectionStatus(false));
+      // The refresh grant itself is dead — socket.io's capped reconnection
+      // would keep retrying and every retry would re-fail auth. Disconnect
+      // for real, then hand off to the standard expiry flow (clears auth
+      // state, toasts once, routes to /sign-in).
+      this.disconnect();
+      window.dispatchEvent(new Event("tokenExpired"));
     }
   }
 

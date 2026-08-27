@@ -2,7 +2,8 @@
 <html lang="en" dir="ltr" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.png" />
+    <!-- type must match the file format: logo.png is a PNG, not SVG -->
+    <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://images.unsplash.com" />
@@ -31,6 +32,10 @@
       />
     </noscript>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Cliqo is a COD-first Algerian marketplace: shop online, pay cash on delivery or by card, and track your order in real time."
+    />
     <title>Cliqo</title>
     <script>
       // Apply the persisted language and direction before first paint so
@@ -50,8 +55,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  <!-- impeccable-live-start -->
-<script src="http://localhost:8400/live.js?token=b2213b7d-ff9e-4bb5-afca-49718b19d9c3"></script>
-<!-- impeccable-live-end -->
-</body>
+  </body>
 </html>

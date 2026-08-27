@@ -28,9 +28,11 @@ export default function Page() {
       <AppSidebar variant="floating" />
       <SidebarInset>
         <SiteHeader />
-        <main id="main-content" className="flex flex-1 flex-col">
+        {/* SidebarInset already renders the page's <main> landmark — this
+            wrapper stays a div so screen readers see one main, not two. */}
+        <div id="main-content" className="flex flex-1 flex-col">
           <Outlet />
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
 

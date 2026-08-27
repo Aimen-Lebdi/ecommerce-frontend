@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "../../ui/input";
@@ -43,6 +43,12 @@ export function SearchBox({
 }: SearchBoxProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // Unique per instance: the header mounts two SearchBoxes (desktop + mobile).
+  // Static ids would collide, and an input without id/name trips Chrome's
+  // "form field element has neither an id nor a name" autofill warning.
+  const inputId = useId();
+  const listboxId = useId();
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -172,6 +178,8 @@ export function SearchBox({
     <div ref={containerRef} className={`relative ${className}`}>
       <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
+        id={inputId}
+        name="search"
         type="text"
         value={query}
         onChange={handleChange}
@@ -184,11 +192,11 @@ export function SearchBox({
         role="combobox"
         aria-expanded={showSuggestions}
         aria-autocomplete="list"
-        aria-controls="search-suggestions"
+        aria-controls={listboxId}
       />
       {showSuggestions && (
         <ul
-          id="search-suggestions"
+          id={listboxId}
           className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
           role="listbox"
           aria-label={t("header.searchPlaceholder")}

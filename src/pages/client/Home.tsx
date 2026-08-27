@@ -21,63 +21,34 @@ import { fetchProducts } from "../../features/products/productsSlice";
 import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
 import { responsiveImageProps } from "../../utils/responsiveImage";
+import { formatPrice } from "../../utils/formatPrice";
 
-// Category rail cards run 2-up on phones down to 6-up on desktops.
-const CATEGORY_WIDTHS = [160, 240, 360, 540, 720];
+// Category rail cards run 2-up on phones down to 6-up on desktops. Widths cap
+// at 480 because the page container is capped (max-w-7xl): vw-based sizes
+// overestimate on desktop, so larger candidates only waste bytes.
+const CATEGORY_WIDTHS = [160, 240, 320, 480];
 const CATEGORY_SIZES =
-  "(max-width: 640px) calc(50vw - 8px), (max-width: 1024px) calc(33.333vw - 11px), calc(16.666vw - 14px)";
+  "(max-width: 640px) calc(50vw - 24px), (max-width: 1024px) calc(33.333vw - 22px), min(calc(16.666vw - 14px), 194px)";
 // Home product cards mirror the shop grid: 1 column on phones up to 4 on
 // large screens.
 const PRODUCT_CARD_WIDTHS = [200, 320, 480, 640, 800];
 const PRODUCT_CARD_SIZES =
   "(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), calc(25vw - 1.75rem)";
 
-// Mock data for hero slides
-const heroSlides = [
-  {
-    id: 1,
-    title: "home.hero.slides.summerSale.title",
-    subtitle: "home.hero.slides.summerSale.subtitle",
-    description: "home.hero.slides.summerSale.description",
-    image:
-      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop",
-    cta: "home.hero.slides.summerSale.cta",
-    badge: "home.hero.slides.summerSale.badge",
-  },
-  {
-    id: 2,
-    title: "home.hero.slides.iphone.title",
-    subtitle: "home.hero.slides.iphone.subtitle",
-    description: "home.hero.slides.iphone.description",
-    image:
-      "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=1200&h=600&fit=crop",
-    cta: "home.hero.slides.iphone.cta",
-    badge: "home.hero.slides.iphone.badge",
-  },
-  {
-    id: 3,
-    title: "home.hero.slides.gaming.title",
-    subtitle: "home.hero.slides.gaming.subtitle",
-    description: "home.hero.slides.gaming.description",
-    image:
-      "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=600&fit=crop",
-    cta: "home.hero.slides.gaming.cta",
-    badge: "home.hero.slides.gaming.badge",
-  },
-];
-
 // NOTE: No testimonial or blog content by design — PRODUCT.md forbids
 // fabricating social proof or editorial content until real assets exist.
 
-// Hero Section Component
-// Build a responsive srcset from an Unsplash URL by swapping its width param.
-const heroSrcSet = (url: string) =>
-  [640, 1280, 1920]
-    .map((w) => `${url.replace(/w=\d+/, `w=${w}`)} ${w}w`)
-    .join(", ");
+// Full-bleed hero imagery widths for the product slides' srcset.
+const HERO_IMAGE_WIDTHS = [640, 1024, 1600];
 
 const HeroSection = () => {
   const { t } = useTranslation();
+  // Real catalog imagery for slides 2+: reuse the featured-products fetch.
+  const { products } = useAppSelector((state) => state.products);
+  const featured = (products ?? [])
+    .filter((product: Product) => product.mainImage)
+    .slice(0, 3);
+  const slideCount = 1 + featured.length;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const prefersReducedMotion =
@@ -87,66 +58,94 @@ const HeroSection = () => {
   // Autoplay pauses on user request and never starts for users who prefer
   // reduced motion — the prev/next controls remain fully available.
   useEffect(() => {
-    if (isPaused || prefersReducedMotion) return;
+    if (isPaused || prefersReducedMotion || slideCount <= 1) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % slideCount);
     }, 5000);
     return () => clearInterval(timer);
-  }, [isPaused, prefersReducedMotion]);
+  }, [isPaused, prefersReducedMotion, slideCount]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    setCurrentSlide((prev) => (prev + 1) % slideCount);
   };
 
   const prevSlide = () => {
-    setCurrentSlide(
-      (prev) => (prev - 1 + heroSlides.length) % heroSlides.length
-    );
+    setCurrentSlide((prev) => (prev - 1 + slideCount) % slideCount);
   };
 
   return (
     <section className="relative w-full h-[500px] md:h-[600px] overflow-hidden rounded-2xl mb-12">
       <div className="relative w-full h-full">
-        {heroSlides.map((slide, index) => (
-          <div
-            key={slide.id}
-            aria-hidden={index !== currentSlide}
-            className={`absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <div className="relative w-full h-full">
+        {/* Lead slide: the COD promise — pure type on ink, no stock photography */}
+        <div
+          aria-hidden={currentSlide !== 0}
+          inert={currentSlide !== 0}
+          className={`absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none bg-primary text-primary-foreground ${
+            currentSlide === 0 ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center max-w-2xl px-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
+                {t("home.hero.cod.title")}
+              </h1>
+              <h2 className="text-xl md:text-2xl mb-4 opacity-90">
+                {t("home.hero.cod.subtitle")}
+              </h2>
+              <p className="text-lg mb-8 opacity-75">
+                {t("home.hero.cod.description")}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button size="lg" variant="secondary" asChild>
+                  <Link to="/shop">{t("home.hero.cod.ctaShop")}</Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                  asChild
+                >
+                  <Link to="/about">{t("home.hero.cod.ctaAbout")}</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Product slides: real catalog imagery, no fabricated campaigns */}
+        {featured.map((product: Product, index: number) => {
+          const slideIndex = index + 1;
+          return (
+            <div
+              key={product._id}
+              aria-hidden={currentSlide !== slideIndex}
+              inert={currentSlide !== slideIndex}
+              className={`absolute inset-0 bg-muted transition-opacity duration-500 motion-reduce:transition-none ${
+                currentSlide === slideIndex ? "opacity-100" : "opacity-0"
+              }`}
+            >
               <img
-                src={slide.image}
-                srcSet={heroSrcSet(slide.image)}
-                sizes="100vw"
-                alt={t(slide.title)}
-                className="w-full h-full object-cover"
-                // Only the visible slide competes for bandwidth: the LCP
-                // candidate loads eagerly at high priority, hidden slides
-                // defer until they are about to be shown.
-                {...(index === currentSlide
+                {...responsiveImageProps(
+                  product.mainImage,
+                  HERO_IMAGE_WIDTHS,
+                  "100vw"
+                )}
+                alt={product.name}
+                className="w-full h-full object-contain"
+                {...(currentSlide === slideIndex
                   ? { fetchPriority: "high" as const }
                   : { loading: "lazy" as const, decoding: "async" as const })}
               />
-              <div className="absolute inset-0 bg-black/40" />
+              <div className="absolute inset-0 bg-black/45" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-white max-w-2xl px-6">
-                  <Badge className="mb-4 bg-destructive hover:bg-destructive/90">
-                    {t(slide.badge)}
-                  </Badge>
-                  <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                    {t(slide.title)}
-                  </h1>
-                  <h2 className="text-xl md:text-2xl mb-4 text-white/90">
-                    {t(slide.subtitle)}
+                  <Badge className="mb-4">{formatPrice(product.price)}</Badge>
+                  <h2 className="text-3xl md:text-5xl font-bold mb-6 line-clamp-2">
+                    {product.name}
                   </h2>
-                  <p className="text-lg mb-8 text-white/75">
-                    {t(slide.description)}
-                  </p>
-                  <Button size="lg" className="text-lg px-8 py-4" asChild>
-                    <Link to="/shop">
-                      {t(slide.cta)}
+                  <Button size="lg" className="text-base px-8" asChild>
+                    <Link to={`/product/${product._id}`}>
+                      {t("home.hero.productCta")}
                       <ArrowRight className="ml-2 h-5 w-5 rtl:hidden" />
                       <ArrowLeft className="ml-2 h-5 w-5 ltr:hidden" />
                     </Link>
@@ -154,67 +153,73 @@ const HeroSection = () => {
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute left-4 top-1/2 h-11 w-11 transform -translate-y-1/2 bg-white/80 hover:bg-white"
-        onClick={prevSlide}
-        aria-label={t("home.hero.prevSlide")}
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute right-4 top-1/2 h-11 w-11 transform -translate-y-1/2 bg-white/80 hover:bg-white"
-        onClick={nextSlide}
-        aria-label={t("home.hero.nextSlide")}
-      >
-        <ChevronRight className="h-6 w-6" />
-      </Button>
-
-      {!prefersReducedMotion && (
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute right-4 bottom-6 h-11 w-11 bg-white/80 hover:bg-white"
-          onClick={() => setIsPaused((p) => !p)}
-          aria-label={
-            isPaused
-              ? t("home.hero.resumeCarousel")
-              : t("home.hero.pauseCarousel")
-          }
-          aria-pressed={isPaused}
-        >
-          {isPaused ? (
-            <Play className="h-5 w-5" />
-          ) : (
-            <Pause className="h-5 w-5" />
-          )}
-        </Button>
-      )}
-
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-1">
-        {heroSlides.map((_, index) => (
-          <button
-            key={index}
-            className="grid h-11 w-11 place-items-center"
-            onClick={() => setCurrentSlide(index)}
-            aria-label={t("home.hero.goToSlide", { number: index + 1 })}
+      {slideCount > 1 && (
+        <>
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute start-4 top-1/2 h-11 w-11 -translate-y-1/2 bg-background/80 hover:bg-background"
+            onClick={prevSlide}
+            aria-label={t("home.hero.prevSlide")}
           >
-            <span
-              aria-hidden="true"
-              className={`w-3 h-3 rounded-full transition-colors ${
-                index === currentSlide ? "bg-white" : "bg-white/50"
-              }`}
-            />
-          </button>
-        ))}
-      </div>
+            <ChevronLeft className="h-6 w-6 flip-rtl" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute end-4 top-1/2 h-11 w-11 -translate-y-1/2 bg-background/80 hover:bg-background"
+            onClick={nextSlide}
+            aria-label={t("home.hero.nextSlide")}
+          >
+            <ChevronRight className="h-6 w-6 flip-rtl" />
+          </Button>
+
+          {!prefersReducedMotion && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute end-4 bottom-6 h-11 w-11 bg-background/80 hover:bg-background"
+              onClick={() => setIsPaused((p) => !p)}
+              aria-label={
+                isPaused
+                  ? t("home.hero.resumeCarousel")
+                  : t("home.hero.pauseCarousel")
+              }
+              aria-pressed={isPaused}
+            >
+              {isPaused ? (
+                <Play className="h-5 w-5" />
+              ) : (
+                <Pause className="h-5 w-5" />
+              )}
+            </Button>
+          )}
+
+          <div className="absolute bottom-6 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 flex space-x-1 rounded-full border bg-background/70 p-1.5 backdrop-blur">
+            {Array.from({ length: slideCount }).map((_, index) => (
+              <button
+                key={index}
+                className="grid h-11 w-11 place-items-center"
+                onClick={() => setCurrentSlide(index)}
+                aria-label={t("home.hero.goToSlide", { number: index + 1 })}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    index === currentSlide
+                      ? "bg-foreground"
+                      : "bg-foreground/40"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </section>
   );
 };
@@ -291,7 +296,7 @@ const CategoriesSection = () => {
           </p>
         </div>
         <div className="flex justify-center">
-          <p className="text-muted-foreground">Loading categories...</p>
+          <p className="text-muted-foreground">{t("shop.loading")}</p>
         </div>
       </section>
     );
@@ -332,9 +337,9 @@ const CategoriesSection = () => {
               to={`/shop?category=${category._id}`}
               className="flex-shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(16.666%-14px)]"
             >
-              <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full">
+              <Card className="group cursor-pointer hover:shadow-sm transition-all duration-150 hover:-translate-y-0.5 h-full">
                 <CardContent className="p-4 text-center">
-                  <div className="w-full h-32 mb-4 overflow-hidden rounded-lg">
+                  <div className="w-full h-32 mb-4 overflow-hidden rounded-lg bg-muted transition-transform duration-150 group-hover:scale-105">
                     {category.image ? (
                       <img
                         {...responsiveImageProps(
@@ -345,7 +350,7 @@ const CategoriesSection = () => {
                         alt={category.name}
                         loading="lazy"
                         decoding="async"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full object-contain"
                       />
                     ) : (
                       <div className="w-full h-full bg-muted flex items-center justify-center">
@@ -413,7 +418,10 @@ const FeaturedProductsSection = () => {
 
   if (loading) {
     return (
-      <section className="mb-12">
+      // content-visibility defers layout/paint of this below-the-fold section
+      // until it scrolls near the viewport; contain-intrinsic-size reserves its
+      // approximate height so the scrollbar doesn't jump.
+      <section className="mb-12 [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold mb-2">
@@ -425,14 +433,15 @@ const FeaturedProductsSection = () => {
           </div>
         </div>
         <div className="flex justify-center">
-          <p className="text-muted-foreground">Loading products...</p>
+          <p className="text-muted-foreground">{t("shop.loadingProducts")}</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="mb-12">
+    // See the loading branch above for why these containment utilities exist.
+    <section className="mb-12 [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold mb-2">
@@ -440,7 +449,9 @@ const FeaturedProductsSection = () => {
           </h2>
           <p className="text-muted-foreground">{t("home.products.subtitle")}</p>
         </div>
-        <Button variant="outline">
+        {/* asChild renders the Link AS the button — a nested <a> inside
+            <button> is invalid HTML and fails WCAG 2.5.8 target-size. */}
+        <Button variant="outline" asChild>
           <Link to="/shop" className="flex items-center">
             {t("home.products.viewAll")} <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
@@ -470,21 +481,23 @@ const FeaturedProductsSection = () => {
               to={`/product/${product._id}`}
               className="block"
             >
-              <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+              <Card className="group hover:shadow-sm transition-all duration-150 h-full flex flex-col">
                 <CardHeader className="p-0">
                   <div className="relative overflow-hidden rounded-t-lg">
                     {product.mainImage ? (
-                      <img
-                        {...responsiveImageProps(
-                          product.mainImage,
-                          PRODUCT_CARD_WIDTHS,
-                          PRODUCT_CARD_SIZES
-                        )}
-                        alt={product.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      <div className="w-full h-48 overflow-hidden bg-muted transition-transform duration-150 group-hover:scale-105">
+                        <img
+                          {...responsiveImageProps(
+                            product.mainImage,
+                            PRODUCT_CARD_WIDTHS,
+                            PRODUCT_CARD_SIZES
+                          )}
+                          alt={product.name}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                     ) : (
                       <div className="w-full h-48 bg-muted flex items-center justify-center">
                         <Package className="h-10 w-10 text-muted-foreground" />
@@ -519,7 +532,7 @@ const FeaturedProductsSection = () => {
                   </h3>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-xl font-bold">
-                      {product.price} DZD
+                      {formatPrice(product.price)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-auto">

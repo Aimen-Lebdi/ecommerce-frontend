@@ -24,6 +24,7 @@ import {
 } from "../../../features/analytics/analyticsSlice";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { formatPrice } from "../../../utils/formatPrice";
 
 /**
  * M4 — Low-stock alerts. Lists products at or below the admin-configurable
@@ -154,7 +155,7 @@ export function LowStockList() {
                     {product.sold}
                   </TableCell>
                   <TableCell className="text-right text-sm font-medium">
-                    {product.price.toLocaleString()} DZD
+                    {formatPrice(product.price)}
                   </TableCell>
                 </TableRow>
               ))}

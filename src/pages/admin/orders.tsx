@@ -27,6 +27,7 @@ import { IconEye } from "@tabler/icons-react";
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { formatPrice } from '../../utils/formatPrice';
 
 // Status badge helper functions
 const getDeliveryStatusBadge = (status: string, t: TFunction) => {
@@ -160,7 +161,7 @@ export default function Orders() {
         const total = row.getValue("totalOrderPrice") as number;
         return (
           <div className="text-right font-medium">
-            {total.toFixed(2)} DZD
+            {formatPrice(total)}
           </div>
         );
       },

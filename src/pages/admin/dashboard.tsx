@@ -30,6 +30,7 @@ import {
 } from "../../features/activities/activitiesSlice";
 import { toast } from "sonner";
 import { useTranslation } from 'react-i18next';
+import { formatPrice } from "../../utils/formatPrice";
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -190,7 +191,7 @@ export default function Dashboard() {
               amount < 0 ? "text-destructive" : "text-success"
             }`}
           >
-            {(amount < 0 ? "-" : "") + Math.abs(amount).toFixed(2)} DZD
+            {(amount < 0 ? "-" : "") + formatPrice(Math.abs(amount))}
           </div>
         );
       },
@@ -376,7 +377,7 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2">
                       {isConnected ? (
                         <div className="flex items-center gap-1">
-                          <div className="h-2 w-2 bg-success rounded-full animate-pulse"></div>
+                          <div className="h-2 w-2 bg-success rounded-full"></div>
                           <span className="text-xs text-success">{t('dashboard.status.live')}</span>
                         </div>
                       ) : (

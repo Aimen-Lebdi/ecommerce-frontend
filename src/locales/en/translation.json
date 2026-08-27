@@ -2,31 +2,19 @@
   "a11y": {
     "skipToContent": "Skip to content"
   },
+  "auth": {
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
   "home": {
     "hero": {
-      "slides": {
-        "summerSale": {
-          "title": "Summer Sale 2024",
-          "subtitle": "Up to 70% Off Electronics",
-          "description": "Don't miss out on amazing deals on smartphones, laptops, and more!",
-          "cta": "Shop Now",
-          "badge": "Limited Time"
-        },
-        "iphone": {
-          "title": "New iPhone 15 Pro",
-          "subtitle": "Revolutionary Performance",
-          "description": "Experience the power of A17 Pro chip with titanium design.",
-          "cta": "Pre-Order Now",
-          "badge": "New Launch"
-        },
-        "gaming": {
-          "title": "Gaming Collection",
-          "subtitle": "Level Up Your Setup",
-          "description": "Premium gaming gear for the ultimate gaming experience.",
-          "cta": "Explore Gaming",
-          "badge": "Gaming Week"
-        }
+      "cod": {
+        "title": "Pay cash at your door",
+        "subtitle": "Order online · Track your delivery · Across Algeria",
+        "description": "Cash on delivery or card — your order arrives in 2-3 business days.",
+        "ctaShop": "Start shopping",
+        "ctaAbout": "How Cliqo works"
       },
+      "productCta": "View product",
       "prevSlide": "Previous slide",
       "nextSlide": "Next slide",
       "goToSlide": "Go to slide {{number}}",
@@ -54,6 +42,7 @@
     "categories": {
       "title": "Shop by Category",
       "subtitle": "Discover our wide range of product categories",
+      "loading": "Loading...",
       "smartphones": "Smartphones",
       "smartphonesCount": "250+ items",
       "laptops": "Laptops",
@@ -144,6 +133,7 @@
   "shop": {
     "loading": "Loading...",
     "loadingProducts": "Loading products...",
+    "searchChip": "Search: \"{{keyword}}\"",
     "header": {
       "title": "Shop All Products",
       "subtitle": "Discover our complete collection of premium products"
@@ -227,9 +217,9 @@
       "category": "Category"
     },
     "features": {
-      "freeShipping": "✅ Free Shipping on orders over 10,000 DZD",
-      "securePayment": "🔒 Secure Payment",
-      "returns": "↩ 30-day returns"
+      "cod": "Cash on delivery",
+      "securePayment": "Secure payment",
+      "tracking": "Real-time order tracking"
     },
     "info": {
       "category": "Category",
@@ -277,16 +267,18 @@
     "tax": "Tax",
     "total": "Total",
     "estimatedDelivery": "Estimated delivery",
+    "deliveryTimeframe": "2 - 3 business days",
     "secureCheckout": "Secure Checkout",
     "secureEncryption": "Secure 256-bit SSL encryption",
     "multiplePaymentOptions": "Multiple payment options",
-    "freeReturns": "Free returns within 30 days",
+    "cashOnDelivery": "Cash on delivery available",
     "weAccept": "We Accept",
     "increaseQuantity": "Increase quantity of {{productName}}",
     "decreaseQuantity": "Decrease quantity of {{productName}}"
   },
   "wishlist": {
     "title": "My Wishlist",
+    "loading": "Loading...",
     "backToShop": "Back to shop",
     "itemCount_one": "{{count}} item",
     "itemCount_other": "{{count}} items",
@@ -339,9 +331,11 @@
     "creditDebitCard": "Credit or Debit Card",
     "securePaymentStripe": "Secure payment via Stripe",
     "sslSecured": "256-bit SSL secured",
-    "moneyBackGuarantee": "Money-back guarantee",
-    "freeReturns": "Free returns within 30 days",
+    "codAvailable": "Cash on delivery — pay when it arrives",
+    "liveTracking": "Track your order in real time",
     "weAccept": "We accept",
+    "completeRequiredFields": "To place your order, please complete:",
+    "fieldRequired": "This field is required",
     "processing": "Processing...",
     "placeOrder": "Place Order",
     "processingOrder": "Processing Order...",
@@ -1734,58 +1728,35 @@
   },
   "footer": {
     "trustBadges": {
-      "freeShipping": {
-        "title": "Free Shipping",
-        "description": "On orders over 10,000 DZD"
+      "cod": {
+        "title": "Cash on Delivery",
+        "description": "Pay cash when your order arrives"
       },
-      "easyReturns": {
-        "title": "Easy Returns",
-        "description": "30-day return policy"
+      "delivery": {
+        "title": "Nationwide Delivery",
+        "description": "Across Algeria with live tracking"
       },
       "securePayment": {
         "title": "Secure Payment",
         "description": "SSL encrypted"
       },
       "support": {
-        "title": "24/7 Support",
-        "description": "Customer service"
+        "title": "Customer Support",
+        "description": "Contact us anytime"
       }
     },
     "logo": "CLICON",
-    "companyDescription": "Your trusted online marketplace for quality products at great prices. Shop with confidence and enjoy fast, reliable service.",
-    "address": "123 Commerce St, City, State 12345",
-    "phone": "+1 (555) 123-4567",
-    "email": "support@clicon.com",
+    "companyDescription": "Algeria's cash-on-delivery marketplace. Order online, pay cash at your door, and track every delivery.",
     "customerService": {
       "title": "Customer Service",
-      "helpCenter": "Help Center",
-      "shippingInfo": "Shipping Info",
-      "returnsExchanges": "Returns & Exchanges",
-      "sizeGuide": "Size Guide",
       "trackOrder": "Track Your Order",
       "contactUs": "Contact Us"
     },
     "company": {
       "title": "Company",
-      "aboutUs": "About Us",
-      "careers": "Careers",
-      "blog": "Blog",
-      "press": "Press",
-      "investors": "Investors",
-      "sustainability": "Sustainability"
-    },
-    "newsletter": {
-      "title": "Stay Connected",
-      "description": "Subscribe to get special offers, free giveaways, and updates.",
-      "placeholder": "Enter your email",
-      "subscribe": "Subscribe"
+      "aboutUs": "About Us"
     },
     "copyright": "© {{year}} Cliqo. All rights reserved.",
-    "legal": {
-      "privacyPolicy": "Privacy Policy",
-      "termsOfService": "Terms of Service",
-      "cookiePolicy": "Cookie Policy"
-    },
     "paymentMethods": {
       "title": "We accept:"
     }
@@ -1798,28 +1769,27 @@
     },
     "story": {
       "title": "Our Story",
-      "paragraph1": "Founded in 2020, our journey began with a simple vision: to make quality products accessible to everyone. We started from a small garage and have grown into a trusted e-commerce platform serving thousands of customers worldwide.",
-      "paragraph2": "Today, we partner with the best brands and suppliers to bring you an incredible selection of products across multiple categories. Our commitment to excellence has made us a leader in the industry.",
-      "paragraph3": "We believe in transparency, reliability, and putting our customers first. Every product, every interaction, and every experience is designed with you in mind.",
-      "cta": "Learn More"
+      "paragraph1": "Cliqo was built for Algeria: a marketplace where you order online and pay cash when your delivery arrives at your door.",
+      "paragraph2": "We deliver across the country through local carrier partners, with tracking that follows your order from checkout to your doorstep.",
+      "paragraph3": "Shop in Arabic, French, or English, pay by card or cash on delivery, and follow every order in real time — no prepayment required."
     },
     "stats": {
       "title": "By The Numbers",
-      "customers": {
-        "number": "50K+",
-        "label": "Happy Customers"
+      "cod": {
+        "number": "COD",
+        "label": "Cash on delivery"
       },
-      "products": {
-        "number": "10K+",
-        "label": "Products"
+      "deliveryTime": {
+        "number": "2-3",
+        "label": "Days typical delivery"
       },
-      "orders": {
-        "number": "100K+",
-        "label": "Orders Delivered"
+      "languages": {
+        "number": "3",
+        "label": "Languages"
       },
-      "countries": {
-        "number": "25+",
-        "label": "Countries"
+      "tracking": {
+        "number": "Live",
+        "label": "Order tracking"
       }
     },
     "values": {
@@ -1854,38 +1824,12 @@
         "description": "Your data is protected with industry-leading encryption and security measures"
       },
       "reason3": {
-        "title": "Easy Returns",
-        "description": "30-day return policy with no questions asked - we want you to be happy"
+        "title": "Cash on Delivery",
+        "description": "Pay only when your order arrives at your door - no prepayment required"
       },
       "reason4": {
-        "title": "Customer First",
-        "description": "24/7 customer support ready to help with any questions or concerns"
-      }
-    },
-    "team": {
-      "title": "Meet Our Team",
-      "subtitle": "Talented individuals passionate about delivering excellence",
-      "members": {
-        "member1": {
-          "name": "CEO & Founder",
-          "role": "Operations",
-          "bio": "Leading the vision with 15+ years of expertise"
-        },
-        "member2": {
-          "name": "Marketing Director",
-          "role": "Growth Strategy",
-          "bio": "Building meaningful customer relationships"
-        },
-        "member3": {
-          "name": "Tech Lead",
-          "role": "Product Development",
-          "bio": "Innovating for seamless experiences"
-        },
-        "member4": {
-          "name": "Customer Success Lead",
-          "role": "Support",
-          "bio": "Ensuring customer satisfaction daily"
-        }
+        "title": "Local Support",
+        "description": "A team that understands Algerian addressing and delivery - reach us via the contact page"
       }
     },
     "cta": {

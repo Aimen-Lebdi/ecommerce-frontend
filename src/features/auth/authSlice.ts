@@ -25,6 +25,7 @@ import {
   type ResetPasswordResponse,
   type User,
 } from "./authAPI";
+import { isTokenExpired } from "../../utils/jwt";
 
 // Re-export the User type for consumers that import from this slice
 // (e.g. nav-user.tsx)
@@ -69,11 +70,16 @@ const getInitialState = (): AuthState => {
     const user = localStorage.getItem("user");
 
     if (accessToken && user) {
+      // A stored token past its `exp` must not boot as "authenticated":
+      // that shell 401s on every call and /sign-in bounces the user back to
+      // /admin. Mark it expired so ProtectedRoute silent-refreshes (or
+      // drops to the sign-in flow when the refresh cookie is dead too).
+      const expired = isTokenExpired(accessToken);
       return {
         user: JSON.parse(user),
         accessToken,
         refreshToken: null,
-        isAuthenticated: true,
+        isAuthenticated: !expired,
         loading: false,
         error: null,
         isSigningIn: false,
@@ -81,7 +87,7 @@ const getInitialState = (): AuthState => {
         isForgotPassword: false,
         isVerifyingResetCode: false,
         isResettingPassword: false,
-        tokenExpired: false,
+        tokenExpired: expired,
         forgotPasswordSuccess: false,
         verifyResetCodeSuccess: false,
         resetPasswordSuccess: false,

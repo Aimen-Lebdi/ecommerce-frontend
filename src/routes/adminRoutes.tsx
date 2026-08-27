@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import AdminLayout from "../layouts/adminLayout";
 import ProtectedRoute from "./protectedRoute";
 import RouteFallback from "../components/RouteFallback";
 
@@ -14,6 +13,10 @@ const Orders = lazy(() => import("../pages/admin/orders"));
 const Users = lazy(() => import("../pages/admin/users"));
 const AdminHelp = lazy(() => import("../pages/admin/help"));
 
+// Lazy-load the admin shell too: it is only reachable behind authentication,
+// so its sidebar/header code must never ship inside the storefront entry.
+const AdminLayout = lazy(() => import("../layouts/adminLayout"));
+
 /** Wrap a lazily-loaded page in a Suspense boundary with the shared fallback. */
 const page = (element: React.ReactNode) => (
   <Suspense fallback={<RouteFallback />}>{element}</Suspense>
@@ -25,7 +28,7 @@ const AdminRoutes = {
   children: [
     {
       path: "",
-      element: <AdminLayout />,
+      element: page(<AdminLayout />),
       children: [
         { index: true, element: page(<Dashboard />) },
         { path: "categories", element: page(<Categories />) },

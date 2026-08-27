@@ -41,7 +41,7 @@ const ContactInfoSection = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-card rounded-xl p-8 text-center border shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl p-8 text-center border shadow-sm hover:shadow-sm transition-shadow">
             <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-5">
               <Phone className="w-7 h-7 text-primary" />
             </div>
@@ -50,7 +50,7 @@ const ContactInfoSection = () => {
             <p className="text-sm text-muted-foreground">{t("contact.info.phoneHours")}</p>
           </div>
 
-          <div className="bg-card rounded-xl p-8 text-center border shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl p-8 text-center border shadow-sm hover:shadow-sm transition-shadow">
             <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-5">
               <Mail className="w-7 h-7 text-primary" />
             </div>
@@ -59,7 +59,7 @@ const ContactInfoSection = () => {
             <p className="text-sm text-muted-foreground">{t("contact.info.emailResponse")}</p>
           </div>
 
-          <div className="bg-card rounded-xl p-8 text-center border shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl p-8 text-center border shadow-sm hover:shadow-sm transition-shadow">
             <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-5">
               <MapPin className="w-7 h-7 text-primary" />
             </div>

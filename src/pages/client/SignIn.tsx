@@ -17,6 +17,7 @@ import { signIn, clearError } from "../../features/auth/authSlice";
 import { useNavigate, useLocation, Navigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useTranslation } from 'react-i18next';
+import { isTokenExpired } from "../../utils/jwt";
 
 export default function SignInPage() {
   const { t } = useTranslation();
@@ -70,7 +71,18 @@ export default function SignInPage() {
     const storedAccessToken = localStorage.getItem("accessToken");
     const storedUser = localStorage.getItem("user");
     
-    if (isAuthenticated && user && !tokenExpired && !loading && !isSigningIn && storedAccessToken && storedUser) {
+    if (
+      isAuthenticated &&
+      user &&
+      !tokenExpired &&
+      !loading &&
+      !isSigningIn &&
+      storedAccessToken &&
+      storedUser &&
+      // Never bounce a visitor with a dead token out of sign-in — that is
+      // how an expired session got trapped redirecting into /admin.
+      !isTokenExpired(storedAccessToken)
+    ) {
       const from = location.state?.from?.pathname || (user.role === "admin" ? "/admin" : "/");
       
       console.log('SignIn: Redirecting authenticated user to:', from);
@@ -81,7 +93,16 @@ export default function SignInPage() {
   // FIXED: Early return check
   const storedAccessToken = localStorage.getItem("accessToken");
   const storedUser = localStorage.getItem("user");
-  if (isAuthenticated && user && !tokenExpired && !loading && !isSigningIn && storedAccessToken && storedUser) {
+  if (
+    isAuthenticated &&
+    user &&
+    !tokenExpired &&
+    !loading &&
+    !isSigningIn &&
+    storedAccessToken &&
+    storedUser &&
+    !isTokenExpired(storedAccessToken)
+  ) {
     const from =
       (location.state as { from?: { pathname?: string } } | null)?.from
         ?.pathname || (user?.role === "admin" ? "/admin" : "/");

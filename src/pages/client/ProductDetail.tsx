@@ -7,6 +7,9 @@ import {
   Loader2,
   AlertCircle,
   ArrowLeft,
+  BadgeCheck,
+  Lock,
+  MapPin,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -30,12 +33,39 @@ import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
 import { getErrorMessage } from "../../utils/errorMessage";
 import { responsiveImageProps } from "../../utils/responsiveImage";
+import { formatPrice } from "../../utils/formatPrice";
 
 // Gallery candidates: the main image renders at up to ~600px CSS width
 // (half the container) and is the page's LCP candidate; thumbnails render
 // at ~140px in a 4-up strip.
 const DETAIL_MAIN_WIDTHS = [400, 600, 800, 1200, 1600];
 const DETAIL_THUMB_WIDTHS = [120, 200, 280];
+
+// Common commerce color names → representative swatch hex. Unknown names
+// fall back to a neutral dot so custom colors still render a target.
+const COLOR_SWATCHES: Record<string, string> = {
+  black: "#18181b",
+  white: "#ffffff",
+  red: "#dc2626",
+  blue: "#2563eb",
+  green: "#16a34a",
+  yellow: "#eab308",
+  orange: "#ea580c",
+  purple: "#7c3aed",
+  pink: "#ec4899",
+  brown: "#92400e",
+  gray: "#6b7280",
+  grey: "#6b7280",
+  silver: "#cbd5e1",
+  gold: "#d4af37",
+  beige: "#e7d8c9",
+  navy: "#1e3a8a",
+};
+
+const colorSwatchHex = (name: string): string => {
+  const key = name.trim().toLowerCase();
+  return COLOR_SWATCHES[key] ?? "#9ca3af";
+};
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,6 +86,9 @@ const ProductDetails = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  // The “pick a color” hint stays quiet until the shopper actually tries to
+  // add without choosing — no pre-error noise on a fresh page.
+  const [colorAttempted, setColorAttempted] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   // Fetch product on component mount
@@ -86,6 +119,7 @@ const ProductDetails = () => {
   useEffect(() => {
     setSelectedImageIndex(0);
     setSelectedColor(null);
+    setColorAttempted(false);
   }, [product?._id]);
 
   // Handle add to cart
@@ -94,7 +128,13 @@ const ProductDetails = () => {
       navigate('/sign-in', { state: { from: location } });
       return;
     }
-    if (!product || !selectedColor) return;
+    if (!product) return;
+    // Surface the missing-color hint at the swatch group instead of leaving
+    // the CTA permanently disabled with no explanation on interaction.
+    if (!selectedColor) {
+      setColorAttempted(true);
+      return;
+    }
     setIsAddingToCart(true);
 
     try {
@@ -102,6 +142,7 @@ const ProductDetails = () => {
         addProductToCart({
           productId: product._id,
           color: selectedColor,
+          quantity,
         })
       ).unwrap();
 
@@ -110,6 +151,7 @@ const ProductDetails = () => {
       // Reset quantity and color after adding
       setQuantity(1);
       setSelectedColor(null);
+      setColorAttempted(false);
     } catch (error) {
       toast.error(getErrorMessage(error, t('productDetail.failedToAddToCart')));
     } finally {
@@ -190,7 +232,7 @@ const ProductDetails = () => {
         <div className="space-y-3 md:space-y-4">
           {/* Main Image */}
           <Card>
-            <CardContent className="p-3 md:p-4">
+            <CardContent className="p-3 md:p-4 bg-muted">
               <img
                 {...responsiveImageProps(
                   productImages[selectedImageIndex],
@@ -199,7 +241,7 @@ const ProductDetails = () => {
                 )}
                 alt={product.name}
                 fetchPriority="high"
-                className="w-full h-64 md:h-96 lg:h-[400px] object-cover rounded-lg"
+                className="w-full h-64 md:h-96 lg:h-[400px] object-contain rounded-lg"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "/placeholder.png";
                 }}
@@ -234,7 +276,7 @@ const ProductDetails = () => {
                     }
                   }}
                 >
-                  <CardContent className="p-2">
+                  <CardContent className="p-2 bg-muted rounded-b-xl">
                     <img
                       {...responsiveImageProps(
                         image,
@@ -244,7 +286,7 @@ const ProductDetails = () => {
                       alt={`${product.name} ${index + 1}`}
                       loading="lazy"
                       decoding="async"
-                      className="w-full h-16 md:h-20 object-cover rounded"
+                      className="w-full h-16 md:h-20 object-contain rounded"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.png";
                       }}
@@ -276,7 +318,7 @@ const ProductDetails = () => {
           {/* Price */}
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-2xl md:text-3xl font-bold">
-              {product.price.toFixed(2)} DZD
+              {formatPrice(product.price)}
             </span>
           </div>
 
@@ -289,18 +331,46 @@ const ProductDetails = () => {
                   <span className="text-primary">({selectedColor})</span>
                 )}
               </p>
-              <div className="flex gap-2 flex-wrap">
-                {product.colors.map((color, index) => (
-                  <Badge
-                    key={index}
-                    variant={selectedColor === color ? "default" : "outline"}
-                    className="cursor-pointer hover:scale-105 transition-transform"
-                    onClick={() => setSelectedColor(color)}
-                  >
-                    {color}
-                  </Badge>
-                ))}
+              <div
+                role="radiogroup"
+                aria-label={t('productDetail.selectColor')}
+                className="flex gap-2 flex-wrap"
+              >
+                {product.colors.map((color) => {
+                  const isSelected = selectedColor === color;
+                  return (
+                    <button
+                      key={color}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-label={color}
+                      title={color}
+                      onClick={() => {
+                        setSelectedColor(color);
+                        setColorAttempted(false);
+                      }}
+                      className={`flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+                        isSelected
+                          ? "border-primary ring-1 ring-primary text-foreground"
+                          : "border-border bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="h-4 w-4 rounded-full border border-border shadow-xs"
+                        style={{ backgroundColor: colorSwatchHex(color) }}
+                      />
+                      {color}
+                    </button>
+                  );
+                })}
               </div>
+              {colorAttempted && !selectedColor && (
+                <p role="alert" className="text-xs text-destructive mt-2">
+                  {t('productDetail.pleaseSelectColor')}
+                </p>
+              )}
             </div>
           )}
 
@@ -324,13 +394,7 @@ const ProductDetails = () => {
               </div>
               <Button
                 className="flex-1 md:flex-none h-9 md:h-10"
-                disabled={
-                  !inStock ||
-                  (product.colors &&
-                    product.colors.length > 0 &&
-                    !selectedColor) ||
-                  isAddingToCart
-                }
+                disabled={!inStock || isAddingToCart}
                 onClick={handleAddToCart}
                 title={
                   !inStock
@@ -387,10 +451,19 @@ const ProductDetails = () => {
             </div>
 
             {/* Product Info Icons */}
-            <div className="text-xs md:text-sm text-muted-foreground space-y-1">
-              <p>{t('productDetail.features.freeShipping')}</p>
-              <p>{t('productDetail.features.securePayment')}</p>
-              <p>{t('productDetail.features.returns')}</p>
+            <div className="text-xs md:text-sm text-muted-foreground space-y-1.5">
+              <p className="flex items-center gap-2">
+                <BadgeCheck className="h-4 w-4 shrink-0 text-success" />
+                {t('productDetail.features.cod')}
+              </p>
+              <p className="flex items-center gap-2">
+                <Lock className="h-4 w-4 shrink-0 text-success" />
+                {t('productDetail.features.securePayment')}
+              </p>
+              <p className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 shrink-0 text-info" />
+                {t('productDetail.features.tracking')}
+              </p>
             </div>
           </div>
 
@@ -491,7 +564,7 @@ const ProductDetails = () => {
                       {t('productDetail.specs.price')}:
                     </span>
                     <span className="text-sm font-medium">
-                      {product.price.toFixed(2)} DZD
+                      {formatPrice(product.price)}
                     </span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
@@ -528,29 +601,31 @@ const ProductDetails = () => {
             {relatedProducts.map((rp) => (
               <Card
                 key={rp._id}
-                className="group hover:shadow-lg transition-shadow duration-200"
+                className="group hover:shadow-sm transition-shadow duration-150"
               >
                 <CardContent className="p-2 md:p-4">
                   <Link to={`/product/${rp._id}`}>
                     <div className="relative">
-                      <img
-                        src={rp.mainImage || "/placeholder.png"}
-                        alt={rp.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="rounded-lg mb-2 w-full h-32 md:h-40 object-cover group-hover:scale-105 transition-transform duration-200"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "/placeholder.png";
-                        }}
-                      />
+                      <div className="group-hover:scale-105 transition-transform duration-150 rounded-lg mb-2 w-full h-32 md:h-40 overflow-hidden bg-muted">
+                        <img
+                          src={rp.mainImage || "/placeholder.png"}
+                          alt={rp.name}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "/placeholder.png";
+                          }}
+                        />
+                      </div>
                     </div>
                     <p className="text-xs md:text-sm font-medium line-clamp-2 mb-1">
                       {rp.name}
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm md:text-base font-bold">
-                        {rp.price.toFixed(2)} DZD
+                        {formatPrice(rp.price)}
                       </span>
                     </div>
                   </Link>

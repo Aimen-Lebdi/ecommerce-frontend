@@ -4,68 +4,34 @@ import {
   Globe,
   Zap,
   Award,
-  Heart,
-  ArrowRight,
-  ArrowLeft,
+  Banknote,
   Truck,
   Shield,
-  RotateCcw,
+  MapPin,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Team Members Data
-const teamMembers = [
-  {
-    id: 1,
-    name: "about.team.members.member1.name",
-    role: "about.team.members.member1.role",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop",
-    bio: "about.team.members.member1.bio",
-  },
-  {
-    id: 2,
-    name: "about.team.members.member2.name",
-    role: "about.team.members.member2.role",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop",
-    bio: "about.team.members.member2.bio",
-  },
-  {
-    id: 3,
-    name: "about.team.members.member3.name",
-    role: "about.team.members.member3.role",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop",
-    bio: "about.team.members.member3.bio",
-  },
-  {
-    id: 4,
-    name: "about.team.members.member4.name",
-    role: "about.team.members.member4.role",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop",
-    bio: "about.team.members.member4.bio",
-  },
-];
-
-// Stats Data
+// Stats Data — product capabilities we can prove (no invented numbers)
 const stats = [
   {
     id: 1,
-    number: "about.stats.customers.number",
-    label: "about.stats.customers.label",
+    number: "about.stats.cod.number",
+    label: "about.stats.cod.label",
   },
   {
     id: 2,
-    number: "about.stats.products.number",
-    label: "about.stats.products.label",
+    number: "about.stats.deliveryTime.number",
+    label: "about.stats.deliveryTime.label",
   },
   {
     id: 3,
-    number: "about.stats.orders.number",
-    label: "about.stats.orders.label",
+    number: "about.stats.languages.number",
+    label: "about.stats.languages.label",
   },
   {
     id: 4,
-    number: "about.stats.countries.number",
-    label: "about.stats.countries.label",
+    number: "about.stats.tracking.number",
+    label: "about.stats.tracking.label",
   },
 ];
 
@@ -141,11 +107,6 @@ const StorySection = () => {
             <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
               {t("about.story.paragraph3")}
             </p>
-            <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors">
-              {t("about.story.cta")}
-              <ArrowRight className="h-4 w-4 rtl:hidden" />
-              <ArrowLeft className="h-4 w-4 ltr:hidden" />
-            </button>
           </div>
           <div className="relative">
             <img
@@ -155,7 +116,7 @@ const StorySection = () => {
               alt="Our Story"
               loading="lazy"
               decoding="async"
-              className="rounded-2xl shadow-md w-full object-cover h-[400px]"
+              className="rounded-2xl shadow-sm w-full object-cover h-[400px]"
             />
             <div className="absolute -bottom-8 -left-8 rtl:left-auto rtl:-right-8 w-24 h-24 bg-primary/20 rounded-full" />
             <div className="absolute -top-4 -right-4 rtl:right-auto rtl:-left-4 w-32 h-32 bg-primary/10 rounded-full" />
@@ -183,7 +144,7 @@ const StatsSection = () => {
           {stats.map((stat) => (
             <div
               key={stat.id}
-              className="text-center p-6 bg-card rounded-xl shadow-sm hover:shadow-md transition-shadow border border-border"
+              className="text-center p-6 bg-card rounded-xl shadow-sm hover:shadow-sm transition-shadow border border-border"
             >
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
                 {t(stat.number)}
@@ -221,7 +182,7 @@ const ValuesSection = () => {
             return (
               <div
                 key={value.id}
-                className="hover:shadow-md transition-all duration-300 hover:-translate-y-1 group p-6 bg-card rounded-xl border border-border hover:border-primary/50"
+                className="hover:shadow-sm transition-all duration-150 hover:-translate-y-0.5 group p-6 bg-card rounded-xl border border-border hover:border-primary/50"
               >
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <Icon className="h-6 w-6 text-primary" />
@@ -262,13 +223,13 @@ const WhyChooseUsSection = () => {
       id: 3,
       title: "about.whyChooseUs.reason3.title",
       description: "about.whyChooseUs.reason3.description",
-      icon: RotateCcw,
+      icon: Banknote,
     },
     {
       id: 4,
       title: "about.whyChooseUs.reason4.title",
       description: "about.whyChooseUs.reason4.description",
-      icon: Heart,
+      icon: MapPin,
     },
   ];
 
@@ -312,54 +273,6 @@ const WhyChooseUsSection = () => {
   );
 };
 
-// Team Section
-const TeamSection = () => {
-  const { t } = useTranslation();
-
-  return (
-    <section className="py-16 md:py-24 mb-16">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {t("about.team.title")}
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            {t("about.team.subtitle")}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teamMembers.map((member) => (
-            <div
-              key={member.id}
-              className="text-center group hover:shadow-md p-6 rounded-xl transition-all duration-300 bg-card border border-border hover:border-primary/50"
-            >
-              <div className="mb-4 overflow-hidden rounded-xl">
-                <img
-                  src={member.image}
-                  alt={t(member.name)}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <h3 className="font-semibold text-lg mb-1 text-foreground">
-                {t(member.name)}
-              </h3>
-              <p className="text-primary font-medium mb-2">
-                {t(member.role)}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                {t(member.bio)}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
 // CTA Section
 const CTASection = () => {
   const { t } = useTranslation();
@@ -374,16 +287,18 @@ const CTASection = () => {
           {t("about.cta.subtitle")}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-8 py-3 rounded-lg font-medium transition-colors">
-            <Link to="/shop">
+          <Link
+            to="/shop"
+            className="inline-flex items-center justify-center bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-8 py-3 rounded-lg font-medium transition-colors"
+          >
             {t("about.cta.button1")}
-            </Link>
-          </button>
-          <button className="bg-transparent text-primary-foreground border border-primary-foreground hover:bg-primary-foreground/10 px-8 py-3 rounded-lg font-medium transition-colors">
-            <Link to="/contact">
+          </Link>
+          <Link
+            to="/contact"
+            className="inline-flex items-center justify-center bg-transparent text-primary-foreground border border-primary-foreground hover:bg-primary-foreground/10 px-8 py-3 rounded-lg font-medium transition-colors"
+          >
             {t("about.cta.button2")}
-            </Link>
-          </button>
+          </Link>
         </div>
       </div>
     </section>
@@ -403,7 +318,6 @@ const AboutPage = () => {
         <StatsSection />
         <ValuesSection />
         <WhyChooseUsSection />
-        <TeamSection />
         <CTASection />
       </div>
     </div>

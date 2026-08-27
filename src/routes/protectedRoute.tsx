@@ -1,6 +1,8 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { 
   refreshToken, 
   handleTokenExpiration, 
@@ -11,6 +13,7 @@ import {
 export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
   const location = useLocation();
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const { 
     user, 
     isAuthenticated, 
@@ -74,10 +77,21 @@ export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - only run once on mount
 
+  // Mirror authentication so the expiry handler can toast exactly once per
+  // episode (a burst of failing requests all fire the same event).
+  const wasAuthenticatedRef = useRef(isAuthenticated);
+  useEffect(() => {
+    wasAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   // Handle API errors (token expiration) from other parts of the app
   useEffect(() => {
     const handleUnauthorized = () => {
       console.log('Token expired event received');
+      if (wasAuthenticatedRef.current) {
+        wasAuthenticatedRef.current = false;
+        toast.error(t("auth.sessionExpired"), { duration: 5000 });
+      }
       dispatch(handleTokenExpiration());
       hasAttemptedRefresh.current = false; // Reset on expiration
     };
@@ -87,7 +101,7 @@ export default function ProtectedRoute({ role }: { role: "user" | "admin" }) {
     return () => {
       window.removeEventListener('tokenExpired', handleUnauthorized as EventListener);
     };
-  }, [dispatch]);
+  }, [dispatch, t]);
 
   // Show loading spinner while initializing, checking auth state, or refreshing token
   if (isInitializing || loading || isRefreshing) {

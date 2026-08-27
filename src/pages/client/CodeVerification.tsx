@@ -237,7 +237,7 @@ const CodeVerificationPage = () => {
         </div>
 
         {/* Verification Form */}
-        <div className="bg-card rounded-lg shadow-lg border p-6">
+        <div className="bg-card rounded-lg shadow-sm border p-6">
           {/* Code Input */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-card-foreground mb-4">

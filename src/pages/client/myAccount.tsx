@@ -32,6 +32,10 @@ import { addProductToCart } from "../../features/cart/cartSlice";
 import { signOut, fetchCurrentUser } from "../../features/auth/authSlice";
 import { toast } from "sonner";
 import { responsiveImageProps } from "../../utils/responsiveImage";
+import { formatPrice } from "../../utils/formatPrice";
+import { format } from "date-fns";
+import { deliveryStatusLabel } from "../../utils/orderStatusLabels";
+import { getDateLocale } from "../../utils/dateLocale";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -63,7 +67,7 @@ import { orderStatusChipClass } from "../../utils/orderStatusStyles";
 import { getErrorMessage } from "../../utils/errorMessage";
 
 const MyAccountDashboard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -156,9 +160,8 @@ useEffect(() => {
     // Empty src makes Radix Avatar render the initials fallback when no image
     profilePicture: user?.image || "",
     memberSince: user?.createdAt
-      ? new Date(user.createdAt).toLocaleDateString("en-US", {
-          month: "long",
-          year: "numeric",
+      ? format(new Date(user.createdAt), "MMMM yyyy", {
+          locale: getDateLocale(i18n.language),
         })
       : t('myAccount.notAvailable'),
     totalOrders: ordersPagination?.totalResults || 0,
@@ -172,12 +175,10 @@ useEffect(() => {
   const recentOrders = orders.slice(0, 3).map((order) => ({
     id: order._id,
     orderNumber: order._id,
-    date: new Date(order.createdAt).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
+    date: format(new Date(order.createdAt), "MMM d, yyyy", {
+      locale: getDateLocale(i18n.language),
     }),
-    status: order.deliveryStatus.replace("_", " "),
+    status: deliveryStatusLabel(t, order.deliveryStatus),
     total: order.totalOrderPrice,
     items: order.cartItems.length,
   }));
@@ -204,7 +205,7 @@ useEffect(() => {
   const handleLogout = () => {
     dispatch(signOut());
     toast.success(t('myAccount.logoutSuccess'));
-    navigate("/signin");
+    navigate("/sign-in");
   };
 
   const handleRemoveFromWishlist = async (productId: string) => {
@@ -400,7 +401,7 @@ useEffect(() => {
               </div>
               <div>
                 <p className="text-xl sm:text-2xl font-semibold">
-                  {userData.totalSpent.toFixed(2)} DZD
+                  {formatPrice(userData.totalSpent)}
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   {t('myAccount.overview.totalSpent')}
@@ -455,7 +456,7 @@ useEffect(() => {
                     </p>
                   </div>
                   <p className="font-semibold text-base">
-                    {order.total.toFixed(2)} DZD
+                    {formatPrice(order.total)}
                   </p>
                 </div>
               ))}
@@ -502,7 +503,7 @@ useEffect(() => {
                       {t('myAccount.orders.orderNumber', { number: order._id.slice(-8) })}
                     </h3>
                     <p className="text-xs sm:text-sm text-muted-foreground">
-                      {t('myAccount.orders.placedOn', { date: new Date(order.createdAt).toLocaleDateString() })}
+                      {t('myAccount.orders.placedOn', { date: format(new Date(order.createdAt), "MMM d, yyyy", { locale: getDateLocale(i18n.language) }) })}
                     </p>
                   </div>
                   <Badge
@@ -510,7 +511,7 @@ useEffect(() => {
                       order.deliveryStatus
                     )} self-start sm:self-auto`}
                   >
-                    {order.deliveryStatus.replace("_", " ")}
+                    {deliveryStatusLabel(t, order.deliveryStatus)}
                   </Badge>
                 </div>
 
@@ -518,7 +519,7 @@ useEffect(() => {
                   <div className="text-xs sm:text-sm text-muted-foreground">
                     {t('myAccount.orders.orderSummary', { 
                       items: order.cartItems.length, 
-                      total: order.totalOrderPrice.toFixed(2) + " DZD"
+                      total: formatPrice(order.totalOrderPrice)
                     })}
                   </div>
 
@@ -569,26 +570,28 @@ useEffect(() => {
           {displayWishlistItems.map((item) => (
             <Card
               key={item.id}
-              className="overflow-hidden group hover:shadow-lg transition-all"
+              className="overflow-hidden group hover:shadow-sm transition-all duration-150"
             >
               <Link
                 to={`/product/${item.id}`}
                 className="block relative aspect-square"
               >
-                <img
-                  {...responsiveImageProps(
-                    item.image,
-                    [200, 320, 480, 640],
-                    "(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
-                  )}
-                  alt={item.name}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/placeholder.png";
-                  }}
-                />
+                <div className="w-full h-full overflow-hidden transition-transform duration-150 group-hover:scale-105">
+                  <img
+                    {...responsiveImageProps(
+                      item.image,
+                      [200, 320, 480, 640],
+                      "(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+                    )}
+                    alt={item.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/placeholder.png";
+                    }}
+                  />
+                </div>
               </Link>
               <CardContent className="p-2 sm:p-3 space-y-2">
                 <Link to={`/product/${item.id}`}>
@@ -597,7 +600,7 @@ useEffect(() => {
                   </h3>
                 </Link>
                 <p className="text-sm sm:text-base font-semibold text-primary">
-                  {item.price.toFixed(2)} DZD
+                  {formatPrice(item.price)}
                 </p>
                 <div className="flex gap-1.5 sm:gap-2">
                   <Button

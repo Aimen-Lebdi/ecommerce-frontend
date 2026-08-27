@@ -23,6 +23,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchSalesBy } from "../../../features/analytics/analyticsSlice";
 import { useTranslation } from "react-i18next";
+import { formatPrice } from "../../../utils/formatPrice";
 
 // The five-hue data-viz palette from DESIGN.md (charts only):
 // Ember / Lagoon / Steel / Gold / Rust — never migrate into chrome.
@@ -125,9 +126,7 @@ export function CategoryBrandChart() {
                     border: "1px solid var(--border)",
                     background: "var(--popover)",
                   }}
-                  formatter={(value: number) =>
-                    `${value.toLocaleString()} DZD`
-                  }
+                  formatter={(value: number) => formatPrice(value)}
                 />
                 <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
                   {data.map((entry) => (

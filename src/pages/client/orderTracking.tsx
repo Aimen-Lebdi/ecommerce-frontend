@@ -28,11 +28,14 @@ import {
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 import { toast } from "sonner";
+import { deliveryStatusLabel } from "../../utils/orderStatusLabels";
+import { getDateLocale } from "../../utils/dateLocale";
 import { format } from "date-fns";
 import { statusToneClass } from "../../utils/orderStatusStyles";
+import { formatPrice } from "../../utils/formatPrice";
 
 const OrderTracking = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -82,7 +85,7 @@ const OrderTracking = () => {
           <p className="text-muted-foreground mb-6">
             {t('orderTracking.unableToLoad')}
           </p>
-          <Button onClick={() => navigate("/orders")}>{t('orderTracking.viewAllOrders')}</Button>
+          <Button onClick={() => navigate("/my-account")}>{t('orderTracking.viewAllOrders')}</Button>
         </div>
       </div>
     );
@@ -93,7 +96,9 @@ const OrderTracking = () => {
   const formatDate = (dateString?: Date) => {
     if (!dateString) return t('orderTracking.notAvailable');
     try {
-      return format(new Date(dateString), "MMM d, yyyy 'at' h:mm a");
+      return format(new Date(dateString), "MMM d, yyyy 'at' h:mm a", {
+        locale: getDateLocale(i18n.language),
+      });
     } catch {
       return String(dateString);
     }
@@ -159,7 +164,7 @@ const OrderTracking = () => {
               </div>
               <div className="flex-1">
                 <h2 className="text-lg sm:text-xl font-bold mb-1">
-                  {order.deliveryStatus.replace("_", " ").toUpperCase()}
+                  {deliveryStatusLabel(t, order.deliveryStatus)}
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground">
                   {order.trackingNumber
@@ -283,7 +288,7 @@ const OrderTracking = () => {
                       <div className="flex-1">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                           <p className="font-medium text-sm sm:text-base">
-                            {history.status.replace("_", " ").toUpperCase()}
+                            {deliveryStatusLabel(t, history.status)}
                           </p>
                           <p className="text-xs sm:text-sm text-muted-foreground">
                             {formatDate(history.timestamp)}
@@ -337,7 +342,7 @@ const OrderTracking = () => {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('orderTracking.totalAmount')}</span>
                   <span className="font-semibold">
-                    {order.totalOrderPrice.toFixed(2)} DZD
+                    {formatPrice(order.totalOrderPrice)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -367,7 +372,7 @@ const OrderTracking = () => {
                 </p>
               </div>
               <Button variant="outline" className="w-full sm:w-auto" asChild>
-                <Link to=''>{t('orderTracking.contactSupport')}</Link>
+                <Link to="/contact">{t('orderTracking.contactSupport')}</Link>
               </Button>
             </div>
           </CardContent>

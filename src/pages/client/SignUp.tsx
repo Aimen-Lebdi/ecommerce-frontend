@@ -8,6 +8,7 @@ import { Separator } from '../../components/ui/separator';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Progress } from '../../components/ui/progress';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { isTokenExpired } from "../../utils/jwt";
 import { signUp, clearError } from '../../features/auth/authSlice';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -53,7 +54,16 @@ export default function SignUpPage() {
     const storedAccessToken = localStorage.getItem("accessToken");
     const storedUser = localStorage.getItem("user");
     
-    if (isAuthenticated && user && !tokenExpired && !loading && !isSigningUp && storedAccessToken && storedUser) {
+    if (
+      isAuthenticated &&
+      user &&
+      !tokenExpired &&
+      !loading &&
+      !isSigningUp &&
+      storedAccessToken &&
+      storedUser &&
+      !isTokenExpired(storedAccessToken)
+    ) {
       const from = location.state?.from?.pathname || (user.role === "admin" ? "/admin" : "/");
       
       console.log('SignUp: Redirecting authenticated user to:', from);
@@ -64,7 +74,16 @@ export default function SignUpPage() {
   // FIXED: Early return check
   const storedAccessToken = localStorage.getItem("accessToken");
   const storedUser = localStorage.getItem("user");
-  if (isAuthenticated && user && !tokenExpired && !loading && !isSigningUp && storedAccessToken && storedUser) {
+  if (
+    isAuthenticated &&
+    user &&
+    !tokenExpired &&
+    !loading &&
+    !isSigningUp &&
+    storedAccessToken &&
+    storedUser &&
+    !isTokenExpired(storedAccessToken)
+  ) {
     const from =
       (location.state as { from?: { pathname?: string } } | null)?.from
         ?.pathname || (user?.role === "admin" ? "/admin" : "/");

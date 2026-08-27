@@ -77,11 +77,26 @@ export default defineConfig({
           ) {
             return "state-vendor";
           }
-          if (pkg === "recharts" || pkg.startsWith("d3-") || pkg === "victory-vendor") {
-            return "charts-vendor";
+          // NOTE: Do NOT manually split recharts/d3 into a "charts-vendor"
+          // chunk. Forcing them into their own chunk makes Rollup hoist its
+          // shared CommonJS interop helpers into that chunk, giving
+          // react-vendor a static import back into it
+          // (react-vendor -> charts-vendor -> react-vendor cycle). The cycle
+          // makes charts-vendor evaluate before React initializes and crashes
+          // at startup with "Cannot access 'S' before initialization".
+          // Recharts is only imported by lazy admin dashboard components, so
+          // default chunking already keeps it out of the entry bundle.
+          // Split icon vendors by consumer: lucide-react powers the storefront
+          // UI (eagerly imported), while @tabler/icons-react is only reachable
+          // from lazy admin chunks. A merged "icons-vendor" chunk lands in the
+          // entry modulepreload set, forcing every visitor to download Tabler
+          // bytes they never execute. Both libs are pure ESM, so unlike
+          // recharts there is no CommonJS-interop cycle risk in splitting them.
+          if (pkg === "lucide-react") {
+            return "icons-lucide";
           }
-          if (pkg === "lucide-react" || pkg === "@tabler/icons-react") {
-            return "icons-vendor";
+          if (pkg === "@tabler/icons-react") {
+            return "icons-tabler";
           }
           return undefined;
         },

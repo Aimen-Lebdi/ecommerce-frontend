@@ -46,7 +46,7 @@ const initialState: CartState = {
 // Async thunk to add product to cart
 export const addProductToCart = createAsyncThunk<
   CartResponse,
-  { productId: string; color: string },
+  { productId: string; color: string; quantity?: number },
   { rejectValue: string }
 >(
   "cart/addProductToCart",

@@ -19,8 +19,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
 import { fetchGrowthRate } from "../../../features/analytics/analyticsSlice"
 import { Skeleton } from "../../ui/skeleton"
-import { useTranslation } from 'react-i18next';
-
+import { useTranslation } from 'react-i18next';import { formatPrice } from "../../../utils/formatPrice";
 const chartConfig = {
   desktop: {
     label: "Revenue",
@@ -88,10 +87,10 @@ export function ChartAreaInteractive({
         <CardTitle>{t('chart.growthRate.title')}</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
-            {t('chart.growthRate.totalRevenue')}: {totalRevenue.toLocaleString()} DZD
+            {t('chart.growthRate.totalRevenue')}: {formatPrice(totalRevenue)}
           </span>
           <span className="@[540px]/card:hidden">
-            {totalRevenue.toLocaleString()} DZD
+            {formatPrice(totalRevenue)}
           </span>
         </CardDescription>
       </CardHeader>

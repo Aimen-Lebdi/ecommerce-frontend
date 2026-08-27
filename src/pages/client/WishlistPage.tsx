@@ -20,6 +20,7 @@ import {
 import { addProductToCart } from "../../features/cart/cartSlice";
 import { toast } from "sonner";
 import { responsiveImageProps } from "../../utils/responsiveImage";
+import { formatPrice } from "../../utils/formatPrice";
 import { useTranslation } from "react-i18next";
 import { getErrorMessage } from "../../utils/errorMessage";
 
@@ -96,7 +97,7 @@ const WishlistPage = () => {
       <div className="container py-10 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading wishlist...</p>
+          <p className="text-sm text-muted-foreground">{t("wishlist.loading")}</p>
         </div>
       </div>
     );
@@ -151,26 +152,28 @@ const WishlistPage = () => {
           return (
             <Card
               key={product._id}
-              className="group hover:shadow-lg transition-all duration-300"
+              className="group hover:shadow-sm transition-all duration-150"
             >
               <CardContent className="p-3 md:p-4">
                 {/* Product Image */}
                 <div className="relative overflow-hidden rounded-lg mb-3">
                   <Link to={`/product/${product._id}`}>
-                    <img
-                      {...responsiveImageProps(
-                        product.mainImage,
-                        [200, 320, 480, 640, 800],
-                        "(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), 350px"
-                      )}
-                      alt={product.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/placeholder.png";
-                      }}
-                    />
+                    <div className="w-full h-40 md:h-48 overflow-hidden bg-muted transition-transform duration-150 group-hover:scale-105">
+                      <img
+                        {...responsiveImageProps(
+                          product.mainImage,
+                          [200, 320, 480, 640, 800],
+                          "(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), 350px"
+                        )}
+                        alt={product.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "/placeholder.png";
+                        }}
+                      />
+                    </div>
                   </Link>
 
                   {/* Badges */}
@@ -244,7 +247,7 @@ const WishlistPage = () => {
                   {/* Price */}
                   <div className="flex items-center gap-2">
                     <span className="text-base md:text-lg font-bold">
-                      {product.price.toFixed(2)} DZD
+                      {formatPrice(product.price)}
                     </span>
                   </div>
 

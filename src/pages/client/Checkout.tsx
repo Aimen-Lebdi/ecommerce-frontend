@@ -13,7 +13,7 @@ import {
   Phone,
   User,
   Home,
-  CheckCircle,
+  Banknote,
   Loader2,
   AlertTriangle,
 } from "lucide-react";
@@ -38,6 +38,8 @@ import {
 } from "../../components/ui/collapsible";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { responsiveImageProps } from "../../utils/responsiveImage";
+import { SHIPPING_COST_DZD } from "../../utils/shippingCost";
+import { formatPrice } from "../../utils/formatPrice";
 import { fetchCart, resetCart } from "../../features/cart/cartSlice";
 import {
   createCashOrder,
@@ -132,6 +134,9 @@ const Checkout = () => {
   // Inline error for an incomplete phone number
   const [phoneError, setPhoneError] = useState(false);
 
+  // Set on a failed Place Order click so missing fields surface inline
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+
   // One-shot prefill guards (avoid overriding the user after a later save)
   const prefilledAddressRef = useRef(false);
   const prefilledPhoneRef = useRef(false);
@@ -221,7 +226,7 @@ const Checkout = () => {
 
   // Calculate totals
   const subtotal = totalCartPrice;
-  const shippingCost = 500;
+  const shippingCost = SHIPPING_COST_DZD;
   const total = subtotal + shippingCost;
 
   // Select a saved address (or "new") and reflect its values in the form
@@ -268,9 +273,16 @@ const Checkout = () => {
 
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
+      setAttemptedSubmit(true);
       setLabelErrors(getLabelErrors());
       setPhoneError(!isCompleteLocalPhone(shippingAddress.phone));
       toast.error(t('checkout.fillRequiredFields'));
+      // Bring the first blocking field into view so the user can fix it
+      if (!customerInfo.userName.trim()) {
+        document.getElementById("userName")?.focus();
+      } else if (!customerInfo.email.trim()) {
+        document.getElementById("email")?.focus();
+      }
       return;
     }
 
@@ -479,6 +491,20 @@ const Checkout = () => {
 
   const isProcessing = isCreatingOrder || isCreatingCheckout;
 
+  // Names of the fields still blocking submission (shown after a failed attempt)
+  const missingFields = (() => {
+    if (!attemptedSubmit) return [] as string[];
+    const missing: string[] = [];
+    if (!customerInfo.userName.trim()) missing.push(t('checkout.userName'));
+    if (!customerInfo.email.trim()) missing.push(t('checkout.emailAddress'));
+    if (!shippingAddress.wilaya) missing.push(t('checkout.wilaya'));
+    if (!shippingAddress.dayra) missing.push(t('checkout.dayra'));
+    if (!shippingAddress.baladiya) missing.push(t('checkout.baladiya'));
+    if (!isCompleteLocalPhone(shippingAddress.phone))
+      missing.push(t('checkout.phoneNumber'));
+    return missing;
+  })();
+
   return (
     <div className="min-h-screen bg-muted/20">
       {/* Header */}
@@ -510,7 +536,7 @@ const Checkout = () => {
                 onOpenChange={setIsOrderSummaryOpen}
               >
                 <CollapsibleTrigger asChild>
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                  <Card className="cursor-pointer hover:shadow-sm transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -527,7 +553,7 @@ const Checkout = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-bold">
-                            {total.toFixed(2)} DZD
+                            {formatPrice(total)}
                           </span>
                           {isOrderSummaryOpen ? (
                             <ChevronUp className="h-4 w-4" />
@@ -554,7 +580,7 @@ const Checkout = () => {
                               alt={item.product.name}
                               loading="lazy"
                               decoding="async"
-                              className="w-12 h-12 rounded object-cover"
+                              className="w-12 h-12 rounded object-contain bg-muted"
                             />
                             <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
                               {item.quantity}
@@ -571,7 +597,7 @@ const Checkout = () => {
                             )}
                           </div>
                           <div className="text-sm font-semibold">
-                            {(item.price * item.quantity).toFixed(2)} DZD
+                            {formatPrice(item.price * item.quantity)}
                           </div>
                         </div>
                       ))}
@@ -579,16 +605,16 @@ const Checkout = () => {
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span>{t('checkout.subtotal')}</span>
-                          <span>{subtotal.toFixed(2)} DZD</span>
+                          <span>{formatPrice(subtotal)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>{t('checkout.shipping')}</span>
-                          <span>{shippingCost.toFixed(2)} DZD</span>
+                          <span>{formatPrice(shippingCost)}</span>
                         </div>
                         <Separator />
                         <div className="flex justify-between font-bold">
                           <span>{t('checkout.total')}</span>
-                          <span>{total.toFixed(2)} DZD</span>
+                          <span>{formatPrice(total)}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -608,19 +634,41 @@ const Checkout = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">{t('checkout.userName')} *</Label>
+                    <Label htmlFor="userName">{t('checkout.userName')} *</Label>
                     <Input
-                      id="firstName"
+                      id="userName"
                       value={customerInfo.userName}
                       onChange={(e) =>
                         setCustomerInfo((prev) => ({
                           ...prev,
-                          firstName: e.target.value,
+                          userName: e.target.value,
                         }))
                       }
                       placeholder={t('checkout.userNamePlaceholder')}
                       disabled={isProcessing}
+                      aria-invalid={
+                        attemptedSubmit && !customerInfo.userName.trim()
+                      }
+                      aria-describedby={
+                        attemptedSubmit && !customerInfo.userName.trim()
+                          ? "userName-error"
+                          : undefined
+                      }
+                      className={
+                        attemptedSubmit && !customerInfo.userName.trim()
+                          ? "border-destructive"
+                          : ""
+                      }
                     />
+                    {attemptedSubmit && !customerInfo.userName.trim() && (
+                      <p
+                        id="userName-error"
+                        role="alert"
+                        className="text-xs text-destructive"
+                      >
+                        {t('checkout.fieldRequired')}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -1127,7 +1175,7 @@ const Checkout = () => {
       {t('checkout.businessDays')}
     </p>
   </div>
-  <span className="font-semibold">500 DZD</span>
+  <span className="font-semibold">{formatPrice(shippingCost)}</span>
 </div>
 
               </CardContent>
@@ -1196,7 +1244,7 @@ const Checkout = () => {
                           alt={item.product.name}
                           loading="lazy"
                           decoding="async"
-                          className="w-16 h-16 rounded object-cover"
+                          className="w-16 h-16 rounded object-contain bg-muted"
                         />
                         <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
                           {item.quantity}
@@ -1212,7 +1260,7 @@ const Checkout = () => {
                           </p>
                         )}
                         <p className="text-sm font-semibold">
-                          {(item.price * item.quantity).toFixed(2)} DZD
+                          {formatPrice(item.price * item.quantity)}
                         </p>
                       </div>
                     </div>
@@ -1223,16 +1271,16 @@ const Checkout = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>{t('checkout.subtotal')}</span>
-                      <span>{subtotal.toFixed(2)} DZD</span>
+                      <span>{formatPrice(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>{t('checkout.shipping')}</span>
-                      <span>{shippingCost.toFixed(2)} DZD</span>
+                      <span>{formatPrice(shippingCost)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>{t('checkout.total')}</span>
-                      <span>{total.toFixed(2)} DZD</span>
+                      <span>{formatPrice(total)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -1246,12 +1294,12 @@ const Checkout = () => {
                     <span>{t('checkout.sslSecured')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-info" />
-                    <span>{t('checkout.moneyBackGuarantee')}</span>
+                    <Banknote className="h-4 w-4 text-info" />
+                    <span>{t('checkout.codAvailable')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Truck className="h-4 w-4 text-info" />
-                    <span>{t('checkout.freeReturns')}</span>
+                    <span>{t('checkout.liveTracking')}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -1274,12 +1322,26 @@ const Checkout = () => {
         </div>
 
         {/* Sticky Bottom Bar (Mobile) */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-10 shadow-lg">
+        <div className="lg:hidden fixed bottom-0 inset-x-0 bg-background border-t p-4 z-10 shadow-sm">
+          {missingFields.length > 0 && (
+            <div
+              role="alert"
+              className="mb-3 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm"
+            >
+              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-destructive" />
+              <div>
+                <p className="font-medium">
+                  {t('checkout.completeRequiredFields')}
+                </p>
+                <p className="text-muted-foreground">{missingFields.join(" · ")}</p>
+              </div>
+            </div>
+          )}
           <Button
             size="lg"
             className="w-full"
             onClick={handlePlaceOrder}
-            disabled={!validateForm() || isProcessing}
+            disabled={isProcessing}
           >
             {isProcessing ? (
               <>
@@ -1289,20 +1351,32 @@ const Checkout = () => {
             ) : (
               <>
                 <Lock className="h-4 w-4 mr-2" />
-                {t('checkout.placeOrder')} • {total.toFixed(2)} DZD
+                {t('checkout.placeOrder')} • {formatPrice(total)}
               </>
             )}
           </Button>
         </div>
 
         {/* Desktop Place Order Button — sticky, centered */}
-<div className="hidden lg:block fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t p-4 z-10 shadow-lg">
+<div className="hidden lg:block fixed bottom-0 inset-x-0 bg-background/95 backdrop-blur border-t p-4 z-10 shadow-sm">
   <div className="max-w-2xl mx-auto">
+    {missingFields.length > 0 && (
+      <div
+        role="alert"
+        className="mb-3 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm"
+      >
+        <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-destructive" />
+        <div>
+          <p className="font-medium">{t('checkout.completeRequiredFields')}</p>
+          <p className="text-muted-foreground">{missingFields.join(" · ")}</p>
+        </div>
+      </div>
+    )}
     <Button
       size="lg"
       className="w-full"
       onClick={handlePlaceOrder}
-      disabled={!validateForm() || isProcessing}
+      disabled={isProcessing}
     >
       {isProcessing ? (
         <>
@@ -1312,7 +1386,7 @@ const Checkout = () => {
       ) : (
         <>
           <Lock className="h-4 w-4 mr-2" />
-          {t('checkout.placeOrder')} • {total.toFixed(2)} DZD
+          {t('checkout.placeOrder')} • {formatPrice(total)}
         </>
       )}
     </Button>

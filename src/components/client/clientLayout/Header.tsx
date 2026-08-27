@@ -98,9 +98,12 @@ export function Header() {
           <div className="flex items-center">
             <Link to="/" aria-label={t("header.goHome")} className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                  <img src="/logo.png" alt="" />
+                  <img src="/logo.png" alt="" width={128} height={128} />
               </div>
-                  <img src="/shopName.png" alt="" className=" h-8" />
+                  {/* w-auto: width/height attrs are presentational hints — without
+                      an explicit width override the img would render at its raw
+                      attribute width. */}
+                  <img src="/shopName.png" alt="" width={130} height={64} className="h-8 w-auto" />
             </Link>
           </div>
 
@@ -151,7 +154,7 @@ export function Header() {
               }}
             >
               <ShoppingCart className="h-5 w-5" />
-              {isAuthenticated && numOfCartItems > 0 && (
+              {numOfCartItems > 0 && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
                   {numOfCartItems}
                 </Badge>
@@ -281,26 +284,26 @@ export function Header() {
                   <div className="space-y-2 border-t pt-4">
                     <Link
                       to="/"
-                      className="block py-2 text-md font-medium"
+                      className="block py-2 text-base font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t("header.nav.home")}
                     </Link>
                     <Link
                       to="/shop"
-                      className="block py-2 text-md font-medium"
+                      className="block py-2 text-base font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t("header.nav.shop")}
                     </Link>
                     <Link
                       to="/about"
-                      className="block py-2 text-md font-medium"
+                      className="block py-2 text-base font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t("header.nav.about")}
                     </Link>
-                    <Link to="/contact" className="block py-2 text-md font-medium">
+                    <Link to="/contact" className="block py-2 text-base font-medium">
                       {t("header.nav.contact")}
                     </Link>
                   </div>
@@ -322,25 +325,25 @@ export function Header() {
           <NavigationMenu className="max-w-full">
             <NavigationMenuList className="flex-wrap">
               <NavigationMenuItem>
-                <Link to="/" className="px-4 py-3 text-md font-medium">
+                <Link to="/" className="px-4 py-3.5 text-base font-medium">
                   {t("header.nav.home")}
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/shop" className="px-4 py-3 text-md font-medium">
+                <Link to="/shop" className="px-4 py-3.5 text-base font-medium">
                   {t("header.nav.shop")}
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/about" className="px-4 py-3 text-md font-medium">
+                <Link to="/about" className="px-4 py-3.5 text-base font-medium">
                   {t("header.nav.about")}
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/contact" className="px-4 py-3 text-md font-medium">
+                <Link to="/contact" className="px-4 py-3.5 text-base font-medium">
                   {t("header.nav.contact")}
                 </Link>
               </NavigationMenuItem>

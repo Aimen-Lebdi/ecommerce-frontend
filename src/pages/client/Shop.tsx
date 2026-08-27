@@ -40,6 +40,7 @@ import {
 import { Link } from "react-router-dom";
 
 import { responsiveImageProps } from "../../utils/responsiveImage";
+import { formatPrice } from "../../utils/formatPrice";
 
 // Import Redux actions
 import { fetchProducts } from "../../features/products/productsSlice";
@@ -322,8 +323,8 @@ const FiltersPanel = memo<FiltersPanelProps>(
           </Button>
           {(filters.minPrice || filters.maxPrice) && (
             <div className="text-xs text-muted-foreground text-center">
-              {t("shop.filters.active")}: {filters.minPrice || "0"} DZD -{" "}
-              {filters.maxPrice || "∞"} DZD
+              {t("shop.filters.active")}: {formatPrice(Number(filters.minPrice || 0))} -{" "}
+              {filters.maxPrice ? formatPrice(Number(filters.maxPrice)) : "∞"}
             </div>
           )}
         </div>
@@ -387,21 +388,23 @@ const ProductCard = memo<ProductCardProps>(
 
     return (
       <Link to={`/product/${product._id}`} className="block h-full">
-        <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col cursor-pointer">
+        <Card className="group hover:shadow-sm transition-all duration-150 h-full flex flex-col cursor-pointer">
           <CardHeader className="p-0 flex-shrink-0">
             <div className="relative overflow-hidden rounded-t-lg">
               {product.mainImage ? (
-                <img
-                  {...responsiveImageProps(
-                    product.mainImage,
-                    PRODUCT_GRID_WIDTHS,
-                    PRODUCT_GRID_SIZES
-                  )}
-                  alt={product.name}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+                <div className="w-full h-36 sm:h-40 md:h-48 overflow-hidden bg-muted transition-transform duration-150 group-hover:scale-105">
+                  <img
+                    {...responsiveImageProps(
+                      product.mainImage,
+                      PRODUCT_GRID_WIDTHS,
+                      PRODUCT_GRID_SIZES
+                    )}
+                    alt={product.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               ) : (
                 <div className="w-full h-36 sm:h-40 md:h-48 bg-muted flex items-center justify-center">
                   <Package className="h-8 w-8 text-muted-foreground" />
@@ -444,7 +447,7 @@ const ProductCard = memo<ProductCardProps>(
             </h3>
             <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
               <span className="text-base sm:text-lg font-bold">
-                {product.price} DZD
+                {formatPrice(product.price)}
               </span>
             </div>
             <div className="flex items-center justify-between mt-auto">
@@ -477,22 +480,24 @@ const ProductCardList = memo<ProductCardListProps>(
 
     return (
       <Link to={`/product/${product._id}`} className="block">
-        <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+        <Card className="group hover:shadow-sm transition-all duration-150 cursor-pointer">
           <CardContent className="p-4">
             <div className="flex gap-4">
               <div className="relative overflow-hidden rounded-lg flex-shrink-0">
                 {product.mainImage ? (
-                  <img
-                    {...responsiveImageProps(
-                      product.mainImage,
-                      LIST_THUMB_WIDTHS,
-                      "128px"
-                    )}
-                    alt={product.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-24 h-24 sm:w-32 sm:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 overflow-hidden bg-muted transition-transform duration-150 group-hover:scale-105">
+                    <img
+                      {...responsiveImageProps(
+                        product.mainImage,
+                        LIST_THUMB_WIDTHS,
+                        "128px"
+                      )}
+                      alt={product.name}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 ) : (
                   <div className="w-24 h-24 sm:w-32 sm:h-32 bg-muted flex items-center justify-center">
                     <Package className="h-8 w-8 text-muted-foreground" />
@@ -521,7 +526,7 @@ const ProductCardList = memo<ProductCardListProps>(
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg sm:text-xl font-bold">
-                        {product.price} DZD
+                        {formatPrice(product.price)}
                       </span>
                     </div>
                     <span
@@ -1048,7 +1053,7 @@ const ShopPage = () => {
             <div className="flex flex-wrap gap-2 mb-6">
               {filters.keyword && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  Search: "{filters.keyword}"
+                  {t("shop.searchChip", { keyword: filters.keyword })}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => clearSpecificFilter("keyword")}

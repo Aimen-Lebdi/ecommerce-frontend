@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
           {t('forgotPassword.backToSignIn')}
         </Button>
 
-        <Card className="shadow-lg">
+        <Card className="shadow-sm">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-semibold">{t('forgotPassword.title')}</CardTitle>
             <CardDescription>

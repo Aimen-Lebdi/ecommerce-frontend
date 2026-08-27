@@ -38,6 +38,7 @@ import {
   maskPhoneChange,
   phoneToLocalDigits,
 } from "../../../utils/phoneFormat";
+import { formatPrice } from "../../../utils/formatPrice";
 import type { Order } from "../../../features/orders/ordersSlice";
 import type { UpdateOrderPayload } from "../../../features/orders/ordersAPI";
 
@@ -597,7 +598,7 @@ export function OrderEditDialog({
                         alt={item.name}
                         loading="lazy"
                         decoding="async"
-                        className="h-16 w-16 rounded object-cover"
+                        className="h-16 w-16 rounded object-contain bg-muted"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "/placeholder.png";
                         }}
@@ -606,7 +607,7 @@ export function OrderEditDialog({
                         <p className="truncate font-medium">{item.name}</p>
                         <p className="text-sm text-muted-foreground">
                           {t("orders.editDialog.items.price")}:{" "}
-                          {item.price.toFixed(2)} DZD
+                          {formatPrice(item.price)}
                         </p>
                         {errors.items?.[item.key] && (
                           <p className="mt-1 text-sm text-destructive">
@@ -664,7 +665,7 @@ export function OrderEditDialog({
                     {t("orders.editDialog.amounts.subtotal")}
                   </span>
                   <span className="font-medium">
-                    {subtotal.toFixed(2)} DZD
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
@@ -694,11 +695,11 @@ export function OrderEditDialog({
                   <span className="text-muted-foreground">
                     {t("orders.editDialog.amounts.tax")}
                   </span>
-                  <span className="font-medium">{taxPrice.toFixed(2)} DZD</span>
+                  <span className="font-medium">{formatPrice(taxPrice)}</span>
                 </div>
                 <div className="flex justify-between border-t pt-2 text-lg font-bold">
                   <span>{t("orders.editDialog.amounts.total")}</span>
-                  <span>{derivedTotal.toFixed(2)} DZD</span>
+                  <span>{formatPrice(derivedTotal)}</span>
                 </div>
                 {existingData?.paymentMethodType === "cash" && (
                   <div className="flex justify-between">
@@ -706,7 +707,7 @@ export function OrderEditDialog({
                       {t("orders.editDialog.amounts.codAmount")}
                     </span>
                     <span className="font-medium">
-                      {derivedTotal.toFixed(2)} DZD
+                      {formatPrice(derivedTotal)}
                     </span>
                   </div>
                 )}

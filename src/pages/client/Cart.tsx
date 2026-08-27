@@ -11,8 +11,11 @@ import { useTranslation } from 'react-i18next';import { getErrorMessage } from "
   ArrowLeft,
   Shield,
   CreditCard,
+  Banknote,
   Loader2,
 } from "lucide-react";
+import { SHIPPING_COST_DZD } from "../../utils/shippingCost";
+import { formatPrice } from "../../utils/formatPrice";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -75,7 +78,7 @@ const Cart = () => {
 
   // Calculate totals
   const subtotal = totalCartPrice;
-  const shippingCost = 500;
+  const shippingCost = SHIPPING_COST_DZD;
   const taxRate = 0;
   const taxAmount = subtotal * taxRate;
   const total = subtotal + shippingCost + taxAmount;
@@ -189,7 +192,7 @@ const Cart = () => {
                       alt={item.product.name}
                       loading="lazy"
                       decoding="async"
-                      className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-lg"
+                      className="w-16 h-16 md:w-24 md:h-24 object-contain rounded-lg bg-muted"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.png";
                       }}
@@ -225,7 +228,7 @@ const Cart = () => {
                       {/* Price */}
                       <div className="text-right">
                         <div className="font-semibold text-sm md:text-base">
-                          {item.price.toFixed(2)} DZD
+                          {formatPrice(item.price)}
                         </div>
                       </div>
                     </div>
@@ -301,7 +304,7 @@ const Cart = () => {
                     {/* Subtotal */}
                     <div className="text-right mt-2">
                       <span className="text-sm font-semibold">
-                        {t('cart.subtotal')}: {(item.price * item.quantity).toFixed(2)} DZD
+                        {t('cart.subtotal')}: {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -321,7 +324,7 @@ const Cart = () => {
             <CardContent className="space-y-4">
               <div className="flex justify-between text-sm">
                 <span>{t('cart.subtotal')}</span>
-                <span>{subtotal.toFixed(2)} DZD</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
 
               {/* Shipping Options */}
@@ -347,33 +350,35 @@ const Cart = () => {
 
               <div className="flex justify-between text-sm">
                 <span>{t('cart.shipping')}</span>
-                <span>{shippingCost.toFixed(2)} DZD</span>
+                <span>{formatPrice(shippingCost)}</span>
               </div>
 
               <div className="flex justify-between text-sm">
                 <span>{t('cart.tax')}</span>
-                <span>{taxAmount.toFixed(2)} DZD</span>
+                <span>{formatPrice(taxAmount)}</span>
               </div>
 
               <Separator />
 
               <div className="flex justify-between text-lg font-semibold">
                 <span>{t('cart.total')}</span>
-                <span>{total.toFixed(2)} DZD</span>
+                <span>{formatPrice(total)}</span>
               </div>
 
               {/* Estimated Delivery */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
                 <Truck className="h-4 w-4" />
                 <span>
-                  {t('cart.estimatedDelivery')} 2 - 3 days
+                  {t('cart.estimatedDelivery')} {t('cart.deliveryTimeframe')}
                 </span>
               </div>
 
               {/* Checkout Button */}
-              <Button size="lg" className="w-full mt-4">
-                <Lock className="h-4 w-4 mr-2" />
-                <Link to="/checkout">{t('cart.secureCheckout')}</Link>
+              <Button size="lg" className="w-full mt-4" asChild>
+                <Link to="/checkout">
+                  <Lock className="h-4 w-4 mr-2" />
+                  {t('cart.secureCheckout')}
+                </Link>
               </Button>
 
               <Button variant="outline" size="lg" className="w-full" asChild>
@@ -394,8 +399,8 @@ const Cart = () => {
                 <span>{t('cart.multiplePaymentOptions')}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <Truck className="h-4 w-4 text-info" />
-                <span>{t('cart.freeReturns')}</span>
+                <Banknote className="h-4 w-4 text-info" />
+                <span>{t('cart.cashOnDelivery')}</span>
               </div>
             </CardContent>
           </Card>
@@ -407,7 +412,7 @@ const Cart = () => {
             </CardHeader>
             <CardContent>
               <div className="flex gap-2 flex-wrap">
-                {["Visa", "Mastercard", "PayPal", "Apple Pay"].map((method) => (
+                {["Visa", "Mastercard", "Stripe", "COD"].map((method) => (
                   <Badge key={method} variant="outline" className="text-xs">
                     {method}
                   </Badge>

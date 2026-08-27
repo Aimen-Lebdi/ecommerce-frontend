@@ -11,6 +11,20 @@ interface SocketContextType {
   socketService: typeof socketService;
 }
 
+/**
+ * Defer work until the browser is idle so it never competes with first paint.
+ * Falls back to a short timeout where requestIdleCallback is unavailable, and
+ * always returns a cancel function suitable for effect cleanup.
+ */
+const scheduleWhenIdle = (task: () => void): (() => void) => {
+  if (typeof window.requestIdleCallback === "function") {
+    const id = window.requestIdleCallback(task, { timeout: 2000 });
+    return () => window.cancelIdleCallback(id);
+  }
+  const id = window.setTimeout(task, 200);
+  return () => window.clearTimeout(id);
+};
+
 const SocketContext = createContext<SocketContextType | null>(null);
 
 interface SocketProviderProps {
@@ -58,15 +72,20 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   // (logout / tokenExpired). No disconnect+reconnect churn on token changes —
   // the socket service self-heals (reads localStorage, refreshes on auth error).
   useEffect(() => {
+    let cancelIdleConnect: (() => void) | undefined;
     if (accessToken && user) {
       if (lastAccessTokenRef.current !== accessToken) {
         lastAccessTokenRef.current = accessToken;
-        connect();
+        // Defer the handshake off the critical path: guests never download or
+        // run the socket.io chunk during load; authenticated users connect
+        // once the main thread goes idle.
+        cancelIdleConnect = scheduleWhenIdle(connect);
       }
     } else {
       lastAccessTokenRef.current = null;
       disconnect();
     }
+    return () => cancelIdleConnect?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user]);
 

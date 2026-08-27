@@ -33,6 +33,7 @@ export interface CartResponse {
 export const addProductToCartAPI = async (productData: {
   productId: string;
   color: string;
+  quantity?: number;
 }) => {
   const response = await axiosInstance.post("/api/cart", productData);
   return response.data;

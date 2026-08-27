@@ -27,6 +27,13 @@ import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 import { toast } from "sonner";
 import { responsiveImageProps } from "../../utils/responsiveImage";
+import { SHIPPING_COST_DZD } from "../../utils/shippingCost";
+import { formatPrice } from "../../utils/formatPrice";
+import {
+  deliveryStatusLabel,
+  paymentStatusLabel,
+} from "../../utils/orderStatusLabels";
+import { getDateLocale } from "../../utils/dateLocale";
 import { format } from "date-fns";
 import { downloadInvoiceAPI } from "../../features/orders/ordersAPI";
 import {
@@ -39,7 +46,7 @@ const OrderConfirmationPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // M2: Stripe redirects here with ?session_id=... after a successful card
   // payment. We poll until the webhook creates the order.
@@ -173,7 +180,9 @@ const OrderConfirmationPage = () => {
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     try {
-      return format(new Date(dateString), "MMMM d, yyyy");
+      return format(new Date(dateString), "MMMM d, yyyy", {
+        locale: getDateLocale(i18n.language),
+      });
     } catch {
       return dateString;
     }
@@ -183,7 +192,7 @@ const OrderConfirmationPage = () => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shipping = order.shippingPrice || 500;
+  const shipping = order.shippingPrice || SHIPPING_COST_DZD;
   const tax = order.taxPrice || 0;
   const total = order.totalOrderPrice;
 
@@ -233,7 +242,7 @@ const OrderConfirmationPage = () => {
                   order.deliveryStatus
                 )} border px-3 py-1`}
               >
-                {order.deliveryStatus.replace("_", " ").toUpperCase()}
+                {deliveryStatusLabel(t, order.deliveryStatus)}
               </Badge>
               <Badge
                 className={`${paymentStatusBadgeClass(
@@ -241,7 +250,7 @@ const OrderConfirmationPage = () => {
                 )} border px-3 py-1`}
               >
                 {t("orderConfirmation.header.paymentStatus", {
-                  status: order.paymentStatus.toUpperCase(),
+                  status: paymentStatusLabel(t, order.paymentStatus),
                 })}
               </Badge>
               <Badge className={`${paymentMethodBadgeClass(
@@ -324,7 +333,7 @@ const OrderConfirmationPage = () => {
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="font-semibold text-foreground text-sm sm:text-base">
-                        {item.price.toFixed(2)} DZD
+                        {formatPrice(item.price)}
                       </p>
                     </div>
                   </div>
@@ -376,7 +385,7 @@ const OrderConfirmationPage = () => {
                         order.deliveryStatus
                       )} border`}
                     >
-                      {order.deliveryStatus.replace("_", " ").toUpperCase()}
+                      {deliveryStatusLabel(t, order.deliveryStatus)}
                     </Badge>
                     {order.trackingNumber && (
                       <div className="mt-3 p-3 bg-info/10 border border-info/30 rounded-lg">
@@ -418,7 +427,7 @@ const OrderConfirmationPage = () => {
                           <div className="w-2 h-2 mt-1.5 rounded-full bg-primary flex-shrink-0" />
                           <div className="flex-1">
                             <p className="font-medium text-foreground">
-                              {history.status.replace("_", " ").toUpperCase()}
+                              {deliveryStatusLabel(t, history.status)}
                             </p>
                             <p className="text-muted-foreground">{history.note}</p>
                             <p className="text-muted-foreground/80 text-xs">
@@ -510,26 +519,26 @@ const OrderConfirmationPage = () => {
                   <span className="text-muted-foreground">
                     {t("orderConfirmation.summary.subtotal")}
                   </span>
-                  <span className="text-foreground">{subtotal.toFixed(2)} DZD</span>
+                  <span className="text-foreground">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-muted-foreground">
                     {t("orderConfirmation.summary.shipping")}
                   </span>
-                  <span className="text-foreground">{shipping.toFixed(2)} DZD</span>
+                  <span className="text-foreground">{formatPrice(shipping)}</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-muted-foreground">
                     {t("orderConfirmation.summary.tax")}
                   </span>
-                  <span className="text-foreground">{tax.toFixed(2)} DZD</span>
+                  <span className="text-foreground">{formatPrice(tax)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-base sm:text-lg font-semibold">
                   <span className="text-foreground">
                     {t("orderConfirmation.summary.total")}
                   </span>
-                  <span className="text-foreground">{total.toFixed(2)} DZD</span>
+                  <span className="text-foreground">{formatPrice(total)}</span>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">

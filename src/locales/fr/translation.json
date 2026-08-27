@@ -2,31 +2,19 @@
   "a11y": {
     "skipToContent": "Aller au contenu"
   },
+  "auth": {
+    "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
+  },
   "home": {
     "hero": {
-      "slides": {
-        "summerSale": {
-          "title": "Soldes d'Été 2024",
-          "subtitle": "Jusqu'à -70% sur l'Électronique",
-          "description": "Ne manquez pas nos offres exceptionnelles sur smartphones, ordinateurs portables et plus encore !",
-          "cta": "Acheter Maintenant",
-          "badge": "Temps Limitée"
-        },
-        "iphone": {
-          "title": "Nouvel iPhone 15 Pro",
-          "subtitle": "Performance Révolutionnaire",
-          "description": "Découvrez la puissance de la puce A17 Pro avec un design en titane.",
-          "cta": "Précommander",
-          "badge": "Nouveauté"
-        },
-        "gaming": {
-          "title": "Collection Gaming",
-          "subtitle": "Améliorez Votre Setup",
-          "description": "Équipement gaming premium pour une expérience de jeu ultime.",
-          "cta": "Découvrir le Gaming",
-          "badge": "Semaine Gaming"
-        }
+      "cod": {
+        "title": "Payez en espèces à votre porte",
+        "subtitle": "Commandez en ligne · Suivez votre livraison · Partout en Algérie",
+        "description": "Paiement à la livraison ou par carte — commande livrée en 2-3 jours ouvrés.",
+        "ctaShop": "Commencer les achats",
+        "ctaAbout": "Comment fonctionne Cliqo"
       },
+      "productCta": "Voir le produit",
       "prevSlide": "Diapositive précédente",
       "nextSlide": "Diapositive suivante",
       "goToSlide": "Aller à la diapositive {{number}}",
@@ -54,6 +42,7 @@
     "categories": {
       "title": "Acheter par Catégorie",
       "subtitle": "Découvrez notre large gamme de catégories de produits",
+      "loading": "Chargement...",
       "smartphones": "Smartphones",
       "smartphonesCount": "250+ articles",
       "laptops": "Ordinateurs Portables",
@@ -144,6 +133,7 @@
   "shop": {
     "loading": "Chargement...",
     "loadingProducts": "Chargement des produits...",
+    "searchChip": "Recherche : « {{keyword}} »",
     "header": {
       "title": "Tous les Produits",
       "subtitle": "Découvrez notre collection complète de produits premium"
@@ -227,9 +217,9 @@
       "category": "Catégorie"
     },
     "features": {
-      "freeShipping": "✅ Livraison Gratuite dès 10,000 DZD",
-      "securePayment": "🔒 Paiement Sécurisé",
-      "returns": "↩ Retours sous 30 jours"
+      "cod": "Paiement à la livraison",
+      "securePayment": "Paiement sécurisé",
+      "tracking": "Suivi de commande en temps réel"
     },
     "info": {
       "category": "Catégorie",
@@ -277,16 +267,18 @@
     "tax": "TVA",
     "total": "Total",
     "estimatedDelivery": "Livraison estimée",
+    "deliveryTimeframe": "2 - 3 jours ouvrés",
     "secureCheckout": "Paiement Sécurisé",
     "secureEncryption": "Chiffrement SSL 256-bit sécurisé",
     "multiplePaymentOptions": "Options de paiement multiples",
-    "freeReturns": "Retours gratuits sous 30 jours",
+    "cashOnDelivery": "Paiement à la livraison disponible",
     "weAccept": "Nous Acceptons",
     "increaseQuantity": "Augmenter la quantité de {{productName}}",
     "decreaseQuantity": "Diminuer la quantité de {{productName}}"
   },
   "wishlist": {
     "title": "Ma Liste de Souhaits",
+    "loading": "Chargement...",
     "backToShop": "Retour à la boutique",
     "itemCount_one": "{{count}} article",
     "itemCount_other": "{{count}} articles",
@@ -339,9 +331,11 @@
     "creditDebitCard": "Carte de Crédit ou Débit",
     "securePaymentStripe": "Paiement sécurisé via Stripe",
     "sslSecured": "Sécurisé par SSL 256-bit",
-    "moneyBackGuarantee": "Garantie de Remboursement",
-    "freeReturns": "Retours gratuits sous 30 jours",
+    "codAvailable": "Paiement à la livraison — payez à la réception",
+    "liveTracking": "Suivez votre commande en temps réel",
     "weAccept": "Nous acceptons",
+    "completeRequiredFields": "Pour passer votre commande, veuillez compléter :",
+    "fieldRequired": "Ce champ est obligatoire",
     "processing": "Traitement en cours...",
     "placeOrder": "Passer la Commande",
     "processingOrder": "Traitement de la Commande...",
@@ -1734,58 +1728,35 @@
   },
   "footer": {
     "trustBadges": {
-      "freeShipping": {
-        "title": "Livraison Gratuite",
-        "description": "Commandes de plus de 10,000 DZD"
+      "cod": {
+        "title": "Paiement à la Livraison",
+        "description": "Payez en espèces à la réception"
       },
-      "easyReturns": {
-        "title": "Retours Faciles",
-        "description": "Politique de retour 30 jours"
+      "delivery": {
+        "title": "Livraison Nationale",
+        "description": "Partout en Algérie avec suivi en direct"
       },
       "securePayment": {
         "title": "Paiement Sécurisé",
         "description": "Chiffré SSL"
       },
       "support": {
-        "title": "Support 24h/24",
-        "description": "Service client"
+        "title": "Support Client",
+        "description": "Contactez-nous à tout moment"
       }
     },
     "logo": "CLICON",
-    "companyDescription": "Votre marketplace de confiance pour des produits de qualité à prix avantageux. Achetez en toute confiance et profitez d'un service rapide et fiable.",
-    "address": "123 Rue du Commerce, Ville, État 12345",
-    "phone": "+1 (555) 123-4567",
-    "email": "support@clicon.com",
+    "companyDescription": "La marketplace algérienne au paiement à la livraison. Commandez en ligne, payez en espèces à votre porte et suivez chaque livraison.",
     "customerService": {
       "title": "Service Client",
-      "helpCenter": "Centre d'Aide",
-      "shippingInfo": "Infos Livraison",
-      "returnsExchanges": "Retours & Échanges",
-      "sizeGuide": "Guide des Tailles",
       "trackOrder": "Suivre Votre Commande",
       "contactUs": "Contactez-Nous"
     },
     "company": {
       "title": "Entreprise",
-      "aboutUs": "À Propos",
-      "careers": "Carrières",
-      "blog": "Blog",
-      "press": "Presse",
-      "investors": "Investisseurs",
-      "sustainability": "Développement Durable"
-    },
-    "newsletter": {
-      "title": "Restez Connecté",
-      "description": "Abonnez-vous pour recevoir des offres spéciales, des cadeaux gratuits et des mises à jour.",
-      "placeholder": "Entrez votre email",
-      "subscribe": "S'abonner"
+      "aboutUs": "À Propos"
     },
     "copyright": "© {{year}} Cliqo. Tous droits réservés.",
-    "legal": {
-      "privacyPolicy": "Politique de Confidentialité",
-      "termsOfService": "Conditions d'Utilisation",
-      "cookiePolicy": "Politique des Cookies"
-    },
     "paymentMethods": {
       "title": "Nous acceptons :"
     }
@@ -1798,28 +1769,27 @@
     },
     "story": {
       "title": "Notre Histoire",
-      "paragraph1": "Fondée en 2020, notre voyage a commencé avec une vision simple : rendre les produits de qualité accessibles à tous. Nous avons commencé dans un petit garage et sommes devenus une plateforme de commerce électronique fiable servant des milliers de clients dans le monde.",
-      "paragraph2": "Aujourd'hui, nous nous associons avec les meilleures marques et fournisseurs pour vous offrir une sélection incroyable de produits dans plusieurs catégories. Notre engagement envers l'excellence nous a établis comme leader du secteur.",
-      "paragraph3": "Nous croyons à la transparence, à la fiabilité et à mettre nos clients en premier. Chaque produit, chaque interaction et chaque expérience est conçu en pensant à vous.",
-      "cta": "En Savoir Plus"
+      "paragraph1": "Cliqo a été conçu pour l'Algérie : une marketplace où vous commandez en ligne et payez en espèces lorsque votre livraison arrive à votre porte.",
+      "paragraph2": "Nous livrons dans tout le pays via des transporteurs locaux, avec un suivi qui accompagne votre commande du paiement jusqu'à votre seuil.",
+      "paragraph3": "Achetez en arabe, français ou anglais, payez par carte ou en espèces à la livraison, et suivez chaque commande en temps réel — sans prépaiement."
     },
     "stats": {
       "title": "Par Les Chiffres",
-      "customers": {
-        "number": "50K+",
-        "label": "Clients Satisfaits"
+      "cod": {
+        "number": "COD",
+        "label": "Paiement à la livraison"
       },
-      "products": {
-        "number": "10K+",
-        "label": "Produits"
+      "deliveryTime": {
+        "number": "2-3",
+        "label": "Jours de livraison type"
       },
-      "orders": {
-        "number": "100K+",
-        "label": "Commandes Livrées"
+      "languages": {
+        "number": "3",
+        "label": "Langues"
       },
-      "countries": {
-        "number": "25+",
-        "label": "Pays"
+      "tracking": {
+        "number": "Direct",
+        "label": "Suivi de commande"
       }
     },
     "values": {
@@ -1854,38 +1824,12 @@
         "description": "Vos données sont protégées par le chiffrement de qualité industrielle et les mesures de sécurité"
       },
       "reason3": {
-        "title": "Retours Faciles",
-        "description": "Politique de retour de 30 jours sans questions posées - nous voulons que vous soyez heureux"
+        "title": "Paiement à la Livraison",
+        "description": "Payez uniquement quand votre commande arrive à votre porte - sans prépaiement"
       },
       "reason4": {
-        "title": "Client D'Abord",
-        "description": "Support client 24/7 prêt à vous aider pour toute question ou préoccupation"
-      }
-    },
-    "team": {
-      "title": "Rencontrez Notre Équipe",
-      "subtitle": "Des individus talentueux passionnés par la livraison de l'excellence",
-      "members": {
-        "member1": {
-          "name": "PDG & Fondateur",
-          "role": "Opérations",
-          "bio": "Diriger la vision avec plus de 15 ans d'expertise"
-        },
-        "member2": {
-          "name": "Directeur Marketing",
-          "role": "Stratégie de Croissance",
-          "bio": "Construire des relations clients significatives"
-        },
-        "member3": {
-          "name": "Chef Technologie",
-          "role": "Développement Produit",
-          "bio": "Innover pour des expériences transparentes"
-        },
-        "member4": {
-          "name": "Chef du Succès Client",
-          "role": "Support",
-          "bio": "Assurer la satisfaction des clients quotidiennement"
-        }
+        "title": "Support Local",
+        "description": "Une équipe qui comprend l'adressage et la livraison algériens - contactez-nous via la page contact"
       }
     },
     "cta": {

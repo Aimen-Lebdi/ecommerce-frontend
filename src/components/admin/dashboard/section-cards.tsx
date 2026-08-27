@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchDashboardCards } from "../../../features/analytics/analyticsSlice";
 import { Skeleton } from "../../../components/ui/skeleton";
 import { useTranslation } from 'react-i18next';
+import { formatPrice } from "../../../utils/formatPrice";
 
 function CardSkeleton() {
   return (
@@ -84,7 +85,7 @@ export function SectionCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {revenue?.total.toLocaleString() || "0"} DZD
+            {formatPrice(revenue?.total ?? 0)}
           </div>
           <KpiChange
             total={revenue?.total ?? 0}
@@ -156,7 +157,7 @@ export function SectionCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {aov?.total.toLocaleString() || "0"} DZD
+            {formatPrice(aov?.total ?? 0)}
           </div>
           <KpiChange
             total={aov?.total ?? 0}

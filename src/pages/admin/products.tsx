@@ -30,6 +30,7 @@ import {
 } from "../../features/products/productsSlice";
 import { useTranslation } from 'react-i18next';
 import type { Product } from '../../types';
+import { formatPrice } from '../../utils/formatPrice';
 
 export default function Products() {
   const { t } = useTranslation();
@@ -96,7 +97,7 @@ export default function Products() {
       header: t('products.columns.price'),
       cell: ({ row }) => {
         const price = row.getValue("price") as number;
-        return `${price.toFixed(2)} DZD`;
+        return formatPrice(price);
       },
     },
     {
