@@ -28,14 +28,16 @@ import {
 } from "../../ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
 import { ModeToggle } from "../../mode-toggle";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { signOut } from "../../../features/auth/authSlice";
 import { useTranslation } from "react-i18next";
 import { setLanguage } from "../../../i18n";
+import { cn } from "../../../lib/utils";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { t, i18n } = useTranslation();
 
   const dispatch = useAppDispatch();
@@ -80,6 +82,14 @@ export function Header() {
     }
   }, [changeLanguage, i18n.language]);
 
+  // Add a subtle shadow once the page is scrolled for depth/affordance.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   // Get current language code
   const getCurrentLanguageCode = () => {
     const lang = i18n.language;
@@ -90,7 +100,12 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-shadow",
+        scrolled && "shadow-sm"
+      )}
+    >
       {/* Main Header */}
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
@@ -155,7 +170,10 @@ export function Header() {
             >
               <ShoppingCart className="h-5 w-5" />
               {numOfCartItems > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                <Badge
+                  key={numOfCartItems}
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs animate-in zoom-in-75"
+                >
                   {numOfCartItems}
                 </Badge>
               )}
@@ -282,30 +300,63 @@ export function Header() {
                   </div>
 
                   <div className="space-y-2 border-t pt-4">
-                    <Link
+                    <NavLink
                       to="/"
-                      className="block py-2 text-base font-medium"
+                      end
+                      className={({ isActive }) =>
+                        cn(
+                          "block rounded-md px-3 py-2 text-base font-medium transition-colors",
+                          isActive
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        )
+                      }
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t("header.nav.home")}
-                    </Link>
-                    <Link
+                    </NavLink>
+                    <NavLink
                       to="/shop"
-                      className="block py-2 text-base font-medium"
+                      className={({ isActive }) =>
+                        cn(
+                          "block rounded-md px-3 py-2 text-base font-medium transition-colors",
+                          isActive
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        )
+                      }
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t("header.nav.shop")}
-                    </Link>
-                    <Link
+                    </NavLink>
+                    <NavLink
                       to="/about"
-                      className="block py-2 text-base font-medium"
+                      className={({ isActive }) =>
+                        cn(
+                          "block rounded-md px-3 py-2 text-base font-medium transition-colors",
+                          isActive
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        )
+                      }
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t("header.nav.about")}
-                    </Link>
-                    <Link to="/contact" className="block py-2 text-base font-medium">
+                    </NavLink>
+                    <NavLink
+                      to="/contact"
+                      className={({ isActive }) =>
+                        cn(
+                          "block rounded-md px-3 py-2 text-base font-medium transition-colors",
+                          isActive
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        )
+                      }
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       {t("header.nav.contact")}
-                    </Link>
+                    </NavLink>
                   </div>
                 </div>
               </SheetContent>
@@ -320,32 +371,73 @@ export function Header() {
       </div>
 
       {/* Navigation Menu */}
-      <div className="hidden md:block border-t">
+      <div className="hidden md:block  ">
         <div className="container mx-auto px-4">
           <NavigationMenu className="max-w-full">
-            <NavigationMenuList className="flex-wrap">
+            <NavigationMenuList className="flex-wrap gap-1 py-2">
               <NavigationMenuItem>
-                <Link to="/" className="px-4 py-3.5 text-base font-medium">
+                <NavLink
+                  to="/"
+                  end
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )
+                  }
+                >
                   {t("header.nav.home")}
-                </Link>
+                </NavLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/shop" className="px-4 py-3.5 text-base font-medium">
+                <NavLink
+                  to="/shop"
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )
+                  }
+                >
                   {t("header.nav.shop")}
-                </Link>
+                </NavLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/about" className="px-4 py-3.5 text-base font-medium">
+                <NavLink
+                  to="/about"
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )
+                  }
+                >
                   {t("header.nav.about")}
-                </Link>
+                </NavLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link to="/contact" className="px-4 py-3.5 text-base font-medium">
+                <NavLink
+                  to="/contact"
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )
+                  }
+                >
                   {t("header.nav.contact")}
-                </Link>
+                </NavLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
