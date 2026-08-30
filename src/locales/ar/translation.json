@@ -1758,8 +1758,12 @@
       "trackOrder": "تتبع طلبك",
       "contactUs": "اتصل بنا"
     },
+    "myAccount": {
+      "title": "حسابي"
+    },
     "company": {
       "title": "الشركة",
+      "shop": "المتجر",
       "aboutUs": "من نحن"
     },
     "copyright": "© {{year}} Cliqo. جميع الحقوق محفوظة.",

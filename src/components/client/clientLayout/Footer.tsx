@@ -43,7 +43,7 @@ export function Footer() {
 
       {/* Main Footer */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -71,7 +71,18 @@ export function Footer() {
           <div className="space-y-4">
             <h2 className="font-semibold text-lg">{t('footer.company.title')}</h2>
             <ul className="space-y-2 text-sm">
+              <li><Link to="/shop" className="text-muted-foreground hover:text-foreground">{t('footer.company.shop')}</Link></li>
               <li><Link to="/about" className="text-muted-foreground hover:text-foreground">{t('footer.company.aboutUs')}</Link></li>
+            </ul>
+          </div>
+
+          {/* My Account */}
+          <div className="space-y-4">
+            <h2 className="font-semibold text-lg">{t('footer.myAccount.title')}</h2>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/my-account?tab=orders" className="text-muted-foreground hover:text-foreground">{t('myAccount.sidebar.orders')}</Link></li>
+              <li><Link to="/my-account?tab=wishlist" className="text-muted-foreground hover:text-foreground">{t('myAccount.sidebar.wishlist')}</Link></li>
+              <li><Link to="/my-account?tab=addresses" className="text-muted-foreground hover:text-foreground">{t('myAccount.sidebar.addresses')}</Link></li>
             </ul>
           </div>
         </div>

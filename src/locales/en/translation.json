@@ -1752,8 +1752,12 @@
       "trackOrder": "Track Your Order",
       "contactUs": "Contact Us"
     },
+    "myAccount": {
+      "title": "My Account"
+    },
     "company": {
       "title": "Company",
+      "shop": "Shop",
       "aboutUs": "About Us"
     },
     "copyright": "© {{year}} Cliqo. All rights reserved.",
