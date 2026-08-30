@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript types for the My-Ecommerce frontend.
+ * Shared TypeScript types for the cliqo frontend.
  *
  * Purpose:
  * - Canonical PaginationMeta (previously duplicated in every slice)

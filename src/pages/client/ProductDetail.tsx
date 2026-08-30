@@ -41,32 +41,6 @@ import { formatPrice } from "../../utils/formatPrice";
 const DETAIL_MAIN_WIDTHS = [400, 600, 800, 1200, 1600];
 const DETAIL_THUMB_WIDTHS = [120, 200, 280];
 
-// Common commerce color names → representative swatch hex. Unknown names
-// fall back to a neutral dot so custom colors still render a target.
-const COLOR_SWATCHES: Record<string, string> = {
-  black: "#18181b",
-  white: "#ffffff",
-  red: "#dc2626",
-  blue: "#2563eb",
-  green: "#16a34a",
-  yellow: "#eab308",
-  orange: "#ea580c",
-  purple: "#7c3aed",
-  pink: "#ec4899",
-  brown: "#92400e",
-  gray: "#6b7280",
-  grey: "#6b7280",
-  silver: "#cbd5e1",
-  gold: "#d4af37",
-  beige: "#e7d8c9",
-  navy: "#1e3a8a",
-};
-
-const colorSwatchHex = (name: string): string => {
-  const key = name.trim().toLowerCase();
-  return COLOR_SWATCHES[key] ?? "#9ca3af";
-};
-
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -356,11 +330,6 @@ const ProductDetails = () => {
                           : "border-border bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                       }`}
                     >
-                      <span
-                        aria-hidden="true"
-                        className="h-4 w-4 rounded-full border border-border shadow-xs"
-                        style={{ backgroundColor: colorSwatchHex(color) }}
-                      />
                       {color}
                     </button>
                   );

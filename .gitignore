@@ -10,6 +10,7 @@ yarn.lock
 .env.local
 .env.production
 .env.development
+.env.preview
 *.env
 
 # But keep example files
