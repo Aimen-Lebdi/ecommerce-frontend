@@ -110,10 +110,10 @@ const StorySection = () => {
           </div>
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=600&h=600&fit=crop"
-              srcSet="https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=400&h=400&fit=crop 400w, https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=600&h=600&fit=crop 600w, https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=900&h=900&fit=crop 900w"
+              src="https://images.unsplash.com/photo-1607166452427-7e4477079cb9?w=600&h=600&fit=crop"
+              srcSet="https://images.unsplash.com/photo-1607166452427-7e4477079cb9?w=400&h=400&fit=crop 400w, https://images.unsplash.com/photo-1607166452427-7e4477079cb9?w=600&h=600&fit=crop 600w, https://images.unsplash.com/photo-1607166452427-7e4477079cb9?w=900&h=900&fit=crop 900w"
               sizes="(min-width: 1024px) 50vw, 100vw"
-              alt="Our Story"
+              alt="A brown cardboard delivery box"
               loading="lazy"
               decoding="async"
               className="rounded-2xl shadow-sm w-full object-cover h-[400px]"
