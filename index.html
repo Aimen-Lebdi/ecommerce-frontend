@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" class="dark">
+<html lang="ar" dir="rtl" class="dark">
   <head>
     <meta charset="UTF-8" />
     <!-- type must match the file format: logo.png is a PNG, not SVG -->
@@ -40,10 +40,16 @@
     <script>
       // Apply the persisted language and direction before first paint so
       // direct visits (including /admin) never flash the wrong direction.
+      // Arabic is the default; only an explicitly saved choice overrides it.
       (function () {
         try {
-          var lang = localStorage.getItem("i18nextLng") || "en";
-          if (["en", "fr", "ar"].indexOf(lang) === -1) lang = "en";
+          // One-time cleanup of legacy keys so old preferences don't
+          // override the new Arabic default.
+          localStorage.removeItem("i18nextLng");
+          localStorage.removeItem("preferred-language");
+
+          var lang = localStorage.getItem("app-language") || "ar";
+          if (["en", "fr", "ar"].indexOf(lang) === -1) lang = "ar";
           document.documentElement.lang = lang;
           document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
         } catch (e) {
