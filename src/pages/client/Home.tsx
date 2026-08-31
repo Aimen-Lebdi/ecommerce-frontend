@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import type { Category, Product } from "@/types";
@@ -228,61 +228,12 @@ const HeroSection = () => {
 const CategoriesSection = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const { categories, loading } = useAppSelector((state) => state.categories);
 
   useEffect(() => {
     dispatch(fetchCategories({ limit: 100 }));
   }, [dispatch]);
-
-  const checkScrollButtons = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } =
-        scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  useEffect(() => {
-    checkScrollButtons();
-    const container = scrollContainerRef.current;
-    if (container) {
-      // The handler only flips arrow visibility, so it never needs to block
-      // scrolling: register passive and coalesce frames with rAF.
-      let rafId = 0;
-      const scheduleCheck = () => {
-        if (rafId) return;
-        rafId = requestAnimationFrame(() => {
-          rafId = 0;
-          checkScrollButtons();
-        });
-      };
-      container.addEventListener("scroll", scheduleCheck, { passive: true });
-      window.addEventListener("resize", scheduleCheck);
-      return () => {
-        if (rafId) cancelAnimationFrame(rafId);
-        container.removeEventListener("scroll", scheduleCheck);
-        window.removeEventListener("resize", scheduleCheck);
-      };
-    }
-  }, [categories]);
-
-  const scroll = (direction: string) => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 300;
-      const newScrollLeft =
-        scrollContainerRef.current.scrollLeft +
-        (direction === "left" ? -scrollAmount : scrollAmount);
-      scrollContainerRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: "smooth",
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -313,21 +264,8 @@ const CategoriesSection = () => {
         </p>
       </div>
 
-      <div className="relative">
-        {canScrollLeft && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-sm"
-            onClick={() => scroll("left")}
-            aria-label={t("home.categories.scrollLeft")}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-        )}
-
+      <div>
         <div
-          ref={scrollContainerRef}
           className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
@@ -371,18 +309,6 @@ const CategoriesSection = () => {
             </Link>
           ))}
         </div>
-
-        {canScrollRight && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-sm"
-            onClick={() => scroll("right")}
-            aria-label={t("home.categories.scrollRight")}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-        )}
       </div>
     </section>
   );
