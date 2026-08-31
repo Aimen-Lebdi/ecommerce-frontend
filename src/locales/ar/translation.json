@@ -219,7 +219,8 @@
     "relatedProducts": "منتجات ذات صلة",
     "breadcrumbs": {
       "shop": "المتجر",
-      "category": "الفئة"
+      "category": "الفئة",
+      "subcategory": "الفئة الفرعية"
     },
     "features": {
       "cod": "الدفع عند الاستلام",

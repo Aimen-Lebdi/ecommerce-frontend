@@ -654,11 +654,22 @@ const ShopPage = () => {
     maxPrice: "",
   });
 
-  // Get keyword from URL on mount and when URL changes
+  // Get filters from URL on mount and when URL changes
   useEffect(() => {
     const keywordFromUrl = searchParams.get("keyword");
+    const categoryFromUrl = searchParams.get("category");
+    const subCategoryFromUrl = searchParams.get("subcategory");
+
     if (keywordFromUrl) {
       setFilters((prev) => ({ ...prev, keyword: keywordFromUrl, page: 1 }));
+    }
+
+    if (categoryFromUrl) {
+      setSelectedCategories(categoryFromUrl.split(",").filter(Boolean));
+    }
+
+    if (subCategoryFromUrl) {
+      setSelectedSubCategories(subCategoryFromUrl.split(",").filter(Boolean));
     }
   }, [searchParams]);
 
@@ -668,13 +679,19 @@ const ShopPage = () => {
     dispatch(fetchBrands({}));
   }, [dispatch]);
 
-  // Fetch subcategories when categories change
+  // Fetch subcategories when categories change.
+  // The `else` branch uses a functional updater to avoid clearing subcategories
+  // that were just set from URL params (e.g. breadcrumb links). React batches
+  // state updates across effects, so the stale `selectedCategories` in this
+  // render could still be `[]` while the URL-params effect already queued
+  // `setSelectedSubCategories([...])`. Checking `prev` (the pending state)
+  // ensures we only clear subcategories that were genuinely empty before.
   useEffect(() => {
     if (selectedCategories.length > 0) {
       const categoryIds = selectedCategories.join(",");
       dispatch(fetchSubCategories({ category: categoryIds, limit: 100 }));
     } else {
-      setSelectedSubCategories([]);
+      setSelectedSubCategories((prev) => (prev.length > 0 ? prev : []));
     }
   }, [selectedCategories, dispatch]);
 

@@ -216,7 +216,8 @@
     "relatedProducts": "Produits Associés",
     "breadcrumbs": {
       "shop": "Boutique",
-      "category": "Catégorie"
+      "category": "Catégorie",
+      "subcategory": "Sous-catégorie"
     },
     "features": {
       "cod": "Paiement à la livraison",

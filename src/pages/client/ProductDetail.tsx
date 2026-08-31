@@ -22,6 +22,14 @@ import {
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
 import { Alert, AlertDescription } from "../../components/ui/alert";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../../components/ui/breadcrumb";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchProductById,
@@ -189,16 +197,39 @@ const ProductDetails = () => {
   return (
     <div className="container py-6 md:py-10 space-y-6 md:space-y-10 px-4 md:px-6">
       {/* Breadcrumbs */}
-      <div className="text-xs md:text-sm text-muted-foreground">
-        <Link to="/shop" className="hover:underline">
-          {t('productDetail.breadcrumbs.shop')}
-        </Link>{" "}
-        /{" "}
-        <span className="hover:underline cursor-pointer">
-          {product.category?.name || t('productDetail.breadcrumbs.category')}
-        </span>{" "}
-        / <span className="font-medium text-foreground">{product.name}</span>
-      </div>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/shop">{t('productDetail.breadcrumbs.shop')}</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to={`/shop?category=${product.category?._id}`}>
+                {product.category?.name || t('productDetail.breadcrumbs.category')}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {product.subCategory && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to={`/shop?category=${product.category?._id}&subcategory=${product.subCategory._id}`}>
+                    {product.subCategory.name}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{product.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       {/* Main Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">

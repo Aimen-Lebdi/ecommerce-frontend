@@ -216,7 +216,8 @@
     "relatedProducts": "Related Products",
     "breadcrumbs": {
       "shop": "Shop",
-      "category": "Category"
+      "category": "Category",
+      "subcategory": "Subcategory"
     },
     "features": {
       "cod": "Cash on delivery",
