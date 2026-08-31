@@ -173,6 +173,8 @@
       "outOfStock": "Rupture de Stock",
       "inStock": "En Stock ({{quantity}})",
       "addedToWishlist": "{{productName}} ajouté à la liste de souhaits",
+      "removedFromWishlist": "{{productName}} retiré de la liste de souhaits",
+      "removeFromWishlist": "Retirer {{productName}} de la liste de souhaits",
       "failedToAddToWishlist": "Échec de l'ajout à la liste de souhaits"
     },
     "pagination": {

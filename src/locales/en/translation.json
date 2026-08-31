@@ -173,6 +173,8 @@
       "outOfStock": "Out of Stock",
       "inStock": "In Stock ({{quantity}})",
       "addedToWishlist": "{{productName}} added to wishlist",
+      "removedFromWishlist": "{{productName}} removed from wishlist",
+      "removeFromWishlist": "Remove {{productName}} from wishlist",
       "failedToAddToWishlist": "Failed to add to wishlist"
     },
     "pagination": {

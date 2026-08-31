@@ -176,6 +176,8 @@
       "outOfStock": "غير متوفر",
       "inStock": "متوفر ({{quantity}})",
       "addedToWishlist": "تمت إضافة {{productName}} إلى قائمة الرغبات",
+      "removedFromWishlist": "تمت إزالة {{productName}} من قائمة الرغبات",
+      "removeFromWishlist": "إزالة {{productName}} من قائمة الرغبات",
       "failedToAddToWishlist": "فشل الإضافة إلى قائمة الرغبات"
     },
     "pagination": {

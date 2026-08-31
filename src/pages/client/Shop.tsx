@@ -47,7 +47,7 @@ import { fetchProducts } from "../../features/products/productsSlice";
 import { fetchCategories } from "../../features/categories/categoriesSlice";
 import { fetchSubCategories } from "../../features/subCategories/subCategoriesSlice";
 import { fetchBrands } from "../../features/brands/brandsSlice";
-import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
+import { addProductToWishlist, removeProductFromWishlist } from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
 
 // ─── Shop Filters Types ───────────────────────────────────────────────────────
@@ -372,7 +372,6 @@ FiltersPanel.displayName = "FiltersPanel";
 
 interface ProductCardProps {
   product: Product;
-  onAddToWishlist: (product: Product) => void;
 }
 
 // Grid cards run from one phone-width column up to four columns on wide
@@ -382,91 +381,136 @@ const PRODUCT_GRID_SIZES =
   "(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), 350px";
 const LIST_THUMB_WIDTHS = [128, 192, 256, 384];
 
-const ProductCard = memo<ProductCardProps>(
-  ({ product, onAddToWishlist }) => {
-    const { t } = useTranslation();
+const ProductCard = memo<ProductCardProps>(({ product }) => {
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const wishlistItems = useAppSelector((state) => state.wishlist.wishlistItems);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-    return (
-      <Link to={`/product/${product._id}`} className="block h-full">
-        <Card className="group hover:shadow-sm transition-all duration-150 h-full flex flex-col cursor-pointer">
-          <CardHeader className="p-0 flex-shrink-0">
-            <div className="relative overflow-hidden rounded-t-lg">
-              {product.mainImage ? (
-                <div className="w-full h-36 sm:h-40 md:h-48 overflow-hidden bg-muted transition-transform duration-150 group-hover:scale-105">
-                  <img
-                    {...responsiveImageProps(
-                      product.mainImage,
-                      PRODUCT_GRID_WIDTHS,
-                      PRODUCT_GRID_SIZES
-                    )}
-                    alt={product.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-36 sm:h-40 md:h-48 bg-muted flex items-center justify-center">
-                  <Package className="h-8 w-8 text-muted-foreground" />
-                </div>
-              )}
-              <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-11 w-11 bg-white/90 hover:bg-white"
-                  aria-label={t("home.products.addToWishlist", {
-                    productName: product.name,
-                  })}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onAddToWishlist(product);
-                  }}
-                >
-                  <Heart className="h-3 w-3" />
-                </Button>
+  const isInWishlist = wishlistItems.some((item) => item._id === product._id);
+
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Trigger a quick pop animation for tactile feedback.
+    setIsAnimating(true);
+    window.setTimeout(() => setIsAnimating(false), 300);
+
+    try {
+      if (isInWishlist) {
+        await dispatch(removeProductFromWishlist(product._id)).unwrap();
+        toast.success(
+          t("shop.product.removedFromWishlist", {
+            productName: product.name,
+          })
+        );
+      } else {
+        await dispatch(addProductToWishlist(product._id)).unwrap();
+        toast.success(
+          t("shop.product.addedToWishlist", {
+            productName: product.name,
+          })
+        );
+      }
+    } catch (err) {
+      toast.error(
+        (err as string) || t("shop.product.failedToAddToWishlist")
+      );
+    }
+  };
+
+  return (
+    <Link to={`/product/${product._id}`} className="block h-full">
+      <Card className="group hover:shadow-sm transition-all duration-150 h-full flex flex-col cursor-pointer">
+        <CardHeader className="p-0 flex-shrink-0">
+          <div className="relative overflow-hidden rounded-t-lg">
+            {product.mainImage ? (
+              <div className="w-full h-36 sm:h-40 md:h-48 overflow-hidden bg-muted transition-transform duration-150 group-hover:scale-105">
+                <img
+                  {...responsiveImageProps(
+                    product.mainImage,
+                    PRODUCT_GRID_WIDTHS,
+                    PRODUCT_GRID_SIZES
+                  )}
+                  alt={product.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-contain"
+                />
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
-            <div className="mb-1.5 flex flex-wrap gap-1">
-              {product.brand?.name && (
-                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                  {product.brand.name}
-                </Badge>
-              )}
-              {product.category?.name && (
-                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                  {product.category.name}
-                </Badge>
-              )}
-            </div>
-            <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-2 leading-tight flex-1">
-              {product.name}
-            </h3>
-            <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
-              <span className="text-base sm:text-lg font-bold">
-                {formatPrice(product.price)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between mt-auto">
-              <span
-                className={`text-xs ${
-                  product.quantity > 0 ? "text-success" : "text-destructive"
+            ) : (
+              <div className="w-full h-36 sm:h-40 md:h-48 bg-muted flex items-center justify-center">
+                <Package className="h-8 w-8 text-muted-foreground" />
+              </div>
+            )}
+            <div className="absolute top-2 right-2 flex flex-col gap-1">
+              <Button
+                size="icon"
+                variant="outline"
+                className={`h-11 w-11 bg-white/95 backdrop-blur-sm shadow-md ring-1 ring-black/5 hover:bg-white transition-transform ${
+                  isAnimating ? "scale-110" : ""
                 }`}
+                aria-label={
+                  isInWishlist
+                    ? t("shop.product.removeFromWishlist", {
+                        productName: product.name,
+                      })
+                    : t("home.products.addToWishlist", {
+                        productName: product.name,
+                      })
+                }
+                aria-pressed={isInWishlist}
+                onClick={handleToggleWishlist}
               >
-                {product.quantity > 0
-                  ? t("shop.product.inStock", { quantity: product.quantity })
-                  : t("shop.product.outOfStock")}
-              </span>
+                <Heart
+                  className={`h-3 w-3 transition-colors drop-shadow ${
+                    isInWishlist
+                      ? "fill-destructive text-destructive"
+                      : "text-foreground"
+                  }`}
+                />
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </Link>
-    );
-  }
-);
+          </div>
+        </CardHeader>
+        <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
+          <div className="mb-1.5 flex flex-wrap gap-1">
+            {product.brand?.name && (
+              <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                {product.brand.name}
+              </Badge>
+            )}
+            {product.category?.name && (
+              <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                {product.category.name}
+              </Badge>
+            )}
+          </div>
+          <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-2 leading-tight flex-1">
+            {product.name}
+          </h3>
+          <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
+            <span className="text-base sm:text-lg font-bold">
+              {formatPrice(product.price)}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-auto">
+            <span
+              className={`text-xs ${
+                product.quantity > 0 ? "text-success" : "text-destructive"
+              }`}
+            >
+              {product.quantity > 0
+                ? t("shop.product.inStock", { quantity: product.quantity })
+                : t("shop.product.outOfStock")}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+});
 
 ProductCard.displayName = "ProductCard";
 
@@ -833,26 +877,6 @@ const ShopPage = () => {
     return selectedCategories.includes(subCategoryId);
   });
 
-  // Stable wishlist handler shared by both card variants; keeping its
-  // identity across renders lets the memoized cards skip re-renders.
-  const handleAddToWishlist = useCallback(
-    async (product: Product) => {
-      try {
-        await dispatch(addProductToWishlist(product._id)).unwrap();
-        toast.success(
-          t("shop.product.addedToWishlist", {
-            productName: product.name,
-          })
-        );
-      } catch (err) {
-        toast.error(
-          (err as string) || t("shop.product.failedToAddToWishlist")
-        );
-      }
-    },
-    [dispatch, t]
-  );
-
   const generatePaginationPages = () => {
     if (!pagination) return [];
 
@@ -1173,11 +1197,7 @@ const ShopPage = () => {
               {viewMode === "grid" ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
                   {products.map((product) => (
-                    <ProductCard
-                      key={product._id}
-                      product={product}
-                      onAddToWishlist={handleAddToWishlist}
-                    />
+                    <ProductCard key={product._id} product={product} />
                   ))}
                 </div>
               ) : (

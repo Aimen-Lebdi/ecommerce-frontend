@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { fetchCart, resetCart } from "./features/cart/cartSlice";
+import { fetchWishlist, resetWishlist } from "./features/wishlist/wishlistSlice";
 import { Toaster } from "sonner";
 
 const App = () => {
@@ -25,8 +26,12 @@ const App = () => {
     // - logged out / token expired: reset local cart state (no API call)
     if (isAuthenticated) {
       dispatch(fetchCart());
+      // Also fetch the wishlist globally so product-card hearts reflect the
+      // user's saved items on every page (Shop, Home, etc.).
+      dispatch(fetchWishlist());
     } else {
       dispatch(resetCart());
+      dispatch(resetWishlist());
     }
   }, [isAuthenticated, dispatch]);
 

@@ -18,7 +18,10 @@ import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Link } from "react-router-dom";
 import { fetchCategories } from "../../features/categories/categoriesSlice";
 import { fetchProducts } from "../../features/products/productsSlice";
-import { addProductToWishlist } from "../../features/wishlist/wishlistSlice";
+import {
+  addProductToWishlist,
+  removeProductFromWishlist,
+} from "../../features/wishlist/wishlistSlice";
 import { toast } from "sonner";
 import { responsiveImageProps } from "../../utils/responsiveImage";
 import { formatPrice } from "../../utils/formatPrice";
@@ -320,24 +323,42 @@ const FeaturedProductsSection = () => {
   const dispatch = useAppDispatch();
 
   const { products, loading } = useAppSelector((state) => state.products);
+  const wishlistItems = useAppSelector((state) => state.wishlist.wishlistItems);
 
   useEffect(() => {
     // Fetch top 4 products sorted by sold (most popular)
     dispatch(fetchProducts({ limit: 4, sort: "-sold" }));
   }, [dispatch]);
 
-  const handleAddToWishlist = async (e: React.MouseEvent, productId: string, productName: string) => {
+  const handleToggleWishlist = async (
+    e: React.MouseEvent,
+    productId: string,
+    productName: string,
+    isInWishlist: boolean
+  ) => {
     e.preventDefault();
     e.stopPropagation();
     try {
-      await dispatch(addProductToWishlist(productId)).unwrap();
-      toast.success(
-        t("shop.product.addedToWishlist", {
-          productName: productName,
-        })
-      );
+      if (isInWishlist) {
+        await dispatch(removeProductFromWishlist(productId)).unwrap();
+        toast.success(
+          t("shop.product.removedFromWishlist", {
+            productName: productName,
+          })
+        );
+      } else {
+        await dispatch(addProductToWishlist(productId)).unwrap();
+        toast.success(
+          t("shop.product.addedToWishlist", {
+            productName: productName,
+          })
+        );
+      }
     } catch (err: unknown) {
-      const message = typeof err === "string" ? err : t("shop.product.failedToAddToWishlist");
+      const message =
+        typeof err === "string"
+          ? err
+          : t("shop.product.failedToAddToWishlist");
       toast.error(message);
     }
   };
@@ -401,6 +422,10 @@ const FeaturedProductsSection = () => {
             badgeVariant = "default";
           }
 
+          const isInWishlist = wishlistItems.some(
+            (item) => item._id === product._id
+          );
+
           return (
             <Link
               key={product._id}
@@ -435,19 +460,37 @@ const FeaturedProductsSection = () => {
                     >
                       {t(badge)}
                     </Badge>
-                    <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-3 right-3 flex flex-col gap-2">
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-11 w-11 bg-white/80 hover:bg-white"
-                        aria-label={t("home.products.addToWishlist", {
-                          productName: product.name,
-                        })}
+                        className="h-11 w-11 bg-white/95 backdrop-blur-sm shadow-md ring-1 ring-black/5 hover:bg-white"
+                        aria-label={
+                          isInWishlist
+                            ? t("shop.product.removeFromWishlist", {
+                                productName: product.name,
+                              })
+                            : t("home.products.addToWishlist", {
+                                productName: product.name,
+                              })
+                        }
+                        aria-pressed={isInWishlist}
                         onClick={(e) =>
-                          handleAddToWishlist(e, product._id, product.name)
+                          handleToggleWishlist(
+                            e,
+                            product._id,
+                            product.name,
+                            isInWishlist
+                          )
                         }
                       >
-                        <Heart className="h-4 w-4" />
+                        <Heart
+                          className={`h-4 w-4 transition-colors drop-shadow ${
+                            isInWishlist
+                              ? "fill-destructive text-destructive"
+                              : "text-foreground"
+                          }`}
+                        />
                       </Button>
                     </div>
                   </div>
