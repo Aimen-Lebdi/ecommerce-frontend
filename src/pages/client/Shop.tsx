@@ -5,8 +5,6 @@ import type { Product, Category, SubCategory, Brand, ProductsQueryParams } from 
 import { useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
-  Grid3X3,
-  List,
   Heart,
   ShoppingCart,
   Package,
@@ -379,7 +377,6 @@ interface ProductCardProps {
 const PRODUCT_GRID_WIDTHS = [200, 320, 480, 640, 800];
 const PRODUCT_GRID_SIZES =
   "(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), 350px";
-const LIST_THUMB_WIDTHS = [128, 192, 256, 384];
 
 const ProductCard = memo<ProductCardProps>(({ product }) => {
   const { t } = useTranslation();
@@ -514,89 +511,6 @@ const ProductCard = memo<ProductCardProps>(({ product }) => {
 
 ProductCard.displayName = "ProductCard";
 
-interface ProductCardListProps {
-  product: Product;
-}
-
-const ProductCardList = memo<ProductCardListProps>(
-  ({ product }) => {
-    const { t } = useTranslation();
-
-    return (
-      <Link to={`/product/${product._id}`} className="block">
-        <Card className="group hover:shadow-sm transition-all duration-150 cursor-pointer">
-          <CardContent className="p-4">
-            <div className="flex gap-4">
-              <div className="relative overflow-hidden rounded-lg flex-shrink-0">
-                {product.mainImage ? (
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 overflow-hidden bg-muted transition-transform duration-150 group-hover:scale-105">
-                    <img
-                      {...responsiveImageProps(
-                        product.mainImage,
-                        LIST_THUMB_WIDTHS,
-                        "128px"
-                      )}
-                      alt={product.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-muted flex items-center justify-center">
-                    <Package className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="mb-2">
-                  <div className="flex flex-wrap gap-1 mb-1">
-                    {product.brand?.name && (
-                      <Badge variant="outline" className="text-xs">
-                        {product.brand.name}
-                      </Badge>
-                    )}
-                    {product.category?.name && (
-                      <Badge variant="outline" className="text-xs">
-                        {product.category.name}
-                      </Badge>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-base sm:text-lg mb-1 line-clamp-2">
-                    {product.name}
-                  </h3>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg sm:text-xl font-bold">
-                        {formatPrice(product.price)}
-                      </span>
-                    </div>
-                    <span
-                      className={`text-sm ${
-                        product.quantity > 0 ? "text-success" : "text-destructive"
-                      }`}
-                    >
-                      {product.quantity > 0
-                        ? t("shop.product.inStock", {
-                            quantity: product.quantity,
-                          })
-                        : t("shop.product.outOfStock")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </Link>
-    );
-  }
-);
-
-ProductCardList.displayName = "ProductCardList";
-
 const ShopPage = () => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
@@ -632,7 +546,6 @@ const ShopPage = () => {
   );
 
   // Local state
-  const [viewMode, setViewMode] = useState("grid");
   const [filters, setFilters] = useState<ShopFilters>({
     page: 1,
     limit: 12,
@@ -1069,23 +982,6 @@ const ShopPage = () => {
                 </SelectContent>
               </Select>
 
-              {/* View Toggle */}
-              <div className="flex border rounded-md p-1">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
           </div>
 
@@ -1208,22 +1104,14 @@ const ShopPage = () => {
             </div>
           )}
 
-          {/* Products Grid/List */}
+          {/* Products Grid */}
           {!productsLoading && !productsError && products && products.length > 0 ? (
             <>
-              {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                  {products.map((product) => (
-                    <ProductCard key={product._id} product={product} />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4 mb-8">
-                  {products.map((product) => (
-                    <ProductCardList key={product._id} product={product} />
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                {products.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
 
               {/* Pagination */}
               {pagination && pagination.numberOfPages > 1 && (
