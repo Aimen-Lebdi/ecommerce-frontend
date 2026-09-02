@@ -190,8 +190,10 @@
     },
     "errors": {
       "loadingProductsFailed": "Échec du chargement des produits",
-      "loadingSubcategoriesFailed": "Échec du chargement des sous-catégories"
+      "loadingSubcategoriesFailed": "Échec du chargement des sous-catégories",
+      "loadMoreFailed": "Échec du chargement de plus de produits"
     },
+    "reachedEnd": "Vous avez atteint la fin",
     "retry": "Réessayer"
   },
   "productDetail": {

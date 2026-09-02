@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useTranslation } from "react-i18next";
 import type { Product, Category, SubCategory, Brand, ProductsQueryParams } from "@/types";
@@ -11,8 +11,6 @@ import {
   RefreshCw,
   X,
   SlidersHorizontal,
-  ChevronLeft,
-  ChevronRight,
   Loader2,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -41,7 +39,10 @@ import { responsiveImageProps } from "../../utils/responsiveImage";
 import { formatPrice } from "../../utils/formatPrice";
 
 // Import Redux actions
-import { fetchProducts } from "../../features/products/productsSlice";
+import {
+  fetchProducts,
+  fetchMoreProducts,
+} from "../../features/products/productsSlice";
 import { fetchCategories } from "../../features/categories/categoriesSlice";
 import { fetchSubCategories } from "../../features/subCategories/subCategoriesSlice";
 import { fetchBrands } from "../../features/brands/brandsSlice";
@@ -56,7 +57,6 @@ interface TempPriceRange {
 }
 
 interface ShopFilters {
-  page: number;
   limit: number;
   sort: string;
   category: string;
@@ -135,7 +135,7 @@ const FiltersPanel = memo<FiltersPanelProps>(
               </span>
             </div>
           ) : (
-            <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
+            <div className="space-y-2">
               {categories?.map((category) => (
                 <div key={category._id} className="flex items-center space-x-2">
                   <Checkbox
@@ -185,7 +185,7 @@ const FiltersPanel = memo<FiltersPanelProps>(
                 </Button>
               </div>
             ) : availableSubCategories.length > 0 ? (
-              <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
+              <div className="space-y-2">
                 {availableSubCategories.map((subcategory) => (
                   <div
                     key={subcategory._id}
@@ -231,7 +231,7 @@ const FiltersPanel = memo<FiltersPanelProps>(
               </span>
             </div>
           ) : (
-            <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto custom-scroll">
+            <div className="space-y-2">
               {brands?.map((brand) => (
                 <div key={brand._id} className="flex items-center space-x-2">
                   <Checkbox
@@ -338,7 +338,7 @@ const FiltersPanel = memo<FiltersPanelProps>(
                 id="in-stock"
                 checked={filters.inStock}
                 onCheckedChange={(checked) =>
-                  onFiltersChange({ ...filters, inStock: checked === true, page: 1 })
+                  onFiltersChange({ ...filters, inStock: checked === true })
                 }
               />
               <Label htmlFor="in-stock" className="text-sm font-normal">
@@ -532,6 +532,8 @@ const ShopPage = () => {
     pagination,
     loading: productsLoading,
     error: productsError,
+    loadingMore,
+    loadMoreError,
   } = useAppSelector((state) => state.products);
   const { categories, loading: categoriesLoading } = useAppSelector(
     (state) => state.categories
@@ -547,8 +549,7 @@ const ShopPage = () => {
 
   // Local state
   const [filters, setFilters] = useState<ShopFilters>({
-    page: 1,
-    limit: 12,
+    limit: 24,
     sort: "-sold",
     category: "",
     subCategory: "",
@@ -574,7 +575,7 @@ const ShopPage = () => {
     const subCategoryFromUrl = searchParams.get("subcategory");
 
     if (keywordFromUrl) {
-      setFilters((prev) => ({ ...prev, keyword: keywordFromUrl, page: 1 }));
+      setFilters((prev) => ({ ...prev, keyword: keywordFromUrl }));
     }
 
     if (categoryFromUrl) {
@@ -611,7 +612,6 @@ const ShopPage = () => {
   // Build products query params from current filters (shared by effect + retry)
   const buildProductsQueryParams = useCallback((): ProductsQueryParams => {
     const queryParams: ProductsQueryParams = {
-      page: filters.page,
       limit: filters.limit,
       sort: filters.sort,
     };
@@ -653,6 +653,9 @@ const ShopPage = () => {
     const fetchPromise = dispatch(fetchProducts(buildProductsQueryParams()));
     return () => {
       fetchPromise?.abort?.();
+      // A filter change supersedes any in-flight load-more request
+      loadMorePromiseRef.current?.abort?.();
+      loadMorePromiseRef.current = null;
     };
   }, [buildProductsQueryParams, dispatch]);
 
@@ -668,6 +671,48 @@ const ShopPage = () => {
       dispatch(fetchSubCategories({ category: categoryIds, limit: 100 }));
     }
   }, [selectedCategories, dispatch]);
+
+  // Retry a failed load-more request (infinite scroll)
+  const handleRetryLoadMore = useCallback(() => {
+    dispatch(fetchMoreProducts(buildProductsQueryParams()));
+  }, [buildProductsQueryParams, dispatch]);
+
+  const hasMore = Boolean(pagination?.nextPage);
+
+  // Infinite scroll: prefetch the next page when the sentinel approaches the
+  // bottom of the scroll container. The observer is recreated whenever the
+  // guard values change so that a sentinel already in view re-triggers once
+  // loadingMore clears.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    const scrollRoot = productsScrollRef.current;
+    if (!sentinel || !scrollRoot) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0]?.isIntersecting &&
+          !productsLoading &&
+          !loadingMore &&
+          hasMore
+        ) {
+          loadMorePromiseRef.current = dispatch(
+            fetchMoreProducts(buildProductsQueryParams())
+          );
+        }
+      },
+      { root: scrollRoot, rootMargin: "300px 0px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [
+    dispatch,
+    buildProductsQueryParams,
+    productsLoading,
+    loadingMore,
+    hasMore,
+  ]);
 
   // Count active filters
   useEffect(() => {
@@ -703,7 +748,7 @@ const ShopPage = () => {
         })
       );
 
-      setFilters((prev) => ({ ...prev, page: 1 }));
+      setFilters((prev) => ({ ...prev }));
     },
     [selectedCategories, subcategories]
   );
@@ -714,7 +759,7 @@ const ShopPage = () => {
         ? prev.filter((s) => s !== subCategoryId)
         : [...prev, subCategoryId]
     );
-    setFilters((prev) => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev }));
   }, []);
 
   const handleBrandChange = useCallback((brandId: string) => {
@@ -723,7 +768,7 @@ const ShopPage = () => {
         ? prev.filter((b) => b !== brandId)
         : [...prev, brandId]
     );
-    setFilters((prev) => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev }));
   }, []);
 
   const handleTempPriceChange = useCallback((field: string, value: string) => {
@@ -735,7 +780,6 @@ const ShopPage = () => {
       ...prev,
       minPrice: tempPriceRange.minPrice,
       maxPrice: tempPriceRange.maxPrice,
-      page: 1,
     }));
   }, [tempPriceRange]);
 
@@ -744,13 +788,12 @@ const ShopPage = () => {
   }, []);
 
   const handleSortChange = (sortValue: string) => {
-    setFilters((prev) => ({ ...prev, sort: sortValue, page: 1 }));
+    setFilters((prev) => ({ ...prev, sort: sortValue }));
   };
 
-  const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const productsScrollRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadMorePromiseRef = useRef<{ abort: () => void } | null>(null);
 
   const clearFilters = useCallback(() => {
     setSelectedCategories([]);
@@ -763,7 +806,6 @@ const ShopPage = () => {
       maxPrice: "",
       inStock: false,
       keyword: "",
-      page: 1,
     }));
     // Clear keyword from URL
     setSearchParams({});
@@ -786,14 +828,13 @@ const ShopPage = () => {
           ...prev,
           minPrice: "",
           maxPrice: "",
-          page: 1,
         }));
         break;
       case "inStock":
-        setFilters((prev) => ({ ...prev, inStock: false, page: 1 }));
+        setFilters((prev) => ({ ...prev, inStock: false }));
         break;
       case "keyword":
-        setFilters((prev) => ({ ...prev, keyword: "", page: 1 }));
+        setFilters((prev) => ({ ...prev, keyword: "" }));
         setSearchParams({});
         break;
     }
@@ -807,49 +848,10 @@ const ShopPage = () => {
     return selectedCategories.includes(subCategoryId);
   });
 
-  const generatePaginationPages = () => {
-    if (!pagination) return [];
-
-    const { currentPage, numberOfPages } = pagination;
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    if (numberOfPages <= maxVisiblePages) {
-      for (let i = 1; i <= numberOfPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-
-      if (currentPage > 3) {
-        pages.push("...");
-      }
-
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(numberOfPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        if (!pages.includes(i)) {
-          pages.push(i);
-        }
-      }
-
-      if (currentPage < numberOfPages - 2) {
-        pages.push("...");
-      }
-
-      if (!pages.includes(numberOfPages)) {
-        pages.push(numberOfPages);
-      }
-    }
-
-    return pages;
-  };
-
   return (
-    <div className="container mx-auto px-4 py-4 sm:py-8">
+    <div className="container mx-auto px-4 py-3 sm:py-4 flex flex-col overflow-hidden" style={{ height: "calc(100dvh - 4rem)" }}>
       {/* Page Header */}
-      <div className="mb-6 sm:mb-8">
+      <div className="flex-shrink-0 pb-2 sm:pb-3">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           {t("shop.header.title")}
         </h1>
@@ -860,9 +862,9 @@ const ShopPage = () => {
         </p>
       </div>
 
-      <div className="flex gap-4 sm:gap-8">
+      <div className="flex gap-4 sm:gap-8 flex-1 min-h-0">
         {/* Desktop Filters Sidebar */}
-        <div className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
+        <div className="hidden lg:block w-64 xl:w-72 flex-shrink-0 overflow-y-auto custom-scroll">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -903,9 +905,9 @@ const ShopPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col min-h-0">
           {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-3">
             <div className="flex items-center gap-4 w-full sm:w-auto">
               {/* Mobile Filters */}
               <Sheet>
@@ -987,7 +989,7 @@ const ShopPage = () => {
 
           {/* Active Filters */}
           {activeFilters > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex-shrink-0 flex flex-wrap gap-2 pb-3">
               {filters.keyword && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   {t("shop.searchChip", { keyword: filters.keyword })}
@@ -1073,6 +1075,8 @@ const ShopPage = () => {
             </div>
           )}
 
+          {/* Scrollable Products Area */}
+          <div ref={productsScrollRef} className="flex-1 overflow-y-auto min-h-0 custom-scroll">
           {/* Loading State */}
           {productsLoading && (
             <div className="flex items-center justify-center py-12">
@@ -1106,100 +1110,11 @@ const ShopPage = () => {
 
           {/* Products Grid */}
           {!productsLoading && !productsError && products && products.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((product) => (
                   <ProductCard key={product._id} product={product} />
                 ))}
               </div>
-
-              {/* Pagination */}
-              {pagination && pagination.numberOfPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t">
-                  <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                    {t("shop.pagination.showingPage")} {pagination.currentPage}{" "}
-                    {t("shop.pagination.of")} {pagination.numberOfPages}
-                  </div>
-
-                  <div className="flex items-center gap-2 order-1 sm:order-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handlePageChange(pagination.currentPage - 1)
-                      }
-                      disabled={!pagination.previousPage}
-                      className="hidden sm:flex"
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      {t("shop.pagination.previous")}
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handlePageChange(pagination.currentPage - 1)
-                      }
-                      disabled={!pagination.previousPage}
-                      className="sm:hidden"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-
-                    {generatePaginationPages().map((page, index) =>
-                      page === "..." ? (
-                        <span
-                          key={`ellipsis-${index}`}
-                          className="px-2 text-muted-foreground"
-                        >
-                          ...
-                        </span>
-                      ) : (
-                        <Button
-                          key={page}
-                          variant={
-                            pagination.currentPage === page
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handlePageChange(Number(page))}
-                          className="min-w-[40px]"
-                        >
-                          {page}
-                        </Button>
-                      )
-                    )}
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handlePageChange(pagination.currentPage + 1)
-                      }
-                      disabled={!pagination.nextPage}
-                      className="hidden sm:flex"
-                    >
-                      {t("shop.pagination.next")}
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handlePageChange(pagination.currentPage + 1)
-                      }
-                      disabled={!pagination.nextPage}
-                      className="sm:hidden"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </>
           ) : !productsLoading && !productsError ? (
             <div className="text-center py-12">
               <div className="mb-4">
@@ -1222,6 +1137,40 @@ const ShopPage = () => {
               )}
             </div>
           ) : null}
+
+          {/* Infinite scroll sentinel + bottom states */}
+          {!productsLoading && !productsError && products && products.length > 0 && (
+            <>
+              <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+              {loadingMore && (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+              {!loadingMore && loadMoreError && (
+                <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+                  <p className="text-sm text-destructive">
+                    {t("shop.errors.loadMoreFailed")}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRetryLoadMore}
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" />
+                    {t("shop.retry")}
+                  </Button>
+                </div>
+              )}
+              {!loadingMore && !loadMoreError && !hasMore && (
+                <div className="py-8 text-center text-sm text-muted-foreground">
+                  {t("shop.reachedEnd")}
+                </div>
+              )}
+            </>
+          )}
+          </div>
+          {/* End Scrollable Products Area */}
         </div>
       </div>
     </div>

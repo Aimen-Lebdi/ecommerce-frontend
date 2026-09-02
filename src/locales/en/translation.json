@@ -190,8 +190,10 @@
     },
     "errors": {
       "loadingProductsFailed": "Failed to load products",
-      "loadingSubcategoriesFailed": "Failed to load subcategories"
+      "loadingSubcategoriesFailed": "Failed to load subcategories",
+      "loadMoreFailed": "Failed to load more products"
     },
+    "reachedEnd": "You've reached the end",
     "retry": "Retry"
   },
   "productDetail": {

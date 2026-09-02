@@ -45,6 +45,9 @@ interface ProductsState {
   isDeleting: boolean;
   isDeletingMany: boolean;
   currentQueryParams: ProductsQueryParams;
+  // Infinite scroll state (Shop page)
+  loadingMore: boolean;
+  loadMoreError: string | null;
 }
 
 // Initial state
@@ -61,6 +64,8 @@ const initialState: ProductsState = {
   isDeleting: false,
   isDeletingMany: false,
   currentQueryParams: {},
+  loadingMore: false,
+  loadMoreError: null,
 };
 
 // Async thunk to fetch products from backend with query parameters
@@ -104,6 +109,57 @@ export const fetchProducts = createAsyncThunk<
     return rejectWithValue({ message, status });
   }
 });
+
+// Async thunk to fetch the NEXT page of products and append them to the list.
+// Used by the Shop page's infinite scroll. The page is derived from the
+// current pagination state so callers never track it themselves.
+export const fetchMoreProducts = createAsyncThunk<
+  { products: Product[]; pagination: PaginationMeta },
+  ProductsQueryParams,
+  {
+    rejectValue: { message: string; status?: number };
+    state: { products: ProductsState };
+  }
+>(
+  "products/fetchMoreProducts",
+  async (queryParams, { rejectWithValue, signal, getState }) => {
+    const nextPage = (getState().products.pagination?.currentPage ?? 0) + 1;
+    try {
+      const response: ProductsResponse = await fetchProductsAPI(
+        { ...queryParams, page: nextPage },
+        signal
+      );
+      return {
+        products: response.documents,
+        pagination: {
+          ...response.pagination,
+          totalResults: response.result,
+        },
+      };
+    } catch (err: any) {
+      // Request aborted because a newer filter request superseded this one.
+      // Rethrow so RTK marks the thunk as aborted and we don't clobber state.
+      if (signal.aborted) {
+        throw err;
+      }
+      const status = err.response?.status;
+      const message = err.response?.data?.message || err.message;
+      // Handle 404 as a special case - not really an "error" but no results
+      if (status === 404) {
+        return {
+          products: [],
+          pagination: {
+            currentPage: nextPage,
+            limit: queryParams.limit || 10,
+            numberOfPages: 0,
+            totalResults: 0,
+          },
+        };
+      }
+      return rejectWithValue({ message, status });
+    }
+  }
+);
 
 // Async thunk to fetch single product by ID
 export const fetchProductById = createAsyncThunk<
@@ -317,6 +373,9 @@ const productsSlice = createSlice({
       .addCase(fetchProducts.pending, (state, action) => {
         state.loading = true;
         state.error = null;
+        // A fresh (reset) fetch supersedes any in-flight load-more
+        state.loadingMore = false;
+        state.loadMoreError = null;
         // Store the query parameters used for this fetch
         state.currentQueryParams = action.meta.arg;
       })
@@ -343,6 +402,46 @@ const productsSlice = createSlice({
         state.error = action.payload?.message || "An error occurred";
         state.products = [];
         state.pagination = null;
+      })
+      // Fetch more products (infinite scroll append)
+      .addCase(fetchMoreProducts.pending, (state) => {
+        state.loadingMore = true;
+        state.loadMoreError = null;
+      })
+      .addCase(fetchMoreProducts.fulfilled, (state, action) => {
+        state.loadingMore = false;
+        state.loadMoreError = null;
+        const { products, pagination } = action.payload;
+        // End of list - no more pages to load
+        if (products.length === 0) {
+          state.pagination = {
+            ...(state.pagination ?? {
+              currentPage: 1,
+              limit: 10,
+              numberOfPages: 0,
+              totalResults: 0,
+            }),
+            numberOfPages: 0,
+            nextPage: undefined,
+          };
+          return;
+        }
+        // Guard against stale/duplicate appends: only append the exact next page
+        const expectedPage = (state.pagination?.currentPage ?? 0) + 1;
+        if (pagination.currentPage !== expectedPage) {
+          return;
+        }
+        state.products = [...state.products, ...products];
+        state.pagination = pagination;
+      })
+      .addCase(fetchMoreProducts.rejected, (state, action) => {
+        // Ignore aborted requests - a newer filter request superseded this one
+        if (action.meta.aborted) {
+          return;
+        }
+        state.loadingMore = false;
+        state.loadMoreError =
+          action.payload?.message || "Failed to load more products";
       })
       // Fetch single product
       .addCase(fetchProductById.pending, (state) => {

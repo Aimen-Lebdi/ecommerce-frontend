@@ -193,8 +193,10 @@
     },
     "errors": {
       "loadingProductsFailed": "فشل تحميل المنتجات",
-      "loadingSubcategoriesFailed": "فشل تحميل الفئات الفرعية"
+      "loadingSubcategoriesFailed": "فشل تحميل الفئات الفرعية",
+      "loadMoreFailed": "فشل تحميل المزيد من المنتجات"
     },
+    "reachedEnd": "وصلت إلى النهاية",
     "retry": "إعادة المحاولة"
   },
   "productDetail": {
