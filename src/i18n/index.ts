@@ -19,6 +19,30 @@ export const LANGUAGE_STORAGE_KEY = 'app-language';
 
 const loadedBundles = new Set<string>(['en', 'ar']);
 
+/** Resolve an arbitrary language tag to one we support. */
+export function normalizeLanguage(lng: string | undefined): SupportedLanguage {
+  const base = (lng ?? '').split('-')[0];
+  return (SUPPORTED_LANGUAGES as readonly string[]).includes(base)
+    ? (base as SupportedLanguage)
+    : 'ar';
+}
+
+/** Read the persisted choice before init; default to Arabic + RTL. */
+function getInitialLanguage(): SupportedLanguage {
+  try {
+    return normalizeLanguage(localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'ar');
+  } catch {
+    return 'ar';
+  }
+}
+
+/** Apply the correct `dir`/`lang` attributes for a language. */
+function applyDocumentDirection(lng: SupportedLanguage): void {
+  const html = document.documentElement;
+  html.setAttribute('lang', lng);
+  html.setAttribute('dir', lng === 'ar' ? 'rtl' : 'ltr');
+}
+
 // Best-effort cleanup of the legacy storage keys so previously saved
 // English/French preferences don't override the new Arabic default.
 function cleanupLegacyLanguageKeys(): void {
@@ -44,8 +68,8 @@ i18n
         translation: enTranslation,
       },
     },
-    fallbackLng: 'en', // Fallback language
-    lng: 'ar', // Default language (Arabic)
+    fallbackLng: 'ar', // Fallback to Arabic default
+    lng: getInitialLanguage(), // Persisted choice or Arabic default
     supportedLngs: SUPPORTED_LANGUAGES as unknown as string[], // Supported languages
     load: 'languageOnly', // Normalize e.g. "ar-DZ" to "ar"
 
@@ -55,8 +79,10 @@ i18n
 
     detection: {
       // Only honor an explicitly saved choice; never sniff the browser.
+      // caches is empty: setLanguage() persists explicitly, so init never
+      // overwrites a saved 'en' choice back to 'ar'.
       order: ['localStorage'],
-      caches: ['localStorage'], // Cache user language preference
+      caches: [],
       lookupLocalStorage: LANGUAGE_STORAGE_KEY,
     },
 
@@ -65,13 +91,9 @@ i18n
     },
   });
 
-/** Resolve an arbitrary language tag to one we support. */
-export function normalizeLanguage(lng: string | undefined): SupportedLanguage {
-  const base = (lng ?? '').split('-')[0];
-  return (SUPPORTED_LANGUAGES as readonly string[]).includes(base)
-    ? (base as SupportedLanguage)
-    : 'ar';
-}
+// Keep <html lang/dir> in sync on boot and on every language change.
+applyDocumentDirection(normalizeLanguage(i18n.language));
+i18n.on('languageChanged', (lng) => applyDocumentDirection(normalizeLanguage(lng)));
 
 /**
  * Lazily fetch a locale chunk and register it. Arabic and English are bundled
@@ -83,13 +105,6 @@ export async function ensureLanguageBundle(lng: string): Promise<void> {
   const mod = await import(`../locales/${target}/translation.json`);
   i18n.addResourceBundle(target, 'translation', mod.default, true, true);
   loadedBundles.add(target);
-}
-
-/** Apply the correct `dir`/`lang` attributes for a language. */
-function applyDocumentDirection(lng: SupportedLanguage): void {
-  const html = document.documentElement;
-  html.setAttribute('lang', lng);
-  html.setAttribute('dir', lng === 'ar' ? 'rtl' : 'ltr');
 }
 
 /**
