@@ -4,7 +4,7 @@ import App from "./App.tsx";
 import { store } from "./app/Store.ts";
 import { Provider } from "react-redux";
 import { i18nReady } from "./i18n";
-
+//test
 // Wait for the initial language's translations (lazy-loaded for fr/ar) so the
 // first paint is never raw translation keys.
 i18nReady.then(() => {
